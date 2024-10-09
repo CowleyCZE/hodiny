@@ -3,31 +3,31 @@ from openpyxl import load_workbook, Workbook
 from openpyxl.utils import get_column_letter
 from datetime import datetime, timedelta
 import logging
-from dropbox_manager import DropboxManager
 
 logging.basicConfig(filename='evidence_pracovni_doby.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 class ExcelManager:
-    def __init__(self, dropbox_manager):
+    def __init__(self):
         self.excel_cesta = "Hodiny_Cap.xlsx"
         self.TEMPLATE_SHEET_NAME = 'Týden'
-        self.dropbox_manager = dropbox_manager
-        self.dropbox_path = '/Hodiny_Cap.xlsx'
 
     def nacti_nebo_vytvor_excel(self):
         try:
-            # Nejprve se pokusíme stáhnout soubor z Dropboxu
-            self.dropbox_manager.download_file(self.dropbox_path, self.excel_cesta)
-            workbook = load_workbook(self.excel_cesta)
-            logging.info(f"Načten existující Excel soubor z Dropboxu: {self.excel_cesta}")
-        except Exception as e:
-            logging.warning(f"Nelze načíst existující soubor z Dropboxu, vytvářím nový: {e}")
-            workbook = Workbook()
-            workbook.save(self.excel_cesta)
-            self.dropbox_manager.upload_file(self.excel_cesta, self.dropbox_path)
-            logging.info(f"Vytvořen nový Excel soubor a nahrán na Dropbox: {self.excel_cesta}")
-        return workbook
+            if os.path.exists(self.excel_cesta):
+                try:
+                    workbook = load_workbook(self.excel_cesta)
+                    logging.info(f"Načten existující Excel soubor: {self.excel_cesta}")
+                except Exception as e:
+                    logging.warning(f"Nelze načíst existující soubor, vytvářím nový: {e}")
+                    workbook = Workbook()
+                    workbook.save(self.excel_cesta)
+                    logging.info(f"Vytvořen nový Excel soubor se stejným názvem: {self.excel_cesta}")
+            else:
+                workbook = Workbook()
+                workbook.save(self.excel_cesta)
+                logging.info(f"Vytvořen nový Excel soubor: {self.excel_cesta}")
+            return workbook
         except Exception as e:
             logging.error(f"Chyba při načítání nebo vytváření Excel souboru: {e}")
             raise
@@ -97,8 +97,7 @@ class ExcelManager:
                     sheet.cell(row=row, column=2 + den_v_tydnu * 2, value='X')
 
             workbook.save(self.excel_cesta)
-            self.dropbox_manager.upload_file(self.excel_cesta, self.dropbox_path)
-            logging.info(f"Data úspěšně uložena do souboru a nahrána na Dropbox: {self.excel_cesta}")
+            logging.info(f"Data úspěšně uložena do souboru: {self.excel_cesta}")
         except Exception as e:
             logging.error(f"Nepodařilo se uložit pracovní dobu: {e}")
             raise

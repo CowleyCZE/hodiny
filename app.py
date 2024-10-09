@@ -1,39 +1,21 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, send_file
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
 from datetime import datetime
 from employee_management import EmployeeManagement
 from excel_manager import ExcelManager
 from zalohy_manager import ZalohyManager
-from dropbox_manager import DropboxManager
 import logging
-import os
-import config  # Import konfiguračního souboru
 
 app = Flask(__name__)
 app.secret_key = 'tajny_klic_pro_flash_zpravy'
 
-# Inicializace Dropbox manageru
-DROPBOX_ACCESS_TOKEN = config.DROPBOX_ACCESS_TOKEN
-dropbox_manager = DropboxManager(DROPBOX_ACCESS_TOKEN)
-
-employee_manager = EmployeeManagement(dropbox_manager)
-excel_manager = ExcelManager(dropbox_manager)
-zalohy_manager = ZalohyManager(dropbox_manager)
+employee_manager = EmployeeManagement()
+excel_manager = ExcelManager()
+zalohy_manager = ZalohyManager()
 
 @app.route('/')
 def index():
     logging.info("Přístup na hlavní stránku")
     return render_template('index.html')
-
-@app.route('/download_excel')
-def download_excel():
-    try:
-        # Stáhneme soubor z Dropboxu
-        dropbox_manager.download_file('/Hodiny_Cap.xlsx', 'Hodiny_Cap.xlsx')
-        # Pošleme soubor uživateli
-        return send_file('Hodiny_Cap.xlsx', as_attachment=True)
-    except Exception as e:
-        flash(f'Chyba při stahování souboru: {str(e)}', 'error')
-        return redirect(url_for('index'))
 
 @app.route('/employees', methods=['GET', 'POST'])
 def manage_employees():
@@ -140,5 +122,4 @@ def zalohy():
                            option1_name=option1_name, option2_name=option2_name)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
-input("Stiskněte Enter pro ukončení...")
+    app.run(debug=True)

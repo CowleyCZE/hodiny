@@ -253,3 +253,58 @@
 2024-10-07 19:44:24,857 - INFO - Inicializována tøída EmployeeManagement
 2024-10-07 19:44:26,606 - WARNING -  * Debugger is active!
 2024-10-07 19:44:26,643 - INFO -  * Debugger PIN: 204-318-965
+2024-10-09 19:41:26,125 - INFO - Naètena konfigurace: 6 zamìstnancù, 4 vybraných
+2024-10-09 19:41:26,142 - INFO - Inicializována tøída EmployeeManagement
+2024-10-09 19:41:27,484 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2024-10-09 19:41:27,485 - INFO - [33mPress CTRL+C to quit[0m
+2024-10-09 19:41:27,521 - INFO -  * Restarting with stat
+2024-10-09 19:41:28,815 - INFO - Naètena konfigurace: 6 zamìstnancù, 4 vybraných
+2024-10-09 19:41:28,815 - INFO - Inicializována tøída EmployeeManagement
+2024-10-09 19:41:28,871 - WARNING -  * Debugger is active!
+2024-10-09 19:41:28,985 - INFO -  * Debugger PIN: 204-318-965
+2024-10-09 19:45:26,175 - INFO - Pøístup na hlavní stránku
+2024-10-09 19:45:26,496 - INFO - 127.0.0.1 - - [09/Oct/2024 19:45:26] "GET / HTTP/1.1" 200 -
+2024-10-09 19:45:26,635 - INFO - 127.0.0.1 - - [09/Oct/2024 19:45:26] "GET /static/images/logo.png HTTP/1.1" 200 -
+2024-10-09 19:45:28,548 - INFO - 127.0.0.1 - - [09/Oct/2024 19:45:28] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2024-10-09 19:45:35,136 - INFO - manage_employees called, method: GET
+2024-10-09 19:45:35,305 - INFO - 127.0.0.1 - - [09/Oct/2024 19:45:35] "GET /employees HTTP/1.1" 200 -
+2024-10-09 19:45:43,532 - INFO - Pøístup na hlavní stránku
+2024-10-09 19:45:43,533 - INFO - 127.0.0.1 - - [09/Oct/2024 19:45:43] "GET / HTTP/1.1" 200 -
+2024-10-09 19:45:43,573 - INFO - 127.0.0.1 - - [09/Oct/2024 19:45:43] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2024-10-09 19:45:46,495 - INFO - 127.0.0.1 - - [09/Oct/2024 19:45:46] "GET /record_time HTTP/1.1" 200 -
+2024-10-09 19:46:28,147 - INFO - Naèten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-09 19:46:28,165 - INFO - Vytvoøen nový list 'Týden 41'.
+2024-10-09 19:46:28,507 - INFO - Data úspìšnì uložena do souboru: Hodiny_Cap.xlsx
+2024-10-09 19:46:28,507 - INFO - Záznam pracovní doby uložen: datum=2024-10-09, zaèátek=07:00, konec=18:00, obìd=1.0
+2024-10-09 19:46:28,507 - INFO - 127.0.0.1 - - [09/Oct/2024 19:46:28] "POST /record_time HTTP/1.1" 200 -
+2024-10-09 19:46:39,083 - INFO - Naèten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-09 19:46:39,083 - INFO - List 'Týden 41' již existuje.
+2024-10-09 19:46:39,439 - INFO - Data úspìšnì uložena do souboru: Hodiny_Cap.xlsx
+2024-10-09 19:46:39,439 - INFO - Záznam pracovní doby uložen: datum=2024-10-08, zaèátek=07:00, konec=18:00, obìd=1.0
+2024-10-09 19:46:39,440 - INFO - 127.0.0.1 - - [09/Oct/2024 19:46:39] "POST /record_time HTTP/1.1" 200 -
+2024-10-09 19:46:49,477 - INFO - Naèten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-09 19:46:49,477 - INFO - List 'Týden 41' již existuje.
+2024-10-09 19:46:49,714 - INFO - Data úspìšnì uložena do souboru: Hodiny_Cap.xlsx
+2024-10-09 19:46:49,714 - INFO - Záznam pracovní doby uložen: datum=2024-10-07, zaèátek=07:00, konec=18:00, obìd=1.0
+2024-10-09 19:46:49,714 - INFO - 127.0.0.1 - - [09/Oct/2024 19:46:49] "POST /record_time HTTP/1.1" 200 -
+2024-10-09 19:46:54,191 - INFO - Pøístup na hlavní stránku
+2024-10-09 19:46:54,193 - INFO - 127.0.0.1 - - [09/Oct/2024 19:46:54] "GET / HTTP/1.1" 200 -
+2024-10-09 19:46:54,232 - INFO - 127.0.0.1 - - [09/Oct/2024 19:46:54] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2024-10-09 19:46:58,044 - INFO - Naèten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-09 19:46:58,130 - INFO - 127.0.0.1 - - [09/Oct/2024 19:46:58] "GET /zalohy HTTP/1.1" 200 -
+2024-10-09 19:47:23,896 - INFO - Naèten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-09 19:47:24,346 - INFO - Naèten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-09 19:47:24,575 - INFO - Záloha pro Drdla Josef aktualizována: 60.0 EUR (option2) k datu 2024-10-09
+2024-10-09 19:47:24,607 - INFO - 127.0.0.1 - - [09/Oct/2024 19:47:24] "[32mPOST /zalohy HTTP/1.1[0m" 302 -
+2024-10-09 19:47:25,116 - INFO - Naèten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-09 19:47:25,117 - INFO - 127.0.0.1 - - [09/Oct/2024 19:47:25] "GET /zalohy HTTP/1.1" 200 -
+2024-10-09 19:48:15,576 - INFO - Naèten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-09 19:48:16,030 - INFO - Naèten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-09 19:48:16,276 - INFO - Záloha pro Chodur Radim aktualizována: 100.0 EUR (option2) k datu 2024-10-09
+2024-10-09 19:48:16,277 - INFO - 127.0.0.1 - - [09/Oct/2024 19:48:16] "[32mPOST /zalohy HTTP/1.1[0m" 302 -
+2024-10-09 19:48:16,777 - INFO - Naèten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-09 19:48:16,779 - INFO - 127.0.0.1 - - [09/Oct/2024 19:48:16] "GET /zalohy HTTP/1.1" 200 -
+2024-10-09 19:49:13,346 - INFO - Pøístup na hlavní stránku
+2024-10-09 19:49:13,347 - INFO - 127.0.0.1 - - [09/Oct/2024 19:49:13] "GET / HTTP/1.1" 200 -
+2024-10-09 19:49:13,383 - INFO - 127.0.0.1 - - [09/Oct/2024 19:49:13] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -

@@ -1,42 +1,45 @@
 import json
 import os
 import logging
-from dropbox_manager import DropboxManager
 
 class EmployeeManagement:
-    def __init__(self, dropbox_manager):
+    def __init__(self):
         self.zamestnanci = []
         self.vybrani_zamestnanci = []
         self.config_file = 'employee_config.json'
-        self.dropbox_manager = dropbox_manager
-        self.dropbox_path = '/employee_config.json'
         self.load_config()
         logging.info("Inicializována třída EmployeeManagement")
 
     def load_config(self):
-        try:
-            json_content = self.dropbox_manager.read_json(self.dropbox_path)
-            if json_content:
-                config = json.loads(json_content)
+        if os.path.exists(self.config_file):
+            with open(self.config_file, 'r', encoding='utf-8') as f:
+                config = json.load(f)
                 self.zamestnanci = config.get('zamestnanci', [])
                 self.vybrani_zamestnanci = config.get('vybrani_zamestnanci', [])
-                logging.info(f"Načtena konfigurace z Dropboxu: {len(self.zamestnanci)} zaměstnanců, {len(self.vybrani_zamestnanci)} vybraných")
-            else:
-                logging.warning(f"Konfigurační soubor na Dropboxu nenalezen")
-        except Exception as e:
-            logging.error(f"Chyba při načítání konfigurace z Dropboxu: {str(e)}")
+            logging.info(f"Načtena konfigurace: {len(self.zamestnanci)} zaměstnanců, {len(self.vybrani_zamestnanci)} vybraných")
+        else:
+            logging.warning(f"Konfigurační soubor {self.config_file} nenalezen")
+
+    def pridat_zamestnance(self, jmeno):
+        logging.info(f"Pokus o přidání zaměstnance: {jmeno}")
+        if jmeno and jmeno not in self.zamestnanci:
+            self.zamestnanci.append(jmeno)
+            self.save_config()
+            logging.info(f"Přidán nový zaměstnanec: {jmeno}")
+            return True
+        logging.warning(f"Nepodařilo se přidat zaměstnance: {jmeno}")
+        return False
 
     def save_config(self):
         try:
-            config = {
-                'zamestnanci': self.zamestnanci,
-                'vybrani_zamestnanci': self.vybrani_zamestnanci
-            }
-            json_content = json.dumps(config, ensure_ascii=False, indent=2)
-            self.dropbox_manager.write_json(self.dropbox_path, json_content)
-            logging.info(f"Konfigurace uložena na Dropbox: {self.dropbox_path}")
+            with open(self.config_file, 'w', encoding='utf-8') as f:
+                json.dump({
+                    'zamestnanci': self.zamestnanci,
+                    'vybrani_zamestnanci': self.vybrani_zamestnanci
+                }, f, ensure_ascii=False, indent=2)
+            logging.info(f"Konfigurace uložena do souboru: {self.config_file}")
         except Exception as e:
-            logging.error(f"Chyba při ukládání konfigurace na Dropbox: {str(e)}")
+            logging.error(f"Chyba při ukládání konfigurace: {str(e)}")
 
     def pridat_vybraneho_zamestnance(self, zamestnanec):
         if zamestnanec in self.zamestnanci and zamestnanec not in self.vybrani_zamestnanci:

@@ -2,11 +2,10 @@ import dropbox
 import os
 from dropbox.files import WriteMode
 from dropbox.exceptions import ApiError
-from config import DROPBOX_ACCESS_TOKEN
 
 class DropboxManager:
-    def __init__(self):
-        self.dbx = dropbox.Dropbox(DROPBOX_ACCESS_TOKEN)
+    def __init__(self, access_token):
+        self.dbx = dropbox.Dropbox(access_token)
 
     def upload_file(self, local_path, dropbox_path):
         with open(local_path, 'rb') as f:

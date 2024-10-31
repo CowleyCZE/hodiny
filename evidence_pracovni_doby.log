@@ -308,3 +308,797 @@
 2024-10-09 19:49:13,346 - INFO - P��stup na hlavn� str�nku
 2024-10-09 19:49:13,347 - INFO - 127.0.0.1 - - [09/Oct/2024 19:49:13] "GET / HTTP/1.1" 200 -
 2024-10-09 19:49:13,383 - INFO - 127.0.0.1 - - [09/Oct/2024 19:49:13] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2024-10-23 23:48:15,469 - INFO - Načtena konfigurace: 6 zaměstnanců, 4 vybraných
+2024-10-23 23:48:15,502 - INFO - Inicializována třída EmployeeManagement
+2024-10-23 23:48:16,608 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2024-10-23 23:48:16,608 - INFO - [33mPress CTRL+C to quit[0m
+2024-10-23 23:48:16,656 - INFO -  * Restarting with stat
+2024-10-23 23:48:25,919 - INFO - Načtena konfigurace: 6 zaměstnanců, 4 vybraných
+2024-10-23 23:48:25,919 - INFO - Inicializována třída EmployeeManagement
+2024-10-23 23:48:26,084 - WARNING -  * Debugger is active!
+2024-10-23 23:48:26,670 - INFO -  * Debugger PIN: 951-010-099
+2024-10-24 00:14:25,919 - INFO - Přístup na hlavní stránku
+2024-10-24 00:14:36,656 - INFO - 127.0.0.1 - - [24/Oct/2024 00:14:36] "GET / HTTP/1.1" 200 -
+2024-10-24 00:14:37,883 - INFO - 127.0.0.1 - - [24/Oct/2024 00:14:37] "GET /static/images/logo.png HTTP/1.1" 200 -
+2024-10-24 00:15:14,289 - INFO - 127.0.0.1 - - [24/Oct/2024 00:15:14] "GET /record_time HTTP/1.1" 200 -
+2024-10-24 00:15:43,334 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-24 00:15:43,412 - INFO - Vytvořen nový list 'Týden 43'.
+2024-10-24 00:15:44,026 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-24 00:15:44,027 - INFO - Záznam pracovní doby uložen: datum=2024-10-23, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-24 00:15:44,028 - INFO - 127.0.0.1 - - [24/Oct/2024 00:15:44] "POST /record_time HTTP/1.1" 200 -
+2024-10-24 00:15:55,607 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-24 00:15:55,608 - INFO - List 'Týden 43' již existuje.
+2024-10-24 00:15:56,186 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-24 00:15:56,187 - INFO - Záznam pracovní doby uložen: datum=2024-10-22, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-24 00:15:56,188 - INFO - 127.0.0.1 - - [24/Oct/2024 00:15:56] "POST /record_time HTTP/1.1" 200 -
+2024-10-24 00:16:08,307 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-24 00:16:08,307 - INFO - List 'Týden 43' již existuje.
+2024-10-24 00:16:08,521 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-24 00:16:08,522 - INFO - Záznam pracovní doby uložen: datum=2024-10-21, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-24 00:16:08,523 - INFO - 127.0.0.1 - - [24/Oct/2024 00:16:08] "POST /record_time HTTP/1.1" 200 -
+2024-10-24 00:16:12,588 - INFO - Přístup na hlavní stránku
+2024-10-24 00:16:12,617 - INFO - 127.0.0.1 - - [24/Oct/2024 00:16:12] "GET / HTTP/1.1" 200 -
+2024-10-24 00:16:12,688 - INFO - 127.0.0.1 - - [24/Oct/2024 00:16:12] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2024-10-24 00:16:18,025 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-24 00:16:18,092 - INFO - 127.0.0.1 - - [24/Oct/2024 00:16:18] "GET /zalohy HTTP/1.1" 200 -
+2024-10-24 00:16:40,033 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-24 00:16:41,417 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-24 00:16:41,641 - INFO - Záloha pro Chodur Radim aktualizována: 200.0 EUR (option2) k datu 2024-10-24
+2024-10-24 00:16:41,687 - INFO - 127.0.0.1 - - [24/Oct/2024 00:16:41] "[32mPOST /zalohy HTTP/1.1[0m" 302 -
+2024-10-24 00:16:43,179 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-24 00:16:43,187 - INFO - 127.0.0.1 - - [24/Oct/2024 00:16:43] "GET /zalohy HTTP/1.1" 200 -
+2024-10-24 00:16:56,610 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-24 00:16:57,678 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-24 00:16:57,946 - INFO - Záloha pro Drdla Josef aktualizována: 100.0 EUR (option1) k datu 2024-10-24
+2024-10-24 00:16:57,949 - INFO - 127.0.0.1 - - [24/Oct/2024 00:16:57] "[32mPOST /zalohy HTTP/1.1[0m" 302 -
+2024-10-24 00:16:59,051 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-24 00:16:59,056 - INFO - 127.0.0.1 - - [24/Oct/2024 00:16:59] "GET /zalohy HTTP/1.1" 200 -
+2024-10-24 00:17:09,479 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-24 00:17:10,426 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-24 00:17:10,681 - INFO - Záloha pro Schmoranzer Martin aktualizována: 200.0 EUR (option1) k datu 2024-10-24
+2024-10-24 00:17:10,682 - INFO - 127.0.0.1 - - [24/Oct/2024 00:17:10] "[32mPOST /zalohy HTTP/1.1[0m" 302 -
+2024-10-24 00:17:11,410 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-24 00:17:11,414 - INFO - 127.0.0.1 - - [24/Oct/2024 00:17:11] "GET /zalohy HTTP/1.1" 200 -
+2024-10-24 00:25:05,688 - INFO - Přístup na hlavní stránku
+2024-10-24 00:25:05,716 - INFO - 127.0.0.1 - - [24/Oct/2024 00:25:05] "GET / HTTP/1.1" 200 -
+2024-10-24 00:25:05,866 - INFO - 127.0.0.1 - - [24/Oct/2024 00:25:05] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2024-10-24 00:25:10,670 - INFO - manage_employees called, method: GET
+2024-10-24 00:25:11,477 - INFO - 127.0.0.1 - - [24/Oct/2024 00:25:11] "GET /employees HTTP/1.1" 200 -
+2024-10-24 00:25:33,018 - INFO - manage_employees called, method: POST
+2024-10-24 00:25:33,020 - INFO - Action: add
+2024-10-24 00:25:33,020 - INFO - Pokus o přidání zaměstnance: Schejbal Martin
+2024-10-24 00:25:33,036 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-24 00:25:33,037 - INFO - Přidán nový zaměstnanec: Schejbal Martin
+2024-10-24 00:25:33,039 - INFO - 127.0.0.1 - - [24/Oct/2024 00:25:33] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-24 00:25:33,096 - INFO - manage_employees called, method: GET
+2024-10-24 00:25:33,103 - INFO - 127.0.0.1 - - [24/Oct/2024 00:25:33] "GET /employees HTTP/1.1" 200 -
+2024-10-24 00:25:45,310 - INFO - manage_employees called, method: POST
+2024-10-24 00:25:45,320 - INFO - Action: toggle
+2024-10-24 00:25:45,337 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-24 00:25:45,338 - INFO - Přidán vybraný zaměstnanec: Schejbal Martin
+2024-10-24 00:25:45,340 - INFO - 127.0.0.1 - - [24/Oct/2024 00:25:45] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-24 00:25:45,352 - INFO - manage_employees called, method: GET
+2024-10-24 00:25:45,359 - INFO - 127.0.0.1 - - [24/Oct/2024 00:25:45] "GET /employees HTTP/1.1" 200 -
+2024-10-24 00:25:48,355 - INFO - Přístup na hlavní stránku
+2024-10-24 00:25:48,363 - INFO - 127.0.0.1 - - [24/Oct/2024 00:25:48] "GET / HTTP/1.1" 200 -
+2024-10-24 00:25:48,453 - INFO - 127.0.0.1 - - [24/Oct/2024 00:25:48] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2024-10-24 00:25:52,425 - INFO - manage_employees called, method: GET
+2024-10-24 00:25:52,433 - INFO - 127.0.0.1 - - [24/Oct/2024 00:25:52] "GET /employees HTTP/1.1" 200 -
+2024-10-24 00:26:04,776 - INFO - manage_employees called, method: POST
+2024-10-24 00:26:04,778 - INFO - Action: add
+2024-10-24 00:26:04,781 - INFO - Pokus o přidání zaměstnance: Jakub
+2024-10-24 00:26:04,798 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-24 00:26:04,799 - INFO - Přidán nový zaměstnanec: Jakub
+2024-10-24 00:26:04,801 - INFO - 127.0.0.1 - - [24/Oct/2024 00:26:04] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-24 00:26:04,816 - INFO - manage_employees called, method: GET
+2024-10-24 00:26:04,828 - INFO - 127.0.0.1 - - [24/Oct/2024 00:26:04] "GET /employees HTTP/1.1" 200 -
+2024-10-24 00:26:14,143 - INFO - manage_employees called, method: POST
+2024-10-24 00:26:14,145 - INFO - Action: add
+2024-10-24 00:26:14,148 - INFO - Pokus o přidání zaměstnance: František
+2024-10-24 00:26:14,157 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-24 00:26:14,158 - INFO - Přidán nový zaměstnanec: František
+2024-10-24 00:26:14,160 - INFO - 127.0.0.1 - - [24/Oct/2024 00:26:14] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-24 00:26:14,172 - INFO - manage_employees called, method: GET
+2024-10-24 00:26:14,180 - INFO - 127.0.0.1 - - [24/Oct/2024 00:26:14] "GET /employees HTTP/1.1" 200 -
+2024-10-24 00:26:18,206 - INFO - manage_employees called, method: POST
+2024-10-24 00:26:18,207 - INFO - Action: toggle
+2024-10-24 00:26:18,217 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-24 00:26:18,218 - INFO - Přidán vybraný zaměstnanec: František
+2024-10-24 00:26:18,220 - INFO - 127.0.0.1 - - [24/Oct/2024 00:26:18] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-24 00:26:18,243 - INFO - manage_employees called, method: GET
+2024-10-24 00:26:18,248 - INFO - 127.0.0.1 - - [24/Oct/2024 00:26:18] "GET /employees HTTP/1.1" 200 -
+2024-10-24 00:26:19,250 - INFO - manage_employees called, method: POST
+2024-10-24 00:26:19,252 - INFO - Action: toggle
+2024-10-24 00:26:19,267 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-24 00:26:19,268 - INFO - Přidán vybraný zaměstnanec: Jakub
+2024-10-24 00:26:19,270 - INFO - 127.0.0.1 - - [24/Oct/2024 00:26:19] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-24 00:26:19,283 - INFO - manage_employees called, method: GET
+2024-10-24 00:26:19,293 - INFO - 127.0.0.1 - - [24/Oct/2024 00:26:19] "GET /employees HTTP/1.1" 200 -
+2024-10-24 00:26:27,010 - INFO - Přístup na hlavní stránku
+2024-10-24 00:26:27,025 - INFO - 127.0.0.1 - - [24/Oct/2024 00:26:27] "GET / HTTP/1.1" 200 -
+2024-10-24 00:26:27,123 - INFO - 127.0.0.1 - - [24/Oct/2024 00:26:27] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2024-10-24 00:26:29,787 - INFO - 127.0.0.1 - - [24/Oct/2024 00:26:29] "GET /record_time HTTP/1.1" 200 -
+2024-10-24 00:26:52,179 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-24 00:26:52,180 - INFO - List 'Týden 43' již existuje.
+2024-10-24 00:26:52,462 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-24 00:26:52,463 - INFO - Záznam pracovní doby uložen: datum=2024-10-21, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-24 00:26:52,465 - INFO - 127.0.0.1 - - [24/Oct/2024 00:26:52] "POST /record_time HTTP/1.1" 200 -
+2024-10-24 00:27:00,537 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-24 00:27:00,538 - INFO - List 'Týden 43' již existuje.
+2024-10-24 00:27:00,731 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-24 00:27:00,733 - INFO - Záznam pracovní doby uložen: datum=2024-10-22, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-24 00:27:00,734 - INFO - 127.0.0.1 - - [24/Oct/2024 00:27:00] "POST /record_time HTTP/1.1" 200 -
+2024-10-24 00:27:08,269 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-24 00:27:08,269 - INFO - List 'Týden 43' již existuje.
+2024-10-24 00:27:08,492 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-24 00:27:08,494 - INFO - Záznam pracovní doby uložen: datum=2024-10-23, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-24 00:27:08,495 - INFO - 127.0.0.1 - - [24/Oct/2024 00:27:08] "POST /record_time HTTP/1.1" 200 -
+2024-10-24 00:27:12,748 - INFO - Přístup na hlavní stránku
+2024-10-24 00:27:12,765 - INFO - 127.0.0.1 - - [24/Oct/2024 00:27:12] "GET / HTTP/1.1" 200 -
+2024-10-24 00:27:12,836 - INFO - 127.0.0.1 - - [24/Oct/2024 00:27:12] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2024-10-31 08:52:49,130 - INFO - Načtena konfigurace: 9 zaměstnanců, 7 vybraných
+2024-10-31 08:52:49,141 - INFO - Inicializována třída EmployeeManagement
+2024-10-31 08:52:49,429 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2024-10-31 08:52:49,430 - INFO - [33mPress CTRL+C to quit[0m
+2024-10-31 08:52:49,441 - INFO -  * Restarting with stat
+2024-10-31 08:52:53,777 - INFO - Načtena konfigurace: 9 zaměstnanců, 7 vybraných
+2024-10-31 08:52:53,777 - INFO - Inicializována třída EmployeeManagement
+2024-10-31 08:52:53,870 - WARNING -  * Debugger is active!
+2024-10-31 08:52:54,069 - INFO -  * Debugger PIN: 258-661-410
+2024-10-31 08:53:35,194 - INFO - Přístup na hlavní stránku
+2024-10-31 08:53:36,554 - INFO - 127.0.0.1 - - [31/Oct/2024 08:53:36] "GET / HTTP/1.1" 200 -
+2024-10-31 08:53:36,692 - INFO - 127.0.0.1 - - [31/Oct/2024 08:53:36] "GET /static/images/logo.png HTTP/1.1" 200 -
+2024-10-31 08:53:39,801 - INFO - manage_employees called, method: GET
+2024-10-31 08:53:39,868 - INFO - 127.0.0.1 - - [31/Oct/2024 08:53:39] "GET /employees HTTP/1.1" 200 -
+2024-10-31 08:54:06,217 - INFO - manage_employees called, method: POST
+2024-10-31 08:54:06,244 - INFO - Action: add
+2024-10-31 08:54:06,245 - INFO - Pokus o přidání zaměstnance: Karel Jiří
+2024-10-31 08:54:06,251 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 08:54:06,252 - INFO - Přidán nový zaměstnanec: Karel Jiří
+2024-10-31 08:54:06,329 - INFO - 127.0.0.1 - - [31/Oct/2024 08:54:06] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 08:54:06,337 - INFO - manage_employees called, method: GET
+2024-10-31 08:54:06,341 - INFO - 127.0.0.1 - - [31/Oct/2024 08:54:06] "GET /employees HTTP/1.1" 200 -
+2024-10-31 08:54:23,423 - INFO - manage_employees called, method: POST
+2024-10-31 08:54:23,425 - INFO - Action: update
+2024-10-31 08:54:23,442 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 08:54:23,443 - INFO - 127.0.0.1 - - [31/Oct/2024 08:54:23] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 08:54:23,452 - INFO - manage_employees called, method: GET
+2024-10-31 08:54:23,459 - INFO - 127.0.0.1 - - [31/Oct/2024 08:54:23] "GET /employees HTTP/1.1" 200 -
+2024-10-31 08:54:34,599 - INFO - Přístup na hlavní stránku
+2024-10-31 08:54:34,609 - INFO - 127.0.0.1 - - [31/Oct/2024 08:54:34] "GET / HTTP/1.1" 200 -
+2024-10-31 08:54:34,663 - INFO - 127.0.0.1 - - [31/Oct/2024 08:54:34] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2024-10-31 08:54:36,740 - INFO - 127.0.0.1 - - [31/Oct/2024 08:54:36] "GET /record_time HTTP/1.1" 200 -
+2024-10-31 08:55:15,464 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 08:55:15,465 - INFO - List 'Týden 42' již existuje.
+2024-10-31 08:55:15,754 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 08:55:15,755 - INFO - Záznam pracovní doby uložen: datum=2024-10-17, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 08:55:15,756 - INFO - 127.0.0.1 - - [31/Oct/2024 08:55:15] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 08:56:12,226 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 08:56:12,227 - INFO - List 'Týden 42' již existuje.
+2024-10-31 08:56:12,336 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 08:56:12,337 - INFO - Záznam pracovní doby uložen: datum=2024-10-17, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 08:56:12,338 - INFO - 127.0.0.1 - - [31/Oct/2024 08:56:12] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 08:58:56,935 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 08:58:56,936 - INFO - List 'Týden 42' již existuje.
+2024-10-31 08:58:57,118 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 08:58:57,119 - INFO - Záznam pracovní doby uložen: datum=2024-10-16, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 08:58:57,120 - INFO - 127.0.0.1 - - [31/Oct/2024 08:58:57] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 08:59:13,612 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 08:59:13,613 - INFO - List 'Týden 42' již existuje.
+2024-10-31 08:59:13,850 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 08:59:13,850 - INFO - Záznam pracovní doby uložen: datum=2024-10-18, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 08:59:13,851 - INFO - 127.0.0.1 - - [31/Oct/2024 08:59:13] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 08:59:48,685 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 08:59:48,685 - INFO - List 'Týden 42' již existuje.
+2024-10-31 08:59:48,872 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 08:59:48,873 - INFO - Záznam pracovní doby uložen: datum=2024-10-19, začátek=06:00, konec=14:30, oběd=0.5
+2024-10-31 08:59:48,874 - INFO - 127.0.0.1 - - [31/Oct/2024 08:59:48] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:00:07,931 - INFO - Přístup na hlavní stránku
+2024-10-31 09:00:07,942 - INFO - 127.0.0.1 - - [31/Oct/2024 09:00:07] "GET / HTTP/1.1" 200 -
+2024-10-31 09:00:08,011 - INFO - 127.0.0.1 - - [31/Oct/2024 09:00:08] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2024-10-31 09:00:13,437 - INFO - manage_employees called, method: GET
+2024-10-31 09:00:13,451 - INFO - 127.0.0.1 - - [31/Oct/2024 09:00:13] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:00:25,370 - INFO - manage_employees called, method: POST
+2024-10-31 09:00:25,372 - INFO - Action: toggle
+2024-10-31 09:00:25,381 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:00:25,382 - INFO - Přidán vybraný zaměstnanec: Malý František
+2024-10-31 09:00:25,390 - INFO - 127.0.0.1 - - [31/Oct/2024 09:00:25] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:00:25,406 - INFO - manage_employees called, method: GET
+2024-10-31 09:00:25,414 - INFO - 127.0.0.1 - - [31/Oct/2024 09:00:25] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:04:01,179 - INFO - manage_employees called, method: POST
+2024-10-31 09:04:01,181 - INFO - Action: toggle
+2024-10-31 09:04:01,191 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:04:01,192 - INFO - Přidán vybraný zaměstnanec: Karel Jiří
+2024-10-31 09:04:01,194 - INFO - 127.0.0.1 - - [31/Oct/2024 09:04:01] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:04:01,204 - INFO - manage_employees called, method: GET
+2024-10-31 09:04:01,212 - INFO - 127.0.0.1 - - [31/Oct/2024 09:04:01] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:04:02,549 - INFO - manage_employees called, method: POST
+2024-10-31 09:04:02,551 - INFO - Action: toggle
+2024-10-31 09:04:02,567 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:04:02,567 - INFO - Odebrán vybraný zaměstnanec: Karel Jiří
+2024-10-31 09:04:02,570 - INFO - 127.0.0.1 - - [31/Oct/2024 09:04:02] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:04:02,580 - INFO - manage_employees called, method: GET
+2024-10-31 09:04:02,587 - INFO - 127.0.0.1 - - [31/Oct/2024 09:04:02] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:04:04,014 - INFO - manage_employees called, method: POST
+2024-10-31 09:04:04,015 - INFO - Action: toggle
+2024-10-31 09:04:04,045 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:04:04,045 - INFO - Odebrán vybraný zaměstnanec: Malý František
+2024-10-31 09:04:04,047 - INFO - 127.0.0.1 - - [31/Oct/2024 09:04:04] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:04:04,056 - INFO - manage_employees called, method: GET
+2024-10-31 09:04:04,060 - INFO - 127.0.0.1 - - [31/Oct/2024 09:04:04] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:04:12,563 - INFO - manage_employees called, method: POST
+2024-10-31 09:04:12,564 - INFO - Action: update
+2024-10-31 09:04:12,576 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:04:12,578 - INFO - 127.0.0.1 - - [31/Oct/2024 09:04:12] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:04:12,587 - INFO - manage_employees called, method: GET
+2024-10-31 09:04:12,591 - INFO - 127.0.0.1 - - [31/Oct/2024 09:04:12] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:04:17,338 - INFO - manage_employees called, method: POST
+2024-10-31 09:04:17,340 - INFO - Action: update
+2024-10-31 09:04:17,350 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:04:17,352 - INFO - 127.0.0.1 - - [31/Oct/2024 09:04:17] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:04:17,362 - INFO - manage_employees called, method: GET
+2024-10-31 09:04:17,366 - INFO - 127.0.0.1 - - [31/Oct/2024 09:04:17] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:04:19,839 - INFO - manage_employees called, method: POST
+2024-10-31 09:04:19,843 - INFO - Action: toggle
+2024-10-31 09:04:19,859 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:04:19,860 - INFO - Přidán vybraný zaměstnanec: Malý František
+2024-10-31 09:04:19,864 - INFO - 127.0.0.1 - - [31/Oct/2024 09:04:19] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:04:19,886 - INFO - manage_employees called, method: GET
+2024-10-31 09:04:19,890 - INFO - 127.0.0.1 - - [31/Oct/2024 09:04:19] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:04:34,045 - INFO - Přístup na hlavní stránku
+2024-10-31 09:04:34,057 - INFO - 127.0.0.1 - - [31/Oct/2024 09:04:34] "GET / HTTP/1.1" 200 -
+2024-10-31 09:04:34,125 - INFO - 127.0.0.1 - - [31/Oct/2024 09:04:34] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2024-10-31 09:04:36,917 - INFO - 127.0.0.1 - - [31/Oct/2024 09:04:36] "GET /record_time HTTP/1.1" 200 -
+2024-10-31 09:05:09,060 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:05:09,090 - INFO - Vytvořen nový list 'Týden 43'.
+2024-10-31 09:05:09,334 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:05:09,335 - INFO - Záznam pracovní doby uložen: datum=2024-10-21, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 09:05:09,336 - INFO - 127.0.0.1 - - [31/Oct/2024 09:05:09] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:05:19,750 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:05:19,750 - INFO - List 'Týden 43' již existuje.
+2024-10-31 09:05:19,911 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:05:19,912 - INFO - Záznam pracovní doby uložen: datum=2024-10-22, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 09:05:19,913 - INFO - 127.0.0.1 - - [31/Oct/2024 09:05:19] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:05:25,381 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:05:25,382 - INFO - List 'Týden 43' již existuje.
+2024-10-31 09:05:25,603 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:05:25,604 - INFO - Záznam pracovní doby uložen: datum=2024-10-23, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 09:05:25,605 - INFO - 127.0.0.1 - - [31/Oct/2024 09:05:25] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:05:29,403 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:05:29,403 - INFO - List 'Týden 43' již existuje.
+2024-10-31 09:05:29,657 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:05:29,658 - INFO - Záznam pracovní doby uložen: datum=2024-10-24, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 09:05:29,659 - INFO - 127.0.0.1 - - [31/Oct/2024 09:05:29] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:05:50,010 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:05:50,010 - INFO - List 'Týden 43' již existuje.
+2024-10-31 09:05:50,159 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:05:50,159 - INFO - Záznam pracovní doby uložen: datum=2024-10-25, začátek=07:00, konec=14:00, oběd=0.0
+2024-10-31 09:05:50,160 - INFO - 127.0.0.1 - - [31/Oct/2024 09:05:50] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:06:05,347 - INFO - Přístup na hlavní stránku
+2024-10-31 09:06:05,357 - INFO - 127.0.0.1 - - [31/Oct/2024 09:06:05] "GET / HTTP/1.1" 200 -
+2024-10-31 09:06:05,414 - INFO - 127.0.0.1 - - [31/Oct/2024 09:06:05] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2024-10-31 09:06:09,416 - INFO - manage_employees called, method: GET
+2024-10-31 09:06:09,423 - INFO - 127.0.0.1 - - [31/Oct/2024 09:06:09] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:06:14,116 - INFO - manage_employees called, method: POST
+2024-10-31 09:06:14,117 - INFO - Action: toggle
+2024-10-31 09:06:14,124 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:06:14,126 - INFO - Odebrán vybraný zaměstnanec: Chodur Radim
+2024-10-31 09:06:14,132 - INFO - 127.0.0.1 - - [31/Oct/2024 09:06:14] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:06:14,145 - INFO - manage_employees called, method: GET
+2024-10-31 09:06:14,154 - INFO - 127.0.0.1 - - [31/Oct/2024 09:06:14] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:06:16,695 - INFO - manage_employees called, method: POST
+2024-10-31 09:06:16,698 - INFO - Action: toggle
+2024-10-31 09:06:16,709 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:06:16,710 - INFO - Odebrán vybraný zaměstnanec: Drdla Josef
+2024-10-31 09:06:16,712 - INFO - 127.0.0.1 - - [31/Oct/2024 09:06:16] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:06:16,721 - INFO - manage_employees called, method: GET
+2024-10-31 09:06:16,726 - INFO - 127.0.0.1 - - [31/Oct/2024 09:06:16] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:06:21,973 - INFO - manage_employees called, method: POST
+2024-10-31 09:06:21,974 - INFO - Action: toggle
+2024-10-31 09:06:21,992 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:06:21,992 - INFO - Odebrán vybraný zaměstnanec: Forster Michael Joseph
+2024-10-31 09:06:21,995 - INFO - 127.0.0.1 - - [31/Oct/2024 09:06:21] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:06:22,005 - INFO - manage_employees called, method: GET
+2024-10-31 09:06:22,011 - INFO - 127.0.0.1 - - [31/Oct/2024 09:06:22] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:06:24,001 - INFO - manage_employees called, method: POST
+2024-10-31 09:06:24,002 - INFO - Action: toggle
+2024-10-31 09:06:24,015 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:06:24,016 - INFO - Odebrán vybraný zaměstnanec: Schejbal Martin
+2024-10-31 09:06:24,018 - INFO - 127.0.0.1 - - [31/Oct/2024 09:06:24] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:06:24,030 - INFO - manage_employees called, method: GET
+2024-10-31 09:06:24,036 - INFO - 127.0.0.1 - - [31/Oct/2024 09:06:24] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:06:27,247 - INFO - manage_employees called, method: POST
+2024-10-31 09:06:27,248 - INFO - Action: toggle
+2024-10-31 09:06:27,264 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:06:27,265 - INFO - Odebrán vybraný zaměstnanec: Jakub
+2024-10-31 09:06:27,267 - INFO - 127.0.0.1 - - [31/Oct/2024 09:06:27] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:06:27,277 - INFO - manage_employees called, method: GET
+2024-10-31 09:06:27,284 - INFO - 127.0.0.1 - - [31/Oct/2024 09:06:27] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:06:30,671 - INFO - manage_employees called, method: POST
+2024-10-31 09:06:30,673 - INFO - Action: toggle
+2024-10-31 09:06:30,690 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:06:30,691 - INFO - Odebrán vybraný zaměstnanec: Malý František
+2024-10-31 09:06:30,696 - INFO - 127.0.0.1 - - [31/Oct/2024 09:06:30] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:06:30,709 - INFO - manage_employees called, method: GET
+2024-10-31 09:06:30,715 - INFO - 127.0.0.1 - - [31/Oct/2024 09:06:30] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:06:32,957 - INFO - manage_employees called, method: POST
+2024-10-31 09:06:32,958 - INFO - Action: toggle
+2024-10-31 09:06:32,968 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:06:32,970 - INFO - Přidán vybraný zaměstnanec: Karel Jiří
+2024-10-31 09:06:32,973 - INFO - 127.0.0.1 - - [31/Oct/2024 09:06:32] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:06:32,983 - INFO - manage_employees called, method: GET
+2024-10-31 09:06:32,990 - INFO - 127.0.0.1 - - [31/Oct/2024 09:06:32] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:06:35,429 - INFO - Přístup na hlavní stránku
+2024-10-31 09:06:35,437 - INFO - 127.0.0.1 - - [31/Oct/2024 09:06:35] "GET / HTTP/1.1" 200 -
+2024-10-31 09:06:35,492 - INFO - 127.0.0.1 - - [31/Oct/2024 09:06:35] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2024-10-31 09:06:42,263 - INFO - 127.0.0.1 - - [31/Oct/2024 09:06:42] "GET /record_time HTTP/1.1" 200 -
+2024-10-31 09:07:13,347 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:07:13,348 - INFO - List 'Týden 43' již existuje.
+2024-10-31 09:07:13,574 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:07:13,575 - INFO - Záznam pracovní doby uložen: datum=2024-10-26, začátek=09:00, konec=14:00, oběd=0.0
+2024-10-31 09:07:13,576 - INFO - 127.0.0.1 - - [31/Oct/2024 09:07:13] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:08:48,102 - INFO - Přístup na hlavní stránku
+2024-10-31 09:08:48,116 - INFO - 127.0.0.1 - - [31/Oct/2024 09:08:48] "GET / HTTP/1.1" 200 -
+2024-10-31 09:08:48,184 - INFO - 127.0.0.1 - - [31/Oct/2024 09:08:48] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2024-10-31 09:08:50,236 - INFO - manage_employees called, method: GET
+2024-10-31 09:08:50,249 - INFO - 127.0.0.1 - - [31/Oct/2024 09:08:50] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:08:55,822 - INFO - manage_employees called, method: POST
+2024-10-31 09:08:55,824 - INFO - Action: toggle
+2024-10-31 09:08:55,840 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:08:55,842 - INFO - Odebrán vybraný zaměstnanec: Karel Jiří
+2024-10-31 09:08:55,845 - INFO - 127.0.0.1 - - [31/Oct/2024 09:08:55] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:08:55,853 - INFO - manage_employees called, method: GET
+2024-10-31 09:08:55,857 - INFO - 127.0.0.1 - - [31/Oct/2024 09:08:55] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:09:04,293 - INFO - manage_employees called, method: POST
+2024-10-31 09:09:04,304 - INFO - Action: toggle
+2024-10-31 09:09:04,318 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:09:04,319 - INFO - Přidán vybraný zaměstnanec: Chodur Radim
+2024-10-31 09:09:04,322 - INFO - 127.0.0.1 - - [31/Oct/2024 09:09:04] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:09:04,337 - INFO - manage_employees called, method: GET
+2024-10-31 09:09:04,342 - INFO - 127.0.0.1 - - [31/Oct/2024 09:09:04] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:09:06,606 - INFO - manage_employees called, method: POST
+2024-10-31 09:09:06,607 - INFO - Action: toggle
+2024-10-31 09:09:06,621 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:09:06,622 - INFO - Přidán vybraný zaměstnanec: Drdla Josef
+2024-10-31 09:09:06,624 - INFO - 127.0.0.1 - - [31/Oct/2024 09:09:06] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:09:06,637 - INFO - manage_employees called, method: GET
+2024-10-31 09:09:06,643 - INFO - 127.0.0.1 - - [31/Oct/2024 09:09:06] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:09:09,122 - INFO - manage_employees called, method: POST
+2024-10-31 09:09:09,123 - INFO - Action: toggle
+2024-10-31 09:09:09,137 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:09:09,138 - INFO - Odebrán vybraný zaměstnanec: Schmoranzer Martin
+2024-10-31 09:09:09,140 - INFO - 127.0.0.1 - - [31/Oct/2024 09:09:09] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:09:09,148 - INFO - manage_employees called, method: GET
+2024-10-31 09:09:09,155 - INFO - 127.0.0.1 - - [31/Oct/2024 09:09:09] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:09:15,535 - INFO - manage_employees called, method: POST
+2024-10-31 09:09:15,536 - INFO - Action: toggle
+2024-10-31 09:09:15,549 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:09:15,551 - INFO - Přidán vybraný zaměstnanec: Schmoranzer Martin
+2024-10-31 09:09:15,554 - INFO - 127.0.0.1 - - [31/Oct/2024 09:09:15] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:09:15,567 - INFO - manage_employees called, method: GET
+2024-10-31 09:09:15,573 - INFO - 127.0.0.1 - - [31/Oct/2024 09:09:15] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:09:18,133 - INFO - manage_employees called, method: POST
+2024-10-31 09:09:18,134 - INFO - Action: toggle
+2024-10-31 09:09:18,146 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:09:18,148 - INFO - Přidán vybraný zaměstnanec: Forster Michael Joseph
+2024-10-31 09:09:18,150 - INFO - 127.0.0.1 - - [31/Oct/2024 09:09:18] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:09:18,162 - INFO - manage_employees called, method: GET
+2024-10-31 09:09:18,168 - INFO - 127.0.0.1 - - [31/Oct/2024 09:09:18] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:09:21,976 - INFO - manage_employees called, method: POST
+2024-10-31 09:09:21,978 - INFO - Action: toggle
+2024-10-31 09:09:21,996 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:09:21,997 - INFO - Přidán vybraný zaměstnanec: Schejbal Martin
+2024-10-31 09:09:21,999 - INFO - 127.0.0.1 - - [31/Oct/2024 09:09:21] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:09:22,010 - INFO - manage_employees called, method: GET
+2024-10-31 09:09:22,016 - INFO - 127.0.0.1 - - [31/Oct/2024 09:09:22] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:09:24,416 - INFO - manage_employees called, method: POST
+2024-10-31 09:09:24,418 - INFO - Action: toggle
+2024-10-31 09:09:24,437 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:09:24,437 - INFO - Přidán vybraný zaměstnanec: Jakub
+2024-10-31 09:09:24,439 - INFO - 127.0.0.1 - - [31/Oct/2024 09:09:24] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:09:24,448 - INFO - manage_employees called, method: GET
+2024-10-31 09:09:24,455 - INFO - 127.0.0.1 - - [31/Oct/2024 09:09:24] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:09:26,393 - INFO - manage_employees called, method: POST
+2024-10-31 09:09:26,395 - INFO - Action: toggle
+2024-10-31 09:09:26,412 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:09:26,413 - INFO - Přidán vybraný zaměstnanec: Malý František
+2024-10-31 09:09:26,416 - INFO - 127.0.0.1 - - [31/Oct/2024 09:09:26] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:09:26,425 - INFO - manage_employees called, method: GET
+2024-10-31 09:09:26,431 - INFO - 127.0.0.1 - - [31/Oct/2024 09:09:26] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:09:29,946 - INFO - Přístup na hlavní stránku
+2024-10-31 09:09:29,957 - INFO - 127.0.0.1 - - [31/Oct/2024 09:09:29] "GET / HTTP/1.1" 200 -
+2024-10-31 09:09:30,009 - INFO - 127.0.0.1 - - [31/Oct/2024 09:09:30] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2024-10-31 09:09:33,960 - INFO - 127.0.0.1 - - [31/Oct/2024 09:09:33] "GET /record_time HTTP/1.1" 200 -
+2024-10-31 09:09:52,177 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:09:52,242 - INFO - Vytvořen nový list 'Týden 43'.
+2024-10-31 09:09:52,479 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:09:52,480 - INFO - Záznam pracovní doby uložen: datum=2024-10-21, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 09:09:52,481 - INFO - 127.0.0.1 - - [31/Oct/2024 09:09:52] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:10:17,123 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:10:17,123 - INFO - List 'Týden 43' již existuje.
+2024-10-31 09:10:17,289 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:10:17,289 - INFO - Záznam pracovní doby uložen: datum=2024-10-22, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 09:10:17,291 - INFO - 127.0.0.1 - - [31/Oct/2024 09:10:17] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:10:25,473 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:10:25,474 - INFO - List 'Týden 43' již existuje.
+2024-10-31 09:10:25,781 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:10:25,782 - INFO - Záznam pracovní doby uložen: datum=2024-10-23, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 09:10:25,783 - INFO - 127.0.0.1 - - [31/Oct/2024 09:10:25] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:10:29,658 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:10:29,659 - INFO - List 'Týden 43' již existuje.
+2024-10-31 09:10:29,807 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:10:29,807 - INFO - Záznam pracovní doby uložen: datum=2024-10-24, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 09:10:29,808 - INFO - 127.0.0.1 - - [31/Oct/2024 09:10:29] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:10:31,867 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:10:31,868 - INFO - List 'Týden 43' již existuje.
+2024-10-31 09:10:32,019 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:10:32,019 - INFO - Záznam pracovní doby uložen: datum=2024-10-25, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 09:10:32,020 - INFO - 127.0.0.1 - - [31/Oct/2024 09:10:32] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:10:36,207 - INFO - Přístup na hlavní stránku
+2024-10-31 09:10:36,215 - INFO - 127.0.0.1 - - [31/Oct/2024 09:10:36] "GET / HTTP/1.1" 200 -
+2024-10-31 09:10:36,272 - INFO - 127.0.0.1 - - [31/Oct/2024 09:10:36] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2024-10-31 09:10:38,538 - INFO - manage_employees called, method: GET
+2024-10-31 09:10:38,551 - INFO - 127.0.0.1 - - [31/Oct/2024 09:10:38] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:13:11,376 - INFO - Přístup na hlavní stránku
+2024-10-31 09:13:11,385 - INFO - 127.0.0.1 - - [31/Oct/2024 09:13:11] "GET / HTTP/1.1" 200 -
+2024-10-31 09:13:11,458 - INFO - 127.0.0.1 - - [31/Oct/2024 09:13:11] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2024-10-31 09:13:13,201 - INFO - manage_employees called, method: GET
+2024-10-31 09:13:13,214 - INFO - 127.0.0.1 - - [31/Oct/2024 09:13:13] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:13:22,445 - INFO - Přístup na hlavní stránku
+2024-10-31 09:13:22,459 - INFO - 127.0.0.1 - - [31/Oct/2024 09:13:22] "GET / HTTP/1.1" 200 -
+2024-10-31 09:13:22,526 - INFO - 127.0.0.1 - - [31/Oct/2024 09:13:22] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2024-10-31 09:13:24,565 - INFO - 127.0.0.1 - - [31/Oct/2024 09:13:24] "GET /record_time HTTP/1.1" 200 -
+2024-10-31 09:13:48,243 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:13:48,273 - INFO - Vytvořen nový list 'Týden 43'.
+2024-10-31 09:13:48,434 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:13:48,435 - INFO - Záznam pracovní doby uložen: datum=2024-10-21, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 09:13:48,436 - INFO - 127.0.0.1 - - [31/Oct/2024 09:13:48] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:13:55,955 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:13:55,956 - INFO - List 'Týden 43' již existuje.
+2024-10-31 09:13:56,115 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:13:56,116 - INFO - Záznam pracovní doby uložen: datum=2024-10-22, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 09:13:56,117 - INFO - 127.0.0.1 - - [31/Oct/2024 09:13:56] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:13:59,446 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:13:59,446 - INFO - List 'Týden 43' již existuje.
+2024-10-31 09:13:59,652 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:13:59,653 - INFO - Záznam pracovní doby uložen: datum=2024-10-23, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 09:13:59,654 - INFO - 127.0.0.1 - - [31/Oct/2024 09:13:59] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:14:02,318 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:14:02,319 - INFO - List 'Týden 43' již existuje.
+2024-10-31 09:14:02,484 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:14:02,485 - INFO - Záznam pracovní doby uložen: datum=2024-10-24, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 09:14:02,486 - INFO - 127.0.0.1 - - [31/Oct/2024 09:14:02] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:14:04,828 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:14:04,829 - INFO - List 'Týden 43' již existuje.
+2024-10-31 09:14:05,064 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:14:05,064 - INFO - Záznam pracovní doby uložen: datum=2024-10-25, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 09:14:05,065 - INFO - 127.0.0.1 - - [31/Oct/2024 09:14:05] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:14:10,563 - INFO - Přístup na hlavní stránku
+2024-10-31 09:14:10,579 - INFO - 127.0.0.1 - - [31/Oct/2024 09:14:10] "GET / HTTP/1.1" 200 -
+2024-10-31 09:14:10,644 - INFO - 127.0.0.1 - - [31/Oct/2024 09:14:10] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2024-10-31 09:14:14,003 - INFO - manage_employees called, method: GET
+2024-10-31 09:14:14,013 - INFO - 127.0.0.1 - - [31/Oct/2024 09:14:14] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:14:18,720 - INFO - manage_employees called, method: POST
+2024-10-31 09:14:18,721 - INFO - Action: toggle
+2024-10-31 09:14:18,737 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:14:18,738 - INFO - Odebrán vybraný zaměstnanec: Chodur Radim
+2024-10-31 09:14:18,739 - INFO - 127.0.0.1 - - [31/Oct/2024 09:14:18] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:14:18,748 - INFO - manage_employees called, method: GET
+2024-10-31 09:14:18,755 - INFO - 127.0.0.1 - - [31/Oct/2024 09:14:18] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:14:21,230 - INFO - manage_employees called, method: POST
+2024-10-31 09:14:21,231 - INFO - Action: toggle
+2024-10-31 09:14:21,242 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:14:21,243 - INFO - Odebrán vybraný zaměstnanec: Drdla Josef
+2024-10-31 09:14:21,245 - INFO - 127.0.0.1 - - [31/Oct/2024 09:14:21] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:14:21,256 - INFO - manage_employees called, method: GET
+2024-10-31 09:14:21,263 - INFO - 127.0.0.1 - - [31/Oct/2024 09:14:21] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:14:33,390 - INFO - manage_employees called, method: POST
+2024-10-31 09:14:33,393 - INFO - Action: toggle
+2024-10-31 09:14:33,409 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:14:33,410 - INFO - Odebrán vybraný zaměstnanec: Forster Michael Joseph
+2024-10-31 09:14:33,414 - INFO - 127.0.0.1 - - [31/Oct/2024 09:14:33] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:14:33,425 - INFO - manage_employees called, method: GET
+2024-10-31 09:14:33,430 - INFO - 127.0.0.1 - - [31/Oct/2024 09:14:33] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:14:38,502 - INFO - manage_employees called, method: POST
+2024-10-31 09:14:38,504 - INFO - Action: toggle
+2024-10-31 09:14:38,516 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:14:38,517 - INFO - Odebrán vybraný zaměstnanec: Schejbal Martin
+2024-10-31 09:14:38,519 - INFO - 127.0.0.1 - - [31/Oct/2024 09:14:38] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:14:38,531 - INFO - manage_employees called, method: GET
+2024-10-31 09:14:38,537 - INFO - 127.0.0.1 - - [31/Oct/2024 09:14:38] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:14:40,147 - INFO - manage_employees called, method: POST
+2024-10-31 09:14:40,149 - INFO - Action: toggle
+2024-10-31 09:14:40,161 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:14:40,162 - INFO - Odebrán vybraný zaměstnanec: Jakub
+2024-10-31 09:14:40,165 - INFO - 127.0.0.1 - - [31/Oct/2024 09:14:40] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:14:40,175 - INFO - manage_employees called, method: GET
+2024-10-31 09:14:40,185 - INFO - 127.0.0.1 - - [31/Oct/2024 09:14:40] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:14:41,538 - INFO - manage_employees called, method: POST
+2024-10-31 09:14:41,546 - INFO - Action: toggle
+2024-10-31 09:14:41,557 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:14:41,557 - INFO - Odebrán vybraný zaměstnanec: Malý František
+2024-10-31 09:14:41,558 - INFO - 127.0.0.1 - - [31/Oct/2024 09:14:41] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:14:41,569 - INFO - manage_employees called, method: GET
+2024-10-31 09:14:41,574 - INFO - 127.0.0.1 - - [31/Oct/2024 09:14:41] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:14:43,527 - INFO - manage_employees called, method: POST
+2024-10-31 09:14:43,529 - INFO - Action: toggle
+2024-10-31 09:14:43,541 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:14:43,543 - INFO - Přidán vybraný zaměstnanec: Karel Jiří
+2024-10-31 09:14:43,545 - INFO - 127.0.0.1 - - [31/Oct/2024 09:14:43] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:14:43,557 - INFO - manage_employees called, method: GET
+2024-10-31 09:14:43,562 - INFO - 127.0.0.1 - - [31/Oct/2024 09:14:43] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:14:46,398 - INFO - Přístup na hlavní stránku
+2024-10-31 09:14:46,409 - INFO - 127.0.0.1 - - [31/Oct/2024 09:14:46] "GET / HTTP/1.1" 200 -
+2024-10-31 09:14:46,480 - INFO - 127.0.0.1 - - [31/Oct/2024 09:14:46] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2024-10-31 09:14:54,023 - INFO - 127.0.0.1 - - [31/Oct/2024 09:14:54] "GET /record_time HTTP/1.1" 200 -
+2024-10-31 09:15:20,303 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:15:20,304 - INFO - List 'Týden 43' již existuje.
+2024-10-31 09:15:20,455 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:15:20,455 - INFO - Záznam pracovní doby uložen: datum=2024-10-26, začátek=09:00, konec=14:00, oběd=0.0
+2024-10-31 09:15:20,457 - INFO - 127.0.0.1 - - [31/Oct/2024 09:15:20] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:17:41,152 - INFO - Načtena konfigurace: 10 zaměstnanců, 2 vybraných
+2024-10-31 09:17:41,152 - INFO - Inicializována třída EmployeeManagement
+2024-10-31 09:17:41,508 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2024-10-31 09:17:41,509 - INFO - [33mPress CTRL+C to quit[0m
+2024-10-31 09:17:41,520 - INFO -  * Restarting with stat
+2024-10-31 09:17:46,194 - INFO - Načtena konfigurace: 10 zaměstnanců, 2 vybraných
+2024-10-31 09:17:46,194 - INFO - Inicializována třída EmployeeManagement
+2024-10-31 09:17:46,284 - WARNING -  * Debugger is active!
+2024-10-31 09:17:46,475 - INFO -  * Debugger PIN: 258-661-410
+2024-10-31 09:17:47,836 - INFO - 127.0.0.1 - - [31/Oct/2024 09:17:47] "GET /record_time HTTP/1.1" 200 -
+2024-10-31 09:17:51,745 - INFO - Přístup na hlavní stránku
+2024-10-31 09:17:51,777 - INFO - Přístup na hlavní stránku
+2024-10-31 09:17:51,787 - INFO - 127.0.0.1 - - [31/Oct/2024 09:17:51] "GET / HTTP/1.1" 200 -
+2024-10-31 09:17:51,802 - INFO - 127.0.0.1 - - [31/Oct/2024 09:17:51] "GET / HTTP/1.1" 200 -
+2024-10-31 09:17:51,875 - INFO - 127.0.0.1 - - [31/Oct/2024 09:17:51] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2024-10-31 09:17:53,680 - INFO - manage_employees called, method: GET
+2024-10-31 09:17:53,714 - INFO - 127.0.0.1 - - [31/Oct/2024 09:17:53] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:18:04,064 - INFO - manage_employees called, method: POST
+2024-10-31 09:18:04,144 - INFO - Action: toggle
+2024-10-31 09:18:04,165 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:18:04,173 - INFO - Odebrán vybraný zaměstnanec: Karel Jiří
+2024-10-31 09:18:04,176 - INFO - 127.0.0.1 - - [31/Oct/2024 09:18:04] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:18:04,195 - INFO - manage_employees called, method: GET
+2024-10-31 09:18:04,207 - INFO - 127.0.0.1 - - [31/Oct/2024 09:18:04] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:18:50,771 - INFO - manage_employees called, method: POST
+2024-10-31 09:18:50,773 - INFO - Action: toggle
+2024-10-31 09:18:50,797 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:18:50,798 - INFO - Přidán vybraný zaměstnanec: Chodur Radim
+2024-10-31 09:18:50,800 - INFO - 127.0.0.1 - - [31/Oct/2024 09:18:50] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:18:50,810 - INFO - manage_employees called, method: GET
+2024-10-31 09:18:50,816 - INFO - 127.0.0.1 - - [31/Oct/2024 09:18:50] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:18:52,767 - INFO - manage_employees called, method: POST
+2024-10-31 09:18:52,770 - INFO - Action: toggle
+2024-10-31 09:18:52,785 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:18:52,786 - INFO - Přidán vybraný zaměstnanec: Drdla Josef
+2024-10-31 09:18:52,787 - INFO - 127.0.0.1 - - [31/Oct/2024 09:18:52] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:18:52,798 - INFO - manage_employees called, method: GET
+2024-10-31 09:18:52,804 - INFO - 127.0.0.1 - - [31/Oct/2024 09:18:52] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:18:57,584 - INFO - manage_employees called, method: POST
+2024-10-31 09:18:57,589 - INFO - Action: toggle
+2024-10-31 09:18:57,606 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:18:57,607 - INFO - Přidán vybraný zaměstnanec: Forster Michael Joseph
+2024-10-31 09:18:57,608 - INFO - 127.0.0.1 - - [31/Oct/2024 09:18:57] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:18:57,617 - INFO - manage_employees called, method: GET
+2024-10-31 09:18:57,623 - INFO - 127.0.0.1 - - [31/Oct/2024 09:18:57] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:19:03,002 - INFO - manage_employees called, method: POST
+2024-10-31 09:19:03,004 - INFO - Action: toggle
+2024-10-31 09:19:03,021 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:19:03,021 - INFO - Přidán vybraný zaměstnanec: Schejbal Martin
+2024-10-31 09:19:03,024 - INFO - 127.0.0.1 - - [31/Oct/2024 09:19:03] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:19:03,035 - INFO - manage_employees called, method: GET
+2024-10-31 09:19:03,040 - INFO - 127.0.0.1 - - [31/Oct/2024 09:19:03] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:19:04,175 - INFO - manage_employees called, method: POST
+2024-10-31 09:19:04,177 - INFO - Action: toggle
+2024-10-31 09:19:04,196 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:19:04,197 - INFO - Přidán vybraný zaměstnanec: Jakub
+2024-10-31 09:19:04,199 - INFO - 127.0.0.1 - - [31/Oct/2024 09:19:04] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:19:04,210 - INFO - manage_employees called, method: GET
+2024-10-31 09:19:04,217 - INFO - 127.0.0.1 - - [31/Oct/2024 09:19:04] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:19:07,027 - INFO - manage_employees called, method: POST
+2024-10-31 09:19:07,029 - INFO - Action: toggle
+2024-10-31 09:19:07,035 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:19:07,036 - INFO - Přidán vybraný zaměstnanec: Malý František
+2024-10-31 09:19:07,038 - INFO - 127.0.0.1 - - [31/Oct/2024 09:19:07] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:19:07,048 - INFO - manage_employees called, method: GET
+2024-10-31 09:19:07,053 - INFO - 127.0.0.1 - - [31/Oct/2024 09:19:07] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:19:22,583 - INFO - Přístup na hlavní stránku
+2024-10-31 09:19:22,588 - INFO - 127.0.0.1 - - [31/Oct/2024 09:19:22] "GET / HTTP/1.1" 200 -
+2024-10-31 09:19:22,659 - INFO - 127.0.0.1 - - [31/Oct/2024 09:19:22] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2024-10-31 09:19:25,094 - INFO - 127.0.0.1 - - [31/Oct/2024 09:19:25] "GET /record_time HTTP/1.1" 200 -
+2024-10-31 09:19:51,171 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:19:51,200 - INFO - Vytvořen nový list 'Týden 43'.
+2024-10-31 09:19:51,384 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:19:51,385 - INFO - Záznam pracovní doby uložen: datum=2024-10-21, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 09:19:51,386 - INFO - 127.0.0.1 - - [31/Oct/2024 09:19:51] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:20:01,498 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:20:01,499 - INFO - List 'Týden 43' již existuje.
+2024-10-31 09:20:01,651 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:20:01,652 - INFO - Záznam pracovní doby uložen: datum=2024-10-22, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 09:20:01,653 - INFO - 127.0.0.1 - - [31/Oct/2024 09:20:01] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:20:04,278 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:20:04,278 - INFO - List 'Týden 43' již existuje.
+2024-10-31 09:20:04,450 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:20:04,450 - INFO - Záznam pracovní doby uložen: datum=2024-10-23, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 09:20:04,451 - INFO - 127.0.0.1 - - [31/Oct/2024 09:20:04] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:20:06,633 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:20:06,634 - INFO - List 'Týden 43' již existuje.
+2024-10-31 09:20:06,836 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:20:06,836 - INFO - Záznam pracovní doby uložen: datum=2024-10-24, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 09:20:06,837 - INFO - 127.0.0.1 - - [31/Oct/2024 09:20:06] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:20:21,308 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:20:21,308 - INFO - List 'Týden 43' již existuje.
+2024-10-31 09:20:21,581 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:20:21,582 - INFO - Záznam pracovní doby uložen: datum=2024-10-25, začátek=07:00, konec=14:00, oběd=0.0
+2024-10-31 09:20:21,583 - INFO - 127.0.0.1 - - [31/Oct/2024 09:20:21] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:20:30,412 - INFO - Přístup na hlavní stránku
+2024-10-31 09:20:30,428 - INFO - 127.0.0.1 - - [31/Oct/2024 09:20:30] "GET / HTTP/1.1" 200 -
+2024-10-31 09:20:30,478 - INFO - 127.0.0.1 - - [31/Oct/2024 09:20:30] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2024-10-31 09:20:32,040 - INFO - manage_employees called, method: GET
+2024-10-31 09:20:32,047 - INFO - 127.0.0.1 - - [31/Oct/2024 09:20:32] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:20:38,491 - INFO - manage_employees called, method: POST
+2024-10-31 09:20:38,492 - INFO - Action: toggle
+2024-10-31 09:20:38,498 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:20:38,499 - INFO - Odebrán vybraný zaměstnanec: Chodur Radim
+2024-10-31 09:20:38,500 - INFO - 127.0.0.1 - - [31/Oct/2024 09:20:38] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:20:38,513 - INFO - manage_employees called, method: GET
+2024-10-31 09:20:38,526 - INFO - 127.0.0.1 - - [31/Oct/2024 09:20:38] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:20:41,267 - INFO - manage_employees called, method: POST
+2024-10-31 09:20:41,268 - INFO - Action: toggle
+2024-10-31 09:20:41,274 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:20:41,275 - INFO - Odebrán vybraný zaměstnanec: Drdla Josef
+2024-10-31 09:20:41,276 - INFO - 127.0.0.1 - - [31/Oct/2024 09:20:41] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:20:41,283 - INFO - manage_employees called, method: GET
+2024-10-31 09:20:41,288 - INFO - 127.0.0.1 - - [31/Oct/2024 09:20:41] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:20:45,518 - INFO - manage_employees called, method: POST
+2024-10-31 09:20:45,519 - INFO - Action: toggle
+2024-10-31 09:20:45,532 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:20:45,533 - INFO - Odebrán vybraný zaměstnanec: Forster Michael Joseph
+2024-10-31 09:20:45,535 - INFO - 127.0.0.1 - - [31/Oct/2024 09:20:45] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:20:45,544 - INFO - manage_employees called, method: GET
+2024-10-31 09:20:45,558 - INFO - 127.0.0.1 - - [31/Oct/2024 09:20:45] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:20:47,076 - INFO - manage_employees called, method: POST
+2024-10-31 09:20:47,082 - INFO - Action: toggle
+2024-10-31 09:20:47,095 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:20:47,097 - INFO - Odebrán vybraný zaměstnanec: Schejbal Martin
+2024-10-31 09:20:47,103 - INFO - 127.0.0.1 - - [31/Oct/2024 09:20:47] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:20:47,114 - INFO - manage_employees called, method: GET
+2024-10-31 09:20:47,123 - INFO - 127.0.0.1 - - [31/Oct/2024 09:20:47] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:20:48,566 - INFO - manage_employees called, method: POST
+2024-10-31 09:20:48,578 - INFO - Action: toggle
+2024-10-31 09:20:48,789 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:20:48,803 - INFO - Odebrán vybraný zaměstnanec: Jakub
+2024-10-31 09:20:48,810 - INFO - 127.0.0.1 - - [31/Oct/2024 09:20:48] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:20:48,848 - INFO - manage_employees called, method: GET
+2024-10-31 09:20:48,882 - INFO - 127.0.0.1 - - [31/Oct/2024 09:20:48] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:20:49,928 - INFO - manage_employees called, method: POST
+2024-10-31 09:20:49,929 - INFO - Action: toggle
+2024-10-31 09:20:49,943 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:20:49,944 - INFO - Odebrán vybraný zaměstnanec: Malý František
+2024-10-31 09:20:49,945 - INFO - 127.0.0.1 - - [31/Oct/2024 09:20:49] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:20:49,960 - INFO - manage_employees called, method: GET
+2024-10-31 09:20:49,971 - INFO - 127.0.0.1 - - [31/Oct/2024 09:20:49] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:20:51,665 - INFO - manage_employees called, method: POST
+2024-10-31 09:20:51,667 - INFO - Action: toggle
+2024-10-31 09:20:51,688 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:20:51,689 - INFO - Přidán vybraný zaměstnanec: Karel Jiří
+2024-10-31 09:20:51,692 - INFO - 127.0.0.1 - - [31/Oct/2024 09:20:51] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:20:51,700 - INFO - manage_employees called, method: GET
+2024-10-31 09:20:51,705 - INFO - 127.0.0.1 - - [31/Oct/2024 09:20:51] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:20:54,516 - INFO - Přístup na hlavní stránku
+2024-10-31 09:20:54,532 - INFO - 127.0.0.1 - - [31/Oct/2024 09:20:54] "GET / HTTP/1.1" 200 -
+2024-10-31 09:20:54,601 - INFO - 127.0.0.1 - - [31/Oct/2024 09:20:54] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2024-10-31 09:20:56,752 - INFO - 127.0.0.1 - - [31/Oct/2024 09:20:56] "GET /record_time HTTP/1.1" 200 -
+2024-10-31 09:22:04,567 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:22:04,567 - INFO - List 'Týden 43' již existuje.
+2024-10-31 09:22:04,718 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:22:04,719 - INFO - Záznam pracovní doby uložen: datum=2024-10-26, začátek=09:00, konec=14:00, oběd=0.0
+2024-10-31 09:22:04,720 - INFO - 127.0.0.1 - - [31/Oct/2024 09:22:04] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:24:36,528 - INFO - Přístup na hlavní stránku
+2024-10-31 09:24:36,539 - INFO - 127.0.0.1 - - [31/Oct/2024 09:24:36] "GET / HTTP/1.1" 200 -
+2024-10-31 09:24:36,609 - INFO - 127.0.0.1 - - [31/Oct/2024 09:24:36] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2024-10-31 09:24:38,370 - INFO - manage_employees called, method: GET
+2024-10-31 09:24:38,385 - INFO - 127.0.0.1 - - [31/Oct/2024 09:24:38] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:24:40,816 - INFO - manage_employees called, method: POST
+2024-10-31 09:24:40,817 - INFO - Action: toggle
+2024-10-31 09:24:40,826 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:24:40,828 - INFO - Přidán vybraný zaměstnanec: Chodur Radim
+2024-10-31 09:24:40,832 - INFO - 127.0.0.1 - - [31/Oct/2024 09:24:40] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:24:40,848 - INFO - manage_employees called, method: GET
+2024-10-31 09:24:40,857 - INFO - 127.0.0.1 - - [31/Oct/2024 09:24:40] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:24:43,373 - INFO - manage_employees called, method: POST
+2024-10-31 09:24:43,374 - INFO - Action: toggle
+2024-10-31 09:24:43,393 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:24:43,394 - INFO - Přidán vybraný zaměstnanec: Drdla Josef
+2024-10-31 09:24:43,396 - INFO - 127.0.0.1 - - [31/Oct/2024 09:24:43] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:24:43,403 - INFO - manage_employees called, method: GET
+2024-10-31 09:24:43,410 - INFO - 127.0.0.1 - - [31/Oct/2024 09:24:43] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:24:45,480 - INFO - manage_employees called, method: POST
+2024-10-31 09:24:45,482 - INFO - Action: toggle
+2024-10-31 09:24:45,503 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:24:45,504 - INFO - Přidán vybraný zaměstnanec: Fiala Štěpán
+2024-10-31 09:24:45,505 - INFO - 127.0.0.1 - - [31/Oct/2024 09:24:45] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:24:45,517 - INFO - manage_employees called, method: GET
+2024-10-31 09:24:45,523 - INFO - 127.0.0.1 - - [31/Oct/2024 09:24:45] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:24:49,360 - INFO - manage_employees called, method: POST
+2024-10-31 09:24:49,366 - INFO - Action: toggle
+2024-10-31 09:24:49,387 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:24:49,387 - INFO - Přidán vybraný zaměstnanec: Forster Michael Joseph
+2024-10-31 09:24:49,388 - INFO - 127.0.0.1 - - [31/Oct/2024 09:24:49] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:24:49,397 - INFO - manage_employees called, method: GET
+2024-10-31 09:24:49,403 - INFO - 127.0.0.1 - - [31/Oct/2024 09:24:49] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:24:51,574 - INFO - manage_employees called, method: POST
+2024-10-31 09:24:51,576 - INFO - Action: toggle
+2024-10-31 09:24:51,585 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:24:51,588 - INFO - Přidán vybraný zaměstnanec: Schejbal Martin
+2024-10-31 09:24:51,590 - INFO - 127.0.0.1 - - [31/Oct/2024 09:24:51] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:24:51,601 - INFO - manage_employees called, method: GET
+2024-10-31 09:24:51,609 - INFO - 127.0.0.1 - - [31/Oct/2024 09:24:51] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:24:52,830 - INFO - manage_employees called, method: POST
+2024-10-31 09:24:52,834 - INFO - Action: toggle
+2024-10-31 09:24:52,852 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:24:52,852 - INFO - Přidán vybraný zaměstnanec: Jakub
+2024-10-31 09:24:52,854 - INFO - 127.0.0.1 - - [31/Oct/2024 09:24:52] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:24:52,864 - INFO - manage_employees called, method: GET
+2024-10-31 09:24:52,870 - INFO - 127.0.0.1 - - [31/Oct/2024 09:24:52] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:24:54,751 - INFO - manage_employees called, method: POST
+2024-10-31 09:24:54,752 - INFO - Action: toggle
+2024-10-31 09:24:54,766 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:24:54,768 - INFO - Přidán vybraný zaměstnanec: Malý František
+2024-10-31 09:24:54,770 - INFO - 127.0.0.1 - - [31/Oct/2024 09:24:54] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:24:54,782 - INFO - manage_employees called, method: GET
+2024-10-31 09:24:54,786 - INFO - 127.0.0.1 - - [31/Oct/2024 09:24:54] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:24:55,755 - INFO - manage_employees called, method: POST
+2024-10-31 09:24:55,758 - INFO - Action: toggle
+2024-10-31 09:24:55,780 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:24:55,781 - INFO - Odebrán vybraný zaměstnanec: Karel Jiří
+2024-10-31 09:24:55,784 - INFO - 127.0.0.1 - - [31/Oct/2024 09:24:55] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:24:55,798 - INFO - manage_employees called, method: GET
+2024-10-31 09:24:55,807 - INFO - 127.0.0.1 - - [31/Oct/2024 09:24:55] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:25:07,768 - INFO - manage_employees called, method: POST
+2024-10-31 09:25:07,770 - INFO - Action: toggle
+2024-10-31 09:25:07,792 - INFO - Konfigurace uložena do souboru: employee_config.json
+2024-10-31 09:25:07,794 - INFO - Odebrán vybraný zaměstnanec: Fiala Štěpán
+2024-10-31 09:25:07,797 - INFO - 127.0.0.1 - - [31/Oct/2024 09:25:07] "[32mPOST /employees HTTP/1.1[0m" 302 -
+2024-10-31 09:25:07,805 - INFO - manage_employees called, method: GET
+2024-10-31 09:25:07,811 - INFO - 127.0.0.1 - - [31/Oct/2024 09:25:07] "GET /employees HTTP/1.1" 200 -
+2024-10-31 09:25:13,396 - INFO - Přístup na hlavní stránku
+2024-10-31 09:25:13,408 - INFO - 127.0.0.1 - - [31/Oct/2024 09:25:13] "GET / HTTP/1.1" 200 -
+2024-10-31 09:25:13,475 - INFO - 127.0.0.1 - - [31/Oct/2024 09:25:13] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2024-10-31 09:25:15,795 - INFO - 127.0.0.1 - - [31/Oct/2024 09:25:15] "GET /record_time HTTP/1.1" 200 -
+2024-10-31 09:25:35,353 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:25:35,354 - INFO - List 'Týden 43' již existuje.
+2024-10-31 09:25:35,609 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:25:35,610 - INFO - Záznam pracovní doby uložen: datum=2024-10-21, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 09:25:35,611 - INFO - 127.0.0.1 - - [31/Oct/2024 09:25:35] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:25:41,734 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:25:41,735 - INFO - List 'Týden 43' již existuje.
+2024-10-31 09:25:41,894 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:25:41,895 - INFO - Záznam pracovní doby uložen: datum=2024-10-22, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 09:25:41,896 - INFO - 127.0.0.1 - - [31/Oct/2024 09:25:41] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:25:46,329 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:25:46,329 - INFO - List 'Týden 43' již existuje.
+2024-10-31 09:25:46,482 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:25:46,483 - INFO - Záznam pracovní doby uložen: datum=2024-10-23, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 09:25:46,484 - INFO - 127.0.0.1 - - [31/Oct/2024 09:25:46] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:25:48,954 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:25:48,955 - INFO - List 'Týden 43' již existuje.
+2024-10-31 09:25:49,113 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:25:49,114 - INFO - Záznam pracovní doby uložen: datum=2024-10-24, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 09:25:49,115 - INFO - 127.0.0.1 - - [31/Oct/2024 09:25:49] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:25:50,992 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:25:50,993 - INFO - List 'Týden 43' již existuje.
+2024-10-31 09:25:51,126 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:25:51,126 - INFO - Záznam pracovní doby uložen: datum=2024-10-25, začátek=07:00, konec=18:00, oběd=1.0
+2024-10-31 09:25:51,127 - INFO - 127.0.0.1 - - [31/Oct/2024 09:25:51] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:26:02,899 - INFO - Načten existující Excel soubor: Hodiny_Cap.xlsx
+2024-10-31 09:26:02,900 - INFO - List 'Týden 43' již existuje.
+2024-10-31 09:26:03,057 - INFO - Data úspěšně uložena do souboru: Hodiny_Cap.xlsx
+2024-10-31 09:26:03,058 - INFO - Záznam pracovní doby uložen: datum=2024-10-25, začátek=07:00, konec=14:00, oběd=0.0
+2024-10-31 09:26:03,059 - INFO - 127.0.0.1 - - [31/Oct/2024 09:26:03] "POST /record_time HTTP/1.1" 200 -
+2024-10-31 09:26:07,066 - INFO - Přístup na hlavní stránku
+2024-10-31 09:26:07,077 - INFO - 127.0.0.1 - - [31/Oct/2024 09:26:07] "GET / HTTP/1.1" 200 -
+2024-10-31 09:26:07,143 - INFO - 127.0.0.1 - - [31/Oct/2024 09:26:07] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -

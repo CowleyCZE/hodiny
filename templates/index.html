@@ -9,61 +9,147 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #333;
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
+            background-color: #f5f5f5;
         }
+
         .header {
-            background-color: #222;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 33vh;
+            background-color: #fff;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+
         .logo {
-            max-height: 100%;
-            max-width: 100%;
-            object-fit: contain;
+            max-height: 60px;
         }
+
         .info-bar {
+            background-color: #e9ecef;
+            padding: 0.5rem 1rem;
             display: flex;
             justify-content: space-between;
-            padding: 10px;
-            background-color: #444;
+            font-size: 0.9rem;
         }
+
         .title {
             text-align: center;
-            padding: 10px;
-            font-size: 24px;
-            background-color: #555;
+            padding: 1.5rem;
+            font-size: 1.5rem;
+            color: #333;
         }
+
         .nav {
-            display: flex;
-            justify-content: space-around;
-            padding: 10px;
-            background-color: #666;
+            background-color: #343a40;
+            padding: 1rem;
+            text-align: center;
         }
+
         .nav a {
-            color: #fff;
+            color: white;
             text-decoration: none;
+            padding: 0.5rem 1rem;
+            margin: 0 0.5rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
         }
+
+        .nav a:hover {
+            background-color: #495057;
+        }
+
         .main {
-            flex-grow: 1;
-            padding: 20px;
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .excel-actions {
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 2rem;
+        }
+
+        .excel-actions h3 {
+            margin-top: 0;
+            color: #333;
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: opacity 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 150px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        @media (max-width: 768px) {
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <img src="./static/images/logo.png" alt="Logo" class="logo">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
     </div>
-    
+
     <div class="info-bar">
-        <div id="current-week"></div>
-        <div id="current-date"></div>
+        <div id="current-week">
+            Týden: {{ week_number }}
+        </div>
+        <div id="current-date">
+            Datum: {{ current_date }}
+        </div>
     </div>
 
     <div class="title">
@@ -71,32 +157,66 @@
     </div>
 
     <div class="nav">
-    <a href="{{ url_for('manage_employees') }}">Zaměstnanci</a>
-    <a href="{{ url_for('record_time') }}">Záznam pracovní doby</a>
-    <a href="{{ url_for('zalohy') }}">Zálohy</a>
-</div>
+        <a href="{{ url_for('manage_employees') }}">Zaměstnanci</a>
+        <a href="{{ url_for('record_time') }}">Záznam pracovní doby</a>
+        <a href="{{ url_for('zalohy') }}">Zálohy</a>
+    </div>
 
     <div class="main">
         <div role="main">
-            Vítejte v systému evidence pracovní doby.
+            <h2>Vítejte v systému evidence pracovní doby</h2>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% if excel_exists %}
+                <div class="excel-actions">
+                    <h3>Operace se souborem Hodiny_Cap.xlsx:</h3>
+                    <div class="button-group">
+                        <a href="{{ url_for('download_excel') }}" class="btn btn-primary">
+                            Stáhnout soubor
+                        </a>
+                        <a href="{{ url_for('open_excel') }}" class="btn btn-secondary" target="_blank">
+                            Otevřít soubor
+                        </a>
+                        <form action="{{ url_for('send_excel') }}" method="post" style="display: inline;">
+                            <button type="submit" class="btn btn-success">
+                                Odeslat emailem
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-warning">
+                    Soubor Hodiny_Cap.xlsx nebyl nalezen.
+                </div>
+            {% endif %}
         </div>
     </div>
 
     <script>
-        function updateDateAndWeek() {
-            const now = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('current-date').textContent = now.toLocaleDateString('cs-CZ', options);
+        // Aktualizace data a týdne
+        document.addEventListener('DOMContentLoaded', function() {
+            const date = new Date();
+            const currentDate = date.toLocaleDateString('cs-CZ');
+            const weekNumber = getWeekNumber(date);
+            
+            document.getElementById('current-date').textContent = `Datum: ${currentDate}`;
+            document.getElementById('current-week').textContent = `Týden: ${weekNumber}`;
+        });
 
-            const start = new Date(now.getFullYear(), 0, 1);
-            const diff = now - start;
-            const oneWeek = 1000 * 60 * 60 * 24 * 7;
-            const weekNumber = Math.floor(diff / oneWeek) + 1;
-            document.getElementById('current-week').textContent = `Týden ${weekNumber}`;
+        function getWeekNumber(date) {
+            const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+            const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
+            return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
         }
-
-        updateDateAndWeek();
-        setInterval(updateDateAndWeek, 60000); // Aktualizace každou minutu
     </script>
 </body>
 </html>

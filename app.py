@@ -1,9 +1,14 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, send_file
 from datetime import datetime
 from employee_management import EmployeeManagement
 from excel_manager import ExcelManager
 from zalohy_manager import ZalohyManager
 import logging
+import os
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
 
 app = Flask(__name__)
 app.secret_key = 'tajny_klic_pro_flash_zpravy'
@@ -11,6 +16,76 @@ app.secret_key = 'tajny_klic_pro_flash_zpravy'
 employee_manager = EmployeeManagement()
 excel_manager = ExcelManager()
 zalohy_manager = ZalohyManager()
+
+EXCEL_FILE_PATH = 'Hodiny_Cap.xlsx'
+RECIPIENT_EMAIL = 'czechmontagesro@gmail.com'
+
+@app.route('/')
+def index():
+    logging.info("Přístup na hlavní stránku")
+    excel_exists = os.path.exists(EXCEL_FILE_PATH)
+    return render_template('index.html', excel_exists=excel_exists)
+
+@app.route('/download-excel')
+def download_excel():
+    try:
+        return send_file(
+            EXCEL_FILE_PATH,
+            as_attachment=True,
+            download_name='Hodiny_Cap.xlsx'
+        )
+    except Exception as e:
+        flash(f'Chyba při stahování souboru: {str(e)}', 'error')
+        return redirect(url_for('index'))
+
+@app.route('/open-excel')
+def open_excel():
+    try:
+        return send_file(
+            EXCEL_FILE_PATH,
+            as_attachment=False,
+            download_name='Hodiny_Cap.xlsx'
+        )
+    except Exception as e:
+        flash(f'Chyba při otevírání souboru: {str(e)}', 'error')
+        return redirect(url_for('index'))
+
+@app.route('/send-excel', methods=['POST'])
+def send_excel():
+    try:
+        # Email configuration
+        smtp_server = "smtp.gmail.com"
+        smtp_port = 587
+        sender_email = "your-email@gmail.com"  # Nahraďte vlastním emailem
+        password = "your-app-password"  # Nahraďte vlastním heslem pro aplikaci
+
+        # Create message
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = RECIPIENT_EMAIL
+        msg['Subject'] = 'Hodiny_Cap.xlsx - Export'
+
+        # Add body
+        body = "V příloze najdete aktuální výkaz hodin."
+        msg.attach(MIMEText(body, 'plain'))
+
+        # Add attachment
+        with open(EXCEL_FILE_PATH, 'rb') as f:
+            attachment = MIMEApplication(f.read(), _subtype='xlsx')
+            attachment.add_header('Content-Disposition', 'attachment', filename='Hodiny_Cap.xlsx')
+            msg.attach(attachment)
+
+        # Send email
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()
+            server.login(sender_email, password)
+            server.send_message(msg)
+
+        flash('Soubor byl úspěšně odeslán emailem.', 'success')
+    except Exception as e:
+        flash(f'Chyba při odesílání emailu: {str(e)}', 'error')
+    
+    return redirect(url_for('index'))
 
 @app.route('/')
 def index():

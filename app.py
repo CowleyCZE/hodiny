@@ -87,10 +87,6 @@ def send_excel():
     
     return redirect(url_for('index'))
 
-@app.route('/')
-def index():
-    logging.info("Přístup na hlavní stránku")
-    return render_template('index.html')
 
 @app.route('/employees', methods=['GET', 'POST'])
 def manage_employees():

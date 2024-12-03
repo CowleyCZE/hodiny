@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>Správa zaměstnanců</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+    </header>
+
+    <nav class="nav">
+        <a href="{{ url_for('index') }}">Hlavní stránka</a>
+        <a href="{{ url_for('manage_employees') }}">Zaměstnanci</a>
+        <a href="{{ url_for('record_time') }}">Záznam pracovní doby</a>
+        <a href="{{ url_for('zalohy') }}">Zálohy</a>
+        <a href="{{ url_for('excel_viewer') }}">Tabulka</a>
+        <a href="{{ url_for('settings_page') }}">Nastavení</a>
+    </nav>
+
+    <main class="main">
+        <h1>Správa zaměstnanců</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div id="add-employee" class="section">
+            <h2>Přidat zaměstnance</h2>
+            <form method="POST" action="{{ url_for('manage_employees') }}">
+                <input type="hidden" name="action" value="add">
+                <label for="name">Jméno zaměstnance:</label>
+                <input type="text" id="name" name="name" required>
+                <button type="submit">Přidat zaměstnance</button>
+            </form>
+        </div>
+
+        <div id="employee-list" class="section">
+            <h2>Seznam zaměstnanců</h2>
+            {% if employees %}
+                <ul>
+                {% for employee in employees %}
+                    <li>
+                        {{ employee.name }}
+                        <form method="POST" action="{{ url_for('manage_employees') }}" style="display: inline;">
+                        <form method="POST" action="{{ url_for('manage_employees') }}" style="display: inline;">
+                            <input type="hidden" name="action" value="select">
+                            <input type="hidden" name="employee_name" value="{{ employee.name }}">
+                            <button type="submit">
+                                {% if employee.selected %}Odznačit{% else %}Označit{% endif %}
+                            </button>
+                        </form>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <p>Zatím nejsou přidáni žádní zaměstnanci.</p>
+            {% endif %}
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Správa zaměstnanců</p>
+    </footer>
+</body>
+</html>

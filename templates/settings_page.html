@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nastavení</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+    </header>
+
+    <nav class="nav">
+        <a href="{{ url_for('index') }}">Hlavní stránka</a>
+        <a href="{{ url_for('manage_employees') }}">Zaměstnanci</a>
+        <a href="{{ url_for('record_time') }}">Záznam pracovní doby</a>
+        <a href="{{ url_for('zalohy') }}">Zálohy</a>
+        <a href="{{ url_for('excel_viewer') }}">Tabulka</a>
+        <a href="{{ url_for('settings_page') }}">Nastavení</a>
+    </nav>
+
+    <main class="main">
+        <h1>Nastavení</h1>
+        <form method="POST" action="{{ url_for('settings_page') }}">
+            <h2>Data Projektu</h2>
+            <div class="form-group">
+                <label for="project_name">Název projektu:</label>
+                <input type="text" name="project_name" value="{{ settings.project_name if settings.project_name else '' }}" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="start_date">Začátek projektu:</label>
+                <input type="date" name="start_date" value="{{ settings.start_date if settings.start_date else '' }}" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="end_date">Konec projektu:</label>
+                <input type="date" name="end_date" value="{{ settings.end_date if settings.end_date else '' }}" class="form-control" required>
+            </div>
+
+            <h2>Přednastavené časy</h2>
+            <label for="start_time">Čas začátku:</label>
+            <input type="text" id="start_time" name="start_time" class="timepicker" required>
+            <br><br>
+
+            <label for="end_time">Čas konce:</label>
+            <input type="text" id="end_time" name="end_time" class="timepicker" required>
+            <br><br>
+
+            <label for="lunch_duration">Délka oběda (v hodinách):</label>
+            <input type="number" id="lunch_duration" name="lunch_duration" step="0.25" min="0" max="4" required>
+            <br><br>
+
+            <button type="submit" class="btn btn-primary">Uložit nastavení</button>
+        </form>
+
+        </form>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Nastavení</p>
+    </footer>
+
+    <script>
+        // Inicializace ciferníku pro čas a datum
+        flatpickr(".timepicker", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+        });
+
+        flatpickr(".date-picker", {
+            dateFormat: "Y-m-d",
+        });
+    </script>
+</body>
+</html>

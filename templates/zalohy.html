@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>Zálohy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+    </header>
+
+    <nav class="nav">
+        <a href="{{ url_for('index') }}">Hlavní stránka</a>
+        <a href="{{ url_for('manage_employees') }}">Zaměstnanci</a>
+        <a href="{{ url_for('record_time') }}">Záznam pracovní doby</a>
+        <a href="{{ url_for('zalohy') }}">Zálohy</a>
+        <a href="{{ url_for('excel_viewer') }}">Tabulka</a>
+        <a href="{{ url_for('settings_page') }}">Nastavení</a>
+    </nav>
+
+    <main class="main">
+        <h1>Zálohy</h1>
+
+        <form method="POST">
+            <label for="employee_name">Zaměstnanec:</label>
+            <select name="employee_name" required>
+                {% for employee in employees %}
+                    <option value="{{ employee }}">{{ employee }}</option>
+                {% endfor %}
+            </select>
+            <br><br>
+
+            <label for="amount">Částka:</label>
+            <input type="number" name="amount" id="amount" step="0.01" required>
+            <br><br>
+
+            <label for="currency">Měna:</label>
+            <select name="currency" id="currency" required>
+                <option value="EUR">EUR</option>
+                <option value="CZK">Kč</option>
+            </select>
+            <br><br>
+
+            <label for="option">Možnost:</label>
+            <select name="option" required>
+                {% for option in options %}
+                    <option value="{{ option }}">{{ option }}</option>
+                {% endfor %}
+            </select>
+            <br><br>
+
+            <label for="date">Datum:</label>
+            <input type="date" name="date" id="date" value="{{ current_date }}" required>
+            <br><br>
+
+            <button type="submit" class="btn btn-primary">Potvrdit</button>
+        </form>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="message-list">
+                {% for category, message in messages %}
+                    <li class="alert alert-{{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Zálohy</p>
+    </footer>
+</body>
+</html>

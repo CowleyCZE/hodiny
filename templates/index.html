@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evidence pracovní doby</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+    </header>
+
+    <nav class="nav">
+        <a href="{{ url_for('index') }}">Hlavní stránka</a>
+        <a href="{{ url_for('manage_employees') }}">Zaměstnanci</a>
+        <a href="{{ url_for('record_time') }}">Záznam pracovní doby</a>
+        <a href="{{ url_for('zalohy') }}">Zálohy</a>
+        <a href="{{ url_for('excel_viewer') }}">Tabulka</a>
+        <a href="{{ url_for('settings_page') }}">Nastavení</a>
+    </nav>
+
+    <div class="info-bar">
+        <div id="current-week">Týden: {{ week_number }}</div>
+        <div id="current-date">Datum: {{ current_date }}</div>
+    </div>
+
+    <main class="main">
+        <h1>Evidence pracovní doby</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if excel_exists %}
+            <div class="excel-actions">
+                <h3>Operace se souborem Hodiny_Cap.xlsx:</h3>
+                <div class="button-group">
+                    <a href="{{ url_for('download_file') }}" class="btn btn-primary">Stáhnout soubor</a>
+                    <form action="{{ url_for('send_email') }}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-success">Odeslat emailem</button>
+                    </form>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-warning">Soubor Hodiny_Cap.xlsx nebyl nalezen.</div>
+        {% endif %}
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Evidence pracovní doby</p>
+    </footer>
+
+    <script>
+        // Aktualizace data a týdne
+        document.addEventListener('DOMContentLoaded', function() {
+            const date = new Date();
+            const currentDate = date.toLocaleDateString('cs-CZ');
+            const weekNumber = getWeekNumber(date);
+
+            document.getElementById('current-date').textContent = `Datum: ${currentDate}`;
+            document.getElementById('current-week').textContent = `Týden: ${weekNumber}`;
+        });
+
+        function getWeekNumber(date) {
+            const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+            const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
+            return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+        }
+    </script>
+</body>
+</html>

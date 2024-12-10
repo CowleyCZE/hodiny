@@ -217,10 +217,10 @@ def record_time():
 def excel_viewer():
     try:
         file_path = "/home/Cowley/hodiny/excel/Hodiny_Cap.xlsx"
-        workbook = load_workbook(file_path, data_only=True)  # Načti data s vypočítanými vzorci
+        workbook = load_workbook(file_path, data_only=True)
         sheet_names = workbook.sheetnames
         active_sheet = request.args.get('sheet', sheet_names[0])
-        
+
         if active_sheet not in sheet_names:
             raise ValueError("Neplatný název listu")
 
@@ -229,12 +229,18 @@ def excel_viewer():
         for row in sheet.iter_rows():
             row_data = []
             for cell in row:
-                if cell.value is None:
-                    row_data.append("")  # Prázdné buňky zobraz jako prázdný řetězec
-                else:
-                    row_data.append(cell.value)
+                value = cell.value
+                if value is None:  # Kontrola prázdné buňky
+                    value = ""
+                elif isinstance(value, str) and value.startswith("="):  # Kontrola vzorce
+                    try:
+                        value = sheet.evaluate(value)
+                    except Exception as e:
+                        print(f"Chyba při vyhodnocení vzorce v buňce {cell.coordinate}: {e}")
+                        value = "Chyba vzorce"
+                row_data.append(value)
             data.append(row_data)
-        
+
         workbook.close()
         return render_template('excel_viewer.html', sheet_names=sheet_names, active_sheet=active_sheet, data=data)
     except Exception as e:

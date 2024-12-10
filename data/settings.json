@@ -1,0 +1,13 @@
+{
+    "start_time": "12:00",
+    "end_time": "18:00",
+    "lunch_duration": 1,
+    "project_info": {
+        "name": "Lidl Měřín",
+        "start_date": "2024-11-14",
+        "end_date": "2024-11-22"
+    },
+    "project_name": "Test1",
+    "start_date": "2024-11-01",
+    "end_date": "2024-12-31"
+}

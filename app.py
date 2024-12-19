@@ -12,6 +12,7 @@ import smtplib
 import openpyxl
 
 from employee_management import EmployeeManager
+from excel_manager2024 import ExcelManager2024
 from excel_manager import ExcelManager
 
 app = Flask(__name__)
@@ -21,12 +22,14 @@ app.secret_key = 'your_secret_key'
 DATA_PATH = '/home/Cowley/hodiny/data'
 EXCEL_BASE_PATH = '/home/Cowley/hodiny/excel'
 EXCEL_FILE_NAME = 'Hodiny_Cap.xlsx'
+EXCEL_FILE_NAME_2024 = 'Hodiny2024.xlsx'  # Nový soubor pro rok 2024
 SETTINGS_FILE_PATH = 'settings.json'
 RECIPIENT_EMAIL = 'cowleyy@gmail.com'
 
 # Inicializace manažerů
 employee_manager = EmployeeManager(DATA_PATH)
 excel_manager = ExcelManager(EXCEL_BASE_PATH)
+excel_manager_2024 = ExcelManager2024(os.path.join(EXCEL_BASE_PATH, EXCEL_FILE_NAME_2024))
 
 # Načtení nastavení
 def load_settings():
@@ -193,56 +196,79 @@ def manage_employees():
 
 @app.route('/record_time', methods=['GET', 'POST'])
 def record_time():
-    settings = load_settings()
     if request.method == 'POST':
         date = request.form['date']
         start_time = request.form['start_time']
         end_time = request.form['end_time']
         lunch_duration = float(request.form['lunch_duration'])
-        employees = employee_manager.get_vybrani_zamestnanci()
+
         try:
-            excel_manager.ulozit_pracovni_dobu(date, start_time, end_time, lunch_duration, employees)
-            flash('Pracovní doba byla úspěšně zaznamenána.', 'success')
+            # Uložení dat pomocí ExcelManager (pro starší formát)
+            excel_manager.ulozit_pracovni_dobu(
+                date, start_time, end_time, lunch_duration, employee_manager.vybrani_zamestnanci
+            )
+
+            # Uložení dat pomocí ExcelManager2024 (pro nový formát 2024)
+            # Zde předáváme lunch_duration jako float, ne jako timedelta
+            excel_manager_2024.ulozit_pracovni_dobu(date, start_time, end_time, lunch_duration)
+
+            flash('Záznam byl úspěšně uložen do obou Excel souborů.', 'success')
         except Exception as e:
-            flash(f'Chyba při ukládání pracovní doby: {str(e)}', 'error')
+            flash(f'Chyba při ukládání záznamu: {str(e)}', 'error')
+            logging.error(f"Chyba při ukládání záznamu: {str(e)}")
+
         return redirect(url_for('record_time'))
 
+    # Pro GET požadavek
+    current_date = datetime.now().strftime('%Y-%m-%d')
     return render_template('record_time.html', 
-                           current_date=datetime.now().strftime('%Y-%m-%d'),
+                           current_date=current_date,
                            start_time=settings['start_time'],
                            end_time=settings['end_time'],
-                           lunch_duration=settings['lunch_duration'])
+                           lunch_duration=settings['lunch_duration'],
+                           selected_employees=employee_manager.vybrani_zamestnanci)
 
 @app.route('/excel_viewer')
 def excel_viewer():
+    excel_folder = "/home/Cowley/hodiny/excel/"
+    excel_files = [f for f in os.listdir(excel_folder) if f.endswith('.xlsx')]
+    
+    selected_file = request.args.get('file')
+    if not selected_file or selected_file not in excel_files:
+        selected_file = excel_files[0] if excel_files else None
+
+    if not selected_file:
+        return "Žádné Excel soubory nebyly nalezeny."
+
     try:
-        file_path = "/home/Cowley/hodiny/excel/Hodiny_Cap.xlsx"
+        file_path = os.path.join(excel_folder, selected_file)
         workbook = load_workbook(file_path, data_only=True)
         sheet_names = workbook.sheetnames
-        active_sheet = request.args.get('sheet', sheet_names[0])
 
-        if active_sheet not in sheet_names:
-            raise ValueError("Neplatný název listu")
+        # Pokud byl změněn soubor, použijeme první list jako výchozí
+        if 'prev_file' not in request.args or request.args.get('prev_file') != selected_file:
+            active_sheet = sheet_names[0]
+        else:
+            active_sheet = request.args.get('sheet')
+            if active_sheet not in sheet_names:
+                active_sheet = sheet_names[0]
 
         sheet = workbook[active_sheet]
         data = []
         for row in sheet.iter_rows():
             row_data = []
             for cell in row:
-                value = cell.value
-                if value is None:  # Kontrola prázdné buňky
-                    value = ""
-                elif isinstance(value, str) and value.startswith("="):  # Kontrola vzorce
-                    try:
-                        value = sheet.evaluate(value)
-                    except Exception as e:
-                        print(f"Chyba při vyhodnocení vzorce v buňce {cell.coordinate}: {e}")
-                        value = "Chyba vzorce"
+                value = cell.value if cell.value is not None else ""
                 row_data.append(value)
             data.append(row_data)
 
         workbook.close()
-        return render_template('excel_viewer.html', sheet_names=sheet_names, active_sheet=active_sheet, data=data)
+        return render_template('excel_viewer.html', 
+                               excel_files=excel_files, 
+                               selected_file=selected_file, 
+                               sheet_names=sheet_names, 
+                               active_sheet=active_sheet, 
+                               data=data)
     except Exception as e:
         return f"Chyba při načítání Excel souboru: {e}"
 

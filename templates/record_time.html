@@ -21,6 +21,13 @@
     </nav>
 
     <main class="main">
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
 <h2>Vybraní zaměstnanci:</h2>
 <ul>
     {% for employee in selected_employees %}

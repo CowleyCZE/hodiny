@@ -1,6 +1,8 @@
+from datetime import datetime, timedelta
+import openpyxl
+from openpyxl.utils import get_column_letter
 import os
 from openpyxl import load_workbook, Workbook
-from datetime import datetime
 import calendar
 
 class ExcelManager2024:
@@ -12,11 +14,17 @@ class ExcelManager2024:
         sheet_name = self._get_sheet_name(date)
         sheet = self._get_or_create_sheet(workbook, sheet_name, date)
 
+        # Převod vstupních dat na správné formáty
+        date = datetime.strptime(date, '%Y-%m-%d').date()
+        start_time = datetime.strptime(start_time, '%H:%M').time()
+        end_time = datetime.strptime(end_time, '%H:%M').time()
+        lunch_duration = timedelta(hours=float(lunch_duration))
+
         # Zápis dat
         row = self._find_row_for_date(sheet, date)
         sheet.cell(row=row, column=5, value=start_time)  # Sloupec E
-        sheet.cell(row=row, column=6, value=lunch_duration)     # Sloupec F
-        sheet.cell(row=row, column=7, value=end_time)    # Sloupec G
+        sheet.cell(row=row, column=6, value=lunch_duration)  # Sloupec F
+        sheet.cell(row=row, column=7, value=end_time)  # Sloupec G
 
         workbook.save(self.file_path)
 

@@ -12,6 +12,13 @@ class EmployeeManager:
         self.load_config()
         logging.info("Inicializována třída EmployeeManagement")
 
+    def pridat_zamestnance(self, name):
+        if name not in self.zamestnanci:
+            self.zamestnanci.append(name)
+            self.save_config()
+            return True
+        return False
+
     def load_config(self):
         if os.path.exists(self.config_file):
             try:

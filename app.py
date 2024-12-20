@@ -84,9 +84,37 @@ def get_excel_with_week(base_path, original_name):
 
 @app.route('/')
 def index():
-    logging.info("Přístup na hlavní stránku")
-    excel_exists = os.path.exists(os.path.join(EXCEL_BASE_PATH, EXCEL_FILE_NAME))
-    return render_template('index.html', excel_exists=excel_exists)
+    employees = employee_manager.get_employees()
+    selected_employees = employee_manager.get_selected_employees()
+    
+    # Sort employees alphabetically
+    sorted_employees = sorted(employees, key=lambda x: x['name'].lower())
+    
+    # Move selected employees to the top
+    final_employees = sorted(selected_employees, key=lambda x: x['name'].lower()) + [
+        emp for emp in sorted_employees if emp['name'] not in [se['name'] for se in selected_employees]
+    ]
+    
+    return render_template('index.html', employees=final_employees)
+
+@app.route('/add_employee', methods=['POST'])
+def add_employee():
+    name = request.form['name']
+    employee_manager.add_employee(name)
+    return redirect(url_for('index'))
+
+@app.route('/delete_employee', methods=['POST'])
+def delete_employee():
+    name = request.form['name']
+    employee_manager.delete_employee(name)
+    return redirect(url_for('index'))
+
+@app.route('/edit_employee', methods=['POST'])
+def edit_employee():
+    old_name = request.form['old_name']
+    new_name = request.form['new_name']
+    employee_manager.edit_employee(old_name, new_name)
+    return redirect(url_for('index'))
 
 @app.route('/download')
 def download_file():

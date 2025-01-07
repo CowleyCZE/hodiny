@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prohlížeč Excel souborů</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> 
 </head>
 <body>
     <header>
-        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo"> 
     </header>
 
     <nav class="nav">
@@ -22,26 +22,29 @@
 
     <main class="main"> 
         <h1>Prohlížeč Excel souborů</h1>
-
+    
         <form method="GET" action="{{ url_for('excel_viewer') }}">
-            <input type="hidden" name="prev_file" value="{{ selected_file }}">
             <label for="file">Vyberte soubor:</label>
             <select name="file" id="file" onchange="this.form.submit()">
                 {% for file in excel_files %}
                     <option value="{{ file }}" {% if file == selected_file %}selected{% endif %}>{{ file }}</option>
                 {% endfor %}
             </select>
-
-            <label for="sheet">Vyberte list:</label>
-            <select name="sheet" id="sheet" onchange="this.form.submit()">
-                {% for sheet in sheet_names %}
-                    <option value="{{ sheet }}" {% if sheet == active_sheet %}selected{% endif %}>{{ sheet }}</option>
-                {% endfor %}
-            </select>
         </form>
-
-        <h2>{{ selected_file }} - {{ active_sheet }}</h2> 
-        <table>
+    
+        {% if selected_file %}
+            <form method="GET" action="{{ url_for('excel_viewer') }}">
+                <input type="hidden" name="file" value="{{ selected_file }}">
+                <label for="sheet">Vyberte list:</label>
+                <select name="sheet" id="sheet" onchange="this.form.submit()">
+                    {% for sheet in sheet_names %}
+                        <option value="{{ sheet }}" {% if sheet == active_sheet %}selected{% endif %}>{{ sheet }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+    
+            <h2>{{ selected_file }} - {{ active_sheet }}</h2> 
+            <table>
             <thead>
                 <tr>
                     {% for header in data[0] %}
@@ -59,6 +62,7 @@
                 {% endfor %}
             </tbody>
         </table>   
+        {% endif %}
     </main> 
 
     <footer> 

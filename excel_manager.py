@@ -13,13 +13,26 @@ class ExcelManager:
         self.file_path = os.path.join(self.base_path, 'Hodiny_Cap.xlsx')
         self.current_project_name = None  # Inicializujeme na None
 
+    def __init__(self, base_path):
+        self.base_path = base_path
+        self.file_path = os.path.join(self.base_path, 'Hodiny_Cap.xlsx')
+        self.current_project_name = None
+
     def _load_or_create_workbook(self):
         try:
-            workbook = load_workbook(self.file_path)
-        except FileNotFoundError:
-            workbook = Workbook()
-            workbook.save(self.file_path)
-        return workbook
+            if not os.path.exists(self.base_path):
+                os.makedirs(self.base_path)
+            
+            if os.path.exists(self.file_path):
+                workbook = load_workbook(self.file_path)
+            else:
+                workbook = Workbook()
+                # Uložíme workbook až po jeho vytvoření
+                workbook.save(self.file_path)
+            return workbook
+        except Exception as e:
+            logging.error(f"Chyba při načítání nebo vytváření Excel souboru: {e}")
+            raise
 
     def ziskej_cislo_tydne(self, datum):
         datum_objekt = datetime.strptime(datum, '%Y-%m-%d').date()

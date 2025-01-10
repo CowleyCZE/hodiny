@@ -62,13 +62,6 @@ class EmployeeManager:
         logging.warning(f"Nepodařilo se odebrat vybraného zaměstnance: {zamestnanec}")
         return False
 
-    def get_employees(self):
-        return self.get_zamestnanci()
-
-    def get_zamestnanci(self):
-        return sorted(self.zamestnanci)
-
-
     def get_vybrani_zamestnanci(self):
         return self.vybrani_zamestnanci
 

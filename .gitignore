@@ -1,0 +1,19 @@
+﻿# Ignorovat složku virtuálního prostředí
+env/
+
+# Ignorovat složku Visual Studio
+.vs/
+
+# Další běžné ignorované soubory a složky
+bin/
+obj/
+*.user
+*.suo
+*.log
+*.tmp
+*.pdb
+*.cache
+*.config
+*.csproj.user
+*.csproj.vspscc
+*.vscode/

@@ -44,6 +44,15 @@ class EmployeeManager:
         except Exception as e:
             logging.error(f"Chyba při ukládání konfigurace: {str(e)}")
 
+    def pridat_zamestnance(self, zamestnanec):
+        if zamestnanec not in self.zamestnanci:
+            self.zamestnanci.append(zamestnanec)
+            self.save_config()
+            logging.info(f"Přidán zaměstnanec: {zamestnanec}")
+            return True
+        logging.warning(f"Zaměstnanec již existuje: {zamestnanec}")
+        return False
+
     def pridat_vybraneho_zamestnance(self, zamestnanec):
         if zamestnanec in self.zamestnanci and zamestnanec not in self.vybrani_zamestnanci:
             self.vybrani_zamestnanci.append(zamestnanec)

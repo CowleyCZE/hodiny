@@ -21,8 +21,8 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
 # Konstanty
-DATA_PATH = '/home/Cowley/Hodiny/data'
-EXCEL_BASE_PATH = '/home/Cowley/hodiny/Excel'
+DATA_PATH = '/home/Cowley/hodiny/data'
+EXCEL_BASE_PATH = '/home/Cowley/hodiny/excel'
 EXCEL_FILE_NAME = 'Hodiny_Cap.xlsx'
 EXCEL_FILE_NAME = 'Hodiny2024.xlsx'
 SETTINGS_FILE_PATH = 'settings.json'

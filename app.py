@@ -167,12 +167,6 @@ def send_email():
         logging.error(f"Chyba při odesílání e-mailu: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-from flask import flash, redirect, url_for, render_template, request
-from employee_management import EmployeeManager
-import os
-
-employee_manager = EmployeeManager('data')
-
 @app.route('/manage_employees', methods=['GET', 'POST'])
 def manage_employees():
     if request.method == 'POST':
@@ -228,6 +222,16 @@ def manage_employees():
                     flash('Zaměstnanec nebyl nalezen.', 'error')
         
         return redirect(url_for('manage_employees'))
+
+    # Příprava dat pro šablonu
+    employees_data = []
+    for employee in sorted(employee_manager.zamestnanci):  # Seřazení podle abecedy
+        employees_data.append({
+            'name': employee,
+            'selected': employee in employee_manager.vybrani_zamestnanci
+        })
+
+    return render_template('employees.html', employees=employees_data)
 
     # Příprava dat pro šablonu
     employees_data = []

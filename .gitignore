@@ -12,6 +12,8 @@ build/
 venv/
 env/
 .env/
+v17/
+
 
 # IDE specific files
 .vscode/
@@ -23,3 +25,6 @@ env/
 # System files
 .DS_Store
 Thumbs.db
+.wsu0
+DocumentLayout.json
+VSWorkspaceState.json

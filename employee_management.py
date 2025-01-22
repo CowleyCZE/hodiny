@@ -131,3 +131,4 @@ class EmployeeManager:
         """Vrátí seznam všech zaměstnanců s informací o jejich označení"""
         return [{'name': name, 'selected': name in self.vybrani_zamestnanci} 
                 for name in sorted(self.zamestnanci)]  # Seřazení podle abecedy
+

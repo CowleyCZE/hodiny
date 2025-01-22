@@ -56,7 +56,7 @@ def get_last_sheet_name(file_path):
     try:
         wb = openpyxl.load_workbook(file_path, read_only=True)
         week_sheets = [sheet for sheet in wb.sheetnames if sheet.startswith('Week')]
-        
+
         if not week_sheets:
             wb.close()
             return None
@@ -94,18 +94,18 @@ def download_file():
     try:
         # Cesta k původnímu souboru
         original_file_path = os.path.join(EXCEL_BASE_PATH, 'Hodiny_Cap.xlsx')
-        
+
         logging.info(f"Načítám Excel soubor: {original_file_path}")
         # Načtení Excel souboru
         workbook = load_workbook(original_file_path)
-        
+
         # Nalezení listu s nejvyšším číslem týdne
         week_sheets = [sheet for sheet in workbook.sheetnames if sheet.startswith('Týden')]
         logging.info(f"Nalezené listy týdnů: {week_sheets}")
-        
+
         if not week_sheets:
             raise ValueError("V souboru nejsou žádné listy začínající 'Týden'")
-        
+
         def safe_week_number(sheet_name):
             try:
                 return int(sheet_name.split()[1])
@@ -114,19 +114,19 @@ def download_file():
 
         highest_week_sheet = max(week_sheets, key=safe_week_number)
         logging.info(f"Nejvyšší týden: {highest_week_sheet}")
-        
+
         # Vytvoření nového názvu souboru
         new_file_name = f"Hodiny_Cap_{highest_week_sheet}.xlsx"
         new_file_path = os.path.join(EXCEL_BASE_PATH, new_file_name)
-        
+
         logging.info(f"Vytvářím kopii souboru: {new_file_path}")
         # Uložení kopie souboru s novým názvem
         shutil.copy2(original_file_path, new_file_path)
-        
+
         # Odeslání souboru uživateli ke stažení
         logging.info(f"Odesílám soubor ke stažení: {new_file_name}")
         return send_file(new_file_path, as_attachment=True, download_name=new_file_name)
-    
+
     except Exception as e:
         logging.error(f"Chyba při stahování souboru: {str(e)}", exc_info=True)
         flash(f'Chyba při stahování souboru: {str(e)}', 'error')
@@ -257,7 +257,7 @@ def record_time():
             flash(f'Chyba při ukládání pracovní doby: {str(e)}', 'error')
         return redirect(url_for('record_time'))
 
-    return render_template('record_time.html', 
+    return render_template('record_time.html',
                            current_date=datetime.now().strftime('%Y-%m-%d'),
                            start_time=settings['start_time'],
                            end_time=settings['end_time'],
@@ -288,9 +288,9 @@ def save_time():
 @app.route('/excel_viewer', methods=['GET'])
 def excel_viewer():
     try:
-        excel_dir = "/home/testuj/test/excel/"
+        excel_dir = "/home/Cowley/hodiny/excel/"
         excel_files = [f for f in os.listdir(excel_dir) if f.endswith('.xlsx')]
-        
+
         selected_file = request.args.get('file')
         if not selected_file or selected_file not in excel_files:
             selected_file = excel_files[0] if excel_files else None
@@ -324,11 +324,11 @@ def excel_viewer():
             data.append(row_data)
 
         workbook.close()
-        return render_template('excel_viewer.html', 
-                               excel_files=excel_files, 
+        return render_template('excel_viewer.html',
+                               excel_files=excel_files,
                                selected_file=selected_file,
-                               sheet_names=sheet_names, 
-                               active_sheet=active_sheet, 
+                               sheet_names=sheet_names,
+                               active_sheet=active_sheet,
                                data=data)
     except Exception as e:
         return f"Chyba při načítání Excel souboru: {e}"

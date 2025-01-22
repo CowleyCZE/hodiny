@@ -1,14 +1,25 @@
-﻿env/
-bin/
-obj/
-*.user
-*.suo
-*.log
-*.tmp
-*.pdb
-*.cache
-*.config
-*.csproj.user
-*.csproj.vspscc
-*.vscode/
-*.vs/
+﻿# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual environment
+venv/
+env/
+.env/
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+.vs/
+
+# System files
+.DS_Store
+Thumbs.db

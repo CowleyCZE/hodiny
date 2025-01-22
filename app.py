@@ -233,16 +233,6 @@ def manage_employees():
 
     return render_template('employees.html', employees=employees_data)
 
-    # Příprava dat pro šablonu
-    employees_data = []
-    for employee in sorted(employee_manager.zamestnanci):  # Seřazení podle abecedy
-        employees_data.append({
-            'name': employee,
-            'selected': employee in employee_manager.vybrani_zamestnanci
-        })
-
-    return render_template('employees.html', employees=employees_data)
-
 
 
 @app.route('/record_time', methods=['GET', 'POST'])

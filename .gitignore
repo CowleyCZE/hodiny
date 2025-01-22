@@ -1,10 +1,4 @@
-﻿# Ignorovat složku virtuálního prostředí
-env/
-
-# Ignorovat složku Visual Studio
-.vs/
-
-# Další běžné ignorované soubory a složky
+﻿env/
 bin/
 obj/
 *.user
@@ -17,3 +11,4 @@ obj/
 *.csproj.user
 *.csproj.vspscc
 *.vscode/
+*.vs/

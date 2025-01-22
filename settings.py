@@ -10,7 +10,7 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
 # Konstanty
-BASE_DIR = '/home/Cowley/hodiny
+BASE_DIR = '/home/Cowley/hodiny'
 DATA_PATH = os.path.join(BASE_DIR, 'data')
 SETTINGS_FILE_PATH = os.path.join(DATA_PATH, 'settings.json')
 EXCEL_BASE_PATH = os.path.join(BASE_DIR, 'excel')

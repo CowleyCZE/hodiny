@@ -11,21 +11,19 @@ build/
 # Virtual environment
 venv/
 env/
-.env/
-v17/
-
 
 # IDE specific files
 .vscode/
 .idea/
 *.swp
 *.swo
-*.xlsx
-.vs/
 
 # System files
 .DS_Store
 Thumbs.db
-.wsu0
-DocumentLayout.json
-VSWorkspaceState.json
+
+# Visual Studio specific files
+.vs/
+
+# Excel Files
+*.xlsx

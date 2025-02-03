@@ -35,7 +35,7 @@ excel_manager2024 = ExcelManager2024(EXCEL_BASE_PATH)
 # Načtení nastavení
 def load_settings():
     if os.path.exists(SETTINGS_FILE_PATH):
-        with open(SETTINGS_FILE_PATH, 'r') as f:
+        with open(SETTINGS_FILE_PATH, 'r', encoding='utf-8') as f:
             return json.load(f)
     else:
         return {
@@ -46,7 +46,7 @@ def load_settings():
 
 # Uložení nastavení
 def save_settings(settings):
-    with open(SETTINGS_FILE_PATH, 'w') as f:
+    with open(SETTINGS_FILE_PATH, 'w', encoding='utf-8') as f:
         json.dump(settings, f, indent=4, ensure_ascii=False)
 
 # Globální proměnná pro nastavení
@@ -252,10 +252,10 @@ def record_time():
         return redirect(url_for('record_time'))
 
     return render_template('record_time.html',
-                           current_date=datetime.now().strftime('%Y-%m-%d'),
-                           start_time=settings['start_time'],
-                           end_time=settings['end_time'],
-                           lunch_duration=settings['lunch_duration'])
+                            current_date=datetime.now().strftime('%Y-%m-%d'),
+                            start_time=settings['start_time'],
+                            end_time=settings['end_time'],
+                            lunch_duration=settings['lunch_duration'])
 
 @app.route('/save_time', methods=['POST'])
 def save_time():

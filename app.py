@@ -171,29 +171,69 @@ def send_email():
 def manage_employees():
     if request.method == 'POST':
         action = request.form.get('action')
+        
         if action == 'add':
             name = request.form.get('name')
-            if name and name not in employee_manager.zamestnanci:
-                success = employee_manager.pridat_zamestnance(name)
-                flash(f'Zaměstnanec {name} byl úspěšně přidán.', 'success' if success else 'error')
-        elif action == 'delete':
-            index = int(request.form.get('index')) - 1
-            if 0 <= index < len(employee_manager.zamestnanci):
-                employee_manager.zamestnanci.pop(index)
-                employee_manager.save_config()
-                flash('Zaměstnanec byl úspěšně odstraněn.', 'success')
+            if name:
+                if employee_manager.pridat_zamestnance(name):
+                    flash('Zaměstnanec byl úspěšně přidán.', 'success')
+                else:
+                    flash('Zaměstnanec již existuje.', 'error')
+        
         elif action == 'select':
             employee_name = request.form.get('employee_name')
-            if employee_name in employee_manager.zamestnanci:
-                if employee_name in employee_manager.vybrani_zamestnanci:
-                    employee_manager.odebrat_vybraneho_zamestnance(employee_name)
-                    flash(f'Zaměstnanec {employee_name} byl odebrán z výběru.', 'success')
-                else:
-                    employee_manager.pridat_vybraneho_zamestnance(employee_name)
-                    flash(f'Zaměstnanec {employee_name} byl přidán do výběru.', 'success')
+            for employee in employee_manager.zamestnanci:
+                if employee == employee_name:
+                    if employee in employee_manager.vybrani_zamestnanci:
+                        employee_manager.odebrat_vybraneho_zamestnance(employee)
+                        flash('Zaměstnanec byl odznačen.', 'success')
+                    else:
+                        employee_manager.pridat_vybraneho_zamestnance(employee)
+                        flash('Zaměstnanec byl označen.', 'success')
+        
+        elif action == 'edit':
+            old_name = request.form.get('old_name')
+            new_name = request.form.get('new_name')
+            if old_name and new_name:
+                # Najít index starého jména
+                try:
+                    index = employee_manager.zamestnanci.index(old_name) + 1
+                    if employee_manager.upravit_zamestnance(index, new_name):
+                        # Aktualizovat také ve vybraných zaměstnancích
+                        if old_name in employee_manager.vybrani_zamestnanci:
+                            employee_manager.vybrani_zamestnanci.remove(old_name)
+                            employee_manager.vybrani_zamestnanci.append(new_name)
+                        flash('Jméno zaměstnance bylo úspěšně upraveno.', 'success')
+                    else:
+                        flash('Nepodařilo se upravit jméno zaměstnance.', 'error')
+                except ValueError:
+                    flash('Zaměstnanec nebyl nalezen.', 'error')
+        
+        elif action == 'delete':
+            employee_name = request.form.get('employee_name')
+            if employee_name:
+                try:
+                    index = employee_manager.zamestnanci.index(employee_name) + 1
+                    if employee_manager.smazat_zamestnance(index):
+                        flash('Zaměstnanec byl úspěšně smazán.', 'success')
+                    else:
+                        flash('Nepodařilo se smazat zaměstnance.', 'error')
+                except ValueError:
+                    flash('Zaměstnanec nebyl nalezen.', 'error')
+        
+        return redirect(url_for('manage_employees'))
 
-    employees = [{"name": e, "selected": e in employee_manager.vybrani_zamestnanci} for e in employee_manager.zamestnanci]
-    return render_template('employees.html', employees=employees)
+    # Příprava dat pro šablonu
+    employees_data = []
+    for employee in sorted(employee_manager.zamestnanci):  # Seřazení podle abecedy
+        employees_data.append({
+            'name': employee,
+            'selected': employee in employee_manager.vybrani_zamestnanci
+        })
+
+    return render_template('employees.html', employees=employees_data)
+
+
 
 @app.route('/record_time', methods=['GET', 'POST'])
 def record_time():

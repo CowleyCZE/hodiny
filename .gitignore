@@ -1,19 +1,30 @@
-﻿# Ignorovat složku virtuálního prostředí
-env/
+﻿# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
 
-# Ignorovat složku Visual Studio
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual environment
+venv/
+env/
+.env/
+v17/
+
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo
 .vs/
 
-# Další běžné ignorované soubory a složky
-bin/
-obj/
-*.user
-*.suo
-*.log
-*.tmp
-*.pdb
-*.cache
-*.config
-*.csproj.user
-*.csproj.vspscc
-*.vscode/
+# System files
+.DS_Store
+Thumbs.db
+.wsu0
+DocumentLayout.json
+VSWorkspaceState.json

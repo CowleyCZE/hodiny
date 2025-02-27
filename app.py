@@ -225,12 +225,8 @@ def manage_employees():
         return redirect(url_for('manage_employees'))
 
     # Příprava dat pro šablonu
-    employees_data =
-    for employee in sorted(employee_manager.zamestnanci):  # Seřazení podle abecedy
-        employees_data.append({
-            'name': employee,
-            'selected': employee in employee_manager.vybrani_zamestnanci
-        })
+    employees_data = [{'name': employee, 'selected': employee in employee_manager.vybrani_zamestnanci} 
+                      for employee in sorted(employee_manager.zamestnanci)]
 
     return render_template('employees.html', employees=employees_data)
 

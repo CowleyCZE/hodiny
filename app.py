@@ -31,8 +31,7 @@ RECIPIENT_EMAIL = 'cowleyy@gmail.com'
 # Inicializace manažerů
 employee_manager = EmployeeManager(DATA_PATH)
 excel_manager = ExcelManager(EXCEL_BASE_PATH, EXCEL_FILE_NAME)  # Předání názvu souboru
-excel_manager2024 = ExcelManager2024(EXCEL_BASE_PATH, EXCEL_FILE_NAME_2024)  # Předání názvu souboru
-
+excel_manager2024 = ExcelManager2024(os.path.join(EXCEL_BASE_PATH, EXCEL_FILE_NAME_2024))
 # Načtení nastavení
 def load_settings():
     if os.path.exists(SETTINGS_FILE_PATH):
@@ -284,7 +283,7 @@ def excel_viewer():
 
         selected_file = request.args.get('file')
         if not selected_file or selected_file not in excel_files:
-            selected_file = excel_files if excel_files else None
+            selected_file = excel_files[0] if excel_files else None
 
         if not selected_file:
             return "Žádné Excel soubory nebyly nalezeny."
@@ -292,15 +291,15 @@ def excel_viewer():
         file_path = os.path.join(excel_dir, selected_file)
         workbook = load_workbook(file_path, data_only=True)
         sheet_names = workbook.sheetnames
-        active_sheet = request.args.get('sheet', sheet_names)
+        active_sheet = request.args.get('sheet', sheet_names[0])
 
         if active_sheet not in sheet_names:
             raise ValueError("Neplatný název listu")
 
         sheet = workbook[active_sheet]
-        data =
+        data = []
         for row in sheet.iter_rows():
-            row_data =
+            row_data = []
             for cell in row:
                 value = cell.value
                 if value is None:

@@ -22,7 +22,7 @@ class ExcelManager:
         try:
             if not os.path.exists(self.base_path):
                 os.makedirs(self.base_path)
-            
+
             if os.path.exists(self.file_path):
                 workbook = load_workbook(self.file_path)
             else:
@@ -101,7 +101,7 @@ class ExcelManager:
             name, ext = os.path.splitext(original_filename)
             new_filename = f"{name}_Tyden_{last_week}{ext}"
             new_filepath = os.path.join(original_dir, new_filename)
-        
+
             if os.path.exists(self.file_path):
                 shutil.copy(self.file_path, new_filepath)
                 logging.info(f"Vytvořena týdenní kopie: {new_filepath}")
@@ -116,7 +116,7 @@ class ExcelManager:
     def get_last_week_number(self):
         try:
             workbook = self._load_or_create_workbook()
-            week_numbers =
+            week_numbers = []
             for sheet_name in workbook.sheetnames:
                 match = re.search(r'Týden (\d+)', sheet_name)
                 if match:
@@ -135,23 +135,23 @@ class ExcelManager:
     def update_project_info(self, project_name, start_date, end_date=None):
         try:
             workbook = self._load_or_create_workbook()
-            
+
             # Nastavíme název projektu pro použití v ulozit_pracovni_dobu
             self.set_project_name(project_name)
-            
+
             if 'Zálohy' not in workbook.sheetnames:
                 workbook.create_sheet('Zálohy')
-            
+
             zalohy_sheet = workbook['Zálohy']
             zalohy_sheet['A79'] = project_name
-            
+
             start_date_obj = datetime.strptime(start_date, '%Y-%m-%d')
             zalohy_sheet['C81'] = start_date_obj.strftime('%d.%m.%y')
-            
+
             if end_date:
                 end_date_obj = datetime.strptime(end_date, '%Y-%m-%d')
                 zalohy_sheet['D81'] = end_date_obj.strftime('%d.%m.%y')
-                
+
             workbook.save(self.file_path)
             logging.info(f"Aktualizovány informace o projektu: {project_name}")
             return True
@@ -161,7 +161,7 @@ class ExcelManager:
 
     def get_advance_options(self):
         workbook = self._load_or_create_workbook()
-        options =
+        options = []
 
         if 'Zálohy' in workbook.sheetnames:
             zalohy_sheet = workbook['Zálohy']
@@ -174,7 +174,7 @@ class ExcelManager:
     def save_advance(self, employee_name, amount, currency, option, date):
         try:
             workbook = self._load_or_create_workbook()
-            
+
             if 'Zálohy' not in workbook.sheetnames:
                 sheet = workbook.create_sheet('Zálohy')
                 sheet['B80'] = 'Option 1'
@@ -204,7 +204,7 @@ class ExcelManager:
             current_value = sheet[f'{column}{row}'].value
             if current_value is None:
                 current_value = 0
-            
+
             sheet[f'{column}{row}'] = current_value + float(amount)
 
             # Přidání data zálohy
@@ -212,10 +212,10 @@ class ExcelManager:
             sheet.cell(row=row, column=date_column, value=datetime.strptime(date, '%Y-%m-%d').date())
 
             workbook.save(self.file_path)
-            
+
             logging.info(f"Úspěšně uložena záloha pro {employee_name}: {amount} {currency}")
             return True
-            
+
         except Exception as e:
             logging.error(f"Chyba při ukládání zálohy: {str(e)}")
             return False

@@ -8,9 +8,9 @@ from openpyxl import load_workbook, Workbook
 from openpyxl.worksheet.copier import WorksheetCopy
 
 class ExcelManager:
-    def __init__(self, base_path):
+    def __init__(self, base_path, excel_file_name):
         self.base_path = base_path
-        self.file_path = os.path.join(self.base_path, 'Hodiny_Cap.xlsx')
+        self.file_path = os.path.join(self.base_path, excel_file_name)
         self.current_project_name = None
 
     def set_project_name(self, project_name):
@@ -35,7 +35,7 @@ class ExcelManager:
 
     def ziskej_cislo_tydne(self, datum):
         datum_objekt = datetime.strptime(datum, '%Y-%m-%d').date()
-        return datum_objekt.isocalendar()[1]
+        return datum_objekt.isocalendar()
 
     def ulozit_pracovni_dobu(self, date, start_time, end_time, lunch_duration, employees):
         try:
@@ -116,7 +116,7 @@ class ExcelManager:
     def get_last_week_number(self):
         try:
             workbook = self._load_or_create_workbook()
-            week_numbers = []
+            week_numbers =
             for sheet_name in workbook.sheetnames:
                 match = re.search(r'Týden (\d+)', sheet_name)
                 if match:
@@ -161,7 +161,7 @@ class ExcelManager:
 
     def get_advance_options(self):
         workbook = self._load_or_create_workbook()
-        options = []
+        options =
 
         if 'Zálohy' in workbook.sheetnames:
             zalohy_sheet = workbook['Zálohy']
@@ -171,7 +171,7 @@ class ExcelManager:
 
         return options
 
-    def save_advance(self, employee_name, amount, currency, option):
+    def save_advance(self, employee_name, amount, currency, option, date):
         try:
             workbook = self._load_or_create_workbook()
             
@@ -206,6 +206,11 @@ class ExcelManager:
                 current_value = 0
             
             sheet[f'{column}{row}'] = current_value + float(amount)
+
+            # Přidání data zálohy
+            date_column = 26  # Předpokládáme, že datum bude v sloupci Z
+            sheet.cell(row=row, column=date_column, value=datetime.strptime(date, '%Y-%m-%d').date())
+
             workbook.save(self.file_path)
             
             logging.info(f"Úspěšně uložena záloha pro {employee_name}: {amount} {currency}")

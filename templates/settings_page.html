@@ -28,28 +28,28 @@
             <h2>Data Projektu</h2>
             <div class="form-group">
                 <label for="project_name">Název projektu:</label>
-                <input type="text" name="project_name" value="{{ settings.project_name if settings.project_name else '' }}" class="form-control" required>
+                <input type="text" name="project_name" value="{{ settings.project_info.name if settings.project_info.name else '' }}" class="form-control" required>
             </div>
             <div class="form-group">
                 <label for="start_date">Začátek projektu:</label>
-                <input type="date" name="start_date" value="{{ settings.start_date if settings.start_date else '' }}" class="form-control" required>
+                <input type="date" name="start_date" value="{{ settings.project_info.start_date if settings.project_info.start_date else '' }}" class="form-control" required>
             </div>
             <div class="form-group">
                 <label for="end_date">Konec projektu:</label>
-                <input type="date" name="end_date" value="{{ settings.end_date if settings.end_date else '' }}" class="form-control" required>
+                <input type="date" name="end_date" value="{{ settings.project_info.end_date if settings.project_info.end_date else '' }}" class="form-control" required>
             </div>
 
             <h2>Přednastavené časy</h2>
             <label for="start_time">Čas začátku:</label>
-            <input type="text" id="start_time" name="start_time" class="timepicker" required>
+            <input type="text" id="start_time" name="start_time" class="timepicker" value="{{ settings.start_time }}" required>
             <br><br>
 
             <label for="end_time">Čas konce:</label>
-            <input type="text" id="end_time" name="end_time" class="timepicker" required>
+            <input type="text" id="end_time" name="end_time" class="timepicker" value="{{ settings.end_time }}" required>
             <br><br>
 
             <label for="lunch_duration">Délka oběda (v hodinách):</label>
-            <input type="number" id="lunch_duration" name="lunch_duration" step="0.25" min="0" max="4" required>
+            <input type="number" id="lunch_duration" name="lunch_duration" step="0.25" min="0" max="4" value="{{ settings.lunch_duration }}" required>
             <br><br>
 
             <button type="submit" class="btn btn-primary">Uložit nastavení</button>

@@ -4,8 +4,9 @@ from datetime import datetime
 import calendar
 
 class ExcelManager2024:
-    def __init__(self, file_path):
-        self.file_path = file_path
+    def __init__(self, base_path):
+        self.base_path = base_path
+        self.file_path = os.path.join(self.base_path, 'Hodiny2024.xlsx')  # Opravena cesta k souboru
 
     def ulozit_pracovni_dobu(self, date, start_time, end_time, lunch_duration):
         workbook = self._load_or_create_workbook()
@@ -14,11 +15,12 @@ class ExcelManager2024:
 
         # Zápis dat
         row = self._find_row_for_date(sheet, date)
-        sheet.cell(row=row, column=5, value=start_time)  # Sloupec E
-        sheet.cell(row=row, column=6, value=lunch_duration)     # Sloupec F
-        sheet.cell(row=row, column=7, value=end_time)    # Sloupec G
+        if row:  # Kontrola, zda byl nalezen řádek pro dané datum
+            sheet.cell(row=row, column=5, value=start_time)  # Sloupec E
+            sheet.cell(row=row, column=6, value=lunch_duration)     # Sloupec F
+            sheet.cell(row=row, column=7, value=end_time)    # Sloupec G
 
-        workbook.save(self.file_path)
+            workbook.save(self.file_path)
 
     def _load_or_create_workbook(self):
         if os.path.exists(self.file_path):
@@ -72,4 +74,15 @@ class ExcelManager2024:
             cell_value = sheet.cell(row=row, column=1).value
             if isinstance(cell_value, datetime) and cell_value.date() == date_obj.date():
                 return row
-        return None
+        return None  # Vrácení None, pokud řádek pro dané datum neexistuje
+
+    def update_project_info(self, project_name, start_date, end_date):
+        workbook = self._load_or_create_workbook()
+        sheet = workbook.active
+
+        # Zápis informací o projektu
+        sheet['A1'] = project_name
+        sheet['A2'] = start_date
+        sheet['A3'] = end_date
+
+        workbook.save(self.file_path)

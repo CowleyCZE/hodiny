@@ -23,15 +23,16 @@ app.secret_key = 'your_secret_key'
 # Konstanty
 DATA_PATH = '/home/Cowley/hodiny/data'
 EXCEL_BASE_PATH = '/home/Cowley/hodiny/excel'
-EXCEL_FILE_NAME = 'Hodiny_Cap.xlsx'
-EXCEL_FILE_NAME = 'Hodiny2024.xlsx'
+EXCEL_FILE_NAME = 'Hodiny_Cap.xlsx'  # Původní název souboru
+EXCEL_FILE_NAME_2024 = 'Hodiny2024.xlsx'  # Nový název souboru pro rok 2024
 SETTINGS_FILE_PATH = 'settings.json'
 RECIPIENT_EMAIL = 'cowleyy@gmail.com'
 
 # Inicializace manažerů
 employee_manager = EmployeeManager(DATA_PATH)
-excel_manager = ExcelManager(EXCEL_BASE_PATH)
-excel_manager2024 = ExcelManager2024(EXCEL_BASE_PATH)
+excel_manager = ExcelManager(EXCEL_BASE_PATH, EXCEL_FILE_NAME)  # Předání názvu souboru
+excel_manager2024 = ExcelManager2024(EXCEL_BASE_PATH, EXCEL_FILE_NAME_2024)  # Předání názvu souboru
+
 # Načtení nastavení
 def load_settings():
     if os.path.exists(SETTINGS_FILE_PATH):
@@ -108,7 +109,7 @@ def download_file():
 
         def safe_week_number(sheet_name):
             try:
-                return int(sheet_name.split()[1])
+                return int(sheet_name.split())
             except (IndexError, ValueError):
                 return -1  # Vrátí -1 pro neplatné názvy
 
@@ -121,7 +122,7 @@ def download_file():
 
         logging.info(f"Vytvářím kopii souboru: {new_file_path}")
         # Uložení kopie souboru s novým názvem
-        shutil.copy2(original_file_path, new_file_path)
+        shutil.copy2(original_path, new_file_path)
 
         # Odeslání souboru uživateli ke stažení
         logging.info(f"Odesílám soubor ke stažení: {new_file_name}")
@@ -224,7 +225,7 @@ def manage_employees():
         return redirect(url_for('manage_employees'))
 
     # Příprava dat pro šablonu
-    employees_data = []
+    employees_data =
     for employee in sorted(employee_manager.zamestnanci):  # Seřazení podle abecedy
         employees_data.append({
             'name': employee,
@@ -287,7 +288,7 @@ def excel_viewer():
 
         selected_file = request.args.get('file')
         if not selected_file or selected_file not in excel_files:
-            selected_file = excel_files[0] if excel_files else None
+            selected_file = excel_files if excel_files else None
 
         if not selected_file:
             return "Žádné Excel soubory nebyly nalezeny."
@@ -295,15 +296,15 @@ def excel_viewer():
         file_path = os.path.join(excel_dir, selected_file)
         workbook = load_workbook(file_path, data_only=True)
         sheet_names = workbook.sheetnames
-        active_sheet = request.args.get('sheet', sheet_names[0])
+        active_sheet = request.args.get('sheet', sheet_names)
 
         if active_sheet not in sheet_names:
             raise ValueError("Neplatný název listu")
 
         sheet = workbook[active_sheet]
-        data = []
+        data =
         for row in sheet.iter_rows():
-            row_data = []
+            row_data =
             for cell in row:
                 value = cell.value
                 if value is None:
@@ -361,7 +362,7 @@ def zalohy():
         date = request.form['date']
 
         try:
-            excel_manager.save_advance(employee_name, amount, currency, option)
+            excel_manager.save_advance(employee_name, amount, currency, option, date)
             flash('Záloha byla úspěšně uložena.', 'success')
         except Exception as e:
             flash(f'Chyba při ukládání zálohy: {str(e)}', 'error')
@@ -373,4 +374,6 @@ def zalohy():
     return render_template('zalohy.html', employees=employees, options=options, current_date=current_date)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    logging.basicConfig(level=logging.INFO, filename='app.log', filemode='a',
+                        format='%(asctime)s - %(levelname)s - %(message)s')
+    app.run(debug=True, host='0.0.0.0')

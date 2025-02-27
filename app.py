@@ -4,6 +4,7 @@ from datetime import datetime
 from openpyxl import load_workbook
 from openpyxl.utils.exceptions import InvalidFileException
 import os
+import re
 import json
 import logging
 import shutil
@@ -108,8 +109,13 @@ def download_file():
 
         def safe_week_number(sheet_name):
             try:
-                return int(sheet_name.split())
-            except (IndexError, ValueError):
+                # Nalezení čísla v názvu listu pomocí regulárního výrazu
+                match = re.search(r'\d+', sheet_name)
+                if match:
+                    return int(match.group())
+                else:
+                    return 0  # Nebo jiná výchozí hodnota, pokud číslo není nalezeno
+            except ValueError:
                 return -1  # Vrátí -1 pro neplatné názvy
 
         highest_week_sheet = max(week_sheets, key=safe_week_number)
@@ -121,8 +127,8 @@ def download_file():
 
         logging.info(f"Vytvářím kopii souboru: {new_file_path}")
         # Uložení kopie souboru s novým názvem
+        original_path = os.path.join(EXCEL_BASE_PATH, EXCEL_FILE_NAME)  # Definování original_path
         shutil.copy2(original_path, new_file_path)
-
         # Odeslání souboru uživateli ke stažení
         logging.info(f"Odesílám soubor ke stažení: {new_file_name}")
         return send_file(new_file_path, as_attachment=True, download_name=new_file_name)

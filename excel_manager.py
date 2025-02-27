@@ -40,7 +40,13 @@ class ExcelManager:
     def ulozit_pracovni_dobu(self, date, start_time, end_time, lunch_duration, employees):
         try:
             workbook = self._load_or_create_workbook()
+
+            # Získání čísla týdne z datumu
             week_number = self.ziskej_cislo_tydne(date)
+
+            # Extrahování čísla týdne z isocalendar()
+            week_number = week_number.week  # Přidáno .week
+
             sheet_name = f"Týden {week_number}"
 
             if sheet_name not in workbook.sheetnames:
@@ -64,11 +70,24 @@ class ExcelManager:
             sheet[f"{day_column}7"] = start_time
             sheet[f"{chr(ord(day_column)+1)}7"] = end_time
 
-            row = 9
+            # Najdeme řádky pro všechny zaměstnance v listu
+            employee_rows = {}
+            for row in range(9, sheet.max_row + 1):
+                employee_name = sheet.cell(row=row, column=1).value
+                if employee_name:
+                    employee_rows[employee_name] = row
+
+            # Uložíme pracovní dobu pro označené zaměstnance
             for employee in employees:
-                sheet[f"A{row}"] = employee
-                sheet[f"{day_column}{row}"] = total_hours
-                row += 1
+                if employee in employee_rows:
+                    row = employee_rows[employee]
+                    sheet[f"{day_column}{row}"] = total_hours
+                else:
+                    # Pokud zaměstnanec není v listu, přidáme ho na konec
+                    new_row = sheet.max_row + 1
+                    sheet[f"A{new_row}"] = employee
+                    sheet[f"{day_column}{new_row}"] = total_hours
+                    employee_rows[employee] = new_row
 
             sheet[f"{day_column}8"] = total_hours
             sheet[f"{day_column}80"] = date

@@ -172,7 +172,7 @@ def send_email():
 def manage_employees():
     if request.method == 'POST':
         action = request.form.get('action')
-        
+
         if action == 'add':
             name = request.form.get('name')
             if name:
@@ -180,7 +180,7 @@ def manage_employees():
                     flash('Zaměstnanec byl úspěšně přidán.', 'success')
                 else:
                     flash('Zaměstnanec již existuje.', 'error')
-        
+
         elif action == 'select':
             employee_name = request.form.get('employee_name')
             for employee in employee_manager.zamestnanci:
@@ -191,7 +191,7 @@ def manage_employees():
                     else:
                         employee_manager.pridat_vybraneho_zamestnance(employee)
                         flash('Zaměstnanec byl označen.', 'success')
-        
+
         elif action == 'edit':
             old_name = request.form.get('old_name')
             new_name = request.form.get('new_name')
@@ -209,7 +209,7 @@ def manage_employees():
                         flash('Nepodařilo se upravit jméno zaměstnance.', 'error')
                 except ValueError:
                     flash('Zaměstnanec nebyl nalezen.', 'error')
-        
+
         elif action == 'delete':
             employee_name = request.form.get('employee_name')
             if employee_name:
@@ -221,11 +221,11 @@ def manage_employees():
                         flash('Nepodařilo se smazat zaměstnance.', 'error')
                 except ValueError:
                     flash('Zaměstnanec nebyl nalezen.', 'error')
-        
+
         return redirect(url_for('manage_employees'))
 
     # Příprava dat pro šablonu
-    employees_data = [{'name': employee, 'selected': employee in employee_manager.vybrani_zamestnanci} 
+    employees_data = [{'name': employee, 'selected': employee in employee_manager.vybrani_zamestnanci}
                       for employee in sorted(employee_manager.zamestnanci)]
 
     return render_template('employees.html', employees=employees_data)

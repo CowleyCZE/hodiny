@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prohlížeč Excel souborů</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> 
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <header>
-        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo"> 
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
     </header>
 
     <nav class="nav">
@@ -16,13 +16,13 @@
         <a href="{{ url_for('manage_employees') }}">Zaměstnanci</a>
         <a href="{{ url_for('record_time') }}">Záznam pracovní doby</a>
         <a href="{{ url_for('zalohy') }}">Zálohy</a>
-        <a href="{{ url_for('excel_viewer') }}">Tabulka</a> 
+        <a href="{{ url_for('excel_viewer') }}">Tabulka</a>
         <a href="{{ url_for('settings_page') }}">Nastavení</a>
     </nav>
 
-    <main class="main"> 
+    <main class="main">
         <h1>Prohlížeč Excel souborů</h1>
-    
+
         <form method="GET" action="{{ url_for('excel_viewer') }}">
             <label for="file">Vyberte soubor:</label>
             <select name="file" id="file" onchange="this.form.submit()">
@@ -31,7 +31,7 @@
                 {% endfor %}
             </select>
         </form>
-    
+
         {% if selected_file %}
             <form method="GET" action="{{ url_for('excel_viewer') }}">
                 <input type="hidden" name="file" value="{{ selected_file }}">
@@ -42,31 +42,31 @@
                     {% endfor %}
                 </select>
             </form>
-    
-            <h2>{{ selected_file }} - {{ active_sheet }}</h2> 
+
+            <h2>{{ selected_file }} - {{ active_sheet }}</h2>
             <table>
-            <thead>
-                <tr>
-                    {% for header in data %}
-                        <th>{{ header }}</th>
-                    {% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in data[1:] %}
+                <thead>
                     <tr>
-                        {% for cell in row %}
-                            <td>{{ cell }}</td>
+                        {% for header in data[0] %}
+                            <th>{{ header }}</th>
                         {% endfor %}
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>   
+                </thead>
+                <tbody>
+                    {% for row in data[1:] %}
+                        <tr>
+                            {% for cell in row %}
+                                <td>{{ cell }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         {% endif %}
-    </main> 
+    </main>
 
-    <footer> 
-        <p>&copy; 2024 Evidence pracovní doby</p> 
+    <footer>
+        <p>&copy; 2024 Evidence pracovní doby</p>
     </footer>
 </body>
 </html>

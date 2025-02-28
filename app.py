@@ -287,9 +287,13 @@ def excel_viewer():
         excel_dir = "/home/Cowley/hodiny/excel/"
         excel_files = [f for f in os.listdir(excel_dir) if f.endswith('.xlsx')]
 
-        selected_file = request.args.get('file')
-        if not selected_file or selected_file not in excel_files:
-            selected_file = excel_files[0] if excel_files else None
+        # Upřednostnění "Hodiny_Cap.xlsx"
+        if 'Hodiny_Cap.xlsx' in excel_files:
+            selected_file = 'Hodiny_Cap.xlsx'
+        else:
+            selected_file = request.args.get('file')
+            if not selected_file or selected_file not in excel_files:
+                selected_file = excel_files[0] if excel_files else None
 
         if not selected_file:
             return "Žádné Excel soubory nebyly nalezeny."
@@ -297,6 +301,7 @@ def excel_viewer():
         file_path = os.path.join(excel_dir, selected_file)
         workbook = load_workbook(file_path, data_only=True)
         sheet_names = workbook.sheetnames
+
         active_sheet = request.args.get('sheet', sheet_names[0])
 
         if active_sheet not in sheet_names:

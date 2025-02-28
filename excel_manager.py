@@ -33,6 +33,20 @@ class ExcelManager:
             logging.error(f"Chyba při načítání nebo vytváření Excel souboru: {e}")
             raise
 
+    def _load_or_create_workbook_2025(self):
+        """Načte nebo vytvoří sešit Hodiny2025.xlsx"""
+        file_path_2025 = os.path.join(self.base_path, 'Hodiny2025.xlsx')
+        try:
+            if os.path.exists(file_path_2025):
+                workbook = load_workbook(file_path_2025)
+            else:
+                workbook = Workbook()
+                workbook.save(file_path_2025)
+            return workbook
+        except Exception as e:
+            logging.error(f"Chyba při načítání nebo vytváření Excel souboru Hodiny2025.xlsx: {e}")
+            raise
+
     def ziskej_cislo_tydne(self, datum):
         datum_objekt = datetime.strptime(datum, '%Y-%m-%d').date()
         return datum_objekt.isocalendar()
@@ -193,7 +207,9 @@ class ExcelManager:
     def save_advance(self, employee_name, amount, currency, option, date):
         try:
             workbook = self._load_or_create_workbook()
+            workbook_2025 = self._load_or_create_workbook_2025()  # Načtení druhého sešitu
 
+            # --- Uložení do Hodiny_Cap.xlsx (původní logika) ---
             if 'Zálohy' not in workbook.sheetnames:
                 sheet = workbook.create_sheet('Zálohy')
                 sheet['B80'] = 'Option 1'
@@ -229,8 +245,16 @@ class ExcelManager:
             # Přidání data zálohy
             date_column = 26  # Předpokládáme, že datum bude v sloupci Z
             sheet.cell(row=row, column=date_column, value=datetime.strptime(date, '%Y-%m-%d').date())
+            # --- Konec ukládání do Hodiny_Cap.xlsx ---
+
+            # Uložení do Hodiny2025.xlsx - list "Zalohy25"
+            self._save_advance_zalohy25(workbook_2025, employee_name, amount, currency, date)
+
+            # Uložení do Hodiny2025.xlsx - list "(pp)cash25"
+            self._save_advance_cash25(workbook_2025, employee_name, amount, currency, date)
 
             workbook.save(self.file_path)
+            workbook_2025.save(os.path.join(self.base_path, 'Hodiny2025.xlsx'))  # Uložení druhého sešitu
 
             logging.info(f"Úspěšně uložena záloha pro {employee_name}: {amount} {currency}")
             return True
@@ -238,6 +262,80 @@ class ExcelManager:
         except Exception as e:
             logging.error(f"Chyba při ukládání zálohy: {str(e)}")
             return False
+
+    def _save_advance_zalohy25(self, workbook, employee_name, amount, currency, date):
+        if 'Zalohy25' not in workbook.sheetnames:
+            workbook.create_sheet('Zalohy25')
+        sheet = workbook['Zalohy25']
+
+        # Hledání řádku pro zaměstnance
+        row = 3  # Začínáme od řádku 3
+        found = False
+        while sheet.cell(row=row, column=1).value:
+            if sheet.cell(row=row, column=1).value == employee_name:
+                found = True
+                break
+            row += 1
+
+        if not found:
+            # Nový zaměstnanec
+            sheet.cell(row=row, column=1).value = employee_name
+
+        # Datum
+        date_obj = datetime.strptime(date, '%Y-%m-%d').date()
+        min_date = sheet.cell(row=row, column=2).value
+        max_date = sheet.cell(row=row, column=3).value
+        if min_date is None or date_obj < min_date:
+            sheet.cell(row=row, column=2).value = date_obj
+        if max_date is None or date_obj > max_date:
+            sheet.cell(row=row, column=3).value = date_obj
+
+        # Částka
+        eur_column = 4
+        czk_column = 5
+        if currency == 'EUR':
+            current_eur = sheet.cell(row=row, column=eur_column).value or 0
+            sheet.cell(row=row, column=eur_column).value = current_eur + amount
+        elif currency == 'CZK':
+            current_czk = sheet.cell(row=row, column=czk_column).value or 0
+            sheet.cell(row=row, column=czk_column).value = current_czk + amount
+
+    def _save_advance_cash25(self, workbook, employee_name, amount, currency, date):
+        if '(pp)cash25' not in workbook.sheetnames:
+            workbook.create_sheet('(pp)cash25')
+        sheet = workbook['(pp)cash25']
+
+        # Hledání buňky se jménem zaměstnance nebo "SloupecN"
+        row = 1
+        col = 1
+        found = False
+        while col < sheet.max_column + 1:
+            row = 1
+            while row < sheet.max_row + 1:
+                cell_value = sheet.cell(row=row, column=col).value
+                if cell_value == employee_name or cell_value == f"Sloupec{col}":
+                    found = True
+                    break
+                row += 1
+            if found:
+                break
+            col += 1
+
+        if not found:
+            # Pokud není nalezen ani zaměstnanec ani "SloupecN", použijeme další sloupec
+            col += 1
+            sheet.cell(row=1, column=col).value = employee_name
+
+        # Zápis dat
+        row = self._get_next_empty_row_in_column(sheet, col)
+        sheet.cell(row=row, column=col).value = amount
+        sheet.cell(row=row, column=col + 1).value = datetime.strptime(date, '%Y-%m-%d').date()
+
+    def _get_next_empty_row_in_column(self, sheet, col):
+        row = 1
+        while sheet.cell(row=row, column=col).value is not None:
+            row += 1
+        return row
 
 if __name__ == "__main__":
     # Test ukládání zálohy

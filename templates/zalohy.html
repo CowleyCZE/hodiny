@@ -66,6 +66,37 @@
                 </ul>
             {% endif %}
         {% endwith %}
+
+        <h2>Historie záloh</h2>
+
+        <form method="GET" action="{{ url_for('zalohy') }}">
+            <label for="filter_employee">Zaměstnanec:</label>
+            <input type="text" name="filter_employee" id="filter_employee">
+            <button type="submit">Filtrovat</button>
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Zaměstnanec</th>
+                    <th>Částka</th>
+                    <th>Měna</th>
+                    <th>Možnost</th>
+                    <th>Datum</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for advance in advance_history %}
+                    <tr>
+                        <td>{{ advance.employee_name }}</td>
+                        <td>{{ advance.amount }}</td>
+                        <td>{{ advance.currency }}</td>
+                        <td>{{ advance.option }}</td>
+                        <td>{{ advance.date }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </main>
 
     <footer>

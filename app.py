@@ -120,24 +120,41 @@ def manage_employees():
                 flash(f'Zaměstnanec "{employee_name}" už existuje.', 'error')
         elif action == 'select':
             employee_name = request.form['employee_name']
-            employee_manager.oznacit_zamestnance(employee_name)
+            if employee_name in employee_manager.zamestnanci:
+                if employee_name in employee_manager.vybrani_zamestnanci:
+                    employee_manager.odebrat_vybraneho_zamestnance(employee_name)
+                else:
+                    employee_manager.pridat_vybraneho_zamestnance(employee_name)
+                employee_manager.save_config()
         elif action == 'edit':
             old_name = request.form['old_name']
             new_name = request.form['new_name']
-            if employee_manager.upravit_zamestnance(old_name, new_name):
-                flash(f'Zaměstnanec "{old_name}" byl upraven na "{new_name}".', 'success')
-            else:
-                flash(f'Nepodařilo se upravit zaměstnance "{old_name}".', 'error')
+            try:
+                idx = employee_manager.zamestnanci.index(old_name) + 1
+                if employee_manager.upravit_zamestnance(idx, new_name):
+                    flash(f'Zaměstnanec "{old_name}" byl upraven na "{new_name}".', 'success')
+                else:
+                    flash(f'Nepodařilo se upravit zaměstnance "{old_name}".', 'error')
+            except ValueError:
+                flash(f'Zaměstnanec "{old_name}" nebyl nalezen.', 'error')
         elif action == 'delete':
             employee_name = request.form['employee_name']
-            if employee_manager.smazat_zamestnance(employee_name):
-                flash(f'Zaměstnanec "{employee_name}" byl smazán.', 'success')
-            else:
-                flash(f'Nepodařilo se smazat zaměstnance "{employee_name}".', 'error')
+            try:
+                idx = employee_manager.zamestnanci.index(employee_name) + 1
+                if employee_manager.smazat_zamestnance(idx):
+                    flash(f'Zaměstnanec "{employee_name}" byl smazán.', 'success')
+                else:
+                    flash(f'Nepodařilo se smazat zaměstnance "{employee_name}".', 'error')
+            except ValueError:
+                flash(f'Zaměstnanec "{employee_name}" nebyl nalezen.', 'error')
         else:
             flash('Neplatná akce.', 'error')
 
-    employees = employee_manager.zamestnanci
+    # Převedení seznamů na formát očekávaný šablonou
+    employees = [
+        {'name': name, 'selected': name in employee_manager.vybrani_zamestnanci}
+        for name in employee_manager.zamestnanci
+    ]
     return render_template('employees.html', employees=employees)
 
 @app.route('/zaznam', methods=['GET', 'POST'])

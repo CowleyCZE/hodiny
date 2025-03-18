@@ -13,20 +13,21 @@ from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 import smtplib
 import openpyxl
+from config import Config
 
 from employee_management import EmployeeManager
 from excel_manager import ExcelManager
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
+app.secret_key = Config.SECRET_KEY
 
 # Konstanty
-DATA_PATH = '/home/Cowley/hodiny/data'
-EXCEL_BASE_PATH = '/home/Cowley/hodiny/excel'
-EXCEL_FILE_NAME = 'Hodiny_Cap.xlsx'
-EXCEL_FILE_NAME_2025 = 'Hodiny2025.xlsx'
-SETTINGS_FILE_PATH = '/home/Cowley/hodiny/data/settings.json'
-RECIPIENT_EMAIL = 'cowleyy@gmail.com'
+DATA_PATH = Config.DATA_PATH
+EXCEL_BASE_PATH = Config.EXCEL_BASE_PATH 
+EXCEL_FILE_NAME = Config.EXCEL_FILE_NAME
+EXCEL_FILE_NAME_2025 = Config.EXCEL_FILE_NAME_2025
+SETTINGS_FILE_PATH = Config.SETTINGS_FILE_PATH
+RECIPIENT_EMAIL = Config.RECIPIENT_EMAIL
 
 def load_settings():
     """Načtení nastavení ze souboru JSON."""
@@ -89,7 +90,7 @@ def send_email():
     try:
         msg = MIMEMultipart()
         msg['Subject'] = 'Hodiny_Cap.xlsx'
-        msg['From'] = 'vas_email@example.com'  # Zadejte váš email
+        msg['From'] = Config.SMTP_USERNAME
         msg['To'] = RECIPIENT_EMAIL
 
         with open(excel_manager.file_path, 'rb') as f:
@@ -97,8 +98,8 @@ def send_email():
             attachment.add_header('Content-Disposition', 'attachment', filename=EXCEL_FILE_NAME)
             msg.attach(attachment)
 
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-            smtp.login('vas_email@example.com', 'vase_heslo')  # Zadejte váš email a heslo
+        with smtplib.SMTP_SSL(Config.SMTP_SERVER, Config.SMTP_PORT) as smtp:
+            smtp.login(Config.SMTP_USERNAME, Config.SMTP_PASSWORD)
             smtp.send_message(msg)
 
         flash('Email byl odeslán.', 'success')

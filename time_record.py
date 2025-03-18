@@ -105,33 +105,6 @@ class TimeRecord:
             logging.error(f"Nepodařilo se uložit záznam: {e}")
         return
 
-    def ulozit_zaznam(self):
-        if not hasattr(self, 'vybrane_datum') or not hasattr(self, 'zacatek') or not hasattr(self, 'konec') or not hasattr(self, 'obed'):
-            messagebox.showerror("Chyba", "Nejsou zadány všechny potřebné údaje.")
-            logging.error("Nejsou zadány všechny potřebné údaje.")
-            return
-
-        try:
-            datum = self.vybrane_datum.strftime('%Y-%m-%d')
-
-            if not (datum and self.zacatek and self.konec and self.obed):
-                logging.error("Nejsou předány platné parametry pro uložení.")
-                messagebox.showerror("Chyba", "Chybí některý z údajů.")
-                return
-
-            logging.info("Pokus o uložení pracovní doby.")
-            self.excel_manager.ulozit_pracovni_dobu(
-                datum, self.zacatek, self.konec, self.obed, self.employee_manager.vybrani_zamestnanci
-            )
-            messagebox.showinfo("Uloženo", "Záznam byl úspěšně uložen do Excel souboru.")
-            logging.info(f"Úspěšně uloženo: Datum {datum}, Začátek {self.zacatek}, Konec {self.konec}, Oběd {self.obed}")
-        except Exception as e:
-            messagebox.showerror("Chyba", f"Nepodařilo se uložit záznam: {e}")
-            logging.error(f"Nepodařilo se uložit záznam: {e}")
-        messagebox.showerror("Chyba", f"Nepodařilo se uložit záznam: {e}")
-        logging.error(f"Nepodařilo se uložit záznam: {e}")
-
-
 class EmployeeManager:
     def __init__(self, employees_file):
         self.employees_file = employees_file

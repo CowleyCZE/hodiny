@@ -16,7 +16,6 @@ import openpyxl
 
 from employee_management import EmployeeManager
 from excel_manager import ExcelManager
-from excel_manager2024 import ExcelManager2024
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -25,7 +24,6 @@ app.secret_key = 'your_secret_key'
 DATA_PATH = '/home/Cowley/hodiny/data'
 EXCEL_BASE_PATH = '/home/Cowley/hodiny/excel'
 EXCEL_FILE_NAME = 'Hodiny_Cap.xlsx'
-EXCEL_FILE_NAME_2024 = 'Hodiny2024.xlsx'
 EXCEL_FILE_NAME_2025 = 'Hodiny2025.xlsx'
 SETTINGS_FILE_PATH = '/home/Cowley/hodiny/data/settings.json'
 RECIPIENT_EMAIL = 'cowleyy@gmail.com'
@@ -55,7 +53,6 @@ def load_settings():
 # Inicializace manažerů
 employee_manager = EmployeeManager(DATA_PATH)
 excel_manager = ExcelManager(EXCEL_BASE_PATH, EXCEL_FILE_NAME)
-excel_manager2024 = ExcelManager2024(os.path.join(EXCEL_BASE_PATH, EXCEL_FILE_NAME_2024))
 
 # Načtení nastavení
 settings = load_settings()
@@ -159,9 +156,6 @@ def record_time():
         # Uložení do Hodiny_Cap.xlsx
         excel_manager.ulozit_pracovni_dobu(date, start_time, end_time, lunch_duration, selected_employees)
 
-        # Uložení do Hodiny2024.xlsx
-        excel_manager2024.ulozit_pracovni_dobu(date, start_time, end_time, lunch_duration)
-
         flash('Pracovní doba byla zaznamenána.', 'success')
 
     return render_template(
@@ -175,17 +169,15 @@ def record_time():
 
 @app.route('/excel_viewer', methods=['GET'])
 def excel_viewer():
-    excel_files = ['Hodiny_Cap.xlsx', 'Hodiny2024.xlsx', 'Hodiny2025.xlsx']  # Přidán Hodiny2025.xlsx
+    excel_files = ['Hodiny_Cap.xlsx', 'Hodiny2025.xlsx']  # Odebrán Hodiny2024.xlsx
     selected_file = request.args.get('file', excel_files[0])
     active_sheet = request.args.get('sheet', None)
 
     try:
         if selected_file == 'Hodiny_Cap.xlsx':
             workbook = load_workbook(excel_manager.file_path, read_only=True)
-        elif selected_file == 'Hodiny2024.xlsx':
-            workbook = load_workbook(excel_manager2024.file_path, read_only=True)
         elif selected_file == 'Hodiny2025.xlsx':
-            workbook = load_workbook(os.path.join(EXCEL_BASE_PATH, EXCEL_FILE_NAME_2025), read_only=True)  # Načtení Hodiny2025.xlsx
+            workbook = load_workbook(os.path.join(EXCEL_BASE_PATH, EXCEL_FILE_NAME_2025), read_only=True)
         else:
             raise ValueError("Neplatný název souboru.")
 

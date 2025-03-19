@@ -1,13 +1,16 @@
 import os
 import json
+from pathlib import Path
 from utils.logger import setup_logger
 
 logger = setup_logger('employee_management')
 
 class EmployeeManager:
     def __init__(self, data_path):
-        if not isinstance(data_path, str):
-            raise TypeError("data_path musí být řetězec")
+        if not isinstance(data_path, (str, Path)):
+            raise TypeError("data_path musí být řetězec nebo Path objekt")
+        if isinstance(data_path, Path):
+            data_path = str(data_path)
         if not data_path:
             raise ValueError("data_path nesmí být prázdný")
             

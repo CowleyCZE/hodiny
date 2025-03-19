@@ -106,16 +106,46 @@ class ExcelManager:
             sheet[f"{day_column}8"] = total_hours
             sheet[f"{day_column}80"] = date
 
-            # Zápis názvu projektu
+            # Zápis názvu projektu do buňky B79 v aktuálním listu
             if self.current_project_name:
                 try:
-                    # Přímý zápis názvu projektu do buňky B79
-                    sheet['B79'] = self.current_project_name
+                    if sheet['B79'].value:
+                        if self.current_project_name not in sheet['B79'].value:
+                            sheet['B79'].value += f", {self.current_project_name}"
+                    else:
+                        sheet['B79'].value = self.current_project_name
                     logging.info(f"Zapsán název projektu '{self.current_project_name}' do listu {sheet_name}")
                 except Exception as e:
-                    logging.error(f"Chyba při zápisu názvu projektu: {e}")
+                    logging.error(f"Chyba při zápisu názvu projektu do listu {sheet_name}: {e}")
 
+            # Ukládání do Hodiny_Cap.xlsx
             workbook.save(self.file_path)
+
+            # Ukládání do Hodiny2025.xlsx
+            try:
+                workbook_2025 = self._load_or_create_workbook_2025()
+                sheet_name_2025 = datetime.strptime(date, '%Y-%m-%d').strftime('%mhod25')
+                if sheet_name_2025 not in workbook_2025.sheetnames:
+                    workbook_2025.create_sheet(sheet_name_2025)
+                sheet_2025 = workbook_2025[sheet_name_2025]
+
+                day_in_month = datetime.strptime(date, '%Y-%m-%d').day
+                row_2025 = day_in_month + 2  # První den v měsíci začíná na řádku 3
+
+                # Zápis názvu projektu do sloupce I
+                sheet_2025.cell(row=row_2025, column=9).value = self.current_project_name  # Sloupec I
+
+                # Zápis dat pracovní doby
+                sheet_2025.cell(row=row_2025, column=5).value = start_time  # Sloupec E
+                sheet_2025.cell(row=row_2025, column=7).value = end_time  # Sloupec G
+                sheet_2025.cell(row=row_2025, column=6).value = lunch_duration  # Sloupec F
+                sheet_2025.cell(row=row_2025, column=3).value = total_hours  # Sloupec C
+
+                workbook_2025.save(os.path.join(self.base_path, 'Hodiny2025.xlsx'))
+                logging.info(f"Úspěšně uložena data do Hodiny2025.xlsx, list {sheet_name_2025}")
+            except Exception as e:
+                logging.error(f"Chyba při ukládání dat do Hodiny2025.xlsx: {e}")
+
             logging.info(f"Úspěšně uložena pracovní doba pro datum {date}")
             return True
         except Exception as e:
@@ -169,14 +199,17 @@ class ExcelManager:
         try:
             workbook = self._load_or_create_workbook()
 
-            # Nastavíme název projektu pro použití v ulozit_pracovni_dobu
-            self.set_project_name(project_name)
-
+            # Zápis do listu "Zálohy" v Hodiny_Cap.xlsx
             if 'Zálohy' not in workbook.sheetnames:
                 workbook.create_sheet('Zálohy')
-
             zalohy_sheet = workbook['Zálohy']
-            zalohy_sheet['A79'] = project_name
+
+            # Přidání názvu projektu do buňky A79 oddělené čárkou
+            if zalohy_sheet['A79'].value:
+                if project_name not in zalohy_sheet['A79'].value:
+                    zalohy_sheet['A79'].value += f", {project_name}"
+            else:
+                zalohy_sheet['A79'].value = project_name
 
             start_date_obj = datetime.strptime(start_date, '%Y-%m-%d')
             zalohy_sheet['C81'] = start_date_obj.strftime('%d.%m.%y')
@@ -186,10 +219,10 @@ class ExcelManager:
                 zalohy_sheet['D81'] = end_date_obj.strftime('%d.%m.%y')
 
             workbook.save(self.file_path)
-            logging.info(f"Aktualizovány informace o projektu: {project_name}")
+            logging.info(f"Aktualizovány informace o projektu v Hodiny_Cap.xlsx: {project_name}")
             return True
         except Exception as e:
-            logging.error(f"Chyba při aktualizaci informací o projektu: {e}")
+            logging.error(f"Chyba při aktualizaci informací o projektu v Hodiny_Cap.xlsx: {e}")
             return False
 
     def get_advance_options(self):

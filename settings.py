@@ -3,8 +3,6 @@ import json
 import logging
 import os
 
-from excel_manager import ExcelManager
-
 # Flask aplikace
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -25,7 +23,8 @@ def load_settings():
             'name': '',
             'start_date': '',
             'end_date': ''
-        }
+        },
+        'cislo_akce': ''  # Přidání výchozí hodnoty pro číslo akce
     }
 
     try:
@@ -42,30 +41,13 @@ def load_settings():
         return default_settings
 
 def save_settings(settings_data):
-    """Uložení nastavení do JSON a aktualizace Excel souboru."""
+    """Uložení nastavení do souboru JSON."""
     try:
-        # Kontrola existence adresáře
-        os.makedirs(os.path.dirname(SETTINGS_FILE_PATH), exist_ok=True)
+        # Přidání čísla akce do dat
+        settings_data['cislo_akce'] = int(request.form['cislo_akce'])
 
-        # Načtení existujících nastavení (pokud existují)
-        current_settings = load_settings()
-
-        # Aktualizace nastavení novými hodnotami
-        current_settings.update(settings_data)
-
-        # Uložení nastavení do JSON souboru
         with open(SETTINGS_FILE_PATH, 'w', encoding='utf-8') as f:
-            json.dump(current_settings, f, indent=4, ensure_ascii=False)
-
-        # Aktualizace projektových dat v Excel souboru
-        excel_manager = ExcelManager(EXCEL_BASE_PATH)
-        project_name = settings_data['project_info']['name']
-        start_date = settings_data['project_info']['start_date']
-        end_date = settings_data['project_info']['end_date']
-
-        excel_manager.update_project_info_in_advances(project_name, start_date, end_date)
-
-        logging.info("Nastavení byla úspěšně uložena.")
+            json.dump(settings_data, f, indent=4)
         return True
     except Exception as e:
         logging.error(f"Chyba při ukládání nastavení: {e}")
@@ -101,7 +83,5 @@ def settings_page():
     # Načtení aktuálního nastavení
     current_settings = load_settings()
     logging.debug(f"Načtená aktuální nastavení: {current_settings}")
-    return render_template('settings_page.html', settings=current_settings)
 
-if __name__ == '__main__':
-    app.run(debug=True)
+    return render_template('settings_page.html', settings=current_settings)

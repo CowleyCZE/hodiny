@@ -1,73 +1,65 @@
-import pandas as pd
-from flask import Flask, jsonify, render_template, request, redirect, url_for, flash, send_file
+from flask import Flask, jsonify, render_template, request, redirect, url_for, flash, send_file, session
 from datetime import datetime
+import pandas as pd
+import openpyxl
 from openpyxl import load_workbook
 from openpyxl.utils.exceptions import InvalidFileException
 import os
 import re
 import json
+from utils.logger import setup_logger
 import logging
 import shutil
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 import smtplib
-import openpyxl
-from config import Config
+import ssl
+from email.utils import parseaddr
+from pathlib import Path
 
+# Local imports
+from config import Config
 from employee_management import EmployeeManager
 from excel_manager import ExcelManager
 
+# Nahrazení základního loggeru naším vlastním
+logger = setup_logger('app')
+
+# Initialize Flask app
 app = Flask(__name__)
 app.secret_key = Config.SECRET_KEY
 
-# Konstanty
-DATA_PATH = Config.DATA_PATH
-EXCEL_BASE_PATH = Config.EXCEL_BASE_PATH 
+# Constants - upravené na používání Path pro konzistenci
+DATA_PATH = Path(Config.DATA_PATH)
+EXCEL_BASE_PATH = Path(Config.EXCEL_BASE_PATH)
 EXCEL_FILE_NAME = Config.EXCEL_FILE_NAME
 EXCEL_FILE_NAME_2025 = Config.EXCEL_FILE_NAME_2025
-SETTINGS_FILE_PATH = Config.SETTINGS_FILE_PATH
+SETTINGS_FILE_PATH = Path(Config.SETTINGS_FILE_PATH)
 RECIPIENT_EMAIL = Config.RECIPIENT_EMAIL
 
-def load_settings():
-    """Načtení nastavení ze souboru JSON."""
-    try:
-        with open(SETTINGS_FILE_PATH, 'r', encoding='utf-8') as f:
-            settings = json.load(f)
-            return settings
-    except FileNotFoundError:
-        logging.warning("Soubor s nastavením nebyl nalezen. Používám výchozí nastavení.")
-        return {
-            'start_time': '07:00',
-            'end_time': '18:00',
-            'lunch_duration': 1,
-            'project_info': {
-                'name': '',
-                'start_date': '',
-                'end_date': ''
-            }
-        }
-    except Exception as e:
-        logging.error(f"Chyba při načítání nastavení: {e}")
-        return {}
+# Ensure required directories exist
+for path in [DATA_PATH, EXCEL_BASE_PATH]:
+    path.mkdir(parents=True, exist_ok=True)
 
-# Inicializace manažerů
+# Initialize managers and load settings
 employee_manager = EmployeeManager(DATA_PATH)
 excel_manager = ExcelManager(EXCEL_BASE_PATH, EXCEL_FILE_NAME)
 
-# Načtení nastavení
-settings = load_settings()
-excel_manager.set_project_name(settings['project_info'].get('name'))
-
-def save_settings(settings):
-    """Uložení nastavení do souboru JSON."""
-    try:
-        with open(SETTINGS_FILE_PATH, 'w', encoding='utf-8') as f:
-            json.dump(settings, f, indent=4)
-        return True
-    except Exception as e:
-        logging.error(f"Chyba při ukládání nastavení: {e}")
-        return False
+def get_settings():
+    """Get settings from session or load them if not present"""
+    if 'settings' not in session:
+        default_settings = Config.get_default_settings()
+        try:
+            if os.path.exists(SETTINGS_FILE_PATH):
+                with open(SETTINGS_FILE_PATH, 'r', encoding='utf-8') as f:
+                    saved_settings = json.load(f)
+                    default_settings.update(saved_settings)
+            session['settings'] = default_settings
+        except Exception as e:
+            logger.error(f"Error loading settings: {e}")
+            session['settings'] = default_settings
+    return session['settings']
 
 @app.route('/')
 def index():
@@ -81,30 +73,47 @@ def download_file():
     try:
         return send_file(excel_manager.file_path, as_attachment=True)
     except Exception as e:
-        logging.error(f"Chyba při stahování souboru: {e}")
+        logger.error(f"Chyba při stahování souboru: {e}")
         flash('Chyba při stahování souboru.', 'error')
         return redirect(url_for('index'))
+
+def validate_email(email):
+    """Validace emailové adresy"""
+    if not email or '@' not in parseaddr(email)[1]:
+        raise ValueError("Neplatná emailová adresa")
+    return True
 
 @app.route('/send_email', methods=['POST'])
 def send_email():
     try:
         msg = MIMEMultipart()
         msg['Subject'] = 'Hodiny_Cap.xlsx'
-        msg['From'] = Config.SMTP_USERNAME
-        msg['To'] = RECIPIENT_EMAIL
+        
+        # Validace emailových adres
+        sender = Config.SMTP_USERNAME
+        recipient = RECIPIENT_EMAIL
+        
+        if not all([validate_email(addr) for addr in [sender, recipient]]):
+            raise ValueError("Neplatné emailové adresy")
+            
+        msg['From'] = sender
+        msg['To'] = recipient
 
+        # Nastavení SSL/TLS kontextu
+        ssl_context = ssl.create_default_context()
+        
         with open(excel_manager.file_path, 'rb') as f:
             attachment = MIMEApplication(f.read(), _subtype="xlsx")
             attachment.add_header('Content-Disposition', 'attachment', filename=EXCEL_FILE_NAME)
             msg.attach(attachment)
 
-        with smtplib.SMTP_SSL(Config.SMTP_SERVER, Config.SMTP_PORT) as smtp:
+        with smtplib.SMTP_SSL(Config.SMTP_SERVER, Config.SMTP_PORT, context=ssl_context) as smtp:
             smtp.login(Config.SMTP_USERNAME, Config.SMTP_PASSWORD)
             smtp.send_message(msg)
 
         flash('Email byl odeslán.', 'success')
     except Exception as e:
-        logging.error(f"Chyba při odesílání emailu: {e}")
+        logger.error(f"Chyba při odesílání emailu: {e}")
         flash('Chyba při odesílání emailu.', 'error')
     return redirect(url_for('index'))
 
@@ -161,6 +170,7 @@ def manage_employees():
 def record_time():
     selected_employees = employee_manager.vybrani_zamestnanci
     current_date = datetime.now().strftime('%Y-%m-%d')
+    settings = get_settings()
     start_time = settings.get('start_time', '07:00')
     end_time = settings.get('end_time', '18:00')
     lunch_duration = settings.get('lunch_duration', 1)
@@ -187,7 +197,7 @@ def record_time():
 
 @app.route('/excel_viewer', methods=['GET'])
 def excel_viewer():
-    excel_files = ['Hodiny_Cap.xlsx', 'Hodiny2025.xlsx']  # Odebrán Hodiny2024.xlsx
+    excel_files = ['Hodiny_Cap.xlsx', 'Hodiny2025.xlsx']
     selected_file = request.args.get('file', excel_files[0])
     active_sheet = request.args.get('sheet', None)
 
@@ -222,45 +232,71 @@ def excel_viewer():
         flash('Soubor nebyl nalezen nebo je poškozen.', 'error')
         return redirect(url_for('index'))
     except Exception as e:
-        logging.error(f"Chyba při zobrazení Excel souboru: {e}")
+        logger.error(f"Chyba při zobrazení Excel souboru: {e}")
         flash('Chyba při zobrazení Excel souboru.', 'error')
         return redirect(url_for('index'))
 
 @app.route('/settings', methods=['GET', 'POST'])
 def settings_page():
-    """Zobrazení a zpracování stránky pro nastavení."""
-    global settings
+    """Handle settings page"""
     if request.method == 'POST':
-        logging.info("Přijat POST požadavek na stránce nastavení")
-        settings['start_time'] = request.form['start_time']
-        settings['end_time'] = request.form['end_time']
-        settings['lunch_duration'] = float(request.form['lunch_duration'])
-        settings['project_info']['name'] = request.form.get('project_name')
-        settings['project_info']['start_date'] = request.form.get('start_date')
-        settings['project_info']['end_date'] = request.form.get('end_date')
+        try:
+            new_settings = get_settings()  # Get current settings as base
+            new_settings.update({
+                'start_time': request.form['start_time'],
+                'end_time': request.form['end_time'],
+                'lunch_duration': float(request.form['lunch_duration']),
+                'project_info': {
+                    'name': request.form.get('project_name', ''),
+                    'start_date': request.form.get('start_date', ''),
+                    'end_date': request.form.get('end_date', '')
+                }
+            })
 
-        save_settings(settings)
-        flash('Nastavení bylo úspěšně uloženo.', 'success')
-
-        excel_manager.update_project_info(settings['project_info']['name'], settings['project_info']['start_date'], settings['project_info']['end_date'])
-
-    return render_template('settings_page.html', settings=settings)
+            # Ensure settings directory exists
+            os.makedirs(os.path.dirname(SETTINGS_FILE_PATH), exist_ok=True)
+            
+            # Save new settings
+            with open(SETTINGS_FILE_PATH, 'w', encoding='utf-8') as f:
+                json.dump(new_settings, f, indent=4)
+            
+            session['settings'] = new_settings
+            excel_manager.update_project_info(
+                new_settings['project_info']['name'],
+                new_settings['project_info']['start_date'],
+                new_settings['project_info']['end_date']
+            )
+            flash('Nastavení bylo úspěšně uloženo.', 'success')
+            
+        except Exception as e:
+            logger.error(f"Error saving settings: {e}")
+            flash('Chyba při ukládání nastavení.', 'error')
+            
+    return render_template('settings_page.html', settings=get_settings())
 
 @app.route('/zalohy', methods=['GET', 'POST'])
 def zalohy():
     if request.method == 'POST':
-        employee_name = request.form['employee_name']
-        amount = float(request.form['amount'])  # Převod na float
-        currency = request.form['currency']
-        option = request.form['option']
-        date = request.form['date']
-
         try:
-            # Uložení do Hodiny_Cap.xlsx a Hodiny2025.xlsx
-            excel_manager.save_advance(employee_name, amount, currency, option, date)
+            employee_name = request.form['employee_name']
+            amount = float(request.form['amount'])
+            currency = request.form['currency']
+            option = request.form['option']
+            date = request.form['date']
+
+            # Vytvoření instance ZalohyManager
+            zalohy_manager = ZalohyManager(EXCEL_BASE_PATH)
+
+            # Validace a uložení zálohy
+            zalohy_manager.add_or_update_employee_advance(employee_name, amount, currency, option, date)
             flash('Záloha byla úspěšně uložena.', 'success')
+
+        except ValueError as e:
+            flash(f'Chyba validace: {str(e)}', 'error')
+            logger.error(f"Chyba validace zálohy: {e}")
         except Exception as e:
             flash(f'Chyba při ukládání zálohy: {str(e)}', 'error')
+            logger.error(f"Chyba při ukládání zálohy: {e}")
 
     employees = employee_manager.zamestnanci
     options = excel_manager.get_advance_options()
@@ -268,16 +304,22 @@ def zalohy():
 
     # Načtení historie záloh z Hodiny2025.xlsx
     try:
-        workbook_2025 = load_workbook(os.path.join(EXCEL_BASE_PATH, EXCEL_FILE_NAME_2025))
-        if 'Zalohy25' in workbook_2025.sheetnames:
-            sheet = workbook_2025['Zalohy25']
-            data = list(sheet.values)
-            keys = data[0]  # Předpokládáme, že první řádek obsahuje hlavičky
-            advance_history = [dict(zip(keys, row)) for row in data[1:]]  # Vytvoření seznamu slovníků
-        else:
+        hodiny2025_path = os.path.join(EXCEL_BASE_PATH, EXCEL_FILE_NAME_2025)
+        if not os.path.exists(hodiny2025_path):
+            logger.error(f"Soubor {EXCEL_FILE_NAME_2025} nebyl nalezen")
+            flash(f'Soubor {EXCEL_FILE_NAME_2025} nebyl nalezen', 'error')
             advance_history = []
+        else:
+            workbook_2025 = load_workbook(hodiny2025_path)
+            if 'Zalohy25' in workbook_2025.sheetnames:
+                sheet = workbook_2025['Zalohy25']
+                data = list(sheet.values)
+                keys = data[0]  # Předpokládáme, že první řádek obsahuje hlavičky
+                advance_history = [dict(zip(keys, row)) for row in data[1:]]  # Vytvoření seznamu slovníků
+            else:
+                advance_history = []
     except Exception as e:
-        logging.error(f"Chyba při načítání historie záloh: {str(e)}")
+        logger.error(f"Chyba při načítání historie záloh: {str(e)}")
         advance_history = []
 
     return render_template(

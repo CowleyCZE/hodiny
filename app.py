@@ -65,9 +65,10 @@ def get_settings():
 @app.route('/')
 def index():
     excel_exists = os.path.exists(excel_manager.file_path)
-    current_date = datetime.now().strftime('%Y-%m-%d')
+    current_date = datetime.now()  # Changed to return datetime object instead of string
     week_number = excel_manager.ziskej_cislo_tydne(current_date)
-    return render_template('index.html', excel_exists=excel_exists, week_number=week_number, current_date=current_date)
+    current_date_str = current_date.strftime('%Y-%m-%d')  # Format date for template
+    return render_template('index.html', excel_exists=excel_exists, week_number=week_number, current_date=current_date_str)
 
 @app.route('/download')
 def download_file():

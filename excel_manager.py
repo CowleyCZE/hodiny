@@ -328,11 +328,13 @@ class ExcelManager:
         Získá číslo týdne pro zadané datum.
         
         Args:
-            datum: Datum, pro které chceme zjistit číslo týdne
+            datum: Datum jako string ('YYYY-MM-DD') nebo datetime objekt
             
         Returns:
             int: Číslo týdne (1-53)
         """
+        if isinstance(datum, str):
+            datum = datetime.strptime(datum, '%Y-%m-%d')
         return datum.isocalendar()[1]
 
 if __name__ == "__main__":

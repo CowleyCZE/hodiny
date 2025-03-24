@@ -323,6 +323,18 @@ class ExcelManager:
             row += 1
         return row
 
+    def ziskej_cislo_tydne(self, datum):
+        """
+        Získá číslo týdne pro zadané datum.
+        
+        Args:
+            datum: Datum, pro které chceme zjistit číslo týdne
+            
+        Returns:
+            int: Číslo týdne (1-53)
+        """
+        return datum.isocalendar()[1]
+
 if __name__ == "__main__":
     # Test ukládání zálohy
     logging.basicConfig(level=logging.INFO)

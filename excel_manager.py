@@ -3,13 +3,14 @@ import os
 import logging
 import shutil
 import re
-from datetime import datetime
+from datetime import datetime 
 from openpyxl import load_workbook, Workbook
 from openpyxl.worksheet.copier import WorksheetCopy
 import fcntl
 import contextlib
 from threading import Lock
 from utils.logger import setup_logger
+from contextlib import contextmanager
 
 logger = setup_logger('excel_manager')
 
@@ -17,70 +18,64 @@ class ExcelManager:
     def __init__(self, base_path, excel_file_name):
         self.base_path = base_path
         self.file_path = os.path.join(self.base_path, excel_file_name)
+        self.file_path_2025 = os.path.join(self.base_path, 'Hodiny2025.xlsx')
         self.current_project_name = None
         self._file_lock = Lock()
+        self._workbook_cache = {}
+
+    @contextmanager 
+    def _get_workbook(self, file_path, read_only=False):
+        """Vylepšený context manager pro práci s workbookem"""
+        cache_key = os.path.abspath(file_path)
         
-    @contextlib.contextmanager
-    def _excel_file_lock(self):
-        """Context manager pro bezpečný přístup k Excel souborům"""
-        with self._file_lock:
-            try:
-                with open(self.file_path, 'r+b') as f:
-                    fcntl.flock(f.fileno(), fcntl.LOCK_EX)
-                    yield
-            finally:
-                with open(self.file_path, 'r+b') as f:
-                    fcntl.flock(f.fileno(), fcntl.LOCK_UN)
-
-    def set_project_name(self, project_name):
-        """Nastaví aktuální název projektu"""
-        self.current_project_name = project_name
-        logger.info(f"Nastaven název projektu: {project_name}")
-
-    def _load_or_create_workbook(self):
-        with self._excel_file_lock():
-            workbook = None
-            try:
-                if not os.path.exists(self.base_path):
-                    os.makedirs(self.base_path)
-
-                if os.path.exists(self.file_path):
-                    workbook = load_workbook(self.file_path)
-                else:
-                    workbook = Workbook()
-                    workbook.save(self.file_path)
-                return workbook
-            except Exception as e:
-                logger.error(f"Chyba při načítání nebo vytváření Excel souboru: {e}")
-                raise
-            finally:
-                if workbook:
-                    workbook.close()
-
-    def _load_or_create_workbook_2025(self):
-        """Načte nebo vytvoří sešit Hodiny2025.xlsx"""
-        file_path_2025 = os.path.join(self.base_path, 'Hodiny2025.xlsx')
         try:
-            if os.path.exists(file_path_2025):
-                workbook = load_workbook(file_path_2025)
+            if cache_key in self._workbook_cache:
+                wb = self._workbook_cache[cache_key]
+                if not wb.is_active:  # Kontrola, zda workbook není uzavřený
+                    del self._workbook_cache[cache_key]
+                    wb = None
             else:
-                workbook = Workbook()
-                workbook.save(file_path_2025)
-            return workbook
+                wb = None
+
+            if wb is None:
+                with self._file_lock:
+                    if os.path.exists(file_path):
+                        wb = load_workbook(file_path, read_only=read_only)
+                    else:
+                        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+                        wb = Workbook()
+                        wb.save(file_path)
+                    self._workbook_cache[cache_key] = wb
+
+            yield wb
+            
+            if not read_only:
+                wb.save(file_path)
+                
         except Exception as e:
-            logger.error(f"Chyba při načítání nebo vytváření Excel souboru Hodiny2025.xlsx: {e}")
+            logger.error(f"Chyba při práci s workbookem {file_path}: {e}")
             raise
 
-    def ziskej_cislo_tydne(self, datum):
-        datum_objekt = datetime.strptime(datum, '%Y-%m-%d').date()
-        return datum_objekt.isocalendar()
+    def _clear_workbook_cache(self):
+        """Vylepšená metoda pro čištění cache"""
+        for path, wb in list(self._workbook_cache.items()):
+            try:
+                if wb.is_active:  # Kontrola, zda workbook není již uzavřený
+                    wb.save(path)
+                    wb.close()
+            except Exception as e:
+                logger.error(f"Chyba při ukládání a zavírání workbooku {path}: {e}")
+            finally:
+                self._workbook_cache.pop(path, None)
+
+    def __del__(self):
+        """Destruktor - zajistí uvolnění všech prostředků"""
+        self._clear_workbook_cache()
 
     def ulozit_pracovni_dobu(self, date, start_time, end_time, lunch_duration, employees):
-        with self._excel_file_lock():
-            workbook = None
-            try:
-                workbook = self._load_or_create_workbook()
-
+        """Uloží pracovní dobu do Excel souboru"""
+        try:
+            with self._get_workbook(self.file_path) as workbook:
                 # Získání čísla týdne z datumu
                 week_number = self.ziskej_cislo_tydne(date)
 
@@ -144,173 +139,115 @@ class ExcelManager:
                 workbook.save(self.file_path)
                 logger.info(f"Úspěšně uložena pracovní doba pro datum {date}")
                 return True
-            except Exception as e:
-                logger.error(f"Chyba při ukládání pracovní doby: {e}")
-                return False
-            finally:
-                if workbook:
-                    workbook.close()
-
-    def create_weekly_copy(self):
-        try:
-            last_week = self.get_last_week_number()
-            if last_week == 0:
-                logger.warning("Nebyl nalezen žádný týden v Excel souboru.")
-                return None
-
-            original_dir = os.path.dirname(self.file_path)
-            original_filename = os.path.basename(self.file_path)
-            name, ext = os.path.splitext(original_filename)
-            new_filename = f"{name}_Tyden_{last_week}{ext}"
-            new_filepath = os.path.join(original_dir, new_filename)
-
-            if os.path.exists(self.file_path):
-                shutil.copy(self.file_path, new_filepath)
-                logger.info(f"Vytvořena týdenní kopie: {new_filepath}")
-                return new_filepath
-            else:
-                logger.error(f"Zdrojový soubor neexistuje: {self.file_path}")
-                return None
         except Exception as e:
-            logger.error(f"Chyba při vytváření týdenní kopie: {str(e)}")
-            return None
-
-    def get_last_week_number(self):
-        try:
-            workbook = self._load_or_create_workbook()
-            week_numbers = []
-            for sheet_name in workbook.sheetnames:
-                match = re.search(r'Týden (\d+)', sheet_name)
-                if match:
-                    week_numbers.append(int(match.group(1)))
-            return max(week_numbers) if week_numbers else 0
-        except Exception as e:
-            logger.error(f"Chyba při získávání čísla posledního týdne: {str(e)}")
-            return 0
-
-    def get_file_name_with_week(self):
-        last_week = self.get_last_week_number()
-        base_name = os.path.basename(self.file_path)
-        name, ext = os.path.splitext(base_name)
-        return f"{name}_Tyden_{last_week}{ext}"
+            logger.error(f"Chyba při ukládání pracovní doby: {e}")
+            return False
 
     def update_project_info(self, project_name, start_date, end_date=None):
+        """Aktualizuje informace o projektu"""
         try:
-            workbook = self._load_or_create_workbook()
+            with self._get_workbook(self.file_path) as workbook:
+                # Nastavíme název projektu pro použití v ulozit_pracovni_dobu
+                self.set_project_name(project_name)
 
-            # Nastavíme název projektu pro použití v ulozit_pracovni_dobu
-            self.set_project_name(project_name)
+                if 'Zálohy' not in workbook.sheetnames:
+                    workbook.create_sheet('Zálohy')
 
-            if 'Zálohy' not in workbook.sheetnames:
-                workbook.create_sheet('Zálohy')
+                zalohy_sheet = workbook['Zálohy']
+                zalohy_sheet['A79'] = project_name
 
-            zalohy_sheet = workbook['Zálohy']
-            zalohy_sheet['A79'] = project_name
+                start_date_obj = datetime.strptime(start_date, '%Y-%m-%d')
+                zalohy_sheet['C81'] = start_date_obj.strftime('%d.%m.%y')
 
-            start_date_obj = datetime.strptime(start_date, '%Y-%m-%d')
-            zalohy_sheet['C81'] = start_date_obj.strftime('%d.%m.%y')
+                if end_date:
+                    end_date_obj = datetime.strptime(end_date, '%Y-%m-%d')
+                    zalohy_sheet['D81'] = end_date_obj.strftime('%d.%m.%y')
 
-            if end_date:
-                end_date_obj = datetime.strptime(end_date, '%Y-%m-%d')
-                zalohy_sheet['D81'] = end_date_obj.strftime('%d.%m.%y')
-
-            workbook.save(self.file_path)
-            logger.info(f"Aktualizovány informace o projektu: {project_name}")
-            return True
+                workbook.save(self.file_path)
+                logger.info(f"Aktualizovány informace o projektu: {project_name}")
+                return True
         except Exception as e:
             logger.error(f"Chyba při aktualizaci informací o projektu: {e}")
             return False
 
     def get_advance_options(self):
         """Získá možnosti záloh z Excel souboru"""
-        workbook = None
         try:
-            workbook = self._load_or_create_workbook()
-            options = []
+            with self._get_workbook(self.file_path) as workbook:
+                options = []
 
-            if 'Zálohy' in workbook.sheetnames:
-                zalohy_sheet = workbook['Zálohy']
-                option1 = zalohy_sheet['B80'].value or 'Option 1'
-                option2 = zalohy_sheet['D80'].value or 'Option 2'
-                options = [option1, option2]
-                logger.info(f"Načteny možnosti záloh: {options}")
-            else:
-                logger.warning("List 'Zálohy' nebyl nalezen v Excel souboru")
-                options = ['Option 1', 'Option 2']
+                if 'Zálohy' in workbook.sheetnames:
+                    zalohy_sheet = workbook['Zálohy']
+                    option1 = zalohy_sheet['B80'].value or 'Option 1'
+                    option2 = zalohy_sheet['D80'].value or 'Option 2'
+                    options = [option1, option2]
+                    logger.info(f"Načteny možnosti záloh: {options}")
+                else:
+                    logger.warning("List 'Zálohy' nebyl nalezen v Excel souboru")
+                    options = ['Option 1', 'Option 2']
 
-            return options
+                return options
         except Exception as e:
             logger.error(f"Chyba při načítání možností záloh: {str(e)}")
             return ['Option 1', 'Option 2']
-        finally:
-            if workbook:
-                workbook.close()
 
     def save_advance(self, employee_name, amount, currency, option, date):
+        """Vylepšená metoda pro ukládání zálohy"""
         try:
-            with self._excel_file_lock():
-                workbook = self._load_or_create_workbook()
-                workbook_2025 = self._load_or_create_workbook_2025()  # Načtení druhého sešitu
-
-                # --- Uložení do Hodiny_Cap.xlsx (původní logika) ---
-                if 'Zálohy' not in workbook.sheetnames:
-                    sheet = workbook.create_sheet('Zálohy')
-                    sheet['B80'] = 'Option 1'
-                    sheet['D80'] = 'Option 2'
-                else:
-                    sheet = workbook['Zálohy']
-
-                row = 9
-                while row < 1000:
-                    if not sheet[f'A{row}'].value:
-                        sheet[f'A{row}'] = employee_name
-                        break
-                    if sheet[f'A{row}'].value == employee_name:
-                        break
-                    row += 1
-
-                option1_value = sheet['B80'].value or 'Option 1'
-                option2_value = sheet['D80'].value or 'Option 2'
-
-                if option == option1_value:
-                    column = 'B' if currency == 'EUR' else 'C'
-                elif option == option2_value:
-                    column = 'D' if currency == 'EUR' else 'E'
-                else:
-                    raise ValueError(f"Neplatná volba: {option}")
-
-                current_value = sheet[f'{column}{row}'].value
-                if current_value is None:
-                    current_value = 0
-
-                sheet[f'{column}{row}'] = current_value + float(amount)
-
-                # Přidání data zálohy
-                date_column = 26  # Předpokládáme, že datum bude v sloupci Z
-                sheet.cell(row=row, column=date_column, value=datetime.strptime(date, '%Y-%m-%d').date())
-                # --- Konec ukládání do Hodiny_Cap.xlsx ---
-
-                # Uložení do Hodiny2025.xlsx - list "Zalohy25"
-                self._save_advance_zalohy25(workbook_2025, employee_name, amount, currency, date)
-
-                # Uložení do Hodiny2025.xlsx - list "(pp)cash25"
-                self._save_advance_cash25(workbook_2025, employee_name, amount, currency, date)
-
-                workbook.save(self.file_path)
-                workbook_2025.save(os.path.join(self.base_path, 'Hodiny2025.xlsx'))  # Uložení druhého sešitu
-
-                logger.info(f"Úspěšně uložena záloha pro {employee_name}: {amount} {currency}")
+            # Použití dvou context managerů najednou
+            with self._get_workbook(self.file_path) as wb1, \
+                 self._get_workbook(self.file_path_2025) as wb2:
+                
+                # Uložení do Hodiny_Cap.xlsx
+                self._save_advance_main(wb1, employee_name, amount, currency, option, date)
+                
+                # Uložení do Hodiny2025.xlsx
+                self._save_advance_zalohy25(wb2, employee_name, amount, currency, date)
+                self._save_advance_cash25(wb2, employee_name, amount, currency, date)
+                
                 return True
 
         except Exception as e:
             logger.error(f"Chyba při ukládání zálohy: {str(e)}")
             return False
 
-        finally:
-            if 'workbook' in locals():
-                workbook.close()
-            if 'workbook_2025' in locals():
-                workbook_2025.close()
+    def _save_advance_main(self, workbook, employee_name, amount, currency, option, date):
+        """Pomocná metoda pro ukládání do hlavního workbooku"""
+        if 'Zálohy' not in workbook.sheetnames:
+            sheet = workbook.create_sheet('Zálohy')
+            sheet['B80'] = 'Option 1'
+            sheet['D80'] = 'Option 2'
+        else:
+            sheet = workbook['Zálohy']
+
+        row = 9
+        while row < 1000:
+            if not sheet[f'A{row}'].value:
+                sheet[f'A{row}'] = employee_name
+                break
+            if sheet[f'A{row}'].value == employee_name:
+                break
+            row += 1
+
+        option1_value = sheet['B80'].value or 'Option 1'
+        option2_value = sheet['D80'].value or 'Option 2'
+
+        if option == option1_value:
+            column = 'B' if currency == 'EUR' else 'C'
+        elif option == option2_value:
+            column = 'D' if currency == 'EUR' else 'E'
+        else:
+            raise ValueError(f"Neplatná volba: {option}")
+
+        current_value = sheet[f'{column}{row}'].value
+        if current_value is None:
+            current_value = 0
+
+        sheet[f'{column}{row}'] = current_value + float(amount)
+
+        # Přidání data zálohy
+        date_column = 26  # Předpokládáme, že datum bude v sloupci Z
+        sheet.cell(row=row, column=date_column, value=datetime.strptime(date, '%Y-%m-%d').date())
 
     def _save_advance_zalohy25(self, workbook, employee_name, amount, currency, date):
         if 'Zalohy25' not in workbook.sheetnames:

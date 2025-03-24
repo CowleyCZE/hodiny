@@ -22,6 +22,7 @@ from pathlib import Path
 from config import Config
 from employee_management import EmployeeManager
 from excel_manager import ExcelManager
+from zalohy_manager import ZalohyManager
 
 # Nahrazení základního loggeru naším vlastním
 logger = setup_logger('app')

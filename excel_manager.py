@@ -333,9 +333,14 @@ class ExcelManager:
         Returns:
             int: Číslo týdne (1-53)
         """
-        if isinstance(datum, str):
-            datum = datetime.strptime(datum, '%Y-%m-%d')
-        return datum.isocalendar()[1]
+        try:
+            if isinstance(datum, str):
+                datum = datetime.strptime(datum, '%Y-%m-%d')
+            return datum.isocalendar()
+        except (ValueError, TypeError) as e:
+            logger.error(f"Chyba při zpracování data: {e}")
+            current_date = datetime.now()
+            return current_date.isocalendar()
 
 if __name__ == "__main__":
     # Test ukládání zálohy

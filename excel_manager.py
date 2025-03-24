@@ -27,15 +27,18 @@ class ExcelManager:
     def _get_workbook(self, file_path, read_only=False):
         """Vylepšený context manager pro práci s workbookem"""
         cache_key = os.path.abspath(file_path)
-        
+        wb = None
+
         try:
             if cache_key in self._workbook_cache:
-                wb = self._workbook_cache[cache_key]
-                if not wb.is_active:  # Kontrola, zda workbook není uzavřený
+                try:
+                    # Test if workbook is still usable by accessing a property
+                    wb = self._workbook_cache[cache_key]
+                    _ = wb.sheetnames
+                except Exception:
+                    # If accessing properties fails, remove from cache
                     del self._workbook_cache[cache_key]
                     wb = None
-            else:
-                wb = None
 
             if wb is None:
                 with self._file_lock:
@@ -44,7 +47,6 @@ class ExcelManager:
                     else:
                         os.makedirs(os.path.dirname(file_path), exist_ok=True)
                         wb = Workbook()
-                        wb.save(file_path)
                     self._workbook_cache[cache_key] = wb
 
             yield wb
@@ -53,16 +55,15 @@ class ExcelManager:
                 wb.save(file_path)
                 
         except Exception as e:
-            logger.error(f"Chyba při práci s workbookem {file_path}: {e}")
+            logger.error(f"Chyba při práci s workbookem {file_path}: {str(e)}")
             raise
-
+            
     def _clear_workbook_cache(self):
         """Vylepšená metoda pro čištění cache"""
         for path, wb in list(self._workbook_cache.items()):
             try:
-                if wb.is_active:  # Kontrola, zda workbook není již uzavřený
-                    wb.save(path)
-                    wb.close()
+                wb.save(path)
+                wb.close()
             except Exception as e:
                 logger.error(f"Chyba při ukládání a zavírání workbooku {path}: {e}")
             finally:

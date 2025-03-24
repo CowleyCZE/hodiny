@@ -52,6 +52,12 @@
             <input type="number" id="lunch_duration" name="lunch_duration" step="0.25" min="0" max="4" value="{{ settings.lunch_duration }}" required>
             <br><br>
 
+            <h2>Číslo akce</h2>
+            <div class="form-group">
+                <label for="cislo_akce">Číslo akce:</label>
+                <input type="number" name="cislo_akce" value="{{ settings.cislo_akce if settings.cislo_akce else '' }}" class="form-control" required>
+            </div>
+
             <button type="submit" class="btn btn-primary">Uložit nastavení</button>
         </form>
     </main>

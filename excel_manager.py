@@ -78,9 +78,7 @@ class ExcelManager:
             with self._get_workbook(self.file_path) as workbook:
                 # Získání čísla týdne z datumu
                 week_number = self.ziskej_cislo_tydne(date)
-
-                # Extrahování čísla týdne z isocalendar()
-                week_number = week_number.week  # Přidáno .week
+                week_number = week_number.week
 
                 sheet_name = f"Týden {week_number}"
 
@@ -95,50 +93,49 @@ class ExcelManager:
                 else:
                     sheet = workbook[sheet_name]
 
+                # Výpočet odpracovaných hodin
                 start = datetime.strptime(start_time, "%H:%M")
                 end = datetime.strptime(end_time, "%H:%M")
                 total_hours = (end - start).total_seconds() / 3600 - lunch_duration
 
+                # Určení sloupce podle dne v týdnu (0 = pondělí, 1 = úterý, atd.)
                 weekday = datetime.strptime(date, '%Y-%m-%d').weekday()
+                # Pro každý den posuneme o 2 sloupce (B,D,F,H,J)
                 day_column = chr(ord('B') + 2 * weekday)
 
+                # Ukládání dat pro každého zaměstnance
+                start_row = 9
+                for employee in employees:
+                    # Hledání řádku pro zaměstnance
+                    current_row = start_row
+                    row_found = False
+                    
+                    while not row_found:
+                        cell_value = sheet[f'A{current_row}'].value
+                        if cell_value is None or cell_value == employee:
+                            if cell_value is None:
+                                # Prázdný řádek - přidáme nového zaměstnance
+                                sheet[f'A{current_row}'] = employee
+                            sheet[f'{day_column}{current_row}'] = total_hours
+                            row_found = True
+                        else:
+                            current_row += 1
+
+                # Ukládání časů začátku a konce do řádku 7
                 sheet[f"{day_column}7"] = start_time
                 sheet[f"{chr(ord(day_column)+1)}7"] = end_time
-
-                # Najdeme řádky pro všechny zaměstnance v listu
-                employee_rows = {}
-                for row in range(9, sheet.max_row + 1):
-                    employee_name = sheet.cell(row=row, column=1).value
-                    if employee_name:
-                        employee_rows[employee_name] = row
-
-                # Uložíme pracovní dobu pro označené zaměstnance
-                for employee in employees:
-                    if employee in employee_rows:
-                        row = employee_rows[employee]
-                        sheet[f"{day_column}{row}"] = total_hours
-                    else:
-                        # Pokud zaměstnanec není v listu, přidáme ho na konec
-                        new_row = sheet.max_row + 1
-                        sheet[f"A{new_row}"] = employee
-                        sheet[f"{day_column}{new_row}"] = total_hours
-                        employee_rows[employee] = new_row
-
-                sheet[f"{day_column}8"] = total_hours
+                
+                # Uložení data do buňky v řádku 80
                 sheet[f"{day_column}80"] = date
 
-                # Zápis názvu projektu
+                # Zápis názvu projektu do B79
                 if self.current_project_name:
-                    try:
-                        # Přímý zápis názvu projektu do buňky B79
-                        sheet['B79'] = self.current_project_name
-                        logger.info(f"Zapsán název projektu '{self.current_project_name}' do listu {sheet_name}")
-                    except Exception as e:
-                        logger.error(f"Chyba při zápisu názvu projektu: {e}")
+                    sheet['B79'] = self.current_project_name
 
                 workbook.save(self.file_path)
                 logger.info(f"Úspěšně uložena pracovní doba pro datum {date}")
                 return True
+
         except Exception as e:
             logger.error(f"Chyba při ukládání pracovní doby: {e}")
             return False

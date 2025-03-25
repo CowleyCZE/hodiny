@@ -17,11 +17,17 @@ class TimeConfig:
     lunch_duration: float = 1.0
 
 class Config:
-    # Bezpečnostní nastavení - generování bezpečného klíče při startu
+    # Detekce prostředí
+    IS_PYTHONANYWHERE = 'PYTHONANYWHERE_SITE' in os.environ
+    
+    # Bezpečnostní nastavení
     SECRET_KEY = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
     
     # Základní adresář - používá Path pro lepší přenositelnost
-    BASE_DIR = Path(os.environ.get('HODINY_BASE_DIR', '.')).resolve()
+    if IS_PYTHONANYWHERE:
+        BASE_DIR = Path(os.path.expanduser('~/hodiny'))
+    else:
+        BASE_DIR = Path(os.environ.get('HODINY_BASE_DIR', '.')).resolve()
     
     # Cesty - používají Path pro konzistentní práci s cestami
     DATA_PATH = Path(os.environ.get('HODINY_DATA_PATH', BASE_DIR / 'data'))
@@ -31,11 +37,11 @@ class Config:
     SETTINGS_FILE_PATH = Path(os.environ.get('HODINY_SETTINGS_PATH', DATA_PATH / 'settings.json'))
     
     # Email konfigurace
-    SMTP_SERVER = os.environ.get('SMTP_SERVER') or 'smtp.gmail.com'
-    SMTP_PORT = int(os.environ.get('SMTP_PORT') or 465)
+    SMTP_SERVER = os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
+    SMTP_PORT = int(os.environ.get('SMTP_PORT', 465))
     SMTP_USERNAME = os.environ.get('SMTP_USERNAME')
     SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD')
-    RECIPIENT_EMAIL = os.environ.get('RECIPIENT_EMAIL')  # Musí být nastaveno v prostředí
+    RECIPIENT_EMAIL = os.environ.get('RECIPIENT_EMAIL')
 
     # Výchozí konfigurace
     DEFAULT_PROJECT_CONFIG = ProjectConfig()
@@ -50,3 +56,30 @@ class Config:
             'lunch_duration': cls.DEFAULT_TIME_CONFIG.lunch_duration,
             'project_info': vars(cls.DEFAULT_PROJECT_CONFIG)
         }
+
+    @classmethod
+    def init_app(cls, app):
+        """Inicializace aplikace s konfigurací"""
+        # Vytvoření potřebných adresářů
+        cls.DATA_PATH.mkdir(parents=True, exist_ok=True)
+        cls.EXCEL_BASE_PATH.mkdir(parents=True, exist_ok=True)
+        
+        # Nastavení logovacího adresáře
+        log_dir = cls.BASE_DIR / 'logs'
+        log_dir.mkdir(exist_ok=True)
+        
+        # Nastavení Flask aplikace
+        app.config['SECRET_KEY'] = cls.SECRET_KEY
+        app.config['UPLOAD_FOLDER'] = str(cls.EXCEL_BASE_PATH)
+        
+        if cls.IS_PYTHONANYWHERE:
+            app.config['PROPAGATE_EXCEPTIONS'] = True
+            app.config['PREFERRED_URL_SCHEME'] = 'https'
+            
+        # Nastavení pro produkci
+        if not app.debug:
+            app.config['SESSION_COOKIE_SECURE'] = True
+            app.config['SESSION_COOKIE_HTTPONLY'] = True
+            app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # 1 hodina
+            
+        return app

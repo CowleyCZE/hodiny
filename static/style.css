@@ -45,20 +45,30 @@ header {
     padding: 20px;
 }
 
-h1, h2 {
+h1, h2, h3 {
     color: #004EA3;
 }
 
-button {
+.btn {
     padding: 10px 15px;
-    background-color: #004EA3;
-    color: #fff;
     border: none;
     cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
 }
 
-button:hover {
-    background-color: #0056b3;
+.btn-primary {
+    background-color: #004EA3;
+    color: #fff;
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.btn:hover {
+    opacity: 0.9;
 }
 
 footer {
@@ -66,4 +76,46 @@ footer {
     color: #aaa;
     text-align: center;
     padding: 10px;
+}
+
+.inline-form {
+    display: inline;
+}
+
+.info-bar {
+    background-color: #444;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.excel-actions {
+    margin: 20px 0;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.alert {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+}
+
+.alert-success {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.alert-warning {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.alert-error {
+    background-color: #dc3545;
+    color: #fff;
 }

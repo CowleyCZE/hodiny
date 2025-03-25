@@ -2,6 +2,7 @@
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zálohy</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
@@ -10,7 +11,7 @@
         <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
     </header>
 
-    <nav class="nav">
+    <nav class="nav" aria-label="Hlavní navigace">
         <a href="{{ url_for('index') }}">Hlavní stránka</a>
         <a href="{{ url_for('manage_employees') }}">Zaměstnanci</a>
         <a href="{{ url_for('record_time') }}">Záznam pracovní doby</a>
@@ -22,40 +23,43 @@
     <main class="main">
         <h1>Zálohy</h1>
 
-        <form method="POST">
-            <label for="employee_name">Zaměstnanec:</label>
-            <select name="employee_name" required>
-                {% for employee in employees %}
-                    <option value="{{ employee }}">{{ employee }}</option>
-                {% endfor %}
-            </select>
-            <br><br>
+        <section>
+            <h2>Přidat zálohu</h2>
+            <form method="POST" aria-label="Formulář pro přidání zálohy">
+                <label for="employee_name">Zaměstnanec:</label>
+                <select name="employee_name" id="employee_name" required>
+                    {% for employee in employees %}
+                        <option value="{{ employee }}">{{ employee }}</option>
+                    {% endfor %}
+                </select>
+                <br><br>
 
-            <label for="amount">Částka:</label>
-            <input type="number" name="amount" id="amount" step="0.01" required>
-            <br><br>
+                <label for="amount">Částka:</label>
+                <input type="number" name="amount" id="amount" step="0.01" required title="Zadejte částku zálohy" placeholder="Částka zálohy">
+                <br><br>
 
-            <label for="currency">Měna:</label>
-            <select name="currency" id="currency" required>
-                <option value="EUR">EUR</option>
-                <option value="CZK">Kč</option>
-            </select>
-            <br><br>
+                <label for="currency">Měna:</label>
+                <select name="currency" id="currency" required>
+                    <option value="EUR">EUR</option>
+                    <option value="CZK">Kč</option>
+                </select>
+                <br><br>
 
-            <label for="option">Možnost:</label>
-            <select name="option" required>
-                {% for option in options %}
-                    <option value="{{ option }}">{{ option }}</option>
-                {% endfor %}
-            </select>
-            <br><br>
+                <label for="option">Možnost:</label>
+                <select name="option" id="option" required>
+                    {% for option in options %}
+                        <option value="{{ option }}">{{ option }}</option>
+                    {% endfor %}
+                </select>
+                <br><br>
 
-            <label for="date">Datum:</label>
-            <input type="date" name="date" id="date" value="{{ current_date }}" required>
-            <br><br>
+                <label for="date">Datum:</label>
+                <input type="date" name="date" id="date" value="{{ current_date }}" required title="Vyberte datum zálohy" placeholder="Datum zálohy">
+                <br><br>
 
-            <button type="submit" class="btn btn-primary">Potvrdit</button>
-        </form>
+                <button type="submit" class="btn btn-primary">Potvrdit</button>
+            </form>
+        </section>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -69,13 +73,13 @@
 
         <h2>Historie záloh</h2>
 
-        <form method="GET" action="{{ url_for('zalohy') }}">
+        <form method="GET" action="{{ url_for('zalohy') }}" role="search" aria-label="Vyhledávání záloh">
             <label for="filter_employee">Zaměstnanec:</label>
             <input type="text" name="filter_employee" id="filter_employee">
             <button type="submit">Filtrovat</button>
         </form>
 
-        <table>
+        <table aria-label="Historie záloh zaměstnanců">
             <thead>
                 <tr>
                     <th>Zaměstnanec</th>

@@ -22,6 +22,7 @@ from pathlib import Path
 from config import Config
 from employee_management import EmployeeManager
 from excel_manager import ExcelManager
+from zalohy_manager import ZalohyManager
 
 # Nahrazení základního loggeru naším vlastním
 logger = setup_logger('app')
@@ -51,22 +52,40 @@ def get_settings():
     if 'settings' not in session:
         default_settings = Config.get_default_settings()
         try:
-            if os.path.exists(SETTINGS_FILE_PATH):
+            if SETTINGS_FILE_PATH.exists():
                 with open(SETTINGS_FILE_PATH, 'r', encoding='utf-8') as f:
-                    saved_settings = json.load(f)
-                    default_settings.update(saved_settings)
+                    try:
+                        saved_settings = json.load(f)
+                        # Validace načtených nastavení
+                        if not isinstance(saved_settings, dict):
+                            raise ValueError("Neplatný formát nastavení")
+                        default_settings.update(saved_settings)
+                    except json.JSONDecodeError:
+                        logger.error("Poškozený soubor s nastaveními")
+                        flash("Soubor s nastaveními je poškozen, používám výchozí nastavení.", "warning")
             session['settings'] = default_settings
         except Exception as e:
-            logger.error(f"Error loading settings: {e}")
+            logger.error(f"Chyba při načítání nastavení: {e}")
             session['settings'] = default_settings
     return session['settings']
 
 @app.route('/')
 def index():
-    excel_exists = os.path.exists(excel_manager.file_path)
-    current_date = datetime.now().strftime('%Y-%m-%d')
-    week_number = excel_manager.ziskej_cislo_tydne(current_date)
-    return render_template('index.html', excel_exists=excel_exists, week_number=week_number, current_date=current_date)
+    try:
+        excel_exists = excel_manager.file_path.exists()
+        current_date = datetime.now().strftime('%Y-%m-%d')
+        week_number = excel_manager.ziskej_cislo_tydne(current_date)
+        return render_template('index.html', 
+                             excel_exists=excel_exists, 
+                             week_number=week_number, 
+                             current_date=current_date)
+    except Exception as e:
+        logger.error(f"Chyba při načítání hlavní stránky: {e}")
+        flash('Došlo k neočekávané chybě při načítání stránky.', 'error')
+        return render_template('index.html', 
+                             excel_exists=False, 
+                             week_number=0, 
+                             current_date=datetime.now().strftime('%Y-%m-%d'))
 
 @app.route('/download')
 def download_file():
@@ -86,78 +105,170 @@ def validate_email(email):
 @app.route('/send_email', methods=['POST'])
 def send_email():
     try:
-        msg = MIMEMultipart()
-        msg['Subject'] = 'Hodiny_Cap.xlsx'
+        # Kontrola existence souboru
+        if not excel_manager.file_path.exists():
+            raise FileNotFoundError("Excel soubor nebyl nalezen")
+
+        # Kontrola konfigurace
+        if not Config.RECIPIENT_EMAIL:
+            raise ValueError("E-mailová adresa příjemce není nastavena v konfiguraci")
         
+        if not Config.SMTP_USERNAME or not Config.SMTP_PASSWORD:
+            raise ValueError("SMTP přihlašovací údaje nejsou nastaveny v konfiguraci")
+
+        if not Config.SMTP_SERVER or not Config.SMTP_PORT:
+            raise ValueError("SMTP server nebo port není nastaven v konfiguraci")
+
         # Validace emailových adres
         sender = Config.SMTP_USERNAME
-        recipient = RECIPIENT_EMAIL
+        recipient = Config.RECIPIENT_EMAIL
         
         if not all([validate_email(addr) for addr in [sender, recipient]]):
             raise ValueError("Neplatné emailové adresy")
-            
+
+        # Vytvoření zprávy
+        msg = MIMEMultipart()
+        msg['Subject'] = f'Hodiny_Cap.xlsx - {datetime.now().strftime("%Y-%m-%d")}'
         msg['From'] = sender
         msg['To'] = recipient
-
-        # Nastavení SSL/TLS kontextu
-        ssl_context = ssl.create_default_context()
         
+        # Přidání textu zprávy
+        body = f"""Dobrý den,
+
+v příloze zasílám aktuální výkaz pracovní doby ({EXCEL_FILE_NAME}).
+
+S pozdravem
+{Config.APP_NAME if hasattr(Config, 'APP_NAME') else 'Evidence pracovní doby'}
+"""
+        msg.attach(MIMEText(body, 'plain', 'utf-8'))
+
+        # Přidání přílohy
         with open(excel_manager.file_path, 'rb') as f:
             attachment = MIMEApplication(f.read(), _subtype="xlsx")
-            attachment.add_header('Content-Disposition', 'attachment', filename=EXCEL_FILE_NAME)
+            attachment.add_header('Content-Disposition', 'attachment', 
+                                filename=('utf-8', '', EXCEL_FILE_NAME))
             msg.attach(attachment)
 
-        with smtplib.SMTP_SSL(Config.SMTP_SERVER, Config.SMTP_PORT, context=ssl_context) as smtp:
+        # Nastavení SSL/TLS kontextu s vyšším zabezpečením
+        ssl_context = ssl.create_default_context()
+        ssl_context.minimum_version = ssl.TLSVersion.TLSv1_2
+        ssl_context.verify_mode = ssl.CERT_REQUIRED
+        
+        # Odeslání emailu
+        with smtplib.SMTP_SSL(Config.SMTP_SERVER, Config.SMTP_PORT, 
+                             context=ssl_context, timeout=30) as smtp:
             smtp.login(Config.SMTP_USERNAME, Config.SMTP_PASSWORD)
             smtp.send_message(msg)
 
-        flash('Email byl odeslán.', 'success')
+        flash('Email byl úspěšně odeslán.', 'success')
+        logger.info(f"Email s výkazem byl úspěšně odeslán na adresu {recipient}")
+
+    except FileNotFoundError as e:
+        logger.error(f"Soubor nebyl nalezen: {e}")
+        flash('Excel soubor nebyl nalezen.', 'error')
+    except ValueError as e:
+        logger.error(f"Chyba konfigurace: {e}")
+        flash(str(e), 'error')
+    except smtplib.SMTPAuthenticationError:
+        logger.error("Chyba při přihlášení k SMTP serveru")
+        flash('Nesprávné přihlašovací údaje k e-mailovému serveru.', 'error')
+    except smtplib.SMTPException as e:
+        logger.error(f"SMTP chyba: {e}")
+        flash('Chyba při komunikaci s e-mailovým serverem.', 'error')
+    except ssl.SSLError as e:
+        logger.error(f"SSL chyba: {e}")
+        flash('Chyba zabezpečeného spojení s e-mailovým serverem.', 'error')
     except Exception as e:
-        logger.error(f"Chyba při odesílání emailu: {e}")
+        logger.error(f"Neočekávaná chyba při odesílání emailu: {e}")
         flash('Chyba při odesílání emailu.', 'error')
+    
     return redirect(url_for('index'))
 
 @app.route('/zamestnanci', methods=['GET', 'POST'])
 def manage_employees():
     if request.method == 'POST':
-        action = request.form.get('action')
-        if action == 'add':
-            employee_name = request.form['name']
-            if employee_manager.pridat_zamestnance(employee_name):
-                flash(f'Zaměstnanec "{employee_name}" byl přidán.', 'success')
+        try:
+            action = request.form.get('action')
+            if not action:
+                raise ValueError("Nebyla specifikována akce")
+
+            if action == 'add':
+                employee_name = request.form.get('name', '').strip()
+                if not employee_name:
+                    raise ValueError("Jméno zaměstnance nemůže být prázdné")
+                if len(employee_name) > 100:
+                    raise ValueError("Jméno zaměstnance je příliš dlouhé")
+                if not employee_name.replace(' ', '').isalnum():
+                    raise ValueError("Jméno zaměstnance obsahuje nepovolené znaky")
+                
+                if employee_manager.pridat_zamestnance(employee_name):
+                    flash(f'Zaměstnanec "{employee_name}" byl přidán.', 'success')
+                else:
+                    flash(f'Zaměstnanec "{employee_name}" už existuje.', 'error')
+
+            elif action == 'select':
+                employee_name = request.form.get('employee_name', '')
+                if not employee_name:
+                    raise ValueError("Nebyl vybrán zaměstnanec")
+                
+                if employee_name in employee_manager.zamestnanci:
+                    if employee_name in employee_manager.vybrani_zamestnanci:
+                        employee_manager.odebrat_vybraneho_zamestnance(employee_name)
+                        flash(f'Zaměstnanec "{employee_name}" byl odebrán z výběru.', 'success')
+                    else:
+                        employee_manager.pridat_vybraneho_zamestnance(employee_name)
+                        flash(f'Zaměstnanec "{employee_name}" byl přidán do výběru.', 'success')
+                    employee_manager.save_config()
+                else:
+                    raise ValueError(f'Zaměstnanec "{employee_name}" neexistuje')
+
+            elif action == 'edit':
+                old_name = request.form.get('old_name', '').strip()
+                new_name = request.form.get('new_name', '').strip()
+                
+                if not old_name or not new_name:
+                    raise ValueError("Původní i nové jméno musí být vyplněno")
+                if len(new_name) > 100:
+                    raise ValueError("Nové jméno je příliš dlouhé")
+                if not new_name.replace(' ', '').isalnum():
+                    raise ValueError("Nové jméno obsahuje nepovolené znaky")
+                
+                try:
+                    idx = employee_manager.zamestnanci.index(old_name) + 1
+                    if employee_manager.upravit_zamestnance(idx, new_name):
+                        flash(f'Zaměstnanec "{old_name}" byl upraven na "{new_name}".', 'success')
+                    else:
+                        raise ValueError(f'Nepodařilo se upravit zaměstnance "{old_name}"')
+                except ValueError as e:
+                    if "list.index" in str(e):
+                        raise ValueError(f'Zaměstnanec "{old_name}" nebyl nalezen')
+                    raise
+
+            elif action == 'delete':
+                employee_name = request.form.get('employee_name', '')
+                if not employee_name:
+                    raise ValueError("Nebyl vybrán zaměstnanec k odstranění")
+                
+                try:
+                    idx = employee_manager.zamestnanci.index(employee_name) + 1
+                    if employee_manager.smazat_zamestnance(idx):
+                        flash(f'Zaměstnanec "{employee_name}" byl smazán.', 'success')
+                    else:
+                        raise ValueError(f'Nepodařilo se smazat zaměstnance "{employee_name}"')
+                except ValueError as e:
+                    if "list.index" in str(e):
+                        raise ValueError(f'Zaměstnanec "{employee_name}" nebyl nalezen')
+                    raise
+
             else:
-                flash(f'Zaměstnanec "{employee_name}" už existuje.', 'error')
-        elif action == 'select':
-            employee_name = request.form['employee_name']
-            if employee_name in employee_manager.zamestnanci:
-                if employee_name in employee_manager.vybrani_zamestnanci:
-                    employee_manager.odebrat_vybraneho_zamestnance(employee_name)
-                else:
-                    employee_manager.pridat_vybraneho_zamestnance(employee_name)
-                employee_manager.save_config()
-        elif action == 'edit':
-            old_name = request.form['old_name']
-            new_name = request.form['new_name']
-            try:
-                idx = employee_manager.zamestnanci.index(old_name) + 1
-                if employee_manager.upravit_zamestnance(idx, new_name):
-                    flash(f'Zaměstnanec "{old_name}" byl upraven na "{new_name}".', 'success')
-                else:
-                    flash(f'Nepodařilo se upravit zaměstnance "{old_name}".', 'error')
-            except ValueError:
-                flash(f'Zaměstnanec "{old_name}" nebyl nalezen.', 'error')
-        elif action == 'delete':
-            employee_name = request.form['employee_name']
-            try:
-                idx = employee_manager.zamestnanci.index(employee_name) + 1
-                if employee_manager.smazat_zamestnance(idx):
-                    flash(f'Zaměstnanec "{employee_name}" byl smazán.', 'success')
-                else:
-                    flash(f'Nepodařilo se smazat zaměstnance "{employee_name}".', 'error')
-            except ValueError:
-                flash(f'Zaměstnanec "{employee_name}" nebyl nalezen.', 'error')
-        else:
-            flash('Neplatná akce.', 'error')
+                raise ValueError("Neplatná akce")
+
+        except ValueError as e:
+            flash(str(e), 'error')
+            logger.error(f"Chyba při správě zaměstnanců: {e}")
+        except Exception as e:
+            flash('Došlo k neočekávané chybě při správě zaměstnanců.', 'error')
+            logger.error(f"Neočekávaná chyba při správě zaměstnanců: {e}")
 
     # Převedení seznamů na formát očekávaný šablonou
     employees = [
@@ -169,6 +280,10 @@ def manage_employees():
 @app.route('/zaznam', methods=['GET', 'POST'])
 def record_time():
     selected_employees = employee_manager.vybrani_zamestnanci
+    if not selected_employees:
+        flash('Nejsou vybráni žádní zaměstnanci.', 'warning')
+        return redirect(url_for('manage_employees'))
+
     current_date = datetime.now().strftime('%Y-%m-%d')
     settings = get_settings()
     start_time = settings.get('start_time', '07:00')
@@ -176,15 +291,55 @@ def record_time():
     lunch_duration = settings.get('lunch_duration', 1)
 
     if request.method == 'POST':
-        date = request.form['date']
-        start_time = request.form['start_time']
-        end_time = request.form['end_time']
-        lunch_duration = float(request.form['lunch_duration'])
+        try:
+            # Validace data
+            date = request.form.get('date', '')
+            try:
+                datetime.strptime(date, '%Y-%m-%d')
+            except ValueError:
+                raise ValueError("Neplatný formát data (použijte YYYY-MM-DD)")
 
-        # Uložení do Hodiny_Cap.xlsx
-        excel_manager.ulozit_pracovni_dobu(date, start_time, end_time, lunch_duration, selected_employees)
+            # Validace časů
+            start_time = request.form.get('start_time', '')
+            end_time = request.form.get('end_time', '')
+            try:
+                start = datetime.strptime(start_time, '%H:%M')
+                end = datetime.strptime(end_time, '%H:%M')
+                if end <= start:
+                    raise ValueError("Čas konce musí být později než čas začátku")
+            except ValueError as e:
+                if "musí být později" in str(e):
+                    raise
+                raise ValueError("Neplatný formát času (použijte HH:MM)")
 
-        flash('Pracovní doba byla zaznamenána.', 'success')
+            # Validace délky pauzy
+            lunch_duration_str = request.form.get('lunch_duration', '')
+            try:
+                lunch_duration = float(lunch_duration_str.replace(',', '.'))
+                if lunch_duration < 0:
+                    raise ValueError("Délka pauzy nemůže být záporná")
+                work_hours = (end - start).seconds / 3600
+                if lunch_duration >= work_hours:
+                    raise ValueError("Délka pauzy nemůže být delší než pracovní doba")
+            except ValueError as e:
+                if any(msg in str(e) for msg in ["nemůže být záporná", "nemůže být delší"]):
+                    raise
+                raise ValueError("Délka pauzy musí být číslo")
+
+            # Uložení do Hodiny_Cap.xlsx
+            try:
+                excel_manager.ulozit_pracovni_dobu(date, start_time, end_time, lunch_duration, selected_employees)
+                flash('Pracovní doba byla úspěšně zaznamenána.', 'success')
+            except Exception as e:
+                logger.error(f"Chyba při ukládání do Excel souboru: {e}")
+                raise ValueError("Nepodařilo se uložit pracovní dobu do Excel souboru")
+
+        except ValueError as e:
+            flash(str(e), 'error')
+            logger.error(f"Chyba validace pracovní doby: {e}")
+        except Exception as e:
+            flash('Došlo k neočekávané chybě při ukládání pracovní doby.', 'error')
+            logger.error(f"Neočekávaná chyba při ukládání pracovní doby: {e}")
 
     return render_template(
         'record_time.html',
@@ -200,133 +355,229 @@ def excel_viewer():
     excel_files = ['Hodiny_Cap.xlsx', 'Hodiny2025.xlsx']
     selected_file = request.args.get('file', excel_files[0])
     active_sheet = request.args.get('sheet', None)
+    workbook = None
 
     try:
+        # Určení cesty k souboru
         if selected_file == 'Hodiny_Cap.xlsx':
-            workbook = load_workbook(excel_manager.file_path, read_only=True)
+            file_path = excel_manager.file_path
         elif selected_file == 'Hodiny2025.xlsx':
-            workbook = load_workbook(os.path.join(EXCEL_BASE_PATH, EXCEL_FILE_NAME_2025), read_only=True)
+            file_path = EXCEL_BASE_PATH / EXCEL_FILE_NAME_2025
         else:
-            raise ValueError("Neplatný název souboru.")
+            raise ValueError("Neplatný název souboru")
 
-        sheet_names = workbook.sheetnames
-        if active_sheet is None:
-            active_sheet = sheet_names[0]
+        if not file_path.exists():
+            raise FileNotFoundError(f"Soubor {selected_file} nebyl nalezen")
 
-        if active_sheet not in sheet_names:
-            raise ValueError("Neplatný název listu.")
+        # Načtení workbooku v read-only módu pro úsporu paměti
+        workbook = load_workbook(file_path, read_only=True, data_only=True)
+        
+        if not workbook.sheetnames:
+            raise ValueError("Excel soubor neobsahuje žádné listy")
 
+        # Výběr aktivního listu
+        active_sheet = active_sheet if active_sheet in workbook.sheetnames else workbook.sheetnames[0]
         sheet = workbook[active_sheet]
-        data = [[cell.value for cell in row] for row in sheet.iter_rows()]
+
+        # Načtení dat s omezením počtu řádků pro prevenci přetížení paměti
+        MAX_ROWS = 1000
+        data = []
+        for i, row in enumerate(sheet.iter_rows(values_only=True)):
+            if i >= MAX_ROWS:
+                flash(f'Zobrazeno prvních {MAX_ROWS} řádků.', 'warning')
+                break
+            data.append([str(cell) if cell is not None else '' for cell in row])
 
         return render_template(
             'excel_viewer.html',
             excel_files=excel_files,
             selected_file=selected_file,
-            sheet_names=sheet_names,
+            sheet_names=workbook.sheetnames,
             active_sheet=active_sheet,
             data=data
         )
 
+    except FileNotFoundError as e:
+        logger.error(f"Soubor nebyl nalezen: {e}")
+        flash('Požadovaný Excel soubor nebyl nalezen.', 'error')
     except InvalidFileException:
-        flash('Soubor nebyl nalezen nebo je poškozen.', 'error')
-        return redirect(url_for('index'))
+        logger.error(f"Soubor {selected_file} je poškozen")
+        flash('Soubor je poškozen nebo má neplatný formát.', 'error')
+    except ValueError as e:
+        logger.error(f"Chyba při práci s Excel souborem: {e}")
+        flash(str(e), 'error')
+    except PermissionError:
+        logger.error(f"Nedostatečná oprávnění pro čtení souboru {selected_file}")
+        flash('Nedostatečná oprávnění pro čtení souboru.', 'error')
     except Exception as e:
-        logger.error(f"Chyba při zobrazení Excel souboru: {e}")
+        logger.error(f"Neočekávaná chyba při zobrazení Excel souboru: {e}")
         flash('Chyba při zobrazení Excel souboru.', 'error')
-        return redirect(url_for('index'))
+    finally:
+        if workbook:
+            workbook.close()
+
+    return redirect(url_for('index'))
 
 @app.route('/settings', methods=['GET', 'POST'])
 def settings_page():
     """Handle settings page"""
     if request.method == 'POST':
         try:
-            new_settings = get_settings()  # Get current settings as base
+            # Validace vstupních dat
+            start_time = request.form.get('start_time', '')
+            end_time = request.form.get('end_time', '')
+            lunch_duration_str = request.form.get('lunch_duration', '')
+
+            # Validace času
+            try:
+                datetime.strptime(start_time, '%H:%M')
+                datetime.strptime(end_time, '%H:%M')
+            except ValueError:
+                raise ValueError("Neplatný formát času (použijte HH:MM)")
+
+            # Validace délky pauzy
+            try:
+                lunch_duration = float(lunch_duration_str.replace(',', '.'))
+                if lunch_duration < 0:
+                    raise ValueError
+            except ValueError:
+                raise ValueError("Délka pauzy musí být nezáporné číslo")
+
+            # Validace dat projektu
+            project_start = request.form.get('start_date', '')
+            project_end = request.form.get('end_date', '')
+            
+            if project_start and project_end:
+                try:
+                    start_date = datetime.strptime(project_start, '%Y-%m-%d')
+                    end_date = datetime.strptime(project_end, '%Y-%m-%d')
+                    if end_date < start_date:
+                        raise ValueError("Datum konce projektu nemůže být dřívější než datum začátku")
+                except ValueError as e:
+                    if "nemůže být dřívější" in str(e):
+                        raise
+                    raise ValueError("Neplatný formát data (použijte YYYY-MM-DD)")
+
+            # Aktualizace nastavení
+            new_settings = get_settings()
             new_settings.update({
-                'start_time': request.form['start_time'],
-                'end_time': request.form['end_time'],
-                'lunch_duration': float(request.form['lunch_duration']),
+                'start_time': start_time,
+                'end_time': end_time,
+                'lunch_duration': lunch_duration,
                 'project_info': {
-                    'name': request.form.get('project_name', ''),
-                    'start_date': request.form.get('start_date', ''),
-                    'end_date': request.form.get('end_date', '')
+                    'name': request.form.get('project_name', '').strip(),
+                    'start_date': project_start,
+                    'end_date': project_end
                 }
             })
 
-            # Ensure settings directory exists
-            os.makedirs(os.path.dirname(SETTINGS_FILE_PATH), exist_ok=True)
+            # Vytvoření adresáře pro nastavení, pokud neexistuje
+            SETTINGS_FILE_PATH.parent.mkdir(parents=True, exist_ok=True)
             
-            # Save new settings
+            # Uložení nastavení
             with open(SETTINGS_FILE_PATH, 'w', encoding='utf-8') as f:
-                json.dump(new_settings, f, indent=4)
+                json.dump(new_settings, f, indent=4, ensure_ascii=False)
             
             session['settings'] = new_settings
-            excel_manager.update_project_info(
-                new_settings['project_info']['name'],
-                new_settings['project_info']['start_date'],
-                new_settings['project_info']['end_date']
-            )
+            
+            # Aktualizace informací o projektu v Excel souboru
+            if new_settings['project_info']['name']:
+                excel_manager.update_project_info(
+                    new_settings['project_info']['name'],
+                    new_settings['project_info']['start_date'],
+                    new_settings['project_info']['end_date']
+                )
+            
             flash('Nastavení bylo úspěšně uloženo.', 'success')
             
+        except ValueError as e:
+            flash(str(e), 'error')
+            logger.error(f"Chyba validace nastavení: {e}")
         except Exception as e:
-            logger.error(f"Error saving settings: {e}")
-            flash('Chyba při ukládání nastavení.', 'error')
+            flash('Došlo k neočekávané chybě při ukládání nastavení.', 'error')
+            logger.error(f"Neočekávaná chyba při ukládání nastavení: {e}")
             
     return render_template('settings_page.html', settings=get_settings())
 
 @app.route('/zalohy', methods=['GET', 'POST'])
 def zalohy():
+    zalohy_manager = ZalohyManager(EXCEL_BASE_PATH)
+    advance_history = []
+
     if request.method == 'POST':
         try:
-            employee_name = request.form['employee_name']
-            amount = float(request.form['amount'])
-            currency = request.form['currency']
-            option = request.form['option']
-            date = request.form['date']
+            # Validace vstupních dat
+            employee_name = request.form.get('employee_name')
+            if not employee_name:
+                raise ValueError("Jméno zaměstnance je povinné")
 
-            # Vytvoření instance ZalohyManager
-            zalohy_manager = ZalohyManager(EXCEL_BASE_PATH)
+            amount_str = request.form.get('amount')
+            try:
+                amount = float(amount_str.replace(',', '.'))
+                if amount <= 0:
+                    raise ValueError
+            except (ValueError, AttributeError):
+                raise ValueError("Částka musí být kladné číslo")
 
-            # Validace a uložení zálohy
-            zalohy_manager.add_or_update_employee_advance(employee_name, amount, currency, option, date)
+            currency = request.form.get('currency')
+            if not currency in ['CZK', 'EUR']:
+                raise ValueError("Neplatná měna")
+
+            option = request.form.get('option')
+            if not option:
+                raise ValueError("Typ zálohy je povinný")
+
+            date = request.form.get('date')
+            try:
+                datetime.strptime(date, '%Y-%m-%d')
+            except ValueError:
+                raise ValueError("Neplatný formát data")
+
+            # Uložení zálohy
+            zalohy_manager.add_or_update_employee_advance(
+                employee_name=employee_name,
+                amount=amount,
+                currency=currency,
+                option=option,
+                date=date
+            )
             flash('Záloha byla úspěšně uložena.', 'success')
 
         except ValueError as e:
-            flash(f'Chyba validace: {str(e)}', 'error')
+            flash(str(e), 'error')
             logger.error(f"Chyba validace zálohy: {e}")
         except Exception as e:
-            flash(f'Chyba při ukládání zálohy: {str(e)}', 'error')
-            logger.error(f"Chyba při ukládání zálohy: {e}")
+            flash('Došlo k neočekávané chybě při ukládání zálohy.', 'error')
+            logger.error(f"Neočekávaná chyba při ukládání zálohy: {e}")
 
-    employees = employee_manager.zamestnanci
-    options = excel_manager.get_advance_options()
-    current_date = datetime.now().strftime('%Y-%m-%d')
-
-    # Načtení historie záloh z Hodiny2025.xlsx
+    # Načtení historie záloh
     try:
-        hodiny2025_path = os.path.join(EXCEL_BASE_PATH, EXCEL_FILE_NAME_2025)
-        if not os.path.exists(hodiny2025_path):
-            logger.error(f"Soubor {EXCEL_FILE_NAME_2025} nebyl nalezen")
-            flash(f'Soubor {EXCEL_FILE_NAME_2025} nebyl nalezen', 'error')
-            advance_history = []
+        hodiny2025_path = EXCEL_BASE_PATH / EXCEL_FILE_NAME_2025
+        if not hodiny2025_path.exists():
+            logger.warning(f"Soubor {EXCEL_FILE_NAME_2025} nebyl nalezen")
+            flash(f'Soubor se záznamy záloh nebyl nalezen.', 'warning')
         else:
-            workbook_2025 = load_workbook(hodiny2025_path)
+            workbook_2025 = load_workbook(hodiny2025_path, read_only=True)
             if 'Zalohy25' in workbook_2025.sheetnames:
                 sheet = workbook_2025['Zalohy25']
                 data = list(sheet.values)
-                keys = data[0]  # Předpokládáme, že první řádek obsahuje hlavičky
-                advance_history = [dict(zip(keys, row)) for row in data[1:]]  # Vytvoření seznamu slovníků
-            else:
-                advance_history = []
+                if data:
+                    keys = [str(k) for k in data[0] if k is not None]  # Konverze na string a odstranění None
+                    advance_history = [
+                        {k: v for k, v in zip(keys, row) if k is not None}
+                        for row in data[1:] if any(cell is not None for cell in row)
+                    ]
+            workbook_2025.close()
+
     except Exception as e:
-        logger.error(f"Chyba při načítání historie záloh: {str(e)}")
-        advance_history = []
+        logger.error(f"Chyba při načítání historie záloh: {e}")
+        flash('Chyba při načítání historie záloh.', 'error')
 
     return render_template(
         'zalohy.html',
-        employees=employees,
-        options=options,
-        current_date=current_date,
+        employees=employee_manager.zamestnanci,
+        options=excel_manager.get_advance_options(),
+        current_date=datetime.now().strftime('%Y-%m-%d'),
         advance_history=advance_history
     )
 

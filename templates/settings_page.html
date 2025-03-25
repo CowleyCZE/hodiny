@@ -28,15 +28,15 @@
             <h2>Data Projektu</h2>
             <div class="form-group">
                 <label for="project_name">Název projektu:</label>
-                <input type="text" name="project_name" value="{{ settings.project_info.name if settings.project_info.name else '' }}" class="form-control" required>
+                <input type="text" name="project_name" value="{{ settings.project_info.name if settings.project_info.name else '' }}" class="form-control" required title="Zadejte název projektu" placeholder="Název projektu">
             </div>
             <div class="form-group">
                 <label for="start_date">Začátek projektu:</label>
-                <input type="date" name="start_date" value="{{ settings.project_info.start_date if settings.project_info.start_date else '' }}" class="form-control" required>
+                <input type="date" name="start_date" value="{{ settings.project_info.start_date if settings.project_info.start_date else '' }}" class="form-control" required title="Vyberte datum začátku projektu" placeholder="Začátek projektu">
             </div>
             <div class="form-group">
                 <label for="end_date">Konec projektu:</label>
-                <input type="date" name="end_date" value="{{ settings.project_info.end_date if settings.project_info.end_date else '' }}" class="form-control" required>
+                <input type="date" name="end_date" value="{{ settings.project_info.end_date if settings.project_info.end_date else '' }}" class="form-control" required title="Vyberte datum konce projektu" placeholder="Konec projektu">
             </div>
 
             <h2>Přednastavené časy</h2>
@@ -55,7 +55,7 @@
             <h2>Číslo akce</h2>
             <div class="form-group">
                 <label for="cislo_akce">Číslo akce:</label>
-                <input type="number" name="cislo_akce" value="{{ settings.cislo_akce if settings.cislo_akce else '' }}" class="form-control" required>
+                <input type="number" name="cislo_akce" value="{{ settings.cislo_akce if settings.cislo_akce else '' }}" class="form-control" required title="Zadejte číslo akce" placeholder="Číslo akce">
             </div>
 
             <button type="submit" class="btn btn-primary">Uložit nastavení</button>

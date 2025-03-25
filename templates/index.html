@@ -41,7 +41,7 @@
                 <h3>Operace se souborem Hodiny_Cap.xlsx:</h3>
                 <div class="button-group">
                     <a href="{{ url_for('download_file') }}" class="btn btn-primary">Stáhnout soubor</a>
-                    <form action="{{ url_for('send_email') }}" method="post" style="display: inline;">
+                    <form action="{{ url_for('send_email') }}" method="post" class="inline-form">
                         <button type="submit" class="btn btn-success">Odeslat emailem</button>
                     </form>
                 </div>

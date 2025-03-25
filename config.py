@@ -1,4 +1,5 @@
 import os
+import secrets
 from dataclasses import dataclass
 from typing import Optional
 from pathlib import Path
@@ -16,8 +17,8 @@ class TimeConfig:
     lunch_duration: float = 1.0
 
 class Config:
-    # Bezpečnostní nastavení
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'vygeneruj-bezpecny-klic'
+    # Bezpečnostní nastavení - generování bezpečného klíče při startu
+    SECRET_KEY = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
     
     # Základní adresář - používá Path pro lepší přenositelnost
     BASE_DIR = Path(os.environ.get('HODINY_BASE_DIR', '.')).resolve()
@@ -34,7 +35,7 @@ class Config:
     SMTP_PORT = int(os.environ.get('SMTP_PORT') or 465)
     SMTP_USERNAME = os.environ.get('SMTP_USERNAME')
     SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD')
-    RECIPIENT_EMAIL = os.environ.get('RECIPIENT_EMAIL') or 'cowleyy@gmail.com'
+    RECIPIENT_EMAIL = os.environ.get('RECIPIENT_EMAIL')  # Musí být nastaveno v prostředí
 
     # Výchozí konfigurace
     DEFAULT_PROJECT_CONFIG = ProjectConfig()

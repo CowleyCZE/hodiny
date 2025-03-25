@@ -2,6 +2,7 @@
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Správa zaměstnanců</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
@@ -42,7 +43,7 @@
         <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
     </header>
 
-    <nav class="nav">
+    <nav class="nav" aria-label="Hlavní navigace">
         <a href="{{ url_for('index') }}">Hlavní stránka</a>
         <a href="{{ url_for('manage_employees') }}">Zaměstnanci</a>
         <a href="{{ url_for('record_time') }}">Záznam pracovní doby</a>
@@ -56,50 +57,54 @@
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                {% for category, message in messages %}
-                    <div class="flash-message {{ category }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
+                <div class="flash-messages" role="alert" aria-live="polite">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
             {% endif %}
         {% endwith %}
 
-        <div id="add-employee" class="section">
-            <h2>Přidat zaměstnance</h2>
-            <form method="POST" action="{{ url_for('manage_employees') }}">
+        <section id="add-employee" class="section" aria-labelledby="add-employee-heading">
+            <h2 id="add-employee-heading">Přidat zaměstnance</h2>
+            <form method="POST" action="{{ url_for('manage_employees') }}" aria-label="Formulář pro přidání zaměstnance">
                 <input type="hidden" name="action" value="add">
-                <label for="name">Jméno zaměstnance:</label>
-                <input type="text" id="name" name="name" required>
+                <div class="form-group">
+                    <label for="name">Jméno zaměstnance:</label>
+                    <input type="text" id="name" name="name" required aria-required="true">
+                </div>
                 <button type="submit">Přidat zaměstnance</button>
             </form>
-        </div>
+        </section>
 
         <div class="employee-container">
-            <div class="employee-list">
-                <h2>Seznam zaměstnanců</h2>
+            <section class="employee-list" aria-labelledby="unselected-employees-heading">
+                <h2 id="unselected-employees-heading">Seznam zaměstnanců</h2>
                 {% if employees %}
-                    <ul>
+                    <ul role="list">
                     {% for employee in employees|sort(attribute='name') if not employee.selected %}
                         <li class="employee-item">
                             <span>{{ employee.name }}</span>
                             <div class="employee-actions">
-                                <form method="POST" action="{{ url_for('manage_employees') }}" style="display: inline;">
+                                <form method="POST" action="{{ url_for('manage_employees') }}" class="inline-form">
                                     <input type="hidden" name="action" value="select">
                                     <input type="hidden" name="employee_name" value="{{ employee.name }}">
                                     <button type="submit">Označit</button>
                                 </form>
-                                <button onclick="showEditForm('{{ employee.name }}')">Upravit</button>
-                                <form method="POST" action="{{ url_for('manage_employees') }}" style="display: inline;">
+                                <button type="button" onclick="showEditForm('{{ employee.name }}')" aria-expanded="false" aria-controls="edit-form-{{ employee.name|replace(' ', '_') }}">Upravit</button>
+                                <form method="POST" action="{{ url_for('manage_employees') }}" class="inline-form">
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="employee_name" value="{{ employee.name }}">
-                                    <button type="submit" onclick="return confirm('Opravdu chcete smazat tohoto zaměstnance?')">Smazat</button>
+                                    <button type="submit" data-confirm="delete">Smazat</button>
                                 </form>
                             </div>
-                            <div id="edit-form-{{ employee.name|replace(' ', '_') }}" class="edit-form">
+                            <div id="edit-form-{{ employee.name|replace(' ', '_') }}" class="edit-form" aria-label="Formulář pro úpravu zaměstnance">
                                 <form method="POST" action="{{ url_for('manage_employees') }}">
                                     <input type="hidden" name="action" value="edit">
                                     <input type="hidden" name="old_name" value="{{ employee.name }}">
-                                    <input type="text" name="new_name" value="{{ employee.name }}" required>
+                                    <input type="text" name="new_name" value="{{ employee.name }}" required aria-required="true">
                                     <button type="submit">Uložit</button>
                                 </form>
                             </div>
@@ -109,33 +114,33 @@
                 {% else %}
                     <p>Zatím nejsou přidáni žádní zaměstnanci.</p>
                 {% endif %}
-            </div>
+            </section>
 
-            <div class="employee-list">
-                <h2>Označení zaměstnanci</h2>
+            <section class="employee-list" aria-labelledby="selected-employees-heading">
+                <h2 id="selected-employees-heading">Označení zaměstnanci</h2>
                 {% if employees %}
-                    <ul>
+                    <ul role="list">
                     {% for employee in employees|sort(attribute='name') if employee.selected %}
                         <li class="employee-item">
                             <span>{{ employee.name }}</span>
                             <div class="employee-actions">
-                                <form method="POST" action="{{ url_for('manage_employees') }}" style="display: inline;">
+                                <form method="POST" action="{{ url_for('manage_employees') }}" class="inline-form">
                                     <input type="hidden" name="action" value="select">
                                     <input type="hidden" name="employee_name" value="{{ employee.name }}">
                                     <button type="submit">Odznačit</button>
                                 </form>
-                                <button onclick="showEditForm('{{ employee.name }}')">Upravit</button>
-                                <form method="POST" action="{{ url_for('manage_employees') }}" style="display: inline;">
+                                <button type="button" onclick="showEditForm('{{ employee.name }}')" aria-expanded="false" aria-controls="edit-form-{{ employee.name|replace(' ', '_') }}">Upravit</button>
+                                <form method="POST" action="{{ url_for('manage_employees') }}" class="inline-form">
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="employee_name" value="{{ employee.name }}">
-                                    <button type="submit" onclick="return confirm('Opravdu chcete smazat tohoto zaměstnance?')">Smazat</button>
+                                    <button type="submit" data-confirm="delete">Smazat</button>
                                 </form>
                             </div>
-                            <div id="edit-form-{{ employee.name|replace(' ', '_') }}" class="edit-form">
+                            <div id="edit-form-{{ employee.name|replace(' ', '_') }}" class="edit-form" aria-label="Formulář pro úpravu zaměstnance">
                                 <form method="POST" action="{{ url_for('manage_employees') }}">
                                     <input type="hidden" name="action" value="edit">
                                     <input type="hidden" name="old_name" value="{{ employee.name }}">
-                                    <input type="text" name="new_name" value="{{ employee.name }}" required>
+                                    <input type="text" name="new_name" value="{{ employee.name }}" required aria-required="true">
                                     <button type="submit">Uložit</button>
                                 </form>
                             </div>
@@ -143,7 +148,7 @@
                     {% endfor %}
                     </ul>
                 {% endif %}
-            </div>
+            </section>
         </div>
     </main>
 
@@ -151,12 +156,6 @@
         <p>&copy; 2024 Správa zaměstnanců</p>
     </footer>
 
-    <script>
-        function showEditForm(employeeName) {
-            const formId = `edit-form-${employeeName.replace(/ /g, '_')}`;
-            const form = document.getElementById(formId);
-            form.classList.toggle('active');
-        }
-    </script>
+    <script src="{{ url_for('static', filename='js/employee-management.js') }}"></script>
 </body>
 </html>

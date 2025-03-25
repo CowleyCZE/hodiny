@@ -272,16 +272,3 @@ class EmployeeManager:
             logger.error(f"Chyba při vytváření seznamu zaměstnanců: {str(e)}")
             return []
 
-    def get_employee_row(self, employee_name):
-        workbook = None
-        try:
-            workbook = self.nacti_nebo_vytvor_excel()
-            sheet = workbook[self.ZALOHY_SHEET_NAME]
-            for row in range(self.EMPLOYEE_START_ROW, sheet.max_row + 1):
-                if sheet.cell(row=row, column=1).value == employee_name:
-                    return row
-            return None
-        finally:
-            if workbook:
-                workbook.close()
-

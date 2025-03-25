@@ -55,7 +55,7 @@
             <h2>Číslo akce</h2>
             <div class="form-group">
                 <label for="cislo_akce">Číslo akce:</label>
-                <input type="number" name="cislo_akce" value="{{ settings.cislo_akce if settings.cislo_akce else '' }}" class="form-control" required title="Zadejte číslo akce" placeholder="Číslo akce">
+                <input type="number" name="cislo_akce" value="{{ settings.get('cislo_akce', '') }}" class="form-control" required title="Zadejte číslo akce" placeholder="Číslo akce">
             </div>
 
             <button type="submit" class="btn btn-primary">Uložit nastavení</button>

@@ -27,11 +27,17 @@ def load_settings():
             return default_settings
 
         with open(Config.SETTINGS_FILE_PATH, 'r', encoding='utf-8') as f:
-            saved_settings = json.load(f)
+            try:
+                saved_settings = json.load(f)
+            except json.JSONDecodeError as e:
+                logger.error(f"Chyba při parsování JSON: {str(e)}")
+                logger.info("Použití výchozích hodnot kvůli poškození souboru s nastavením")
+                return default_settings
             
             # Validace struktury nastavení
             if not isinstance(saved_settings, dict):
-                raise ValueError("Neplatný formát nastavení")
+                logger.error("Neplatný formát nastavení - očekáván slovník")
+                return default_settings
                 
             # Sloučení časového nastavení
             for key in vars(Config.DEFAULT_TIME_CONFIG):
@@ -45,12 +51,23 @@ def load_settings():
                     for key in vars(Config.DEFAULT_PROJECT_CONFIG):
                         if key in project_info:
                             default_settings['project_info'][key] = project_info[key]
+                else:
+                    logger.warning("Projektové informace nejsou ve formátu slovníku")
             
             logger.info("Nastavení úspěšně načteno")
             return default_settings
             
+    except FileNotFoundError as e:
+        logger.error(f"Soubor s nastavením nenalezen: {str(e)}")
+        return default_settings
+    except PermissionError as e:
+        logger.error(f"Nedostatečná oprávnění pro přístup k souboru: {str(e)}")
+        return default_settings
+    except IsADirectoryError:
+        logger.error(f"Zadaná cesta {Config.SETTINGS_FILE_PATH} je adresář, ne soubor")
+        return default_settings
     except Exception as e:
-        logger.error(f"Chyba při načítání nastavení: {str(e)}")
+        logger.error(f"Neočekávaná chyba při načítání nastavení: {str(e)}")
         return default_settings
 
 def save_settings(settings_data):
@@ -82,38 +99,6 @@ def save_settings(settings_data):
     except Exception as e:
         logging.error(f"Chyba při ukládání nastavení: {e}")
         return False
-
-@app.route('/settings', methods=['GET', 'POST'])
-def settings_page():
-    """Zobrazení a zpracování stránky pro nastavení."""
-    if request.method == 'POST':
-        logging.info("Přijat POST požadavek na stránce nastavení")
-        settings_data = {
-            'start_time': request.form['start_time'],
-            'end_time': request.form['end_time'],
-            'lunch_duration': float(request.form['lunch_duration']),
-            'project_info': {
-                'name': request.form['project_name'],
-                'start_date': request.form['start_date'],
-                'end_date': request.form['end_date']
-            }
-        }
-        logging.debug(f"Přijatá data nastavení: {settings_data}")
-
-        # Zápis nastavení
-        if save_settings(settings_data):
-            logging.info(f"Nastavení pro projekt '{settings_data['project_info']['name']}' úspěšně uložena")
-            flash(f'Nastavení pro projekt "{settings_data["project_info"]["name"]}" byla úspěšně uložena.', 'success')
-        else:
-            logging.error("Chyba při ukládání nastavení")
-            flash('Chyba při ukládání nastavení.', 'error')
-
-        return redirect(url_for('settings_page'))
-
-    # Načtení aktuálního nastavení
-    current_settings = load_settings()
-    logging.debug(f"Načtená aktuální nastavení: {current_settings}")
-    return render_template('settings_page.html', settings=current_settings)
 
 if __name__ == '__main__':
     app.run(debug=True)

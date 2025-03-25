@@ -1,5 +1,8 @@
 import logging
+import os
 from pathlib import Path
+from logging.handlers import RotatingFileHandler
+from config import Config
 
 def setup_logger(name):
     """
@@ -10,30 +13,39 @@ def setup_logger(name):
     if not logger.handlers:
         logger.setLevel(logging.INFO)
         
-        # Vytvoření log adresáře, pokud neexistuje
-        log_dir = Path('logs')
+        # Vytvoření log adresáře v závislosti na prostředí
+        if Config.IS_PYTHONANYWHERE:
+            log_dir = Path(os.path.expanduser('~/hodiny/logs'))
+        else:
+            log_dir = Path('logs')
         log_dir.mkdir(exist_ok=True)
         
-        # File handler - použití Path pro spojování cest
-        file_handler = logging.FileHandler(
+        # File handler s rotací - použití Path pro spojování cest
+        file_handler = RotatingFileHandler(
             log_dir / f'{name}.log',
+            maxBytes=1024 * 1024,  # 1MB
+            backupCount=5,
             encoding='utf-8'
         )
         file_handler.setLevel(logging.INFO)
         
-        # Console handler
-        console_handler = logging.StreamHandler()
-        console_handler.setLevel(logging.INFO)
+        # Console handler pouze pro lokální prostředí
+        if not Config.IS_PYTHONANYWHERE:
+            console_handler = logging.StreamHandler()
+            console_handler.setLevel(logging.INFO)
+            console_formatter = logging.Formatter(
+                '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                datefmt='%Y-%m-%d %H:%M:%S'
+            )
+            console_handler.setFormatter(console_formatter)
+            logger.addHandler(console_handler)
         
-        # Formát pro oba handlery
-        formatter = logging.Formatter(
+        # Formát pro file handler
+        file_formatter = logging.Formatter(
             '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S'
         )
-        file_handler.setFormatter(formatter)
-        console_handler.setFormatter(formatter)
-        
+        file_handler.setFormatter(file_formatter)
         logger.addHandler(file_handler)
-        logger.addHandler(console_handler)
     
     return logger

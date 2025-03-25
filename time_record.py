@@ -29,9 +29,6 @@ from excel_manager import ExcelManager
 from employee_management import EmployeeManager  # Import správné třídy
 from settings import load_settings  # Import funkce pro načítání nastavení
 from config import Config
-from utils.logger import setup_logger
-
-logger = setup_logger('time_record')
 
 def check_dependencies():
     try:

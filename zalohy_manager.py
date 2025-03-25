@@ -21,7 +21,7 @@ class ZalohyManager:
         self.ZALOHY_SHEET_NAME = 'Zálohy'
         self.EMPLOYEE_START_ROW = 9
         self.VALID_CURRENCIES = ['EUR', 'CZK']
-        self.VALID_OPTIONS = ['option1', 'option2']
+        self.VALID_OPTIONS = ['Option 1', 'Option 2']  # Změněno z 'option1', 'option2'
         os.makedirs(self.excel_path, exist_ok=True)
 
     def validate_amount(self, amount):
@@ -130,9 +130,9 @@ class ZalohyManager:
                 row = self.get_next_empty_row(sheet)
                 sheet.cell(row=row, column=1, value=employee_name)
             
-            if option == 'option1':
+            if option == 'Option 1':  # Změněno z 'option1'
                 column = 2 if currency == 'EUR' else 3
-            else:  # option2
+            else:  # Option 2
                 column = 4 if currency == 'EUR' else 5
             
             current_value = sheet.cell(row=row, column=column).value or 0
@@ -193,8 +193,9 @@ class ZalohyManager:
 
 if __name__ == "__main__":
     # Test code
-    manager = ZalohyManager()
-    manager.add_or_update_employee_advance("Jan Novák", 100, 'EUR', 'option1', '2023-05-01')
-    manager.add_or_update_employee_advance("Jan Novák", 2000, 'CZK', 'option2', '2023-05-02')
+    excel_path = "/home/Cowley/excel"  # Nastavení správné cesty k Excel souborům
+    manager = ZalohyManager(excel_path)
+    manager.add_or_update_employee_advance("Jan Novák", 100, 'EUR', 'Option 1', '2023-05-01')
+    manager.add_or_update_employee_advance("Jan Novák", 2000, 'CZK', 'Option 2', '2023-05-02')
     print(manager.get_employee_advances("Jan Novák"))
     print(manager.get_option_names())

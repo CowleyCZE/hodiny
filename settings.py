@@ -75,7 +75,7 @@ def save_settings(settings_data):
         start_date = settings_data['project_info']['start_date']
         end_date = settings_data['project_info']['end_date']
 
-        excel_manager.update_project_info_in_advances(project_name, start_date, end_date)
+        excel_manager.update_project_info(project_name, start_date, end_date)
 
         logging.info("Nastavení byla úspěšně uložena.")
         return True

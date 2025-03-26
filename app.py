@@ -17,6 +17,7 @@ import smtplib
 import ssl
 from email.utils import parseaddr
 from pathlib import Path
+from openpyxl.workbook import Workbook
 
 # Local imports
 from config import Config
@@ -73,7 +74,46 @@ def get_settings():
 @app.route('/')
 def index():
     try:
-        excel_exists = excel_manager.file_path.exists()
+        # Použijeme Path pro konzistentní práci s cestami
+        excel_path = Path(excel_manager.file_path)
+        excel_exists = excel_path.exists()
+        
+        # Pokud soubor neexistuje, pokusíme se ho vytvořit prázdný
+        if not excel_exists:
+            try:
+                # Ujistíme se, že adresář existuje
+                excel_path.parent.mkdir(parents=True, exist_ok=True)
+                # Vytvoříme nový workbook
+                wb = Workbook()
+                # Přidáme výchozí list
+                if "Sheet" in wb.sheetnames:
+                    sheet = wb["Sheet"]
+                    sheet.title = "Týden"
+                else:
+                    sheet = wb.create_sheet("Týden")
+                # Uložíme workbook
+                wb.save(str(excel_path))
+                excel_exists = True
+                logger.info(f"Vytvořen nový Excel soubor: {excel_path}")
+            except Exception as e:
+                logger.error(f"Nepodařilo se vytvořit Excel soubor: {e}")
+        
+        # Kontrola existence druhého Excel souboru
+        excel_path_2025 = Path(excel_manager.file_path_2025)
+        if not excel_path_2025.exists():
+            try:
+                excel_path_2025.parent.mkdir(parents=True, exist_ok=True)
+                wb = Workbook()
+                # Přidáme výchozí listy
+                if "Sheet" in wb.sheetnames:
+                    sheet = wb["Sheet"]
+                    sheet.title = "Zalohy25"
+                wb.create_sheet("(pp)cash25")
+                wb.save(str(excel_path_2025))
+                logger.info(f"Vytvořen nový Excel soubor: {excel_path_2025}")
+            except Exception as e:
+                logger.error(f"Nepodařilo se vytvořit Excel soubor Hodiny2025.xlsx: {e}")
+        
         current_date = datetime.now().strftime('%Y-%m-%d')
         week_number = excel_manager.ziskej_cislo_tydne(current_date)
         return render_template('index.html', 
@@ -91,7 +131,14 @@ def index():
 @app.route('/download')
 def download_file():
     try:
-        return send_file(excel_manager.file_path, as_attachment=True)
+        file_path = Path(excel_manager.file_path)
+        if not file_path.exists():
+            raise FileNotFoundError("Excel soubor nebyl nalezen")
+        return send_file(str(file_path), as_attachment=True)
+    except FileNotFoundError as e:
+        logger.error(f"Soubor nebyl nalezen: {e}")
+        flash('Excel soubor nebyl nalezen.', 'error')
+        return redirect(url_for('index'))
     except Exception as e:
         logger.error(f"Chyba při stahování souboru: {e}")
         flash('Chyba při stahování souboru.', 'error')
@@ -107,7 +154,8 @@ def validate_email(email):
 def send_email():
     try:
         # Kontrola existence souboru
-        if not excel_manager.file_path.exists():
+        file_path = Path(excel_manager.file_path)
+        if not file_path.exists():
             raise FileNotFoundError("Excel soubor nebyl nalezen")
 
         # Kontrola konfigurace
@@ -144,7 +192,7 @@ S pozdravem
         msg.attach(MIMEText(body, 'plain', 'utf-8'))
 
         # Přidání přílohy
-        with open(excel_manager.file_path, 'rb') as f:
+        with open(file_path, 'rb') as f:
             attachment = MIMEApplication(f.read(), _subtype="xlsx")
             attachment.add_header('Content-Disposition', 'attachment', 
                                 filename=('utf-8', '', EXCEL_FILE_NAME))
@@ -367,6 +415,8 @@ def excel_viewer():
         else:
             raise ValueError("Neplatný název souboru")
 
+        # Kontrola existence souboru - konverze na Path objekt pro jednotnou práci
+        file_path = Path(file_path)
         if not file_path.exists():
             raise FileNotFoundError(f"Soubor {selected_file} nebyl nalezen")
 

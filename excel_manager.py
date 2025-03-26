@@ -6,19 +6,24 @@ import re
 from datetime import datetime 
 from openpyxl import load_workbook, Workbook
 from openpyxl.worksheet.copier import WorksheetCopy
-import fcntl
 import contextlib
 from threading import Lock
 from utils.logger import setup_logger
 from contextlib import contextmanager
+import platform
+from pathlib import Path
 
 logger = setup_logger('excel_manager')
 
+# Kontrola jestli je systém Windows
+IS_WINDOWS = platform.system() == 'Windows'
+
 class ExcelManager:
     def __init__(self, base_path, excel_file_name):
-        self.base_path = base_path
-        self.file_path = os.path.join(self.base_path, excel_file_name)
-        self.file_path_2025 = os.path.join(self.base_path, 'Hodiny2025.xlsx')
+        from pathlib import Path
+        self.base_path = Path(base_path)
+        self.file_path = self.base_path / excel_file_name
+        self.file_path_2025 = self.base_path / 'Hodiny2025.xlsx'
         self.current_project_name = None
         self._file_lock = Lock()
         self._workbook_cache = {}
@@ -26,7 +31,9 @@ class ExcelManager:
     @contextmanager 
     def _get_workbook(self, file_path, read_only=False):
         """Vylepšený context manager pro práci s workbookem"""
-        cache_key = os.path.abspath(file_path)
+        # Konverze na Path objekt pro jednotnou práci s cestami
+        file_path = Path(file_path)
+        cache_key = str(file_path.absolute())
         wb = None
 
         try:
@@ -42,22 +49,43 @@ class ExcelManager:
 
             if wb is None:
                 with self._file_lock:
-                    if os.path.exists(file_path):
-                        wb = load_workbook(file_path, read_only=read_only)
+                    # Ujistíme se, že adresář existuje
+                    file_path.parent.mkdir(parents=True, exist_ok=True)
+                    
+                    if file_path.exists():
+                        try:
+                            wb = load_workbook(str(file_path), read_only=read_only)
+                        except Exception as e:
+                            logger.error(f"Nelze načíst Excel soubor {file_path}: {str(e)}")
+                            if not read_only:  # Pokud nejsme v read-only módu, vytvoříme nový soubor
+                                logger.info(f"Vytvářím nový Excel soubor {file_path}")
+                                wb = Workbook()
+                            else:
+                                raise  # V read-only módu propagujeme chybu
                     else:
-                        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-                        wb = Workbook()
-                    self._workbook_cache[cache_key] = wb
+                        if not read_only:  # Nový soubor vytvoříme jen když nejsme v read-only módu
+                            logger.info(f"Vytvářím nový Excel soubor {file_path}")
+                            wb = Workbook()
+                        else:
+                            logger.error(f"Soubor {file_path} neexistuje a nelze ho vytvořit v read-only módu")
+                            raise FileNotFoundError(f"Soubor {file_path} nebyl nalezen")
+                    
+                    if wb is not None:
+                        self._workbook_cache[cache_key] = wb
 
             yield wb
             
-            if not read_only:
-                wb.save(file_path)
+            if not read_only and wb is not None:
+                try:
+                    wb.save(str(file_path))
+                except Exception as e:
+                    logger.error(f"Chyba při ukládání workbooku {file_path}: {str(e)}")
+                    raise
                 
         except Exception as e:
             logger.error(f"Chyba při práci s workbookem {file_path}: {str(e)}")
             raise
-            
+
     def _clear_workbook_cache(self):
         """Vylepšená metoda pro čištění cache"""
         for path, wb in list(self._workbook_cache.items()):

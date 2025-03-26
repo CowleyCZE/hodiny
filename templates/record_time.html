@@ -1,57 +1,50 @@
-<!DOCTYPE html>
-<html lang="cs">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Záznam pracovní doby</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <header>
-        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
-    </header>
+{% extends "base.html" %}
 
-    <nav class="nav" aria-label="Hlavní navigace">
-        <a href="{{ url_for('index') }}">Hlavní stránka</a>
-        <a href="{{ url_for('manage_employees') }}">Zaměstnanci</a>
-        <a href="{{ url_for('record_time') }}">Záznam pracovní doby</a>
-        <a href="{{ url_for('zalohy') }}">Zálohy</a>
-        <a href="{{ url_for('excel_viewer') }}">Tabulka</a>
-        <a href="{{ url_for('settings_page') }}">Nastavení</a>
-    </nav>
+{% block title %}Záznam pracovní doby{% endblock %}
 
-    <main class="main">
+{% block content %}
+    {% if selected_employees %}
+    <section>
         <h2>Vybraní zaměstnanci:</h2>
-        <ul aria-label="Seznam vybraných zaměstnanců">
-            {% for employee in selected_employees %}
-                <li>{{ employee }}</li>
-            {% endfor %}
+        <ul aria-label="Seznam vybraných zaměstnanců">{% for employee in selected_employees %}
+            <li>{{ employee }}</li>{% endfor %}
         </ul>
-        <h1>Záznam pracovní doby</h1>
+    </section>
+    {% endif %}
 
-        <form id="record-time-form" method="POST" action="{{ url_for('record_time') }}" aria-label="Formulář pro záznam pracovní doby">
-            <label for="date">Datum:</label>
-            <input type="date" id="date" name="date" value="{{ current_date }}" required title="Vyberte datum záznamu" placeholder="Datum záznamu">
-            <br><br>
+    <h1 id="form-heading">Záznam pracovní doby</h1>
 
-            <label for="start_time">Začátek práce:</label>
-            <input type="time" id="start_time" name="start_time" value="{{ start_time }}" required title="Zadejte čas začátku práce" placeholder="Začátek práce">
-            <br><br>
+    <form id="record-time-form" method="POST" action="{{ url_for('record_time') }}" aria-labelledby="form-heading">
+        <fieldset>
+            <legend>Údaje o pracovní době</legend>
+            
+            <div class="form-group">
+                <label for="date">Datum:</label>
+                <input type="date" id="date" name="date" value="{{ current_date }}" required 
+                       aria-required="true" title="Vyberte datum záznamu">
+            </div>
 
-            <label for="end_time">Konec práce:</label>
-            <input type="time" id="end_time" name="end_time" value="{{ end_time }}" required title="Zadejte čas konce práce" placeholder="Konec práce">
-            <br><br>
+            <div class="form-group">
+                <label for="start_time">Začátek práce:</label>
+                <input type="time" id="start_time" name="start_time" value="{{ start_time }}" required 
+                       aria-required="true" title="Zadejte čas začátku práce">
+            </div>
 
-            <label for="lunch_duration">Délka oběda (v hodinách):</label>
-            <input type="number" id="lunch_duration" name="lunch_duration" step="0.25" min="0" max="4" value="{{ lunch_duration }}" required title="Zadejte délku obědové pauzy" placeholder="Délka oběda">
-            <br><br>
+            <div class="form-group">
+                <label for="end_time">Konec práce:</label>
+                <input type="time" id="end_time" name="end_time" value="{{ end_time }}" required 
+                       aria-required="true" title="Zadejte čas konce práce">
+            </div>
+
+            <div class="form-group">
+                <label for="lunch_duration">Délka oběda (v hodinách):</label>
+                <input type="number" id="lunch_duration" name="lunch_duration" step="0.25" min="0" max="4" 
+                       value="{{ lunch_duration }}" required aria-required="true" title="Zadejte délku obědové pauzy">
+            </div>
 
             <button type="submit" class="btn btn-primary">Uložit záznam</button>
-        </form>
-    </main>
+        </fieldset>
+    </form>
+{% endblock %}
 
-    <footer>
-        <p>&copy; 2024 Záznam pracovní doby</p>
-    </footer>
-</body>
-</html>
+{% block footer_title %}Záznam pracovní doby{% endblock %}

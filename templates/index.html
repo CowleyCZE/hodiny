@@ -1,60 +1,41 @@
-<!DOCTYPE html>
-<html lang="cs">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evidence pracovní doby</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <header>
-        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
-    </header>
+{% extends "base.html" %}
 
-    <nav class="nav">
-        <a href="{{ url_for('index') }}">Hlavní stránka</a>
-        <a href="{{ url_for('manage_employees') }}">Zaměstnanci</a>
-        <a href="{{ url_for('record_time') }}">Záznam pracovní doby</a>
-        <a href="{{ url_for('zalohy') }}">Zálohy</a>
-        <a href="{{ url_for('excel_viewer') }}">Tabulka</a>
-        <a href="{{ url_for('settings_page') }}">Nastavení</a>
-    </nav>
+{% block title %}Evidence pracovní doby{% endblock %}
 
-    <div class="info-bar">
+{% block content %}
+    <div class="info-bar" role="region" aria-label="Časové informace">
         <div id="current-week">Týden: {{ week_number }}</div>
         <div id="current-date">Datum: {{ current_date }}</div>
     </div>
 
-    <main class="main">
-        <h1>Evidence pracovní doby</h1>
+    <h1 id="main-heading">Evidence pracovní doby</h1>
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="messages" role="alert" aria-live="polite">
                 {% for category, message in messages %}
                     <div class="alert alert-{{ category }}">{{ message }}</div>
                 {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        {% if excel_exists %}
-            <div class="excel-actions">
-                <h3>Operace se souborem Hodiny_Cap.xlsx:</h3>
-                <div class="button-group">
-                    <a href="{{ url_for('download_file') }}" class="btn btn-primary">Stáhnout soubor</a>
-                    <form action="{{ url_for('send_email') }}" method="post" class="inline-form">
-                        <button type="submit" class="btn btn-success">Odeslat emailem</button>
-                    </form>
-                </div>
             </div>
-        {% else %}
-            <div class="alert alert-warning">Soubor Hodiny_Cap.xlsx nebyl nalezen.</div>
         {% endif %}
-    </main>
+    {% endwith %}
 
-    <footer>
-        <p>&copy; 2024 Evidence pracovní doby</p>
-    </footer>
+    {% if excel_exists %}
+        <section class="excel-actions" aria-labelledby="excel-heading">
+            <h3 id="excel-heading">Operace se souborem Hodiny_Cap.xlsx:</h3>
+            <div class="button-group">
+                <a href="{{ url_for('download_file') }}" class="btn btn-primary" role="button">Stáhnout soubor</a>
+                <form action="{{ url_for('send_email') }}" method="post" class="inline-form">
+                    <button type="submit" class="btn btn-success">Odeslat emailem</button>
+                </form>
+            </div>
+        </section>
+    {% else %}
+        <div class="alert alert-warning" role="alert">Soubor Hodiny_Cap.xlsx nebyl nalezen.</div>
+    {% endif %}
+{% endblock %}
 
+{% block scripts %}
     <script>
         // Aktualizace data a týdne
         document.addEventListener('DOMContentLoaded', function() {
@@ -72,5 +53,4 @@
             return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
         }
     </script>
-</body>
-</html>
+{% endblock %}

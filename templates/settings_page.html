@@ -1,71 +1,80 @@
-<!DOCTYPE html>
-<html lang="cs">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nastavení</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+{% extends "base.html" %}
+
+{% block title %}Nastavení{% endblock %}
+
+{% block extra_css %}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-</head>
-<body>
-    <header>
-        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
-    </header>
+{% endblock %}
 
-    <nav class="nav">
-        <a href="{{ url_for('index') }}">Hlavní stránka</a>
-        <a href="{{ url_for('manage_employees') }}">Zaměstnanci</a>
-        <a href="{{ url_for('record_time') }}">Záznam pracovní doby</a>
-        <a href="{{ url_for('zalohy') }}">Zálohy</a>
-        <a href="{{ url_for('excel_viewer') }}">Tabulka</a>
-        <a href="{{ url_for('settings_page') }}">Nastavení</a>
-    </nav>
-
-    <main class="main">
-        <h1>Nastavení</h1>
-        <form method="POST" action="{{ url_for('settings_page') }}">
-            <h2>Data Projektu</h2>
+{% block content %}
+    <h1 id="settings-heading">Nastavení</h1>
+    <form method="POST" action="{{ url_for('settings_page') }}" aria-labelledby="settings-heading">
+        <fieldset>
+            <legend>Data Projektu</legend>
             <div class="form-group">
                 <label for="project_name">Název projektu:</label>
-                <input type="text" name="project_name" value="{{ settings.project_info.name if settings.project_info.name else '' }}" class="form-control" required title="Zadejte název projektu" placeholder="Název projektu">
+                <input type="text" name="project_name" id="project_name" 
+                       value="{{ settings.project_info.name if settings.project_info.name else '' }}" 
+                       class="form-control" required aria-required="true" 
+                       title="Zadejte název projektu">
             </div>
             <div class="form-group">
                 <label for="start_date">Začátek projektu:</label>
-                <input type="date" name="start_date" value="{{ settings.project_info.start_date if settings.project_info.start_date else '' }}" class="form-control" required title="Vyberte datum začátku projektu" placeholder="Začátek projektu">
+                <input type="date" name="start_date" id="start_date" 
+                       value="{{ settings.project_info.start_date if settings.project_info.start_date else '' }}" 
+                       class="form-control" required aria-required="true" 
+                       title="Vyberte datum začátku projektu">
             </div>
             <div class="form-group">
                 <label for="end_date">Konec projektu:</label>
-                <input type="date" name="end_date" value="{{ settings.project_info.end_date if settings.project_info.end_date else '' }}" class="form-control" required title="Vyberte datum konce projektu" placeholder="Konec projektu">
+                <input type="date" name="end_date" id="end_date" 
+                       value="{{ settings.project_info.end_date if settings.project_info.end_date else '' }}" 
+                       class="form-control" required aria-required="true" 
+                       title="Vyberte datum konce projektu">
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Přednastavené časy</legend>
+            <div class="form-group">
+                <label for="start_time">Čas začátku:</label>
+                <input type="text" id="start_time" name="start_time" class="timepicker" 
+                       value="{{ settings.start_time }}" required aria-required="true">
             </div>
 
-            <h2>Přednastavené časy</h2>
-            <label for="start_time">Čas začátku:</label>
-            <input type="text" id="start_time" name="start_time" class="timepicker" value="{{ settings.start_time }}" required>
-            <br><br>
+            <div class="form-group">
+                <label for="end_time">Čas konce:</label>
+                <input type="text" id="end_time" name="end_time" class="timepicker" 
+                       value="{{ settings.end_time }}" required aria-required="true">
+            </div>
 
-            <label for="end_time">Čas konce:</label>
-            <input type="text" id="end_time" name="end_time" class="timepicker" value="{{ settings.end_time }}" required>
-            <br><br>
+            <div class="form-group">
+                <label for="lunch_duration">Délka oběda (v hodinách):</label>
+                <input type="number" id="lunch_duration" name="lunch_duration" step="0.25" min="0" max="4" 
+                       value="{{ settings.lunch_duration }}" required aria-required="true">
+            </div>
+        </fieldset>
 
-            <label for="lunch_duration">Délka oběda (v hodinách):</label>
-            <input type="number" id="lunch_duration" name="lunch_duration" step="0.25" min="0" max="4" value="{{ settings.lunch_duration }}" required>
-            <br><br>
-
-            <h2>Číslo akce</h2>
+        <fieldset>
+            <legend>Číslo akce</legend>
             <div class="form-group">
                 <label for="cislo_akce">Číslo akce:</label>
-                <input type="number" name="cislo_akce" value="{{ settings.get('cislo_akce', '') }}" class="form-control" required title="Zadejte číslo akce" placeholder="Číslo akce">
+                <input type="number" name="cislo_akce" id="cislo_akce" 
+                       value="{{ settings.get('cislo_akce', '') }}" class="form-control" 
+                       required aria-required="true" title="Zadejte číslo akce">
             </div>
+        </fieldset>
 
+        <div class="form-group">
             <button type="submit" class="btn btn-primary">Uložit nastavení</button>
-        </form>
-    </main>
+        </div>
+    </form>
+{% endblock %}
 
-    <footer>
-        <p>&copy; 2024 Nastavení</p>
-    </footer>
+{% block footer_title %}Nastavení{% endblock %}
 
+{% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
         // Inicializace ciferníku pro čas a datum
         flatpickr(".timepicker", {
@@ -78,5 +87,4 @@
             dateFormat: "Y-m-d",
         });
     </script>
-</body>
-</html>
+{% endblock %}

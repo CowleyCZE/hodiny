@@ -1,4 +1,35 @@
-// ...existing code...
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Evidence pracovní doby{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+    </header>
+
+    <nav class="nav" aria-label="Hlavní navigace">
+        <a href="{{ url_for('index') }}">Hlavní stránka</a>
+        <a href="{{ url_for('manage_employees') }}">Zaměstnanci</a>
+        <a href="{{ url_for('record_time') }}">Záznam pracovní doby</a>
+        <a href="{{ url_for('zalohy') }}">Zálohy</a>
+        <a href="{{ url_for('excel_viewer') }}">Tabulka</a>
+        <a href="{{ url_for('settings_page') }}">Nastavení</a>
+    </nav>
+
+    <main class="main">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2024 {% block footer_title %}Evidence pracovní doby{% endblock %}</p>
+    </footer>
+
+    {% block scripts %}{% endblock %}
     <script src="{{ url_for('static', filename='js/confirmations.js') }}"></script>
-  </body>
+</body>
 </html>

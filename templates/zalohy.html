@@ -1,110 +1,105 @@
-<!DOCTYPE html>
-<html lang="cs">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zálohy</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <header>
-        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
-    </header>
+{% extends "base.html" %}
 
-    <nav class="nav" aria-label="Hlavní navigace">
-        <a href="{{ url_for('index') }}">Hlavní stránka</a>
-        <a href="{{ url_for('manage_employees') }}">Zaměstnanci</a>
-        <a href="{{ url_for('record_time') }}">Záznam pracovní doby</a>
-        <a href="{{ url_for('zalohy') }}">Zálohy</a>
-        <a href="{{ url_for('excel_viewer') }}">Tabulka</a>
-        <a href="{{ url_for('settings_page') }}">Nastavení</a>
-    </nav>
+{% block title %}Zálohy{% endblock %}
 
-    <main class="main">
-        <h1>Zálohy</h1>
+{% block content %}
+    <h1>Zálohy</h1>
 
-        <section>
-            <h2>Přidat zálohu</h2>
-            <form method="POST" aria-label="Formulář pro přidání zálohy">
-                <label for="employee_name">Zaměstnanec:</label>
-                <select name="employee_name" id="employee_name" required>
-                    {% for employee in employees %}
-                        <option value="{{ employee }}">{{ employee }}</option>
-                    {% endfor %}
-                </select>
-                <br><br>
+    <section>
+        <h2 id="add-advance-heading">Přidat zálohu</h2>
+        <form method="POST" action="{{ url_for('zalohy') }}" aria-labelledby="add-advance-heading">
+            <fieldset>
+                <legend>Údaje o záloze</legend>
+                
+                <div class="form-group">
+                    <label for="employee_name">Zaměstnanec:</label>
+                    <select name="employee_name" id="employee_name" required aria-required="true">
+                        {% for employee in employees %}
+                            <option value="{{ employee }}">{{ employee }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-                <label for="amount">Částka:</label>
-                <input type="number" name="amount" id="amount" step="0.01" required title="Zadejte částku zálohy" placeholder="Částka zálohy">
-                <br><br>
+                <div class="form-group">
+                    <label for="amount">Částka:</label>
+                    <input type="number" name="amount" id="amount" step="0.01" required 
+                           aria-required="true" title="Zadejte částku zálohy">
+                </div>
 
-                <label for="currency">Měna:</label>
-                <select name="currency" id="currency" required>
-                    <option value="EUR">EUR</option>
-                    <option value="CZK">Kč</option>
-                </select>
-                <br><br>
+                <div class="form-group">
+                    <label for="currency">Měna:</label>
+                    <select name="currency" id="currency" required aria-required="true">
+                        <option value="EUR">EUR</option>
+                        <option value="CZK">Kč</option>
+                    </select>
+                </div>
 
-                <label for="option">Možnost:</label>
-                <select name="option" id="option" required>
-                    {% for option in options %}
-                        <option value="{{ option }}">{{ option }}</option>
-                    {% endfor %}
-                </select>
-                <br><br>
+                <div class="form-group">
+                    <label for="option">Možnost:</label>
+                    <select name="option" id="option" required aria-required="true">
+                        {% for option in options %}
+                            <option value="{{ option }}">{{ option }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-                <label for="date">Datum:</label>
-                <input type="date" name="date" id="date" value="{{ current_date }}" required title="Vyberte datum zálohy" placeholder="Datum zálohy">
-                <br><br>
+                <div class="form-group">
+                    <label for="date">Datum:</label>
+                    <input type="date" name="date" id="date" value="{{ current_date }}" required 
+                           aria-required="true" title="Vyberte datum zálohy">
+                </div>
 
                 <button type="submit" class="btn btn-primary">Potvrdit</button>
-            </form>
-        </section>
+            </fieldset>
+        </form>
+    </section>
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <ul class="message-list">
-                {% for category, message in messages %}
-                    <li class="alert alert-{{ category }}">{{ message }}</li>
-                {% endfor %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="messages" role="alert" aria-live="polite">
+                <ul class="message-list">{% for category, message in messages %}
+                    <li class="alert alert-{{ category }}">{{ message }}</li>{% endfor %}
                 </ul>
-            {% endif %}
-        {% endwith %}
+            </div>
+        {% endif %}
+    {% endwith %}
 
-        <h2>Historie záloh</h2>
+    <section>
+        <h2 id="history-heading">Historie záloh</h2>
 
-        <form method="GET" action="{{ url_for('zalohy') }}" role="search" aria-label="Vyhledávání záloh">
-            <label for="filter_employee">Zaměstnanec:</label>
-            <input type="text" name="filter_employee" id="filter_employee">
-            <button type="submit">Filtrovat</button>
+        <form method="GET" action="{{ url_for('zalohy') }}" role="search" aria-labelledby="search-heading">
+            <div class="form-group">
+                <label for="filter_employee" id="search-heading">Zaměstnanec:</label>
+                <input type="text" name="filter_employee" id="filter_employee">
+                <button type="submit" class="btn">Filtrovat</button>
+            </div>
         </form>
 
-        <table aria-label="Historie záloh zaměstnanců">
-            <thead>
-                <tr>
-                    <th>Zaměstnanec</th>
-                    <th>Částka</th>
-                    <th>Měna</th>
-                    <th>Možnost</th>
-                    <th>Datum</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for advance in advance_history %}
+        <div class="table-responsive">
+            <table aria-labelledby="history-heading">
+                <thead>
                     <tr>
-                        <td>{{ advance.employee_name }}</td>
-                        <td>{{ advance.amount }}</td>
-                        <td>{{ advance.currency }}</td>
-                        <td>{{ advance.option }}</td>
-                        <td>{{ advance.date }}</td>
+                        <th scope="col">Zaměstnanec</th>
+                        <th scope="col">Částka</th>
+                        <th scope="col">Měna</th>
+                        <th scope="col">Možnost</th>
+                        <th scope="col">Datum</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </main>
+                </thead>
+                <tbody>
+                    {% for advance in advance_history %}
+                        <tr>
+                            <td>{{ advance.employee_name }}</td>
+                            <td>{{ advance.amount }}</td>
+                            <td>{{ advance.currency }}</td>
+                            <td>{{ advance.option }}</td>
+                            <td>{{ advance.date }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endblock %}
 
-    <footer>
-        <p>&copy; 2024 Zálohy</p>
-    </footer>
-</body>
-</html>
+{% block footer_title %}Zálohy{% endblock %}

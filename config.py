@@ -36,7 +36,7 @@ class Config:
     DATA_PATH = Path(os.environ.get("HODINY_DATA_PATH", BASE_DIR / "data"))
     EXCEL_BASE_PATH = Path(os.environ.get("HODINY_EXCEL_PATH", BASE_DIR / "excel"))
     EXCEL_FILE_NAME = "Hodiny_Cap.xlsx"
-    EXCEL_FILE_NAME_2025 = "Hodiny2025.xlsx"
+    # EXCEL_FILE_NAME_2025 = "Hodiny2025.xlsx" # Odstraněno
     SETTINGS_FILE_PATH = Path(os.environ.get("HODINY_SETTINGS_PATH", DATA_PATH / "settings.json"))
 
     # Email konfigurace

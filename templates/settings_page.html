@@ -3,34 +3,77 @@
 {% block title %}Nastavení{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    {# Link na Flatpickr CSS, pokud ho používáte #}
+    {# <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"> #}
+    <style>
+        .archive-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ccc;
+        }
+        .archive-section h2 {
+            margin-bottom: 15px;
+        }
+        .archive-section p {
+            margin-bottom: 15px;
+            color: #ddd; /* Světlejší text pro popis */
+        }
+        .btn-danger {
+            background-color: #dc3545; /* Červená barva pro nebezpečnou akci */
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
     <h1 id="settings-heading">Nastavení</h1>
+
+    {# Zobrazení flash zpráv #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages" role="alert" aria-live="polite">
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    {# Formulář pro běžná nastavení #}
     <form method="POST" action="{{ url_for('settings_page') }}" aria-labelledby="settings-heading">
         <fieldset>
             <legend>Data Projektu</legend>
             <div class="form-group">
                 <label for="project_name">Název projektu:</label>
-                <input type="text" name="project_name" id="project_name" 
-                       value="{{ settings.project_info.name if settings.project_info.name else '' }}" 
-                       class="form-control" required aria-required="true" 
+                {# Použijeme data z request.form pokud existují (po neúspěšném POSTu), jinak ze settings #}
+                <input type="text" name="project_name" id="project_name"
+                       value="{{ request.form['project_name'] if request.form else settings.project_info.name | default('', true) }}"
+                       class="form-control" required aria-required="true"
                        title="Zadejte název projektu">
             </div>
             <div class="form-group">
                 <label for="start_date">Začátek projektu:</label>
-                <input type="date" name="start_date" id="start_date" 
-                       value="{{ settings.project_info.start_date if settings.project_info.start_date else '' }}" 
-                       class="form-control" required aria-required="true" 
+                <input type="date" name="start_date" id="start_date"
+                       value="{{ request.form['start_date'] if request.form else settings.project_info.start_date | default('', true) }}"
+                       class="form-control date-picker" required aria-required="true" {# Přidána třída date-picker #}
                        title="Vyberte datum začátku projektu">
             </div>
             <div class="form-group">
                 <label for="end_date">Konec projektu:</label>
-                <input type="date" name="end_date" id="end_date" 
-                       value="{{ settings.project_info.end_date if settings.project_info.end_date else '' }}" 
-                       class="form-control" required aria-required="true" 
-                       title="Vyberte datum konce projektu">
+                <input type="date" name="end_date" id="end_date"
+                       value="{{ request.form['end_date'] if request.form else settings.project_info.end_date | default('', true) }}"
+                       class="form-control date-picker" {# Přidána třída date-picker #}
+                       title="Vyberte datum konce projektu (nepovinné)">
             </div>
         </fieldset>
 
@@ -38,53 +81,90 @@
             <legend>Přednastavené časy</legend>
             <div class="form-group">
                 <label for="start_time">Čas začátku:</label>
-                <input type="text" id="start_time" name="start_time" class="timepicker" 
-                       value="{{ settings.start_time }}" required aria-required="true">
+                {# Použijeme time input pro lepší UX na mobilu #}
+                <input type="time" id="start_time" name="start_time" class="form-control"
+                       value="{{ request.form['start_time'] if request.form else settings.start_time | default('07:00', true) }}"
+                       required aria-required="true">
             </div>
-
             <div class="form-group">
                 <label for="end_time">Čas konce:</label>
-                <input type="text" id="end_time" name="end_time" class="timepicker" 
-                       value="{{ settings.end_time }}" required aria-required="true">
+                 {# Použijeme time input #}
+                <input type="time" id="end_time" name="end_time" class="form-control"
+                       value="{{ request.form['end_time'] if request.form else settings.end_time | default('18:00', true) }}"
+                       required aria-required="true">
             </div>
-
             <div class="form-group">
                 <label for="lunch_duration">Délka oběda (v hodinách):</label>
-                <input type="number" id="lunch_duration" name="lunch_duration" step="0.25" min="0" max="4" 
-                       value="{{ settings.lunch_duration }}" required aria-required="true">
+                {# Použijeme request.form pro zachování hodnoty po chybě #}
+                <input type="number" id="lunch_duration" name="lunch_duration" step="0.25" min="0" max="4"
+                       value="{{ request.form['lunch_duration'] if request.form else settings.lunch_duration | default(1.0, true) }}"
+                       required aria-required="true">
             </div>
         </fieldset>
 
+        {# Odstraněno pole Číslo akce, pokud není potřeba #}
+        {#
         <fieldset>
             <legend>Číslo akce</legend>
             <div class="form-group">
                 <label for="cislo_akce">Číslo akce:</label>
-                <input type="number" name="cislo_akce" id="cislo_akce" 
-                       value="{{ settings.get('cislo_akce', '') }}" class="form-control" 
-                       required aria-required="true" title="Zadejte číslo akce">
+                <input type="number" name="cislo_akce" id="cislo_akce"
+                       value="{{ request.form['cislo_akce'] if request.form else settings.get('cislo_akce', '') }}" class="form-control"
+                       title="Zadejte číslo akce">
             </div>
         </fieldset>
+        #}
 
         <div class="form-group">
             <button type="submit" class="btn btn-primary">Uložit nastavení</button>
         </div>
     </form>
+
+    {# Sekce pro archivaci #}
+    <section class="archive-section">
+        <h2>Archivace a nový soubor</h2>
+        <p>
+            Aktuálně používaný soubor pro záznamy:
+            <strong>{{ settings.active_excel_file if settings.active_excel_file else "Žádný (bude vytvořen nový)" }}</strong>
+        </p>
+        <p>
+            Kliknutím na tlačítko níže ukončíte práci s aktuálním souborem. Soubor zůstane zachován v adresáři 'excel'.
+            Při příští akci, která vyžaduje zápis do Excelu (např. záznam pracovní doby nebo zálohy),
+            bude automaticky vytvořen nový soubor z šablony 'Hodiny_Cap.xlsx' a začne se používat pro další záznamy.
+            Nový soubor bude pojmenován podle názvu projektu a aktuálního data.
+        </p>
+        {# Formulář pro odeslání POST požadavku na archivaci #}
+        <form method="POST" action="{{ url_for('start_new_file') }}" onsubmit="return confirm('Opravdu chcete ukončit práci s aktuálním souborem a začít používat nový? Aktuální soubor zůstane zachován.');">
+            <button type="submit" class="btn btn-danger">Archivovat aktuální soubor a připravit nový</button>
+        </form>
+    </section>
+
 {% endblock %}
 
 {% block footer_title %}Nastavení{% endblock %}
 
 {% block scripts %}
+    {# Skripty pro Flatpickr, pokud ho používáte pro výběr času/data #}
+    {#
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-        // Inicializace ciferníku pro čas a datum
-        flatpickr(".timepicker", {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i",
-        });
-
         flatpickr(".date-picker", {
             dateFormat: "Y-m-d",
+            allowInput: true // Umožní ruční zadání
         });
+        // Flatpickr pro čas není potřeba, pokud používáme input type="time"
+        // flatpickr(".timepicker", {
+        //     enableTime: true,
+        //     noCalendar: true,
+        //     dateFormat: "H:i",
+        //     time_24hr: true,
+        //     allowInput: true
+        // });
     </script>
+     #}
+     {# Přidáme potvrzovací dialog pro archivaci (i když je i v onsubmit) #}
+     <script>
+        // Můžeme přidat další JS pro vylepšení UX zde
+     </script>
 {% endblock %}
+

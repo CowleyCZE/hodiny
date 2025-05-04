@@ -23,7 +23,7 @@ from employee_management import EmployeeManager
 from excel_manager import ExcelManager
 from utils.logger import setup_logger
 from zalohy_manager import ZalohyManager
-from voice_processor import VoiceProcessor
+from utils.voice_processor import VoiceProcessor
 
 # Inicializace aplikace
 app = Flask(__name__)

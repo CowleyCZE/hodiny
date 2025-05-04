@@ -62,21 +62,32 @@ def validate_email(email):
 @app.before_request
 def before_request():
     """Inicializace manažerů před každým requestem"""
-    global employee_manager, excel_manager, zalohy_manager
-    
     try:
-        # Inicializace manažerů pouze jednou na request
+        # Načtení nastavení
+        settings = session.get('settings', {})
+        active_filename = settings.get("active_excel_file")  # Aktuální pracovní soubor
+        
+        # Inicializace manažerů
         if not hasattr(g, 'employee_manager'):
             g.employee_manager = EmployeeManager(Config.DATA_PATH)
         
-        if not hasattr(g, 'excel_manager'):
-            g.excel_manager = ExcelManager(Config.EXCEL_BASE_PATH, active_filename, Config.EXCEL_TEMPLATE_NAME)
+        if not hasattr(g, 'excel_manager') and active_filename:
+            g.excel_manager = ExcelManager(
+                Config.EXCEL_BASE_PATH, 
+                active_filename, 
+                Config.EXCEL_TEMPLATE_NAME
+            )
         
-        if not hasattr(g, 'zalohy_manager'):
-            g.zalohy_manager = ZalohyManager(Config.EXCEL_BASE_PATH, Config.EXCEL_TEMPLATE_NAME)
+        if not hasattr(g, 'zalohy_manager') and active_filename:
+            g.zalohy_manager = ZalohyManager(
+                Config.EXCEL_BASE_PATH, 
+                active_filename, 
+                Config.EXCEL_TEMPLATE_NAME
+            )
             
     except Exception as e:
         logger.error(f"Neočekávaná chyba při inicializaci manažerů: {e}", exc_info=True)
+        flash("Neočekávaná chyba při přípravě aplikace.", "error")
         g.excel_manager = None
         g.zalohy_manager = None
         flash("Neočekávaná chyba při přípravě aplikace.", "error")

@@ -178,6 +178,78 @@ def manage_employees():
                           employees=employees, 
                           selected_employees=selected_employees)
 
+@app.route('/process-audio', methods=['POST'])
+@require_excel_managers
+def process_audio():
+    """Zpracování hlasového souboru přes Gemini API"""
+    try:
+        if 'audio' not in request.files:
+            return jsonify({'success': False, 'error': 'Chybí audio soubor'})
+            
+        # Uložení dočasného souboru
+        audio_file = request.files['audio']
+        temp_dir = Path("temp_audio")
+        temp_dir.mkdir(exist_ok=True)
+        temp_path = temp_dir / f"{datetime.now().timestamp()}.webm"
+        
+        audio_file.save(temp_path)
+        logger.info(f"Dočasný soubor uložen: {temp_path}")
+        
+        # Zpracování hlasu přes Gemini
+        voice_processor = VoiceProcessor()
+        result = voice_processor.process_voice_audio(temp_path)
+        
+        # Odstranění dočasného souboru
+        os.remove(temp_path)
+        
+        if not result['success']:
+            return jsonify(result)
+            
+        # Zpracování extrahovaných dat
+        entities = result['entities']
+        excel_manager = g.excel_manager
+        employee_manager = g.employee_manager
+        
+        # Podle typu akce vykonáme odpovídající operaci
+        if entities['action'] == 'record_time':
+            success, message = excel_manager.record_time(
+                entities['employee'], 
+                entities['date'], 
+                entities['start_time'], 
+                entities['end_time']
+            )
+            result['operation_result'] = {'success': success, 'message': message}
+            
+        elif entities['action'] == 'add_advance':
+            success, message = zalohy_manager.add_or_update_employee_advance(
+                entities['employee'], 
+                entities['amount'], 
+                entities['currency'], 
+                entities['option'], 
+                entities['date']
+            )
+            result['operation_result'] = {'success': success, 'message': message}
+            
+        elif entities['action'] == 'get_stats':
+            stats = {}
+            if 'time_period' in entities:
+                if entities['time_period'] == 'week':
+                    stats = excel_manager.get_week_stats(entities.get('employee'))
+                elif entities['time_period'] == 'month':
+                    stats = excel_manager.get_month_stats(entities.get('employee'))
+                elif entities['time_period'] == 'year':
+                    stats = excel_manager.get_year_stats(entities.get('employee'))
+            else:
+                stats = excel_manager.get_total_stats(entities.get('employee'))
+                
+            result['stats'] = stats
+            
+        return jsonify(result)
+        
+    except Exception as e:
+        logger.error(f"Chyba při zpracování hlasového souboru: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': 'Interní chyba serveru'})
+
 @app.route('/zaznam', methods=['GET', 'POST'])
 @require_excel_managers
 def record_time():

@@ -73,8 +73,9 @@ def before_request():
         if not hasattr(g, 'employee_manager'):
             g.employee_manager = EmployeeManager(Config.DATA_PATH)
         
+        # Oprava inicializace ExcelManager s přidáním argumentu template_filename
         if not hasattr(g, 'excel_manager'):
-            g.excel_manager = ExcelManager(Config.EXCEL_BASE_PATH, Config.EXCEL_TEMPLATE_NAME)
+            g.excel_manager = ExcelManager(Config.EXCEL_BASE_PATH, Config.EXCEL_TEMPLATE_NAME, Config.EXCEL_TEMPLATE_NAME)
         
         if not hasattr(g, 'zalohy_manager'):
             g.zalohy_manager = ZalohyManager(Config.EXCEL_BASE_PATH, Config.EXCEL_TEMPLATE_NAME)
@@ -375,7 +376,7 @@ def settings_page():
     
     # Načtení aktuálních nastavení
     settings = session.get('settings', {})
-    return render_template('settings.html', settings=settings)
+    return render_template('settings_page.html', settings=settings)
 
 @app.route('/stahnout')
 @require_excel_managers

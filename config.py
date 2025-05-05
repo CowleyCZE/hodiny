@@ -4,8 +4,6 @@ import secrets
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
-from openpyxl.workbook import Workbook
-import logging
 
 
 @dataclass

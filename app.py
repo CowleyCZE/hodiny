@@ -6,6 +6,7 @@ import re
 import shutil
 import smtplib
 import ssl
+import sys
 from datetime import datetime, timedelta
 from functools import wraps
 from email.mime.application import MIMEApplication
@@ -24,6 +25,9 @@ from excel_manager import ExcelManager
 from utils.logger import setup_logger
 from zalohy_manager import ZalohyManager
 from utils.voice_processor import VoiceProcessor
+
+# Přidání pracovní cesty do sys.path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Inicializace aplikace
 app = Flask(__name__)

@@ -65,6 +65,8 @@ def setup_logger(name: str) -> logging.Logger:
             console_handler = logging.StreamHandler()
             console_handler.setLevel(logging.DEBUG)
             
+            # Oprava importu colorlog
+            # Zkontrolujeme, zda je knihovna colorlog nainstalována, a případně ji přidáme do requirements.txt.
             # Barevné logování pro konzoli (pokud je dostupné)
             try:
                 from colorlog import ColoredFormatter

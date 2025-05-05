@@ -531,47 +531,6 @@ def start_new_file():
     
     return redirect(url_for('settings_page'))
 
-@app.route('/zalohy', methods=['GET', 'POST'])
-@require_excel_managers
-def advances():
-    """Správa záloh"""
-    zalohy_manager_instance = g.zalohy_manager
-    if not zalohy_manager_instance:
-        flash("Správce záloh není k dispozici.", "error")
-        return redirect(url_for('index'))
-    
-    if request.method == 'POST':
-        try:
-            employee = request.form.get('employee')
-            amount = request.form.get('amount')
-            currency = request.form.get('currency')
-            option = request.form.get('option')
-            date = request.form.get('date')
-            
-            if not all([employee, amount, currency, option, date]):
-                raise ValueError("Musíte vyplnit všechna pole")
-                
-            success, message = zalohy_manager_instance.add_or_update_employee_advance(
-                employee, amount, currency, option, date
-            )
-            
-            if success:
-                flash(f"Záloha pro {employee} byla úspěšně uložena", "success")
-            else:
-                flash(message, "error")
-                
-        except ValueError as e:
-            flash(str(e), "error")
-        except Exception as e:
-            logger.error(f"Chyba při ukládání zálohy: {e}", exc_info=True)
-            flash("Došlo k chybě při ukládání zálohy", "error")
-    
-    employees = g.employee_manager.get_all_employees()
-    option_names = zalohy_manager_instance.get_option_names()
-    return render_template('advances.html',
-                          employees=employees,
-                          option_names=option_names)
-
 # Spuštění aplikace
 if __name__ == '__main__':
     app.run(debug=True)

@@ -89,7 +89,11 @@
             <div class="form-group">
                 <label for="project_name">Název projektu:</label>
                 <input type="text" name="project_name" id="project_name"
-                       value="{{ request.form['project_name'] if request.form else settings.project_info.name | default('', true) }}"
+                       {% if settings and settings.project_info and 'name' in settings.project_info %}
+                           value="{{ request.form['project_name'] if request.form else settings.project_info.name | default('', true) }}"
+                       {% else %}
+                           value="{{ request.form['project_name'] if request.form else '' }}"
+                       {% endif %}
                        class="form-control" required aria-required="true"
                        title="Zadejte název projektu">
             </div>

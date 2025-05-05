@@ -8,13 +8,14 @@ let isListening = false;
 
 // Inicializace Web Speech API
 try {
+    // Pro Chrome a podobné prohlížeče
     window.SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
     recognition = new window.SpeechRecognition();
     
     // Nastavení parametrů
     recognition.continuous = false;
     recognition.interimResults = false;
-    recognition.lang = 'cs-CZ';
+    recognition.lang = 'cs-CZ'; // Čeština
     recognition.maxAlternatives = 1;
     
     // Event: Začátek naslouchání
@@ -65,7 +66,7 @@ voiceButton.addEventListener('click', () => {
     }
 });
 
-// Funkce pro odeslání hlasového příkazu na server (textová verze)
+// Funkce pro odeslání hlasového příkazu na server
 function sendVoiceCommandToServer(text) {
     fetch('/voice-command', {
         method: 'POST',
@@ -95,65 +96,173 @@ function sendVoiceCommandToServer(text) {
     });
 }
 
-// Funkce pro odeslání hlasového souboru na server (audio verze)
-function sendVoiceAudioToServer(blob) {
-    const formData = new FormData();
-    formData.append('audio', blob, 'voice.webm');
+// Zobrazení úspěšného výsledku
+function displaySuccessResult(data) {
+    const confidence = (data.confidence * 100).toFixed(1);
+    voiceResult.innerHTML = `
+        <div class="voice-result-success">
+            <p>Úspěšně rozpoznáno (spolehlivost: ${confidence}%)</p>
+            <ul>
+                ${Object.entries(data.entities).map(([key, value]) => 
+                    `<li><strong>${key}:</strong> ${value}</li>`).join('')}
+            </ul>
+        </div>
+    `;
+}
+
+// Zobrazení chybového výsledku
+function displayErrorResult(data) {
+    voiceResult.innerHTML = `
+        <div class="voice-result-error">
+            <p>${data.error || 'Neznámá chyba'}</p>
+            ${data.errors ? `
+                <ul>
+                    ${data.errors.map(error => `<li>${error}</li>`).join('')}
+                </ul>
+            ` : ''}
+        </div>
+    `;
+}
+
+// Zpracování akce podle typu příkazu
+function handleVoiceAction(data) {
+    switch (data.entities.action) {
+        case 'record_time':
+            prefillWorkTimeForm(data.entities);
+            break;
+            
+        case 'add_advance':
+            prefillAdvanceForm(data.entities);
+            break;
+            
+        case 'get_stats':
+            redirectToStatistics(data.entities);
+            break;
+            
+        default:
+            voiceResult.textContent = 'Neznámá akce byla rozpoznána.';
+    }
+}
+
+// Předvyplnění formuláře pracovní doby
+function prefillWorkTimeForm(entities) {
+    const form = document.getElementById('work-time-form');
+    if (!form) return;
     
-    fetch('/process-audio', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Síťová chyba');
+    if (entities.employee) {
+        const employeeSelect = form.querySelector('select[name="employee"]');
+        if (employeeSelect) {
+            employeeSelect.value = entities.employee;
         }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            displaySuccessResult(data);
-            handleVoiceAction(data);
-        } else {
-            displayErrorResult(data);
+    }
+    
+    if (entities.date) {
+        const dateInput = form.querySelector('input[name="date"]');
+        if (dateInput) {
+            dateInput.value = entities.date;
         }
-    })
-    .catch(error => {
-        console.error('Chyba při odesílání hlasového souboru:', error);
-        voiceResult.textContent = 'Nepodařilo se odeslat hlasový soubor na server.';
-    });
+    }
+    
+    if (entities.start_time) {
+        const startTimeInput = form.querySelector('input[name="start_time"]');
+        if (startTimeInput) {
+            startTimeInput.value = entities.start_time;
+        }
+    }
+    
+    if (entities.end_time) {
+        const endTimeInput = form.querySelector('input[name="end_time"]');
+        if (endTimeInput) {
+            endTimeInput.value = entities.end_time;
+        }
+    }
+    
+    // Automatické přepnutí na sekci formuláře
+    document.getElementById('work-time-section').scrollIntoView({ behavior: 'smooth' });
 }
 
-// Získání hlasového záznamu (WebM)
-function startVoiceRecording() {
-    navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(stream => {
-            const mediaRecorder = new MediaRecorder(stream);
-            const audioChunks = [];
-            
-            mediaRecorder.ondataavailable = (event) => {
-                audioChunks.push(event.data);
-            };
-            
-            mediaRecorder.onstop = () => {
-                const blob = new Blob(audioChunks, { type: 'audio/webm' });
-                sendVoiceAudioToServer(blob);
-            };
-            
-            mediaRecorder.start();
-            setTimeout(() => mediaRecorder.stop(), 10000); // Max 10 sekund nahrávání
-        })
-        .catch(err => {
-            console.error('Chyba při záznamu hlasu:', err);
-            voiceResult.textContent = 'Nepodařilo se spustit záznam hlasu.';
-        });
+// Předvyplnění formuláře zálohy
+function prefillAdvanceForm(entities) {
+    const form = document.getElementById('advance-form');
+    if (!form) return;
+    
+    if (entities.employee) {
+        const employeeSelect = form.querySelector('select[name="employee"]');
+        if (employeeSelect) {
+            employeeSelect.value = entities.employee;
+        }
+    }
+    
+    if (entities.date) {
+        const dateInput = form.querySelector('input[name="date"]');
+        if (dateInput) {
+            dateInput.value = entities.date;
+        }
+    }
+    
+    if (entities.amount) {
+        const amountInput = form.querySelector('input[name="amount"]');
+        if (amountInput) {
+            amountInput.value = entities.amount;
+        }
+    }
+    
+    if (entities.currency) {
+        const currencySelect = form.querySelector('select[name="currency"]');
+        if (currencySelect) {
+            currencySelect.value = entities.currency;
+        }
+    }
+    
+    // Automatické přepnutí na sekci formuláře
+    document.getElementById('advance-section').scrollIntoView({ behavior: 'smooth' });
 }
 
-// Přepsání původního tlačítka pro novou funkci
-voiceButton.addEventListener('click', () => {
-    if (!isListening) {
-        startVoiceRecording();  // Začneme záznam hlasu
-    } else {
-        recognition.stop();
+// Přesměrování na statistiky
+function redirectToStatistics(entities) {
+    let url = '/statistics';
+    
+    if (entities.employee) {
+        url += `?employee=${encodeURIComponent(entities.employee)}`;
+    }
+    
+    if (entities.time_period) {
+        url += `${url.includes('?') ? '&' : '?'}period=${encodeURIComponent(entities.time_period)}`;
+    }
+    
+    if (entities.date) {
+        url += `${url.includes('?') ? '&' : '?'}date=${encodeURIComponent(entities.date)}`;
+    }
+    
+    window.location.href = url;
+}
+
+// Funkce pro získání aktuálního času
+function getCurrentTime() {
+    const now = new Date();
+    return now.toTimeString().split(' ')[0];
+}
+
+// Funkce pro získání dnešního data
+function getTodayDate() {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+}
+
+// Funkce pro získání včerejšího data
+function getYesterdayDate() {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    return yesterday.toISOString().split('T')[0];
+}
+
+// Event listener pro klávesové zkratky
+document.addEventListener('keydown', (event) => {
+    // Ctrl + Shift + V pro spuštění hlasového vstupu
+    if (event.ctrlKey && event.shiftKey && event.key === 'V') {
+        event.preventDefault();
+        if (!isListening) {
+            recognition.start();
+        }
     }
 });

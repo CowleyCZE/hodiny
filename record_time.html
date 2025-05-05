@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Záznam pracovní doby{% endblock %}
+
+{% block extra_css %}
+    <style>
+        /* Styl pro odsazení checkboxu */
+        .free-day-group {
+            margin-top: 15px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #4a4a4a; /* Lehce odlišené pozadí */
+            border-radius: 4px;
+        }
+        .free-day-group label {
+            margin-left: 5px;
+            font-weight: bold;
+            color: #ffc107; /* Žlutá barva pro zvýraznění */
+        }
+        /* Skryjeme časová pole, pokud je volný den zaškrtnutý (pomocí JS) */
+        .time-fields.hidden {
+            display: none;
+        }
+    </style>
+{% endblock %}
+
+
+{% block content %}
+    {% if selected_employees %}
+    <section>
+        <h2>Vybraní zaměstnanci:</h2>
+        {# Zobrazíme jako seznam oddělený čárkou pro úsporu místa #}
+        <p aria-label="Seznam vybraných zaměstnanců">
+            {{ selected_employees|join(', ') }}
+        </p>
+    </section>
+    {% endif %}
+
+    <h1 id="form-heading">Záznam pracovní doby</h1>
+
+    {# Zobrazení flash zpráv #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages" role="alert" aria-live="polite">
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <form id="record-time-form" method="POST" action="{{ url_for('record_time') }}" aria-labelledby="form-heading">
+        <fieldset>
+            <legend>Údaje o pracovní době</legend>
+
+            <div class="form-group">
+                <label for="date">Datum:</label>
+                {# Použijeme hodnotu z current_date předanou z Flasku #}
+                <input type="date" id="date" name="date" value="{{ current_date }}" required
+                       aria-required="true" title="Vyberte datum záznamu">
+            </div>
+
+            {# Checkbox pro volný den #}
+            <div class="form-group free-day-group">
+                <input type="checkbox" id="is_free_day" name="is_free_day" value="on"
+                       {% if is_free_day %}checked{% endif %}
+                       onchange="toggleTimeFields()"> {# Přidána JS funkce pro skrytí polí #}
+                <label for="is_free_day">Volný den / Dovolená (zaznamená 0 hodin)</label>
+            </div>
+
+            {# Kontejner pro časová pole, který budeme skrývat #}
+            <div id="time-fields-container" class="time-fields {% if is_free_day %}hidden{% endif %}">
+                <div class="form-group">
+                    <label for="start_time">Začátek práce:</label>
+                    {# Použijeme hodnoty předané z Flasku #}
+                    <input type="time" id="start_time" name="start_time" value="{{ start_time }}"
+                           aria-required="true" title="Zadejte čas začátku práce">
+                </div>
+
+                <div class="form-group">
+                    <label for="end_time">Konec práce:</label>
+                    <input type="time" id="end_time" name="end_time" value="{{ end_time }}"
+                           aria-required="true" title="Zadejte čas konce práce">
+                </div>
+
+                <div class="form-group">
+                    <label for="lunch_duration">Délka oběda (v hodinách):</label>
+                    {# Hodnota je předána z Flasku (již formátovaná s tečkou) #}
+                    <input type="number" id="lunch_duration" name="lunch_duration" step="0.25" min="0" max="4"
+                           value="{{ lunch_duration }}" aria-required="true" title="Zadejte délku obědové pauzy">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Uložit záznam</button>
+        </fieldset>
+    </form>
+{% endblock %}
+
+{% block footer_title %}Záznam pracovní doby{% endblock %}
+
+{% block scripts %}
+<script>
+    // Funkce pro skrytí/zobrazení polí pro čas a pauzu
+    function toggleTimeFields() {
+        const isChecked = document.getElementById('is_free_day').checked;
+        const timeFieldsContainer = document.getElementById('time-fields-container');
+        const startTimeInput = document.getElementById('start_time');
+        const endTimeInput = document.getElementById('end_time');
+        const lunchInput = document.getElementById('lunch_duration');
+
+        if (isChecked) {
+            timeFieldsContainer.classList.add('hidden');
+            // Nastavíme pole jako nepovinná a vymažeme hodnoty, aby neprošla validace, pokud by byla skrytá pole odeslána
+            startTimeInput.required = false;
+            endTimeInput.required = false;
+            lunchInput.required = false;
+            // Můžeme i vymazat hodnoty, ale není to nutné, backend je ignoruje
+            // startTimeInput.value = '';
+            // endTimeInput.value = '';
+            // lunchInput.value = '0';
+        } else {
+            timeFieldsContainer.classList.remove('hidden');
+            // Nastavíme pole zpět jako povinná
+            startTimeInput.required = true;
+            endTimeInput.required = true;
+            lunchInput.required = true;
+        }
+    }
+
+    // Zavoláme funkci při načtení stránky pro případ, že checkbox je již zaškrtnutý (např. po chybě formuláře)
+    document.addEventListener('DOMContentLoaded', toggleTimeFields);
+</script>
+{% endblock %}

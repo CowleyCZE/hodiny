@@ -1,0 +1,121 @@
+/* style.css */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #333;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header {
+    display: flex;
+    align-items: center;
+    background-color: #222;
+    padding: 10px 20px;
+}
+
+.logo {
+    height: 50px;
+    margin-right: 20px;
+}
+
+.nav {
+    display: flex;
+    justify-content: center;
+    background-color: #444;
+    padding: 10px 0;
+}
+
+.nav a {
+    color: #fff;
+    text-decoration: none;
+    padding: 10px 20px;
+    font-weight: bold;
+}
+
+.nav a:hover {
+    background-color: #555;
+}
+
+.main {
+    flex: 1;
+    padding: 20px;
+}
+
+h1, h2, h3 {
+    color: #004EA3;
+}
+
+.btn {
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary {
+    background-color: #004EA3;
+    color: #fff;
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+footer {
+    background-color: #222;
+    color: #aaa;
+    text-align: center;
+    padding: 10px;
+}
+
+.inline-form {
+    display: inline;
+}
+
+.info-bar {
+    background-color: #444;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.excel-actions {
+    margin: 20px 0;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.alert {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+}
+
+.alert-success {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.alert-warning {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.alert-error {
+    background-color: #dc3545;
+    color: #fff;
+}

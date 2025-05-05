@@ -9,7 +9,7 @@ from contextlib import contextmanager
 from datetime import datetime, timedelta
 from pathlib import Path
 from threading import Lock
-from typing import Dict, List, Optional, Tuple, Union, Generator
+from typing import Dict, List, Optional, Tuple, Union
 
 import openpyxl
 from openpyxl import Workbook, load_workbook
@@ -80,7 +80,7 @@ class ExcelManager:
         return f"{file_path.resolve()}_{read_only}"
 
     @contextmanager
-    def _get_workbook(self, file_path: Path, read_only: bool = False) -> Generator[Workbook, None, None]:
+    def _get_workbook(self, file_path: Path, read_only: bool = False) -> Workbook:
         """Získá workbook z cache nebo ho načte z disku"""
         try:
             # Získání workbooku z cache

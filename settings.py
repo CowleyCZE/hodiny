@@ -2,12 +2,10 @@
 import json
 import logging
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from functools import wraps
-import re
-import shutil
 
-from flask import Flask, flash, redirect, render_template, request, session, url_for, g
+from flask import Flask, flash, redirect, render_template, request, session, url_for
 from config import Config
 from excel_manager import ExcelManager
 from employee_management import EmployeeManager

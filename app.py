@@ -2,7 +2,6 @@
 import json
 import logging
 import os
-from pathlib import Path
 import re
 import shutil
 import smtplib
@@ -24,7 +23,7 @@ from employee_management import EmployeeManager
 from excel_manager import ExcelManager
 from utils.logger import setup_logger
 from zalohy_manager import ZalohyManager
-from utils.voice_processor import VoiceProcessor
+from voice_processor import VoiceProcessor
 
 # Inicializace aplikace
 app = Flask(__name__)
@@ -63,34 +62,21 @@ def validate_email(email):
 @app.before_request
 def before_request():
     """Inicializace manažerů před každým requestem"""
+    global employee_manager, excel_manager, zalohy_manager
+    
     try:
-        # Načtení nastavení
-        settings = session.get('settings', {})
-        active_filename = settings.get("active_excel_file")  # Aktuální pracovní soubor
-
-        # Inicializace manažerů pouze pokud ještě nejsou inicializovány
-        if not hasattr(g, 'employee_manager') or g.employee_manager is None:
+        # Inicializace manažerů pouze jednou na request
+        if not hasattr(g, 'employee_manager'):
             g.employee_manager = EmployeeManager(Config.DATA_PATH)
-
-        if not hasattr(g, 'excel_manager') or g.excel_manager is None:
-            if active_filename:
-                g.excel_manager = ExcelManager(
-                    Config.EXCEL_BASE_PATH, 
-                    active_filename, 
-                    Config.EXCEL_TEMPLATE_NAME
-                )
-
-        if not hasattr(g, 'zalohy_manager') or g.zalohy_manager is None:
-            if active_filename:
-                g.zalohy_manager = ZalohyManager(
-                    Config.EXCEL_BASE_PATH, 
-                    active_filename, 
-                    Config.EXCEL_TEMPLATE_NAME
-                )
-
+        
+        if not hasattr(g, 'excel_manager'):
+            g.excel_manager = ExcelManager(Config.EXCEL_BASE_PATH, Config.EXCEL_TEMPLATE_NAME)
+        
+        if not hasattr(g, 'zalohy_manager'):
+            g.zalohy_manager = ZalohyManager(Config.EXCEL_BASE_PATH, Config.EXCEL_TEMPLATE_NAME)
+            
     except Exception as e:
         logger.error(f"Neočekávaná chyba při inicializaci manažerů: {e}", exc_info=True)
-        flash("Neočekávaná chyba při přípravě aplikace.", "error")
         g.excel_manager = None
         g.zalohy_manager = None
         flash("Neočekávaná chyba při přípravě aplikace.", "error")
@@ -191,78 +177,6 @@ def manage_employees():
     return render_template('employees.html', 
                           employees=employees, 
                           selected_employees=selected_employees)
-
-@app.route('/process-audio', methods=['POST'])
-@require_excel_managers
-def process_audio():
-    """Zpracování hlasového souboru přes Gemini API"""
-    try:
-        if 'audio' not in request.files:
-            return jsonify({'success': False, 'error': 'Chybí audio soubor'})
-            
-        # Uložení dočasného souboru
-        audio_file = request.files['audio']
-        temp_dir = Path("temp_audio")
-        temp_dir.mkdir(exist_ok=True)
-        temp_path = temp_dir / f"{datetime.now().timestamp()}.webm"
-        
-        audio_file.save(temp_path)
-        logger.info(f"Dočasný soubor uložen: {temp_path}")
-        
-        # Zpracování hlasu přes Gemini
-        voice_processor = VoiceProcessor()
-        result = voice_processor.process_voice_audio(temp_path)
-        
-        # Odstranění dočasného souboru
-        os.remove(temp_path)
-        
-        if not result['success']:
-            return jsonify(result)
-            
-        # Zpracování extrahovaných dat
-        entities = result['entities']
-        excel_manager = g.excel_manager
-        employee_manager = g.employee_manager
-        
-        # Podle typu akce vykonáme odpovídající operaci
-        if entities['action'] == 'record_time':
-            success, message = excel_manager.record_time(
-                entities['employee'], 
-                entities['date'], 
-                entities['start_time'], 
-                entities['end_time']
-            )
-            result['operation_result'] = {'success': success, 'message': message}
-            
-        elif entities['action'] == 'add_advance':
-            success, message = zalohy_manager.add_or_update_employee_advance(
-                entities['employee'], 
-                entities['amount'], 
-                entities['currency'], 
-                entities['option'], 
-                entities['date']
-            )
-            result['operation_result'] = {'success': success, 'message': message}
-            
-        elif entities['action'] == 'get_stats':
-            stats = {}
-            if 'time_period' in entities:
-                if entities['time_period'] == 'week':
-                    stats = excel_manager.get_week_stats(entities.get('employee'))
-                elif entities['time_period'] == 'month':
-                    stats = excel_manager.get_month_stats(entities.get('employee'))
-                elif entities['time_period'] == 'year':
-                    stats = excel_manager.get_year_stats(entities.get('employee'))
-            else:
-                stats = excel_manager.get_total_stats(entities.get('employee'))
-                
-            result['stats'] = stats
-            
-        return jsonify(result)
-        
-    except Exception as e:
-        logger.error(f"Chyba při zpracování hlasového souboru: {e}", exc_info=True)
-        return jsonify({'success': False, 'error': 'Interní chyba serveru'})
 
 @app.route('/zaznam', methods=['GET', 'POST'])
 @require_excel_managers
@@ -434,7 +348,7 @@ def settings_page():
             start_date = request.form.get('start_date')
             end_date = request.form.get('end_date')
             active_excel_file = request.form.get('active_excel_file')
-
+            
             # Aktualizace nastavení ve session
             session['settings'] = {
                 'start_time': start_time,
@@ -447,18 +361,17 @@ def settings_page():
                 },
                 'active_excel_file': active_excel_file
             }
-
+            
             flash("Nastavení bylo úspěšně uloženo", "success")
             return redirect(url_for('index'))
-
+            
         except Exception as e:
             logger.error(f"Chyba při ukládání nastavení: {e}", exc_info=True)
             flash("Došlo k chybě při ukládání nastavení", "error")
-
+    
     # Načtení aktuálních nastavení
     settings = session.get('settings', {})
-    settings.setdefault('project_info', {'name': '', 'start_date': '', 'end_date': ''})
-    return render_template('settings_page.html', settings=settings)
+    return render_template('settings.html', settings=settings)
 
 @app.route('/stahnout')
 @require_excel_managers
@@ -613,6 +526,47 @@ def start_new_file():
         flash("Došlo k chybě při vytváření nového souboru", "error")
     
     return redirect(url_for('settings_page'))
+
+@app.route('/zalohy', methods=['GET', 'POST'])
+@require_excel_managers
+def advances():
+    """Správa záloh"""
+    zalohy_manager_instance = g.zalohy_manager
+    if not zalohy_manager_instance:
+        flash("Správce záloh není k dispozici.", "error")
+        return redirect(url_for('index'))
+    
+    if request.method == 'POST':
+        try:
+            employee = request.form.get('employee')
+            amount = request.form.get('amount')
+            currency = request.form.get('currency')
+            option = request.form.get('option')
+            date = request.form.get('date')
+            
+            if not all([employee, amount, currency, option, date]):
+                raise ValueError("Musíte vyplnit všechna pole")
+                
+            success, message = zalohy_manager_instance.add_or_update_employee_advance(
+                employee, amount, currency, option, date
+            )
+            
+            if success:
+                flash(f"Záloha pro {employee} byla úspěšně uložena", "success")
+            else:
+                flash(message, "error")
+                
+        except ValueError as e:
+            flash(str(e), "error")
+        except Exception as e:
+            logger.error(f"Chyba při ukládání zálohy: {e}", exc_info=True)
+            flash("Došlo k chybě při ukládání zálohy", "error")
+    
+    employees = g.employee_manager.get_all_employees()
+    option_names = zalohy_manager_instance.get_option_names()
+    return render_template('advances.html',
+                          employees=employees,
+                          option_names=option_names)
 
 # Spuštění aplikace
 if __name__ == '__main__':

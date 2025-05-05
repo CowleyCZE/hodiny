@@ -432,7 +432,7 @@ def settings_page():
             start_date = request.form.get('start_date')
             end_date = request.form.get('end_date')
             active_excel_file = request.form.get('active_excel_file')
-            
+
             # Aktualizace nastavení ve session
             session['settings'] = {
                 'start_time': start_time,
@@ -445,16 +445,17 @@ def settings_page():
                 },
                 'active_excel_file': active_excel_file
             }
-            
+
             flash("Nastavení bylo úspěšně uloženo", "success")
             return redirect(url_for('index'))
-            
+
         except Exception as e:
             logger.error(f"Chyba při ukládání nastavení: {e}", exc_info=True)
             flash("Došlo k chybě při ukládání nastavení", "error")
-    
+
     # Načtení aktuálních nastavení
     settings = session.get('settings', {})
+    settings.setdefault('project_info', {'name': '', 'start_date': '', 'end_date': ''})
     return render_template('settings_page.html', settings=settings)
 
 @app.route('/stahnout')

@@ -100,7 +100,7 @@
             <div class="form-group">
                 <label for="start_date">Začátek projektu:</label>
                 <input type="date" name="start_date" id="start_date"
-                       value="{{ request.form['start_date'] if request.form else settings.project_info.start_date | default('', true) }}"
+                       value="{{ request.form['start_date'] if request.form else (settings.project_info.start_date if settings.project_info else '') }}"
                        class="form-control date-picker" required aria-required="true"
                        title="Vyberte datum začátku projektu">
             </div>

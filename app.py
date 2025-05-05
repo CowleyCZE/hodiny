@@ -67,25 +67,27 @@ def before_request():
         # Načtení nastavení
         settings = session.get('settings', {})
         active_filename = settings.get("active_excel_file")  # Aktuální pracovní soubor
-        
-        # Inicializace manažerů
-        if not hasattr(g, 'employee_manager'):
+
+        # Inicializace manažerů pouze pokud ještě nejsou inicializovány
+        if not hasattr(g, 'employee_manager') or g.employee_manager is None:
             g.employee_manager = EmployeeManager(Config.DATA_PATH)
-        
-        if not hasattr(g, 'excel_manager') and active_filename:
-            g.excel_manager = ExcelManager(
-                Config.EXCEL_BASE_PATH, 
-                active_filename, 
-                Config.EXCEL_TEMPLATE_NAME
-            )
-        
-        if not hasattr(g, 'zalohy_manager') and active_filename:
-            g.zalohy_manager = ZalohyManager(
-                Config.EXCEL_BASE_PATH, 
-                active_filename, 
-                Config.EXCEL_TEMPLATE_NAME
-            )
-            
+
+        if not hasattr(g, 'excel_manager') or g.excel_manager is None:
+            if active_filename:
+                g.excel_manager = ExcelManager(
+                    Config.EXCEL_BASE_PATH, 
+                    active_filename, 
+                    Config.EXCEL_TEMPLATE_NAME
+                )
+
+        if not hasattr(g, 'zalohy_manager') or g.zalohy_manager is None:
+            if active_filename:
+                g.zalohy_manager = ZalohyManager(
+                    Config.EXCEL_BASE_PATH, 
+                    active_filename, 
+                    Config.EXCEL_TEMPLATE_NAME
+                )
+
     except Exception as e:
         logger.error(f"Neočekávaná chyba při inicializaci manažerů: {e}", exc_info=True)
         flash("Neočekávaná chyba při přípravě aplikace.", "error")

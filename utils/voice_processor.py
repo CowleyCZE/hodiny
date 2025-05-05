@@ -4,7 +4,7 @@ import re
 import json
 import logging
 import google.generativeai as genai
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from config import Config
 from employee_management import EmployeeManager

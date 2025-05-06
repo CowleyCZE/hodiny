@@ -33,6 +33,11 @@
     {% else %}
         <div class="alert alert-warning" role="alert">Soubor Hodiny_Cap.xlsx nebyl nalezen.</div>
     {% endif %}
+
+    <section class="voice-control" aria-labelledby="voice-control-heading">
+        <h3 id="voice-control-heading">Hlasové ovládání</h3>
+        <button id="voice-command-btn" class="btn btn-secondary" onclick="startVoiceCommands()">Zapnout hlasové ovládání</button>
+    </section>
 {% endblock %}
 
 {% block scripts %}
@@ -51,6 +56,11 @@
             const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
             const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
             return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+        }
+
+        function startVoiceCommands() {
+            alert('Hlasové ovládání bylo zapnuto!');
+            // Zde můžete přidat volání funkcí z voice_processor.py přes API
         }
     </script>
 {% endblock %}

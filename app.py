@@ -17,7 +17,7 @@ from functools import wraps
 import openpyxl
 import pandas as pd
 from flask import (Flask, flash, jsonify, redirect, render_template, request,
-                   send_file, session, url_for, g)
+                   send_file, session, url_for, g, get_flashed_messages)
 from openpyxl import load_workbook
 from openpyxl.utils.exceptions import InvalidFileException
 from openpyxl.workbook import Workbook
@@ -28,6 +28,7 @@ from employee_management import EmployeeManager
 from excel_manager import ExcelManager
 from utils.logger import setup_logger
 from zalohy_manager import ZalohyManager
+from utils.voice_processor import VoiceProcessor
 
 # Nahrazení základního loggeru naším vlastním
 logger = setup_logger("app")
@@ -613,7 +614,7 @@ def settings_page():
             except ValueError: raise ValueError("Neplatný formát času (HH:MM)")
             try:
                 lunch_duration = float(lunch_duration_str.replace(",", "."))
-                if lunch_duration < 0 or lunch_duration > 4: raise ValueError()
+                if lunch_duration < lunch_duration > 4: raise ValueError()
             except ValueError: raise ValueError("Neplatná délka pauzy (0-4)")
             if not project_name: raise ValueError("Název projektu je povinný")
             if not project_start_str: raise ValueError("Datum začátku projektu je povinné")
@@ -691,7 +692,11 @@ def zalohy():
 
             # Uložení zálohy
             success = zalohy_manager_instance.add_or_update_employee_advance(
-                employee_name=employee_name, amount=amount, currency=currency, option=option, date=date_str
+                employee_name=employee_name, 
+                amount=amount, 
+                currency=currency, 
+                option=option, 
+                date=date_str
             )
             if success: flash("Záloha byla úspěšně uložena.", "success"); return redirect(url_for('zalohy'))
             else: raise RuntimeError("Nepodařilo se uložit zálohu.")
@@ -733,7 +738,7 @@ def start_new_file():
                  start_date = datetime.strptime(project_start_str, "%Y-%m-%d").date()
                  if end_date < start_date:
                       raise ValueError("Datum konce projektu nemůže být dřívější než datum začátku.")
-        except ValueError as e:
+        except ValueError as e: 
              # Zobrazíme specifickou chybu z validace data
              raise ValueError(f"Neplatné datum konce projektu pro archivaci: {e}")
 
@@ -766,10 +771,78 @@ def start_new_file():
     return redirect(url_for('settings_page'))
 
 
+@app.route('/voice-command', methods=['POST'])
+def voice_command():
+    """Zpracování hlasového příkazu"""
+    try:
+        data = request.get_json()
+        if not data or 'command' not in data:
+            return jsonify({'success': False, 'error': 'Chybí hlasový příkaz'})
+
+        voice_processor = VoiceProcessor()
+        result = voice_processor.process_voice_text(data['command'])
+
+        if not result['success']:
+            return jsonify(result)
+
+        # Podle typu akce vykonáme odpovídající operaci
+        entities = result['entities']
+        excel_manager = g.excel_manager
+        employee_manager = g.employee_manager
+
+        if entities['action'] == 'record_time':
+            # Záznam pracovní doby
+            success, message = excel_manager.record_time(
+                entities['employee'], 
+                entities['date'], 
+                entities['start_time'], 
+                entities['end_time']
+            )
+            result['operation_result'] = {'success': success, 'message': message}
+
+        elif entities['action'] == 'add_advance':
+            # Přidání zálohy
+            success, message = g.zalohy_manager.add_or_update_employee_advance(
+                entities['employee'], 
+                entities['amount'], 
+                entities['currency'], 
+                "add", 
+                entities['date']
+            )
+            result['operation_result'] = {'success': success, 'message': message}
+
+        elif entities['action'] == 'get_stats':
+            # Získání statistik
+            stats = {}
+            if 'time_period' in entities:
+                if entities['time_period'] == 'week':
+                    stats = excel_manager.get_week_stats(entities.get('employee'))
+                elif entities['time_period'] == 'month':
+                    stats = excel_manager.get_month_stats(entities.get('employee'))
+                elif entities['time_period'] == 'year':
+                    stats = excel_manager.get_year_stats(entities.get('employee'))
+            else:
+                stats = excel_manager.get_total_stats(entities.get('employee'))
+
+            result['stats'] = stats
+
+        return jsonify(result)
+
+    except Exception as e:
+        logger.error(f"Chyba při zpracování hlasového příkazu: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': 'Interní chyba serveru'})
+
+
+def validate_email(email):
+    """Validuje e-mailovou adresu."""
+    pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+    return re.match(pattern, email) is not None
+
+
 if __name__ == "__main__":
     if not app.debug:
          log_handler = logging.FileHandler('app_prod.log', encoding='utf-8')
-         log_handler.setLevel(logging.WARNING); log_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'); log_handler.setFormatter(log_formatter)
+         log_handler.setLevel(logging.WARNING); log_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levellevel)s - %(message)s'); log_handler.setFormatter(log_formatter)
          app.logger.addHandler(log_handler)
     else: app.logger.setLevel(logging.DEBUG)
     app.run(debug=True, host='0.0.0.0', port=5000)

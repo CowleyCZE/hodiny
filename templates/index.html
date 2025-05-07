@@ -36,7 +36,13 @@
 
     <section class="voice-control" aria-labelledby="voice-control-heading">
         <h3 id="voice-control-heading">Hlasové ovládání</h3>
-        <button id="voice-command-btn" class="btn btn-secondary" onclick="startVoiceCommands()">Zapnout hlasové ovládání</button>
+        <button id="voice-button" class="voice-control-button">
+            <i class="fas fa-microphone"></i> Hlasové ovládání
+        </button>
+        <div id="voice-result"></div>
+        <div id="loading-indicator" style="display: none;">
+            <i class="fas fa-spinner fa-spin"></i>
+        </div>
     </section>
 {% endblock %}
 
@@ -57,10 +63,6 @@
             const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
             return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
         }
-
-        function startVoiceCommands() {
-            alert('Hlasové ovládání bylo zapnuto!');
-            // Zde můžete přidat volání funkcí z voice_processor.py přes API
-        }
     </script>
+    <script src="{{ url_for('static', filename='js/voice-handler.js') }}"></script>
 {% endblock %}

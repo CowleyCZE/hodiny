@@ -37,7 +37,7 @@ class VoiceProcessor:
         """Inicializace procesoru hlasu"""
         self.gemini_api_key = Config.GEMINI_API_KEY
         self.gemini_api_url = Config.GEMINI_API_URL
-        self.employee_manager = EmployeeManager(data_path="data/employee_config.json")
+        self.employee_manager = EmployeeManager(data_path="data")
         self.employee_list = self._load_employees()
         self.currency_options = ["CZK", "EUR"]
         

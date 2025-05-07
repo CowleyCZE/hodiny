@@ -791,23 +791,23 @@ def voice_command():
         employee_manager = g.employee_manager
 
         if entities['action'] == 'record_time':
+            # Získáme vybraného zaměstnance - použijeme prvního vybraného
+            selected_employees = employee_manager.get_vybrani_zamestnanci()
+            if not selected_employees:
+                return jsonify({
+                    'success': False,
+                    'error': 'Nejsou vybráni žádní zaměstnanci'
+                })
+            
+            employee = selected_employees[0]  # Použijeme prvního vybraného zaměstnance
+            
             # Záznam pracovní doby
             success, message = excel_manager.record_time(
-                entities['employee'], 
-                entities['date'], 
-                entities['start_time'], 
-                entities['end_time']
-            )
-            result['operation_result'] = {'success': success, 'message': message}
-
-        elif entities['action'] == 'add_advance':
-            # Přidání zálohy
-            success, message = g.zalohy_manager.add_or_update_employee_advance(
-                entities['employee'], 
-                entities['amount'], 
-                entities['currency'], 
-                "add", 
-                entities['date']
+                employee=employee,
+                date=entities['date'],
+                start_time=entities['start_time'],
+                end_time=entities['end_time'],
+                lunch_duration=entities.get('lunch_duration', 1.0)  # Použijeme výchozí hodnotu 1.0 pokud není zadána
             )
             result['operation_result'] = {'success': success, 'message': message}
 

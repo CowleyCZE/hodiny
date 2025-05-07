@@ -514,3 +514,40 @@ class ExcelManager:
             logger.error(f"Chyba při zpracování data '{datum}' pro získání čísla týdne: {e}")
             # Vrátíme None nebo vyvoláme výjimku, aby volající věděl o chybě
             return None
+
+    def record_time(self, employee, date, start_time, end_time, lunch_duration=1.0):
+        """
+        Zaznamená pracovní dobu pro daného zaměstnance.
+        
+        Args:
+            employee (str): Jméno zaměstnance
+            date (str): Datum ve formátu YYYY-MM-DD
+            start_time (str): Čas začátku ve formátu HH:MM
+            end_time (str): Čas konce ve formátu HH:MM
+            lunch_duration (float): Délka oběda v hodinách, výchozí 1.0
+            
+        Returns:
+            tuple: (success, message)
+        """
+        try:
+            # Zavolá existující metodu ulozit_pracovni_dobu s jedním zaměstnancem
+            success = self.ulozit_pracovni_dobu(
+                date=date,
+                start_time=start_time,
+                end_time=end_time,
+                lunch_duration=lunch_duration,
+                employees=[employee]
+            )
+            
+            if success:
+                message = "Záznam byl úspěšně uložen"
+                logger.info(f"Úspěšně uložen záznam pro {employee}: Datum {date}, Začátek {start_time}, Konec {end_time}, Oběd {lunch_duration}")
+            else:
+                message = "Nepodařilo se uložit záznam"
+                logger.error(f"Nepodařilo se uložit záznam pro {employee}")
+                
+            return success, message
+            
+        except Exception as e:
+            logger.error(f"Chyba při ukládání záznamu: {e}", exc_info=True)
+            return False, str(e)

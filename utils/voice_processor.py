@@ -123,7 +123,9 @@ class VoiceProcessor:
             "amount": None,
             "currency": None,
             "action": None,
-            "time_period": None
+            "time_period": None,
+            "start_time": None,
+            "end_time": None
         }
 
         # Detekce akce - musí být první
@@ -139,7 +141,8 @@ class VoiceProcessor:
                 r"pracovní\s*dob[au]",
                 r"odpracovan[éý]",
                 r"zapiš\s*(?:čas|hodiny)",
-                r"zaznamenej.*dob[au]"
+                r"zaznamenej.*dob[au]",
+                r"přidej.*(?:čas|hodiny|dobu)"
             ],
             "get_stats": [
                 r"statistik[ay]",
@@ -156,16 +159,26 @@ class VoiceProcessor:
                 entities["action"] = action
                 break
 
-        # Extrakce zaměstnance - nejdřív zkusíme načíst vybrané zaměstnance
-        employees = self.employee_manager.get_selected_employees()
-        if not employees:  # Pokud nejsou vybraní, použijeme všechny
-            employees = self._load_employees()
-        
-        for employee in employees:
-            emp_pattern = r"\b" + re.escape(employee.lower()) + r"\b"
-            if re.search(emp_pattern, text.lower()):
-                entities["employee"] = employee
-                break
+        # Extrakce časů pro záznam pracovní doby
+        if entities["action"] == "record_time":
+            # Rozpoznání časů ve formátu "od X do Y" nebo "X-Y"
+            time_patterns = [
+                # Od sedmi do osmi
+                (r"od\s+(\d{1,2}|sedmi|osmi|devíti|desíti|jedenácti|dvanácti|třinácti|čtrnácti|patnácti|šestnácti|sedmnácti|osmnácti|devatenácti|dvaceti|dvaceti ?jedné|dvaceti ?dvou|dvaceti ?tří)\s+(?:hodin(?:y)?)?(?:\s+)?do\s+(\d{1,2}|sedmi|osmi|devíti|desíti|jedenácti|dvanácti|třinácti|čtrnácti|patnácti|šestnácti|sedmnácti|osmnácti|devatenácti|dvaceti|dvaceti ?jedné|dvaceti ?dvou|dvaceti ?tří)(?:\s+hodin)?", lambda x, y: (self._word_to_hour(x), self._word_to_hour(y))),
+                # 7-17 nebo 7:00-17:00
+                (r"(\d{1,2})(?::\d{2})?\s*[-–]\s*(\d{1,2})(?::\d{2})?", lambda x, y: (int(x), int(y))),
+                # Od 7 do 17
+                (r"od\s+(\d{1,2})(?::\d{2})?\s+do\s+(\d{1,2})(?::\d{2})?", lambda x, y: (int(x), int(y)))
+            ]
+
+            for pattern, converter in time_patterns:
+                match = re.search(pattern, text)
+                if match:
+                    start, end = converter(match.group(1), match.group(2))
+                    if 0 <= start <= 23 and 0 <= end <= 23:
+                        entities["start_time"] = f"{start:02d}:00"
+                        entities["end_time"] = f"{end:02d}:00"
+                        break
 
         # Extrakce data
         date_patterns = [
@@ -187,7 +200,22 @@ class VoiceProcessor:
                     entities["date"] = self._normalize_date(date_str)
                 break
 
-        # Extrakce částky a měny s vylepšenou detekcí
+        # Pokud není zadáno datum, použijeme dnešek
+        if not entities["date"] and entities["action"] == "record_time":
+            entities["date"] = datetime.now().strftime("%Y-%m-%d")
+
+        # Extrakce zaměstnance
+        employees = self.employee_manager.get_selected_employees()
+        if not employees:  # Pokud nejsou vybraní, použijeme všechny
+            employees = self._load_employees()
+        
+        for employee in employees:
+            emp_pattern = r"\b" + re.escape(employee.lower()) + r"\b"
+            if re.search(emp_pattern, text.lower()):
+                entities["employee"] = employee
+                break
+
+        # Extrakce částky a měny
         amount_match = re.search(r"(\d+(?:[.,]\d+)?)\s*(czk|kč|eur|€)", text, re.IGNORECASE)
         if amount_match:
             amount = float(amount_match.group(1).replace(",", "."))
@@ -214,6 +242,24 @@ class VoiceProcessor:
                 break
 
         return entities
+
+    def _word_to_hour(self, word):
+        """Převede slovní vyjádření hodiny na číslo"""
+        word = word.lower().strip()
+        if word.isdigit():
+            return int(word)
+            
+        hour_map = {
+            "sedmi": 7, "osmi": 8, "devíti": 9, "desíti": 10,
+            "jedenácti": 11, "dvanácti": 12, "třinácti": 13,
+            "čtrnácti": 14, "patnácti": 15, "šestnácti": 16,
+            "sedmnácti": 17, "osmnácti": 18, "devatenácti": 19,
+            "dvaceti": 20, "dvaceti jedné": 21, "dvacetijedné": 21,
+            "dvaceti dvou": 22, "dvacetidvou": 22,
+            "dvaceti tří": 23, "dvacetitří": 23
+        }
+        
+        return hour_map.get(word, 0)
 
     def _normalize_date(self, date_str):
         """Převede různé formáty data na standardní formát YYYY-MM-DD"""
@@ -291,6 +337,45 @@ class VoiceProcessor:
             
         except Exception as e:
             logger.error(f"Kritická chyba při zpracování hlasového příkazu: {e}", exc_info=True)
+            return {
+                "success": False, 
+                "error": "Interní chyba při zpracování",
+                "details": str(e)
+            }
+
+    def process_voice_text(self, text):
+        """
+        Zpracuje textový příkaz podobně jako hlasový příkaz, ale přeskočí krok s Gemini API
+        """
+        try:
+            if not text:
+                return {"success": False, "error": "Prázdný textový vstup"}
+                
+            # Extrahujeme entity z textu
+            entities = self._extract_entities(text)
+            
+            # Validace dat
+            is_valid, validation_errors = self._validate_data(entities)
+            
+            if not is_valid:
+                return {
+                    "success": False, 
+                    "errors": validation_errors,
+                    "original_text": text
+                }
+            
+            # Přidání dodatečných informací
+            entities.update({
+                "success": True,
+                "confidence": 1.0,  # Pro textový vstup máme 100% jistotu textu
+                "processed_at": datetime.now().isoformat(),
+                "original_text": text
+            })
+            
+            return entities
+            
+        except Exception as e:
+            logger.error(f"Kritická chyba při zpracování textového příkazu: {e}", exc_info=True)
             return {
                 "success": False, 
                 "error": "Interní chyba při zpracování",

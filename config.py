@@ -4,6 +4,8 @@ import secrets
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
+import logging
+from openpyxl import Workbook
 
 
 @dataclass
@@ -50,6 +52,19 @@ class Config:
     # Výchozí konfigurace
     DEFAULT_PROJECT_CONFIG = ProjectConfig()
     DEFAULT_TIME_CONFIG = TimeConfig()
+
+    GEMINI_API_KEY = "AIzaSyBvfpvviIHxJgOxkQeVyZCT2rnhyzI7bMo"  # Replace with your actual Gemini API key
+
+    # Gemini API konfigurace
+    GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "AIzaSyBvfpvviIHxJgOxkQeVyZCT2rnhyzI7bMo")
+    GEMINI_API_URL = os.environ.get("GEMINI_API_URL", "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent")
+    GEMINI_REQUEST_TIMEOUT = int(os.environ.get("GEMINI_REQUEST_TIMEOUT", 10))
+    GEMINI_MAX_RETRIES = int(os.environ.get("GEMINI_MAX_RETRIES", 3))
+    GEMINI_CACHE_TTL = int(os.environ.get("GEMINI_CACHE_TTL", 3600))  # 1 hodina v sekundách
+    
+    # Rate limiting
+    RATE_LIMIT_REQUESTS = int(os.environ.get("RATE_LIMIT_REQUESTS", 100))  # počet požadavků
+    RATE_LIMIT_WINDOW = int(os.environ.get("RATE_LIMIT_WINDOW", 3600))    # časové okno v sekundách
 
     @classmethod
     def get_default_settings(cls):

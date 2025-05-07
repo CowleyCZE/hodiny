@@ -269,3 +269,7 @@ class EmployeeManager:
         except Exception as e:
             logger.error(f"Chyba při vytváření seznamu zaměstnanců: {str(e)}")
             return []
+
+    def get_selected_employees(self):
+        """Vrátí seznam vybraných zaměstnanců"""
+        return self.vybrani_zamestnanci

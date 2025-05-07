@@ -13,7 +13,7 @@ def setup_logger(name):
     logger = logging.getLogger(name)
 
     if not logger.handlers:
-        logger.setLevel(logging.INFO)
+        logger.setLevel(logging.DEBUG)
 
         # Vytvoření log adresáře v závislosti na prostředí
         if Config.IS_PYTHONANYWHERE:

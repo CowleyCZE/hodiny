@@ -38,8 +38,7 @@ class VoiceProcessor:
         self.gemini_api_key = Config.GEMINI_API_KEY
         self.gemini_api_url = Config.GEMINI_API_URL
         self.employee_manager = EmployeeManager(data_path="data")
-        self.employee_list = self._load_employees()
-        self.currency_options = ["CZK", "EUR"]
+        self.default_lunch_duration = 1.0  # Přednastavená délka oběda na 1 hodinu
         
         # Inicializace rate limiteru
         self.rate_limiter = RateLimiter(
@@ -47,7 +46,6 @@ class VoiceProcessor:
             Config.RATE_LIMIT_WINDOW
         )
         
-        # Inicializace session pro HTTP požadavky
         self.session = requests.Session()
 
     def init_cache_session(self):
@@ -118,24 +116,15 @@ class VoiceProcessor:
         """Extrahuje entity z textu pomocí regulárních výrazů"""
         text = text.lower()
         entities = {
-            "employee": None,
             "date": None,
-            "amount": None,
-            "currency": None,
-            "action": None,
-            "time_period": None,
             "start_time": None,
-            "end_time": None
+            "end_time": None,
+            "lunch_duration": self.default_lunch_duration,  # Přednastavená hodnota
+            "action": None
         }
 
-        # Detekce akce - musí být první
+        # Detekce akce
         action_patterns = {
-            "add_advance": [
-                r"záloh[au]",
-                r"přid[aáe][tj]\s*záloh[au]",
-                r"vypl[aá][tc]?\s*záloh[au]",
-                r"nov[áé]\s*záloh[au]"
-            ],
             "record_time": [
                 r"práce",
                 r"pracovní\s*dob[au]",
@@ -143,14 +132,6 @@ class VoiceProcessor:
                 r"zapiš\s*(?:čas|hodiny)",
                 r"zaznamenej.*dob[au]",
                 r"přidej.*(?:čas|hodiny|dobu)"
-            ],
-            "get_stats": [
-                r"statistik[ay]",
-                r"přehled",
-                r"součet",
-                r"celkem",
-                r"ukaž",
-                r"zobraz"
             ]
         }
 
@@ -161,10 +142,9 @@ class VoiceProcessor:
 
         # Extrakce časů pro záznam pracovní doby
         if entities["action"] == "record_time":
-            # Rozpoznání časů ve formátu "od X do Y" nebo "X-Y"
             time_patterns = [
                 # Od sedmi do osmi
-                (r"od\s+(\d{1,2}|sedmi|osmi|devíti|desíti|jedenácti|dvanácti|třinácti|čtrnácti|patnácti|šestnácti|sedmnácti|osmnácti|devatenácti|dvaceti|dvaceti ?jedné|dvaceti ?dvou|dvaceti ?tří)\s+(?:hodin(?:y)?)?(?:\s+)?do\s+(\d{1,2}|sedmi|osmi|devíti|desíti|jedenácti|dvanácti|třinácti|čtrnácti|patnácti|šestnácti|sedmnácti|osmnácti|devatenácti|dvaceti|dvaceti ?jedné|dvaceti ?dvou|dvaceti ?tří)(?:\s+hodin)?", lambda x, y: (self._word_to_hour(x), self._word_to_hour(y))),
+                (r"od\s+(\d{1,2}|sedmi|osmi|devíti|desíti|jedenácti|dvanácti|třinácti|čtrnácti|patnácti|šestnácti|sedmnácti|osmnácti|devatenácti|dvaceti|dvaceti ?jedné|dvaceti ?dvou|dvaceti ?tří)\s+(?:hodin(?:y)?)?(?:\s+)?do\s+(\d{1,2}|sedmi|osmi|devíti|desíti|jedenácti|dvanácti|třinácti|čtrnácti|patnácti|šestnácti|sedmnácti|osmnácti|devatenácti|dvaceti|dvaceti ?jedné|dvaceti ?dvou|dvaceti ?tří)", lambda x, y: (self._word_to_hour(x), self._word_to_hour(y))),
                 # 7-17 nebo 7:00-17:00
                 (r"(\d{1,2})(?::\d{2})?\s*[-–]\s*(\d{1,2})(?::\d{2})?", lambda x, y: (int(x), int(y))),
                 # Od 7 do 17
@@ -204,42 +184,12 @@ class VoiceProcessor:
         if not entities["date"] and entities["action"] == "record_time":
             entities["date"] = datetime.now().strftime("%Y-%m-%d")
 
-        # Extrakce zaměstnance
-        employees = self.employee_manager.get_selected_employees()
-        if not employees:  # Pokud nejsou vybraní, použijeme všechny
-            employees = self._load_employees()
-        
-        for employee in employees:
-            emp_pattern = r"\b" + re.escape(employee.lower()) + r"\b"
-            if re.search(emp_pattern, text.lower()):
-                entities["employee"] = employee
-                break
-
-        # Extrakce částky a měny
-        amount_match = re.search(r"(\d+(?:[.,]\d+)?)\s*(czk|kč|eur|€)", text, re.IGNORECASE)
-        if amount_match:
-            amount = float(amount_match.group(1).replace(",", "."))
-            currency = amount_match.group(2).lower()
-            currency_map = {
-                "kč": "CZK", 
-                "czk": "CZK",
-                "€": "EUR",
-                "eur": "EUR"
-            }
-            entities["amount"] = amount
-            entities["currency"] = currency_map.get(currency, currency.upper())
-
-        # Extrakce časového období
-        period_patterns = {
-            "week": [r"týden", r"týdně", r"týdenní"],
-            "month": [r"měsíc", r"měsíční", r"měsíčně"],
-            "year": [r"rok", r"roční", r"ročně"]
-        }
-
-        for period, patterns in period_patterns.items():
-            if any(re.search(pattern, text, re.IGNORECASE) for pattern in patterns):
-                entities["time_period"] = period
-                break
+        # Extrakce délky oběda (pokud je explicitně uvedena)
+        lunch_match = re.search(r"ob[ěe]d\s+(\d+(?:[.,]\d+)?)\s*(?:hodiny?|hodin|h)?", text)
+        if lunch_match:
+            lunch_duration = float(lunch_match.group(1).replace(",", "."))
+            if 0 <= lunch_duration <= 4:  # Kontrola rozumného rozsahu
+                entities["lunch_duration"] = lunch_duration
 
         return entities
 
@@ -274,21 +224,18 @@ class VoiceProcessor:
         """Validace extrahovaných dat"""
         errors = []
         
-        # Validace zaměstnance pro relevantní akce
-        if data.get("action") in ["record_time", "add_advance"]:
-            if not data.get("employee"):
-                errors.append("Neznámý zaměstnanec")
-        
         # Validace data
         if data.get("date") and not re.match(r"\d{4}-\d{2}-\d{2}", data["date"]):
             errors.append("Neplatný formát data")
         
-        # Validace částky a měny pro zálohy
-        if data.get("action") == "add_advance":
-            if not data.get("amount") or data["amount"] <= 0:
-                errors.append("Částka musí být kladná")
-            if not data.get("currency") or data["currency"] not in self.currency_options:
-                errors.append(f"Neplatná měna. Použijte {', '.join(self.currency_options)}")
+        # Validace časů pro záznam pracovní doby
+        if data.get("action") == "record_time":
+            if not data.get("start_time"):
+                errors.append("Chybí čas začátku")
+            if not data.get("end_time"):
+                errors.append("Chybí čas konce")
+            if data.get("lunch_duration") is not None and (data["lunch_duration"] < 0 or data["lunch_duration"] > 4):
+                errors.append("Délka oběda musí být mezi 0 a 4 hodinami")
         
         # Validace akce
         if not data.get("action"):

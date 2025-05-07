@@ -146,15 +146,8 @@ function handleVoiceAction(data) {
 
 // Předvyplnění formuláře pracovní doby
 function prefillWorkTimeForm(entities) {
-    const form = document.getElementById('work-time-form');
+    const form = document.getElementById('record-time-form');
     if (!form) return;
-    
-    if (entities.employee) {
-        const employeeSelect = form.querySelector('select[name="employee"]');
-        if (employeeSelect) {
-            employeeSelect.value = entities.employee;
-        }
-    }
     
     if (entities.date) {
         const dateInput = form.querySelector('input[name="date"]');
@@ -176,9 +169,15 @@ function prefillWorkTimeForm(entities) {
             endTimeInput.value = entities.end_time;
         }
     }
+
+    // Nastavení délky oběda s přednastavenou hodnotou 1 hodina
+    const lunchInput = form.querySelector('input[name="lunch_duration"]');
+    if (lunchInput) {
+        lunchInput.value = entities.lunch_duration || "1.0";
+    }
     
     // Automatické přepnutí na sekci formuláře
-    document.getElementById('work-time-section').scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('record-time-section').scrollIntoView({ behavior: 'smooth' });
 }
 
 // Předvyplnění formuláře zálohy

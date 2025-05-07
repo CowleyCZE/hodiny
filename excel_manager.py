@@ -219,24 +219,14 @@ class ExcelManager:
                         # Pokud ani šablonový list "Týden" neexistuje, vytvoříme prázdný
                         sheet = workbook.create_sheet(sheet_name)
                         logger.warning(f"Vytvořen nový prázdný list '{sheet_name}' v souboru {self.active_filename} (šablona 'Týden' nenalezena).")
+
                     # Nastavení názvu týdne do buňky A80
                     sheet["A80"] = sheet_name
                 else:
                     sheet = workbook[sheet_name]
 
-                # Výpočet odpracovaných hodin
-                start = datetime.strptime(start_time, "%H:%M")
-                end = datetime.strptime(end_time, "%H:%M")
-                lunch_duration_float = float(lunch_duration)
-                total_hours = (end - start).total_seconds() / 3600 - lunch_duration_float
-                # Zaokrouhlení na 2 desetinná místa pro konzistenci
-                total_hours = round(total_hours, 2)
-
                 # Určení sloupce podle dne v týdnu (0 = Po, ..., 6 = Ne)
                 weekday = datetime.strptime(date, "%Y-%m-%d").weekday()
-                if weekday >= 5: # Kontrola víkendu (neměla by nastat díky validaci v app.py)
-                     logger.warning(f"Pokus o záznam pracovní doby na víkend ({date}), záznam bude přeskočen.")
-                     return False # Nebo vyvolat chybu
 
                 # Pondělí (0) -> sloupec B (index 1), Úterý (1) -> D (index 3), atd.
                 # Použijeme +1 pro index sloupce (openpyxl je 1-based)
@@ -244,6 +234,18 @@ class ExcelManager:
                 start_time_col_index = day_column_index
                 end_time_col_index = day_column_index + 1
                 date_col_index = day_column_index # Datum do stejného sloupce jako hodiny
+
+                # Výpočet odpracovaných hodin - pro volný den vložíme 0
+                if start_time == "00:00" and end_time == "00:00" and lunch_duration == 0.0:
+                    total_hours = 0
+                else:
+                    # Normální výpočet pro pracovní den
+                    start = datetime.strptime(start_time, "%H:%M")
+                    end = datetime.strptime(end_time, "%H:%M")
+                    lunch_duration_float = float(lunch_duration)
+                    total_hours = (end - start).total_seconds() / 3600 - lunch_duration_float
+                    # Zaokrouhlení na 2 desetinná místa pro konzistenci
+                    total_hours = round(total_hours, 2)
 
                 # Ukládání dat pro každého zaměstnance
                 start_row = 9 # Řádek, kde začínají jména zaměstnanců
@@ -289,15 +291,9 @@ class ExcelManager:
                      logger.error(f"Neplatný formát data '{date}' při ukládání do buňky {date_col_letter}80.")
                      sheet[f"{date_col_letter}80"] = date # Uložíme jako text, pokud selže konverze
 
-
                 # Zápis názvu projektu do B79 (pokud je nastaven)
                 if self.current_project_name:
                     sheet["B79"] = self.current_project_name
-                else:
-                    # Pokud název projektu není nastaven, můžeme buňku vymazat nebo nechat
-                    # sheet["B79"] = None
-                    pass
-
 
                 # Workbook se uloží automaticky context managerem _get_workbook
                 logger.info(f"Úspěšně uložena pracovní doba pro datum {date} do listu {sheet_name} v souboru {self.active_filename}")
@@ -517,10 +513,10 @@ class ExcelManager:
 
     def record_time(self, employee, date, start_time, end_time, lunch_duration=1.0):
         """
-        Zaznamená pracovní dobu pro daného zaměstnance.
+        Zaznamená pracovní dobu pro jednoho nebo více zaměstnanců.
         
         Args:
-            employee (str): Jméno zaměstnance
+            employee (Union[str, List[str]]): Jméno zaměstnance nebo seznam jmen zaměstnanců
             date (str): Datum ve formátu YYYY-MM-DD
             start_time (str): Čas začátku ve formátu HH:MM
             end_time (str): Čas konce ve formátu HH:MM
@@ -530,24 +526,27 @@ class ExcelManager:
             tuple: (success, message)
         """
         try:
-            # Zavolá existující metodu ulozit_pracovni_dobu s jedním zaměstnancem
+            # Převedeme jeden string na seznam pro jednotné zpracování
+            employees = employee if isinstance(employee, list) else [employee]
+            
+            # Zavoláme existující metodu ulozit_pracovni_dobu se seznamem zaměstnanců
             success = self.ulozit_pracovni_dobu(
                 date=date,
                 start_time=start_time,
                 end_time=end_time,
                 lunch_duration=lunch_duration,
-                employees=[employee]
+                employees=employees
             )
             
             if success:
                 message = "Záznam byl úspěšně uložen"
-                logger.info(f"Úspěšně uložen záznam pro {employee}: Datum {date}, Začátek {start_time}, Konec {end_time}, Oběd {lunch_duration}")
+                logger.info(f"Úspěšně uložen záznam pro zaměstnance {', '.join(employees)}: Datum {date}, Začátek {start_time}, Konec {end_time}, Oběd {lunch_duration}")
             else:
                 message = "Nepodařilo se uložit záznam"
-                logger.error(f"Nepodařilo se uložit záznam pro {employee}")
+                logger.error(f"Nepodařilo se uložit záznam pro zaměstnance {', '.join(employees)}")
                 
             return success, message
-            
+
         except Exception as e:
             logger.error(f"Chyba při ukládání záznamu: {e}", exc_info=True)
             return False, str(e)

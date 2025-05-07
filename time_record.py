@@ -64,10 +64,6 @@ class TimeRecord:
         today = datetime.now().date()
         selected_date = date.date()
 
-        # Kontrola víkendu
-        if selected_date.weekday() >= 5:
-            raise ValueError("Nelze vybrat víkend")
-
         if selected_date > today:
             raise ValueError("Nelze vybrat datum v budoucnosti")
 

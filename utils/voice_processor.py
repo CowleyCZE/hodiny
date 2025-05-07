@@ -119,8 +119,9 @@ class VoiceProcessor:
             "date": None,
             "start_time": None,
             "end_time": None,
-            "lunch_duration": self.default_lunch_duration,  # Přednastavená hodnota
-            "action": None
+            "lunch_duration": self.default_lunch_duration,
+            "action": None,
+            "is_free_day": False
         }
 
         # Detekce akce
@@ -132,16 +133,29 @@ class VoiceProcessor:
                 r"zapiš\s*(?:čas|hodiny)",
                 r"zaznamenej.*dob[au]",
                 r"přidej.*(?:čas|hodiny|dobu)"
+            ],
+            "record_free_day": [
+                r"voln[oý]",
+                r"dovolen[áa]",
+                r"sick\s*day",
+                r"náhradní\s*volno",
+                r"nepřítomnost"
             ]
         }
 
         for action, patterns in action_patterns.items():
             if any(re.search(pattern, text, re.IGNORECASE) for pattern in patterns):
-                entities["action"] = action
+                entities["action"] = "record_time"  # Vždy použijeme record_time
+                if action == "record_free_day":
+                    entities["is_free_day"] = True
+                    entities["start_time"] = "00:00"
+                    entities["end_time"] = "00:00"
+                    entities["lunch_duration"] = 0.0
                 break
 
-        # Extrakce časů pro záznam pracovní doby
-        if entities["action"] == "record_time":
+        # Pokud je to volný den, přeskočíme extrakci časů
+        if not entities["is_free_day"]:
+            # Extrakce časů pro pracovní dobu
             time_patterns = [
                 # Od sedmi do osmi
                 (r"od\s+(\d{1,2}|sedmi|osmi|devíti|desíti|jedenácti|dvanácti|třinácti|čtrnácti|patnácti|šestnácti|sedmnácti|osmnácti|devatenácti|dvaceti|dvaceti ?jedné|dvaceti ?dvou|dvaceti ?tří)\s+(?:hodin(?:y)?)?(?:\s+)?do\s+(\d{1,2}|sedmi|osmi|devíti|desíti|jedenácti|dvanácti|třinácti|čtrnácti|patnácti|šestnácti|sedmnácti|osmnácti|devatenácti|dvaceti|dvaceti ?jedné|dvaceti ?dvou|dvaceti ?tří)", lambda x, y: (self._word_to_hour(x), self._word_to_hour(y))),
@@ -184,12 +198,14 @@ class VoiceProcessor:
         if not entities["date"] and entities["action"] == "record_time":
             entities["date"] = datetime.now().strftime("%Y-%m-%d")
 
-        # Extrakce délky oběda (pokud je explicitně uvedena)
-        lunch_match = re.search(r"ob[ěe]d\s+(\d+(?:[.,]\d+)?)\s*(?:hodiny?|hodin|h)?", text)
-        if lunch_match:
-            lunch_duration = float(lunch_match.group(1).replace(",", "."))
-            if 0 <= lunch_duration <= 4:  # Kontrola rozumného rozsahu
-                entities["lunch_duration"] = lunch_duration
+        # Pro volný den není délka oběda potřeba
+        if not entities["is_free_day"]:
+            # Extrakce délky oběda (pokud je explicitně uvedena)
+            lunch_match = re.search(r"ob[ěe]d\s+(\d+(?:[.,]\d+)?)\s*(?:hodiny?|hodin|h)?", text)
+            if lunch_match:
+                lunch_duration = float(lunch_match.group(1).replace(",", "."))
+                if 0 <= lunch_duration <= 4:  # Kontrola rozumného rozsahu
+                    entities["lunch_duration"] = lunch_duration
 
         return entities
 

@@ -308,9 +308,10 @@ def send_email():
         active_filename = active_file_path.name
 
         # Kontrola konfigurace a validace emailů (stejná jako dříve)
-        if not Config.RECIPIENT_EMAIL: raise ValueError("E-mail příjemce není nastaven.")
+        if not Config.RECIPIENT_rEMAIL: raise ValueError("E-mail příjemce není nastaven.")
         if not Config.SMTP_USERNAME or not Config.SMTP_PASSWORD: raise ValueError("SMTP údaje nejsou nastaveny.")
-        if not Config.SMTP_SERVER or not Config.SMTP_PORT: raise ValueError("SMTP server/port není nastaven.")
+        if not Config.SMTP_SERVER or not Config.SMTP_PORT:
+            raise ValueError("SMTP server/port není nastaven.")
         sender = Config.SMTP_USERNAME; recipient = Config.RECIPIENT_EMAIL
         validate_email(sender); validate_email(recipient)
 
@@ -458,9 +459,6 @@ def record_time():
             try:
                 selected_date = datetime.strptime(date_str, "%Y-%m-%d").date()
                 if selected_date > datetime.now().date(): raise ValueError("Nelze zadat budoucí datum")
-                # Víkendy povolíme pro záznam volného dne
-                if selected_date.weekday() >= 5 and not is_free_day_submitted:
-                    raise ValueError("Pracovní dobu nelze zadat na víkend (pouze volný den)")
             except ValueError as e: raise ValueError(f"Neplatné datum: {e}")
 
             if is_free_day_submitted:
@@ -683,11 +681,13 @@ def zalohy():
             option = request.form.get("option")
             date_str = request.form.get("date")
 
-            if not employee_name or employee_name not in employees_list: raise ValueError("Vyberte platného zaměstnance")
+            if not employee_name or employee_name not in employees_list:
+                raise ValueError("Vyberte platného zaměstnance")
             try: amount = float(amount_str.replace(",", ".")); zalohy_manager_instance.validate_amount(amount)
             except Exception as e: raise ValueError(f"Neplatná částka: {e}")
             zalohy_manager_instance.validate_currency(currency)
-            if not option or option not in advance_options: raise ValueError("Vyberte platnou možnost")
+            if not option or option not in advance_options:
+                raise ValueError("Vyberte platnou možnost")
             zalohy_manager_instance.validate_date(date_str)
 
             # Uložení zálohy
@@ -791,7 +791,7 @@ def voice_command():
         employee_manager = g.employee_manager
 
         if entities['action'] == 'record_time':
-            # Získáme vybraného zaměstnance - použijeme prvního vybraného
+            # Získáme všechny vybrané zaměstnance
             selected_employees = employee_manager.get_vybrani_zamestnanci()
             if not selected_employees:
                 return jsonify({
@@ -799,15 +799,19 @@ def voice_command():
                     'error': 'Nejsou vybráni žádní zaměstnanci'
                 })
             
-            employee = selected_employees[0]  # Použijeme prvního vybraného zaměstnance
+            # Pokud je to volný den, použijeme speciální hodnoty
+            if entities.get('is_free_day'):
+                entities['start_time'] = "00:00"
+                entities['end_time'] = "00:00"
+                entities['lunch_duration'] = 0.0
             
-            # Záznam pracovní doby
+            # Záznam pracovní doby nebo volna pro všechny vybrané zaměstnance
             success, message = excel_manager.record_time(
-                employee=employee,
+                employee=selected_employees,
                 date=entities['date'],
                 start_time=entities['start_time'],
                 end_time=entities['end_time'],
-                lunch_duration=entities.get('lunch_duration', 1.0)  # Použijeme výchozí hodnotu 1.0 pokud není zadána
+                lunch_duration=entities.get('lunch_duration', 1.0)
             )
             result['operation_result'] = {'success': success, 'message': message}
 
@@ -842,7 +846,10 @@ def validate_email(email):
 if __name__ == "__main__":
     if not app.debug:
          log_handler = logging.FileHandler('app_prod.log', encoding='utf-8')
-         log_handler.setLevel(logging.WARNING); log_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levellevel)s - %(message)s'); log_handler.setFormatter(log_formatter)
+         log_handler.setLevel(logging.WARNING)
+         log_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levellevel)s - %(message)s')
+         log_handler.setFormatter(log_formatter)
          app.logger.addHandler(log_handler)
-    else: app.logger.setLevel(logging.DEBUG)
+    else:
+         app.logger.setLevel(logging.DEBUG)
     app.run(debug=True, host='0.0.0.0', port=5000)

@@ -155,25 +155,36 @@ function prefillWorkTimeForm(entities) {
             dateInput.value = entities.date;
         }
     }
-    
-    if (entities.start_time) {
-        const startTimeInput = form.querySelector('input[name="start_time"]');
-        if (startTimeInput) {
-            startTimeInput.value = entities.start_time;
-        }
-    }
-    
-    if (entities.end_time) {
-        const endTimeInput = form.querySelector('input[name="end_time"]');
-        if (endTimeInput) {
-            endTimeInput.value = entities.end_time;
-        }
-    }
 
-    // Nastavení délky oběda s přednastavenou hodnotou 1 hodina
-    const lunchInput = form.querySelector('input[name="lunch_duration"]');
-    if (lunchInput) {
-        lunchInput.value = entities.lunch_duration || "1.0";
+    const freeDayCheckbox = form.querySelector('input[name="is_free_day"]');
+    if (freeDayCheckbox) {
+        freeDayCheckbox.checked = entities.is_free_day || false;
+        // Zavolat funkci pro skrytí/zobrazení časových polí
+        if (typeof toggleTimeFields === 'function') {
+            toggleTimeFields();
+        }
+    }
+    
+    if (!entities.is_free_day) {
+        // Pouze pokud to není volný den, nastavíme časy
+        if (entities.start_time) {
+            const startTimeInput = form.querySelector('input[name="start_time"]');
+            if (startTimeInput) {
+                startTimeInput.value = entities.start_time;
+            }
+        }
+        
+        if (entities.end_time) {
+            const endTimeInput = form.querySelector('input[name="end_time"]');
+            if (endTimeInput) {
+                endTimeInput.value = entities.end_time;
+            }
+        }
+
+        const lunchInput = form.querySelector('input[name="lunch_duration"]');
+        if (lunchInput) {
+            lunchInput.value = entities.lunch_duration || "1.0";
+        }
     }
     
     // Automatické přepnutí na sekci formuláře

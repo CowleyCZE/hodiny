@@ -345,7 +345,14 @@ class VoiceProcessor:
 
     def process_voice_text(self, text):
         """
-        Zpracuje textový příkaz podobně jako hlasový příkaz, ale přeskočí krok s Gemini API
+        Zpracuje textový příkaz podobně jako hlasový příkaz, ale přeskočí krok s Gemini API.
+        Používá stejné metody pro extrakci entit a validaci jako hlasový vstup.
+        
+        Args:
+            text (str): Textový příkaz k zpracování
+            
+        Returns:
+            dict: Výsledek zpracování s extrahovanými entitami nebo chybou
         """
         try:
             if not text:
@@ -365,14 +372,15 @@ class VoiceProcessor:
                 }
             
             # Přidání dodatečných informací
-            entities.update({
+            result = {
                 "success": True,
+                "entities": entities,
                 "confidence": 1.0,  # Pro textový vstup máme 100% jistotu textu
                 "processed_at": datetime.now().isoformat(),
                 "original_text": text
-            })
+            }
             
-            return entities
+            return result
             
         except Exception as e:
             logger.error(f"Kritická chyba při zpracování textového příkazu: {e}", exc_info=True)

@@ -23,6 +23,15 @@ class EmployeeManager:
         self.load_config()
         logger.info("Inicializována třída EmployeeManagement")
 
+    def _sort_selected_employees(self):
+        """Seřadí vybrané zaměstnance tak, že 'Čáp Jakub' je vždy první a ostatní jsou seřazeni abecedně"""
+        cap_jakub = "Čáp Jakub"
+        others = sorted([x for x in self.vybrani_zamestnanci if x != cap_jakub])
+        if cap_jakub in self.vybrani_zamestnanci:
+            self.vybrani_zamestnanci = [cap_jakub] + others
+        else:
+            self.vybrani_zamestnanci = others
+
     def load_config(self):
         """Načte konfiguraci ze souboru"""
         if not os.path.exists(self.config_file):
@@ -35,14 +44,12 @@ class EmployeeManager:
             with open(self.config_file, "r", encoding="utf-8") as f:
                 config = json.load(f)
 
-                # Validace struktury načtených dat
                 if not isinstance(config, dict):
                     raise ValueError("Neplatný formát konfiguračního souboru")
 
                 zamestnanci = config.get("zamestnanci", [])
                 vybrani = config.get("vybrani_zamestnanci", [])
 
-                # Validace typů a hodnot
                 if not isinstance(zamestnanci, list) or not isinstance(vybrani, list):
                     raise ValueError("Neplatný formát seznamů")
 
@@ -58,12 +65,14 @@ class EmployeeManager:
                 self.zamestnanci = sorted(zamestnanci)
                 self.vybrani_zamestnanci = vybrani
 
+                # Automaticky přidat Čáp Jakub do vybraných pokud existuje
+                if "Čáp Jakub" in self.zamestnanci and "Čáp Jakub" not in self.vybrani_zamestnanci:
+                    self.vybrani_zamestnanci.append("Čáp Jakub")
+                
+                self._sort_selected_employees()
+
         except json.JSONDecodeError:
-            logger.error(f"Chyba při čtení JSON z {self.config_file}")
-            self.zamestnanci = []
-            self.vybrani_zamestnanci = []
-        except ValueError as e:
-            logger.error(f"Chyba validace dat: {str(e)}")
+            logger.error("Chyba při načítání konfiguračního souboru")
             self.zamestnanci = []
             self.vybrani_zamestnanci = []
         except Exception as e:
@@ -106,12 +115,13 @@ class EmployeeManager:
         """Uloží konfiguraci do souboru"""
         try:
             self._validate_lists()
-            # Ensure data directory exists
+            self._sort_selected_employees()
+            
             os.makedirs(os.path.dirname(self.config_file), exist_ok=True)
 
             with open(self.config_file, "w", encoding="utf-8") as f:
                 json.dump(
-                    {"zamestnanci": sorted(self.zamestnanci), "vybrani_zamestnanci": sorted(self.vybrani_zamestnanci)},
+                    {"zamestnanci": sorted(self.zamestnanci), "vybrani_zamestnanci": self.vybrani_zamestnanci},
                     f,
                     ensure_ascii=False,
                     indent=4,
@@ -129,6 +139,12 @@ class EmployeeManager:
             if zamestnanec not in self.zamestnanci:
                 self.zamestnanci.append(zamestnanec)
                 self.zamestnanci.sort()
+                
+                # Automaticky přidat Čáp Jakub do vybraných
+                if zamestnanec == "Čáp Jakub":
+                    self.vybrani_zamestnanci.append(zamestnanec)
+                    self._sort_selected_employees()
+                
                 self.save_config()
                 logger.info(f"Přidán zaměstnanec: {zamestnanec}")
                 return True
@@ -144,7 +160,7 @@ class EmployeeManager:
             zamestnanec = self._validate_employee_name(zamestnanec)
             if zamestnanec in self.zamestnanci and zamestnanec not in self.vybrani_zamestnanci:
                 self.vybrani_zamestnanci.append(zamestnanec)
-                self.vybrani_zamestnanci.sort()
+                self._sort_selected_employees()
                 self.save_config()
                 logger.info(f"Přidán vybraný zaměstnanec: {zamestnanec}")
                 return True
@@ -163,6 +179,11 @@ class EmployeeManager:
         zamestnanec = zamestnanec.strip()
         if len(zamestnanec) < 2:
             logger.error("Jméno zaměstnance musí mít alespoň 2 znaky")
+            return False
+
+        # Zabránit odebrání Čáp Jakub ze seznamu vybraných
+        if zamestnanec == "Čáp Jakub":
+            logger.warning("Nelze odebrat zaměstnance 'Čáp Jakub' ze seznamu vybraných")
             return False
 
         if zamestnanec in self.vybrani_zamestnanci:
@@ -204,12 +225,19 @@ class EmployeeManager:
                     raise ValueError(f"Zaměstnanec s jménem {novy_nazev} již existuje")
 
                 self.zamestnanci[index - 1] = novy_nazev
+                
+                # Úprava v seznamu vybraných zaměstnanců
                 if stary_nazev in self.vybrani_zamestnanci:
                     self.vybrani_zamestnanci.remove(stary_nazev)
                     self.vybrani_zamestnanci.append(novy_nazev)
-                    self.vybrani_zamestnanci.sort()
-
+                
+                # Pokud je nové jméno "Čáp Jakub", přidat do vybraných
+                if novy_nazev == "Čáp Jakub" and novy_nazev not in self.vybrani_zamestnanci:
+                    self.vybrani_zamestnanci.append(novy_nazev)
+                
+                # Seřadit seznamy
                 self.zamestnanci.sort()
+                self._sort_selected_employees()
                 self.save_config()
 
             logger.info(f"Upraven zaměstnanec: {stary_nazev} -> {novy_nazev}")
@@ -240,17 +268,14 @@ class EmployeeManager:
 
     def get_all_employees(self):
         """Vrátí seznam všech zaměstnanců s informací o jejich označení"""
-        # Validace existence seznamů
         if self.zamestnanci is None or self.vybrani_zamestnanci is None:
             logger.error("Seznamy zaměstnanců nejsou inicializovány")
             return []
 
-        # Validace typů seznamů
         if not isinstance(self.zamestnanci, list) or not isinstance(self.vybrani_zamestnanci, list):
             logger.error("Seznamy zaměstnanců nejsou platné")
             return []
 
-        # Validace obsahu seznamů
         if not all(isinstance(z, str) for z in self.zamestnanci):
             logger.error("Seznam zaměstnanců obsahuje neplatné hodnoty")
             return []
@@ -259,7 +284,6 @@ class EmployeeManager:
             logger.error("Seznam vybraných zaměstnanců obsahuje neplatné hodnoty")
             return []
 
-        # Validace konzistence dat
         if not all(z in self.zamestnanci for z in self.vybrani_zamestnanci):
             logger.error("Vybraní zaměstnanci nejsou podmnožinou všech zaměstnanců")
             return []

@@ -17,12 +17,13 @@ from openpyxl.utils import get_column_letter # Import pro převod indexu na pís
 
 # Předpokládá existenci utils.logger
 try:
-    from utils.logger import setup_logger
+    from utils.logger import setup_logger # Opraveno na setup_logger
     logger = setup_logger("excel_manager")
 except ImportError:
     # Fallback na základní logger, pokud utils.logger není dostupný
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger("excel_manager")
+import datetime # Přidán import datetime
 
 
 # Kontrola jestli je systém Windows
@@ -550,3 +551,138 @@ class ExcelManager:
         except Exception as e:
             logger.error(f"Chyba při ukládání záznamu: {e}", exc_info=True)
             return False, str(e)
+
+    def generate_monthly_report(self, month, year, employees=None):
+        """
+        Generuje měsíční report odpracovaných hodin pro zaměstnance.
+
+        Args:
+            month (int): Měsíc (1-12).
+            year (int): Rok.
+            employees (list, optional): Seznam jmen zaměstnanců. Defaults to None (všichni).
+
+        Returns:
+            dict: Slovník s reportem. Klíče jsou jména zaměstnanců, hodnoty jsou slovníky
+                  s "total_hours" a "free_days".
+                  Příklad: {"Novák Josef": {"total_hours": 160, "free_days": 2}}
+
+        Raises:
+            ValueError: Pokud je neplatný měsíc nebo rok.
+        """
+        if not (1 <= month <= 12):
+            logger.error(f"Neplatný měsíc: {month}. Musí být mezi 1 a 12.")
+            raise ValueError("Měsíc musí být v rozsahu 1-12.")
+        if not (2000 <= year <= 2100): # Přiměřený rozsah pro rok
+            logger.error(f"Neplatný rok: {year}. Musí být mezi 2000 a 2100.")
+            raise ValueError("Rok musí být v rozsahu 2000-2100.")
+
+        logger.info(f"Generování měsíčního reportu pro {month}/{year}. Zaměstnanci: {employees if employees else 'Všichni'}")
+
+        report_data = {}
+        try:
+            active_path = self.get_active_file_path()
+            with self._get_workbook(active_path, read_only=True) as wb:
+                if not wb:
+                    logger.error("Nepodařilo se otevřít workbook pro generování reportu.")
+                    return {}
+
+                employee_data_template = {"total_hours": 0, "free_days": 0}
+                # Inicializace report_data pro specifikované zaměstnance, pokud jsou zadáni
+                if employees:
+                    for emp_name in employees:
+                        report_data[emp_name] = employee_data_template.copy()
+
+                for sheet_name in wb.sheetnames:
+                    if not sheet_name.startswith("Týden"):
+                        continue # Přeskočíme listy, které neodpovídají vzoru
+
+                    sheet = wb[sheet_name]
+                    logger.info(f"Zpracovávám list: {sheet_name}")
+
+                    # Sloupce pro hodiny (C, E, ..., O) a odpovídající buňky s daty (B80, D80, ..., N80)
+                    hour_columns_indices = [2, 4, 6, 8, 10, 12, 14] # Indexy pro openpyxl (1-based) C=3, E=5... O=15
+                    date_cells_coords = ["B80", "D80", "F80", "H80", "J80", "L80", "N80"]
+
+                    # Načtení dat pro tento týden
+                    week_dates = []
+                    for col_idx, date_cell_coord in enumerate(date_cells_coords):
+                        date_cell_value = sheet[date_cell_coord].value
+                        if isinstance(date_cell_value, datetime.datetime): # Očekáváme datetime objekty
+                            week_dates.append(date_cell_value.date())
+                        elif isinstance(date_cell_value, str): # Pokus o převod, pokud je string
+                            try:
+                                week_dates.append(datetime.datetime.strptime(date_cell_value, "%d.%m.%Y").date())
+                            except ValueError:
+                                try:
+                                    week_dates.append(datetime.datetime.strptime(date_cell_value, "%Y-%m-%d").date())
+                                except ValueError:
+                                    logger.warning(f"Neplatný formát data v buňce {date_cell_coord} listu {sheet_name}: {date_cell_value}. Tento den bude ignorován.")
+                                    week_dates.append(None) # Chyba při čtení data
+                        else:
+                            week_dates.append(None) # Žádné datum nebo neznámý typ
+
+                    # Procházení řádků se zaměstnanci (od řádku 9)
+                    for row_num in range(9, sheet.max_row + 1):
+                        employee_name_cell = sheet.cell(row=row_num, column=1) # Sloupec A
+                        employee_name = employee_name_cell.value
+                        if not employee_name or not str(employee_name).strip():
+                            # Pokud je jméno prázdné, předpokládáme konec seznamu zaměstnanců pro tento list
+                            break 
+                        
+                        employee_name = str(employee_name).strip()
+
+                        # Pokud jsou specifikováni zaměstnanci a tento není v seznamu, přeskočíme ho
+                        if employees and employee_name not in employees:
+                            continue
+
+                        # Pokud zaměstnanec ještě není v report_data, inicializujeme ho
+                        if employee_name not in report_data:
+                            report_data[employee_name] = employee_data_template.copy()
+
+                        for day_idx, hour_col_idx_offset in enumerate(hour_columns_indices):
+                            actual_col_idx = hour_col_idx_offset + 1 # openpyxl je 1-based, C=3, E=5 ...
+                            
+                            current_date = week_dates[day_idx]
+                            if not current_date: # Pokud se nepodařilo přečíst datum pro tento den
+                                continue
+
+                            # Kontrola, zda datum spadá do požadovaného měsíce a roku
+                            if current_date.month == month and current_date.year == year:
+                                hours_cell = sheet.cell(row=row_num, column=actual_col_idx)
+                                hours_value = hours_cell.value
+
+                                if hours_value is None or str(hours_value).strip() == "":
+                                    # Považujeme za 0 hodin, ale ne nutně volný den (může být jen nevyplněno)
+                                    # Pro účely tohoto reportu to ale znamená 0 odpracovaných hodin.
+                                    # Volný den se počítá jen pokud je explicitně 0.
+                                    pass # Nepřidáváme hodiny
+                                else:
+                                    try:
+                                        hours_worked = float(hours_value)
+                                        report_data[employee_name]["total_hours"] += hours_worked
+                                        if hours_worked == 0:
+                                            report_data[employee_name]["free_days"] += 1
+                                    except (ValueError, TypeError):
+                                        logger.warning(f"Neplatná hodnota hodin '{hours_value}' pro zaměstnance {employee_name} v listu {sheet_name}, buňka {hours_cell.coordinate}. Ignorováno.")
+                
+                # Po zpracování všech listů, odfiltrujeme zaměstnance, kteří nemají žádné hodiny ani volné dny.
+                # Toto je relevantní hlavně v případě, kdy `employees` nebylo specifikováno,
+                # a my jsme mohli potenciálně inicializovat záznam pro zaměstnance,
+                # kteří v daném měsíci nemají žádná data.
+                # Pokud `employees` bylo specifikováno, odstraníme pouze ty, pro které se nic nenašlo.
+                
+                final_report_data = {}
+                for emp_name, data in report_data.items():
+                    if data["total_hours"] > 0 or data["free_days"] > 0:
+                        final_report_data[emp_name] = data
+                report_data = final_report_data
+
+            logger.info(f"Měsíční report pro {month}/{year} úspěšně vygenerován. Nalezeno záznamů pro {len(report_data)} zaměstnanců.")
+            return report_data
+
+        except FileNotFoundError:
+            logger.error(f"Aktivní soubor {self.active_filename} nebyl nalezen při generování reportu.")
+            return {} # Vrací prázdný report v případě chyby
+        except Exception as e:
+            logger.error(f"Chyba při generování měsíčního reportu pro {month}/{year}: {e}", exc_info=True)
+            return {} # Vrací prázdný report v případě obecné chyby

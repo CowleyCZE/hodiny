@@ -837,6 +837,100 @@ def voice_command():
         return jsonify({'success': False, 'error': 'Interní chyba serveru'})
 
 
+@app.route('/monthly_report', methods=['GET', 'POST'])
+@require_excel_managers
+def monthly_report_route():
+    employee_manager_instance = g.employee_manager
+    excel_manager_instance = g.excel_manager
+    
+    all_employees_data = employee_manager_instance.get_all_employees()
+    employee_names = [emp['name'] for emp in all_employees_data]
+    
+    report_data = None
+    
+    if request.method == 'POST':
+        try:
+            selected_month = request.form.get('month', type=int)
+            selected_year = request.form.get('year', type=int)
+            # getlist pro případ, že by frontend posílal vícekrát stejný název parametru
+            # Pokud chceme, aby 'employees' byl vždy seznam, i když je vybrán jen jeden nebo žádný,
+            # getlist je správná volba. Pokud by 'employees' mohlo chybět, zvážili bychom default.
+            selected_employees = request.form.getlist('employees') 
+            if not selected_employees: # Pokud je seznam prázdný (žádný zaměstnanec nebyl vybrán)
+                selected_employees = None # Nastavíme na None pro metodu generate_monthly_report
+
+            # Validace vstupů
+            if not (1 <= selected_month <= 12):
+                flash('Neplatný měsíc. Zadejte hodnotu od 1 do 12.', 'error')
+                # Znovu vykreslíme s původními GET hodnotami nebo aktuálními, pokud POST selhal na začátku
+                return render_template("monthly_report.html",
+                                       employee_names=employee_names,
+                                       current_month=datetime.now().month,
+                                       current_year=datetime.now().year,
+                                       report_data=None,
+                                       selected_employees_post=request.form.getlist('employees')) # Předáme zpět vybrané
+
+            if not (2000 <= selected_year <= 2100): # Rozumný rozsah pro rok
+                flash('Neplatný rok. Zadejte hodnotu např. mezi 2000 a 2100.', 'error')
+                return render_template("monthly_report.html",
+                                       employee_names=employee_names,
+                                       current_month=selected_month, # Použijeme již zadaný měsíc
+                                       current_year=datetime.now().year, # Rok můžeme resetovat nebo ponechat
+                                       report_data=None,
+                                       selected_employees_post=request.form.getlist('employees'))
+
+            logger.info(f"Generování měsíčního reportu pro {selected_month}/{selected_year}. Zaměstnanci: {selected_employees}")
+            
+            report_data = excel_manager_instance.generate_monthly_report(
+                month=selected_month,
+                year=selected_year,
+                employees=selected_employees
+            )
+            
+            if not report_data:
+                flash('Nebyly nalezeny žádné záznamy pro zadané období a zaměstnance.', 'info')
+            
+            # Vykreslení šablony s výsledky (nebo prázdnými daty, pokud nic nebylo nalezeno)
+            return render_template("monthly_report.html",
+                                   employee_names=employee_names,
+                                   current_month=selected_month,
+                                   current_year=selected_year,
+                                   report_data=report_data,
+                                   selected_employees_post=selected_employees if selected_employees else []) # Předáme vybrané pro zachování stavu
+
+        except ValueError as e: # Chyby z generate_monthly_report nebo validace typů
+            flash(str(e), 'error')
+            logger.warning(f"Chyba hodnoty při generování měsíčního reportu: {e}")
+            report_data = None
+        except IOError as e: # Chyby souboru z generate_monthly_report
+            flash(str(e), 'error')
+            logger.error(f"Chyba souboru při generování měsíčního reportu: {e}", exc_info=True)
+            report_data = None
+        except Exception as e:
+            logger.error(f"Neočekávaná chyba při generování měsíčního reportu: {e}", exc_info=True)
+            flash('Došlo k neočekávané chybě při generování reportu.', 'error')
+            report_data = None
+            
+        # Pokud došlo k chybě, znovu vykreslíme formulář s chybovou hláškou
+        # a zachováme co nejvíce zadaných hodnot
+        return render_template("monthly_report.html",
+                               employee_names=employee_names,
+                               current_month=request.form.get('month', datetime.now().month, type=int),
+                               current_year=request.form.get('year', datetime.now().year, type=int),
+                               report_data=report_data, # Bude None
+                               selected_employees_post=request.form.getlist('employees'))
+
+    else: # GET request
+        current_month = datetime.now().month
+        current_year = datetime.now().year
+        return render_template("monthly_report.html",
+                               employee_names=employee_names,
+                               current_month=current_month,
+                               current_year=current_year,
+                               report_data=None,
+                               selected_employees_post=[]) # Pro GET je seznam vybraných prázdný
+
+
 def validate_email(email):
     """Validuje e-mailovou adresu."""
     pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'

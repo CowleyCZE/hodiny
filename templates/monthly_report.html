@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Měsíční Report{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Měsíční Report Odpracovaných Hodin</h2>
+
+    {% include '_flash_messages.html' %}
+
+    <form method="POST" action="{{ url_for('monthly_report_route') }}" class="mb-4 p-4 border rounded shadow-sm">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label for="month" class="form-label">Měsíc:</label>
+                <input type="number" class="form-control" id="month" name="month" min="1" max="12" value="{{ current_month }}" required>
+            </div>
+            <div class="col-md-3">
+                <label for="year" class="form-label">Rok:</label>
+                <input type="number" class="form-control" id="year" name="year" min="2000" max="2100" value="{{ current_year }}" required>
+            </div>
+            <div class="col-md-4">
+                <label for="employees" class="form-label">Zaměstnanci (volitelné):</label>
+                <select multiple class="form-select" id="employees" name="employees" size="5">
+                    {% for emp_name in employee_names %}
+                        <option value="{{ emp_name }}" {% if emp_name in (selected_employees_post or []) %}selected{% endif %}>
+                            {{ emp_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <small class="form-text text-muted">Pro všechny zaměstnance nechte pole prázdné (nevybírejte nic).</small>
+            </div>
+            <div class="col-md-2 align-self-end">
+                <button type="submit" class="btn btn-primary w-100">Generovat Report</button>
+            </div>
+        </div>
+    </form>
+
+    {% if report_data is not none %}
+        <h3 class="mt-5">Výsledky Reportu</h3>
+        {% if report_data %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Zaměstnanec</th>
+                            <th>Celkem Hodin</th>
+                            <th>Počet Volných Dnů</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for employee, data in report_data.items() %}
+                        <tr>
+                            <td>{{ employee }}</td>
+                            <td>{{ "%.2f"|format(data.total_hours) }}</td>
+                            <td>{{ data.free_days }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                Pro zadané kritéria nebyly nalezeny žádné záznamy.
+            </div>
+        {% endif %}
+    {% endif %}
+
+</div>
+{% endblock %}

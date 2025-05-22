@@ -84,6 +84,7 @@
                                 <button type="submit" data-confirm="delete">Smazat</button>
                             </form>
                         </div>
+                        {# Generování ID pro formulář úprav - pozor na speciální znaky ve jménech, pokud by se nepoužívalo replace #}
                         <div id="edit-form-{{ employee.name|replace(' ', '_') }}" class="edit-form" aria-label="Formulář pro úpravu zaměstnance">
                             <form method="POST" action="{{ url_for('manage_employees') }}">
                                 <input type="hidden" name="action" value="edit">
@@ -118,6 +119,7 @@
                                 <button type="submit" data-confirm="delete">Smazat</button>
                             </form>
                         </div>
+                        {# Generování ID pro formulář úprav - pozor na speciální znaky ve jménech, pokud by se nepoužívalo replace #}
                         <div id="edit-form-{{ employee.name|replace(' ', '_') }}" class="edit-form" aria-label="Formulář pro úpravu zaměstnance">
                             <form method="POST" action="{{ url_for('manage_employees') }}">
                                 <input type="hidden" name="action" value="edit">

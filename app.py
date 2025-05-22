@@ -319,7 +319,7 @@ def send_email():
         msg = MIMEMultipart()
         subject = f'{active_filename} - {datetime.now().strftime("%Y-%m-%d %H:%M")}'
         msg["Subject"] = subject; msg["From"] = sender; msg["To"] = recipient
-        app_name = getattr(Config, 'APP_NAME', 'Evidence pracovní doby')
+        app_name = Config.DEFAULT_APP_NAME
         body = f"""Dobrý den,\n\nv příloze zasílám aktuální výkaz pracovní doby ({active_filename}).\n\nS pozdravem,\n{app_name}"""
         msg.attach(MIMEText(body, "plain", "utf-8"))
 
@@ -335,7 +335,7 @@ def send_email():
 
         # Odeslání emailu (stejné jako dříve)
         ssl_context = ssl.create_default_context()
-        with smtplib.SMTP_SSL(Config.SMTP_SERVER, Config.SMTP_PORT, context=ssl_context, timeout=60) as smtp:
+        with smtplib.SMTP_SSL(Config.SMTP_SERVER, Config.SMTP_PORT, context=ssl_context, timeout=Config.SMTP_TIMEOUT) as smtp:
             smtp.login(Config.SMTP_USERNAME, Config.SMTP_PASSWORD)
             smtp.send_message(msg)
 
@@ -373,8 +373,8 @@ def manage_employees():
             if action == "add":
                 employee_name = request.form.get("name", "").strip()
                 if not employee_name: raise ValueError("Jméno zaměstnance nemůže být prázdné")
-                if len(employee_name) > 100: raise ValueError("Jméno zaměstnance je příliš dlouhé")
-                if not re.match(r"^[\w\s\-\.ěščřžýáíéúůďťňĚŠČŘŽÝÁÍÉÚŮĎŤŇ]+$", employee_name):
+                if len(employee_name) > Config.EMPLOYEE_NAME_MAX_LENGTH: raise ValueError("Jméno zaměstnance je příliš dlouhé")
+                if not re.match(Config.EMPLOYEE_NAME_VALIDATION_REGEX, employee_name):
                     raise ValueError("Jméno zaměstnance obsahuje nepovolené znaky.")
                 if employee_manager_instance.pridat_zamestnance(employee_name):
                     flash(f'Zaměstnanec "{employee_name}" byl přidán.', "success")
@@ -397,9 +397,9 @@ def manage_employees():
             elif action == "edit":
                 old_name = request.form.get("old_name", "").strip(); new_name = request.form.get("new_name", "").strip()
                 if not old_name or not new_name: raise ValueError("Původní i nové jméno musí být vyplněno")
-                if len(new_name) > 100: raise ValueError("Nové jméno je příliš dlouhé")
+                if len(new_name) > Config.EMPLOYEE_NAME_MAX_LENGTH: raise ValueError("Nové jméno je příliš dlouhé")
                 if old_name == new_name: flash("Jména jsou stejná.", "info"); return redirect(url_for('manage_employees'))
-                if not re.match(r"^[\w\s\-\.ěščřžýáíéúůďťňĚŠČŘŽÝÁÍÉÚŮĎŤŇ]+$", new_name): raise ValueError("Nové jméno obsahuje nepovolené znaky.")
+                if not re.match(Config.EMPLOYEE_NAME_VALIDATION_REGEX, new_name): raise ValueError("Nové jméno obsahuje nepovolené znaky.")
                 if employee_manager_instance.upravit_zamestnance_podle_jmena(old_name, new_name):
                     flash(f'"{old_name}" upraven na "{new_name}".', "success"); return redirect(url_for('manage_employees'))
                 else: flash(f'Nepodařilo se upravit "{old_name}".', "error")
@@ -559,7 +559,7 @@ def excel_viewer():
         if active_sheet_name not in sheet_names: active_sheet_name = sheet_names[0]
         sheet = workbook[active_sheet_name]
 
-        MAX_ROWS_TO_DISPLAY = 500
+        MAX_ROWS_TO_DISPLAY = Config.MAX_ROWS_TO_DISPLAY_EXCEL_VIEWER
         header_row = next(sheet.iter_rows(min_row=1, max_row=1, values_only=True), None)
         if header_row: data.append([str(c) if c is not None else "" for c in header_row])
         rows_loaded = 0

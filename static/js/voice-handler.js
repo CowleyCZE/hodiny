@@ -13,39 +13,39 @@ try {
     recognition = new window.SpeechRecognition();
     
     // Nastavení parametrů
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = 'cs-CZ'; // Čeština
-    recognition.maxAlternatives = 1;
+    recognition.continuous = false; // Rozpoznávání se zastaví po první promluvě.
+    recognition.interimResults = false; // Chceme pouze finální výsledky.
+    recognition.lang = 'cs-CZ'; // Nastavení jazyka na češtinu.
+    recognition.maxAlternatives = 1; // Počet alternativních transkriptů (chceme jen nejlepší).
     
-    // Event: Začátek naslouchání
+    // Event handler: Spustí se, když Web Speech API začne naslouchat.
     recognition.onstart = () => {
         isListening = true;
-        voiceButton.classList.add('active');
-        voiceResult.textContent = 'Naslouchám...';
-        loadingIndicator.style.display = 'inline-block';
+        voiceButton.classList.add('active'); // Vizuální zpětná vazba tlačítka
+        voiceResult.textContent = 'Naslouchám...'; // Informace pro uživatele
+        loadingIndicator.style.display = 'inline-block'; // Zobrazení indikátoru načítání
     };
     
-    // Event: Konec naslouchání
+    // Event handler: Spustí se, když Web Speech API přestane naslouchat.
     recognition.onend = () => {
         isListening = false;
         voiceButton.classList.remove('active');
         loadingIndicator.style.display = 'none';
     };
     
-    // Event: Výsledky rozpoznání
+    // Event handler: Spustí se, když jsou k dispozici výsledky rozpoznávání.
     recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript.trim();
-        voiceResult.textContent = `Rozpoznáno: ${transcript}`;
+        const transcript = event.results[0][0].transcript.trim(); // Získání rozpoznaného textu
+        voiceResult.textContent = `Rozpoznáno: ${transcript}`; // Zobrazení textu uživateli
         
-        // Odeslání výsledku na server
+        // Odeslání rozpoznaného textu na server k dalšímu zpracování
         sendVoiceCommandToServer(transcript);
     };
     
-    // Event: Chyba
+    // Event handler: Spustí se při chybě v procesu rozpoznávání.
     recognition.onerror = (event) => {
-        console.error('Chyba při hlasovém rozpoznávání:', event.error);
-        voiceResult.textContent = `Chyba: ${event.error}`;
+        console.error('Chyba při hlasovém rozpoznávání:', event.error); // Logování chyby do konzole
+        voiceResult.textContent = `Chyba: ${event.error}`; // Zobrazení chyby uživateli
         isListening = false;
         voiceButton.classList.remove('active');
         loadingIndicator.style.display = 'none';
@@ -66,10 +66,14 @@ voiceButton.addEventListener('click', () => {
     }
 });
 
-// Funkce pro odeslání hlasového příkazu na server
+// Funkce pro odeslání rozpoznaného textu (hlasového příkazu) na server
 function sendVoiceCommandToServer(text) {
-    fetch('/voice-command', {
-        method: 'POST',
+    // Zobrazení indikátoru načítání, protože odesíláme data a čekáme na odpověď
+    loadingIndicator.style.display = 'inline-block'; 
+    voiceResult.textContent = `Zpracovávám: "${text}"`; // Indikace zpracování
+
+    fetch('/voice-command', { // Cílová URL na serveru
+        method: 'POST', // Metoda HTTP požadavku
         headers: {
             'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest'
@@ -84,70 +88,83 @@ function sendVoiceCommandToServer(text) {
     })
     .then(data => {
         if (data.success) {
-            displaySuccessResult(data);
-            handleVoiceAction(data);
+            // Pokud server odpověděl úspěšně, zobrazíme výsledek a provedeme akci
+            displaySuccessResult(data); // Zobrazí formátovaný úspěšný výsledek
+            handleVoiceAction(data);    // Provede akci na základě rozpoznaných entit
         } else {
+            // Pokud server odpověděl s chybou, zobrazíme ji
             displayErrorResult(data);
         }
     })
     .catch(error => {
+        // Zpracování chyb sítě nebo jiných problémů s fetch požadavkem
         console.error('Chyba při odesílání hlasového příkazu:', error);
         voiceResult.textContent = 'Nepodařilo se odeslat hlasový příkaz na server.';
+    })
+    .finally(() => {
+        // Skryjeme indikátor načítání po dokončení (ať už úspěšně nebo neúspěšně)
+        loadingIndicator.style.display = 'none';
     });
 }
 
-// Zobrazení úspěšného výsledku
+// Zobrazení úspěšného výsledku zpracování serverem
 function displaySuccessResult(data) {
-    const confidence = (data.confidence * 100).toFixed(1);
+    const confidence = (data.confidence * 100).toFixed(1); // Spolehlivost rozpoznání
+    // Sestavení HTML pro zobrazení výsledků a entit
     voiceResult.innerHTML = `
         <div class="voice-result-success">
-            <p>Úspěšně rozpoznáno (spolehlivost: ${confidence}%)</p>
+            <p>Úspěšně zpracováno (spolehlivost: ${confidence}%)</p>
             <ul>
                 ${Object.entries(data.entities).map(([key, value]) => 
-                    `<li><strong>${key}:</strong> ${value}</li>`).join('')}
+                    `<li><strong>${key}:</strong> ${value === null || value === undefined ? '<em>N/A</em>' : value}</li>`).join('')}
             </ul>
+            ${data.operation_result ? `<p>Výsledek operace: ${data.operation_result.message || 'Neznámá odpověď'}</p>` : ''}
+            ${data.stats ? `<p>Statistiky: ${JSON.stringify(data.stats, null, 2)}</p>` : ''}
         </div>
     `;
 }
 
-// Zobrazení chybového výsledku
+// Zobrazení chybového výsledku zpracování serverem
 function displayErrorResult(data) {
+    // Sestavení HTML pro zobrazení chyby
     voiceResult.innerHTML = `
         <div class="voice-result-error">
-            <p>${data.error || 'Neznámá chyba'}</p>
+            <p>Chyba: ${data.error || 'Neznámá chyba serveru'}</p>
             ${data.errors ? `
                 <ul>
                     ${data.errors.map(error => `<li>${error}</li>`).join('')}
                 </ul>
             ` : ''}
+            ${data.original_text ? `<p>Původní text: "${data.original_text}"</p>` : ''}
         </div>
     `;
 }
 
-// Zpracování akce podle typu příkazu
+// Zpracování akce podle typu příkazu z rozpoznaného textu
 function handleVoiceAction(data) {
     switch (data.entities.action) {
-        case 'record_time':
+        case 'record_time': // Akce pro záznam pracovní doby nebo volného dne
             prefillWorkTimeForm(data.entities);
             break;
             
-        case 'add_advance':
+        case 'add_advance': // Akce pro přidání zálohy
+            // TODO: Implementovat detekci akce 'add_advance' v VoiceProcessor._extract_entities a otestovat.
             prefillAdvanceForm(data.entities);
             break;
             
-        case 'get_stats':
+        case 'get_stats': // Akce pro zobrazení statistik
             redirectToStatistics(data.entities);
             break;
             
-        default:
+        default: // Neznámá akce
             voiceResult.textContent = 'Neznámá akce byla rozpoznána.';
     }
 }
 
-// Předvyplnění formuláře pracovní doby
+// Předvyplnění formuláře pracovní doby na základě rozpoznaných entit
 function prefillWorkTimeForm(entities) {
-    const form = document.getElementById('record-time-form');
-    if (!form) return;
+    const form = document.getElementById('record-time-form'); // Získání formuláře
+    if (!form) return; // Pokud formulář neexistuje, nic neděláme
     
     if (entities.date) {
         const dateInput = form.querySelector('input[name="date"]');
@@ -191,15 +208,27 @@ function prefillWorkTimeForm(entities) {
     document.getElementById('record-time-section').scrollIntoView({ behavior: 'smooth' });
 }
 
-// Předvyplnění formuláře zálohy
+// Předvyplnění formuláře pro zadání zálohy na základě rozpoznaných entit
 function prefillAdvanceForm(entities) {
-    const form = document.getElementById('advance-form');
-    if (!form) return;
+    const form = document.getElementById('advance-form'); // Získání formuláře
+    if (!form) return; // Pokud formulář neexistuje, nic neděláme
     
+    // Předvyplnění jména zaměstnance, pokud bylo rozpoznáno
     if (entities.employee) {
-        const employeeSelect = form.querySelector('select[name="employee"]');
+        const employeeSelect = form.querySelector('select[name="employee_name"]'); // Opraven název selektoru
         if (employeeSelect) {
-            employeeSelect.value = entities.employee;
+            // Pokusíme se najít option, jehož hodnota (jméno zaměstnance) se shoduje
+            let found = false;
+            for (let i = 0; i < employeeSelect.options.length; i++) {
+                if (employeeSelect.options[i].value === entities.employee) {
+                    employeeSelect.selectedIndex = i;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                console.warn(`Zaměstnanec '${entities.employee}' nenalezen v selectu pro zálohy.`);
+            }
         }
     }
     
@@ -228,50 +257,52 @@ function prefillAdvanceForm(entities) {
     document.getElementById('advance-section').scrollIntoView({ behavior: 'smooth' });
 }
 
-// Přesměrování na statistiky
+// Přesměrování na stránku statistik s případnými parametry
 function redirectToStatistics(entities) {
-    let url = '/statistics';
+    let url = '/monthly_report'; // Cílová URL pro statistiky (měsíční report)
     
+    const params = new URLSearchParams(); // Použití URLSearchParams pro snadné přidávání parametrů
+    
+    // Přidání parametrů, pokud byly rozpoznány
     if (entities.employee) {
-        url += `?employee=${encodeURIComponent(entities.employee)}`;
+        params.append('employees', entities.employee); // Název parametru je 'employees' pro monthly_report
     }
-    
     if (entities.time_period) {
-        url += `${url.includes('?') ? '&' : '?'}period=${encodeURIComponent(entities.time_period)}`;
+        // Mapování rozpoznaného období na hodnoty očekávané backendem, pokud je to nutné
+        // Prozatím předpokládáme, že backend akceptuje 'week', 'month', 'year' přímo,
+        // nebo že se to zpracuje na backendu. Zde jen předáváme.
+        // params.append('period_type', entities.time_period); // Příklad, pokud by backend očekával jiný název
+        
+        // Měsíční report aktuálně filtruje podle měsíce a roku, nikoli obecného 'time_period'
+        // Pokud je 'time_period' např. 'month', můžeme zkusit nastavit aktuální měsíc/rok
+        // Nebo to ponechat na backendu, aby zobrazil výchozí pohled pro daný typ statistiky.
+        // Pro jednoduchost zde pouze logujeme a nepřidáváme jako parametr,
+        // protože /monthly_report očekává konkrétní měsíc/rok.
+        console.log("Rozpoznáno časové období pro statistiky:", entities.time_period, "ale /monthly_report vyžaduje měsíc/rok.");
     }
     
+    // Datum pro statistiky - /monthly_report typicky vyžaduje měsíc a rok, ne konkrétní datum.
+    // Pokud by bylo potřeba předat datum pro jiný typ statistik, zde by se to přidalo.
     if (entities.date) {
-        url += `${url.includes('?') ? '&' : '?'}date=${encodeURIComponent(entities.date)}`;
+         console.log("Rozpoznáno datum pro statistiky:", entities.date, "ale /monthly_report vyžaduje měsíc/rok.");
+        // params.append('specific_date', entities.date);
+    }
+
+    const queryString = params.toString();
+    if (queryString) {
+        url += `?${queryString}`;
     }
     
-    window.location.href = url;
-}
-
-// Funkce pro získání aktuálního času
-function getCurrentTime() {
-    const now = new Date();
-    return now.toTimeString().split(' ')[0];
-}
-
-// Funkce pro získání dnešního data
-function getTodayDate() {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
-}
-
-// Funkce pro získání včerejšího data
-function getYesterdayDate() {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    return yesterday.toISOString().split('T')[0];
+    console.log("Přesměrování na URL pro statistiky:", url);
+    window.location.href = url; // Přesměrování prohlížeče
 }
 
 // Event listener pro klávesové zkratky
 document.addEventListener('keydown', (event) => {
     // Ctrl + Shift + V pro spuštění hlasového vstupu
     if (event.ctrlKey && event.shiftKey && event.key === 'V') {
-        event.preventDefault();
-        if (!isListening) {
+        event.preventDefault(); // Zabráníme výchozí akci prohlížeče pro tuto kombinaci
+        if (!isListening && recognition) { // Zkontrolujeme, zda recognition existuje
             recognition.start();
         }
     }

@@ -1,17 +1,19 @@
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="cs"> {# Nastavení jazyka stránky na češtinu #}
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Evidence pracovní doby{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    {% block extra_css %}{% endblock %}
+    <meta charset="UTF-8"> {# Nastavení kódování znaků #}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> {# Nastavení pro responzivní zobrazení #}
+    <title>{% block title %}Evidence pracovní doby{% endblock %}</title> {# Blok pro titulek stránky, výchozí je "Evidence pracovní doby" #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> {# Link na hlavní CSS soubor #}
+    {% block extra_css %}{% endblock %} {# Blok pro přidání dalších CSS souborů specifických pro jednotlivé stránky #}
 </head>
 <body>
+    {# Hlavička stránky s logem #}
     <header>
-        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo aplikace" class="logo"> {# Logo aplikace #}
     </header>
 
+    {# Hlavní navigační menu #}
     <nav class="nav" aria-label="Hlavní navigace">
         <a href="{{ url_for('index') }}">Hlavní stránka</a>
         <a href="{{ url_for('manage_employees') }}">Zaměstnanci</a>
@@ -22,15 +24,19 @@
         <a href="{{ url_for('settings_page') }}">Nastavení</a>
     </nav>
 
+    {# Hlavní obsah stránky, který bude nahrazen obsahem z dědících šablon #}
     <main class="main">
         {% block content %}{% endblock %}
     </main>
 
+    {# Patička stránky #}
     <footer>
-        <p>&copy; 2024 {% block footer_title %}Evidence pracovní doby{% endblock %}</p>
+        <p>&copy; 2024 {% block footer_title %}Evidence pracovní doby{% endblock %}</p> {# Copyright a blok pro název v patičce #}
     </footer>
 
+    {# Blok pro přidání JavaScript souborů specifických pro jednotlivé stránky #}
     {% block scripts %}{% endblock %}
+    {# Připojení globálního JavaScriptu pro potvrzovací dialogy #}
     <script src="{{ url_for('static', filename='js/confirmations.js') }}"></script>
 </body>
 </html>

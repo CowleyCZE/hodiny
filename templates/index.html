@@ -3,6 +3,7 @@
 {% block title %}Evidence pracovní doby{% endblock %}
 
 {% block content %}
+    {# Info panel zobrazující aktuální týden a datum #}
     <div class="info-bar" role="region" aria-label="Časové informace">
         <div id="current-week">Týden: {{ week_number }}</div>
         <div id="current-date">Datum: {{ current_date }}</div>
@@ -10,6 +11,7 @@
 
     <h1 id="main-heading">Evidence pracovní doby</h1>
 
+    {# Blok pro zobrazení flash zpráv (např. úspěch, chyba) #}
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="messages" role="alert" aria-live="polite">
@@ -20,12 +22,14 @@
         {% endif %}
     {% endwith %}
 
+    {# Sekce pro akce s Excel souborem, zobrazí se, jen pokud soubor existuje #}
     {% if excel_exists %}
         <section class="excel-actions" aria-labelledby="excel-heading">
             <h3 id="excel-heading">Operace se souborem Hodiny_Cap.xlsx:</h3>
             <div class="button-group">
                 <a href="{{ url_for('download_file') }}" class="btn btn-primary" role="button">Stáhnout soubor</a>
-                <form action="{{ url_for('send_email') }}" method="post" class="inline-form">
+                {# Formulář pro odeslání emailu, používá nativní potvrzení přes confirmations.js (pokud je navázáno) nebo prohlížečem #}
+                <form action="{{ url_for('send_email') }}" method="post" class="inline-form" onsubmit="return confirmSendEmail();">
                     <button type="submit" class="btn btn-success">Odeslat emailem</button>
                 </form>
             </div>
@@ -40,7 +44,7 @@
             <i class="fas fa-microphone"></i> Hlasové ovládání
         </button>
         <div id="voice-result"></div>
-        <div id="loading-indicator" style="display: none;">
+        <div id="loading-indicator" style="display: none;"> {# Indikátor načítání pro hlasové příkazy #}
             <i class="fas fa-spinner fa-spin"></i>
         </div>
     </section>
@@ -48,21 +52,30 @@
 
 {% block scripts %}
     <script>
-        // Aktualizace data a týdne
+        // JavaScript pro dynamickou aktualizaci data a čísla týdne na stránce
         document.addEventListener('DOMContentLoaded', function() {
             const date = new Date();
-            const currentDate = date.toLocaleDateString('cs-CZ');
-            const weekNumber = getWeekNumber(date);
+            const currentDate = date.toLocaleDateString('cs-CZ'); // Formát data pro ČR
+            const weekNumber = getWeekNumber(date); // Výpočet čísla týdne
 
             document.getElementById('current-date').textContent = `Datum: ${currentDate}`;
             document.getElementById('current-week').textContent = `Týden: ${weekNumber}`;
         });
 
+        // Funkce pro výpočet ISO čísla týdne
         function getWeekNumber(date) {
-            const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-            const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
-            return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+            const target = new Date(date.valueOf());
+            const dayNr = (date.getDay() + 6) % 7; // Pondělí=0, Neděle=6
+            target.setDate(target.getDate() - dayNr + 3);
+            const firstThursday = target.valueOf();
+            target.setMonth(0, 1);
+            if (target.getDay() !== 4) {
+                target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+            }
+            return 1 + Math.ceil((firstThursday - target) / 604800000); // 604800000 = 7 * 24 * 3600 * 1000
         }
     </script>
-    <script src="{{ url_for('static', filename='js/voice-handler.js') }}"></script>
+    {# Připojení externích JavaScript souborů #}
+    <script src="{{ url_for('static', filename='js/confirmations.js') }}"></script> {# Skripty pro potvrzovací dialogy #}
+    <script src="{{ url_for('static', filename='js/voice-handler.js') }}"></script> {# Skript pro hlasové ovládání #}
 {% endblock %}

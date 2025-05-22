@@ -3,13 +3,16 @@
 {% block title %}Měsíční Report{% endblock %}
 
 {% block content %}
+{# Kontejner pro obsah stránky s měsíčním reportem #}
 <div class="container mt-4">
     <h2 class="mb-4">Měsíční Report Odpracovaných Hodin</h2>
 
+    {# Vložení šablony pro zobrazení flash zpráv (např. o úspěchu nebo chybě) #}
     {% include '_flash_messages.html' %}
 
+    {# Formulář pro výběr kritérií pro generování reportu #}
     <form method="POST" action="{{ url_for('monthly_report_route') }}" class="mb-4 p-4 border rounded shadow-sm">
-        <div class="row g-3">
+        <div class="row g-3"> {# Použití grid systému pro uspořádání prvků formuláře #}
             <div class="col-md-3">
                 <label for="month" class="form-label">Měsíc:</label>
                 <input type="number" class="form-control" id="month" name="month" min="1" max="12" value="{{ current_month }}" required>
@@ -35,12 +38,13 @@
         </div>
     </form>
 
-    {% if report_data is not none %}
+    {# Sekce pro zobrazení výsledků reportu, pokud jsou data k dispozici #}
+    {% if report_data is not none %} {# Kontrola, zda report_data byla vůbec definována (i jako prázdný slovník) #}
         <h3 class="mt-5">Výsledky Reportu</h3>
-        {% if report_data %}
-            <div class="table-responsive">
+        {% if report_data %} {# Pokud report_data obsahuje nějaké záznamy #}
+            <div class="table-responsive"> {# Kontejner pro responzivní tabulku #}
                 <table class="table table-striped table-hover">
-                    <thead class="table-dark">
+                    <thead class="table-dark"> {# Hlavička tabulky #}
                         <tr>
                             <th>Zaměstnanec</th>
                             <th>Celkem Hodin</th>
@@ -48,17 +52,18 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {# Iterace přes výsledky reportu a zobrazení jednotlivých řádků #}
                         {% for employee, data in report_data.items() %}
                         <tr>
                             <td>{{ employee }}</td>
-                            <td>{{ "%.2f"|format(data.total_hours) }}</td>
+                            <td>{{ "%.2f"|format(data.total_hours) }}</td> {# Formátování hodin na 2 desetinná místa #}
                             <td>{{ data.free_days }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
-        {% else %}
+        {% else %} {# Pokud report_data je prázdný (žádné záznamy nenalezeny) #}
             <div class="alert alert-info" role="alert">
                 Pro zadané kritéria nebyly nalezeny žádné záznamy.
             </div>

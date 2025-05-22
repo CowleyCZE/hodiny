@@ -53,8 +53,6 @@ class Config:
     DEFAULT_PROJECT_CONFIG = ProjectConfig()
     DEFAULT_TIME_CONFIG = TimeConfig()
 
-    GEMINI_API_KEY = "AIzaSyBvfpvviIHxJgOxkQeVyZCT2rnhyzI7bMo"  # Replace with your actual Gemini API key
-
     # Gemini API konfigurace
     GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "AIzaSyBvfpvviIHxJgOxkQeVyZCT2rnhyzI7bMo")
     GEMINI_API_URL = os.environ.get("GEMINI_API_URL", "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent")
@@ -65,6 +63,26 @@ class Config:
     # Rate limiting
     RATE_LIMIT_REQUESTS = int(os.environ.get("RATE_LIMIT_REQUESTS", 100))  # počet požadavků
     RATE_LIMIT_WINDOW = int(os.environ.get("RATE_LIMIT_WINDOW", 3600))    # časové okno v sekundách
+
+    # UI a obecné konstanty aplikace
+    DEFAULT_APP_NAME = 'Evidence pracovní doby'
+    SMTP_TIMEOUT = 60  # Timeout pro SMTP operace v sekundách
+    MAX_ROWS_TO_DISPLAY_EXCEL_VIEWER = 500 # Maximální počet řádků pro zobrazení v excel vieweru
+
+    # Konstanty pro Excel operace
+    EXCEL_EMPLOYEE_START_ROW = 9  # Řádek, kde začínají jména zaměstnanců v Excelu
+    EXCEL_WEEK_SHEET_TEMPLATE_NAME = "Týden"  # Název šablony listu pro týdenní záznamy
+    EXCEL_ADVANCES_SHEET_NAME = "Zálohy"  # Název listu pro zálohy
+    # Výchozí názvy pro možnosti záloh, pokud nejsou definovány v Excelu
+    DEFAULT_ADVANCE_OPTION_1 = "Option 1"
+    DEFAULT_ADVANCE_OPTION_2 = "Option 2"
+
+    # Validace
+    # Regulární výraz pro validaci jména zaměstnance. Povoluje písmena (včetně českých), číslice, mezery, pomlčky a tečky.
+    # Python raw string r"..." se používá, takže \w a \. jsou interpretovány správně pro regex.
+    EMPLOYEE_NAME_VALIDATION_REGEX = r"^[\w\s\-.ěščřžýáíéúůďťňĚŠČŘŽÝÁÍÉÚŮĎŤŇ]+$"
+    EMPLOYEE_NAME_MAX_LENGTH = 100 # Maximální povolená délka jména zaměstnance
+
 
     @classmethod
     def get_default_settings(cls):

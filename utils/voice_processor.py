@@ -99,7 +99,7 @@ class VoiceProcessor:
                     self.gemini_api_url,
                     headers=headers,
                     files=files,
-                    timeout=30
+                    timeout=Config.GEMINI_REQUEST_TIMEOUT
                 )
                 
                 response.raise_for_status()
@@ -140,21 +140,87 @@ class VoiceProcessor:
                 r"sick\s*day",
                 r"náhradní\s*volno",
                 r"nepřítomnost"
+            ],
+            "get_stats": [
+                r"statistik[ay]",
+                r"ukaž\s*(mi)?\s*statistik[uy]",
+                r"jak[ée]\s*jsou\s*statistik[ay]",
+                r"přehled"
             ]
         }
 
-        for action, patterns in action_patterns.items():
-            if any(re.search(pattern, text, re.IGNORECASE) for pattern in patterns):
-                entities["action"] = "record_time"  # Vždy použijeme record_time
-                if action == "record_free_day":
-                    entities["is_free_day"] = True
-                    entities["start_time"] = "00:00"
-                    entities["end_time"] = "00:00"
-                    entities["lunch_duration"] = 0.0
-                break
+        # Priorita akcí - get_stats má vyšší prioritu
+        # Pokud je nalezena "get_stats", nastaví se a ostatní se přeskočí.
+        # Jinak se pokračuje s ostatními akcemi.
+        # Toto je zjednodušené řešení konfliktů.
+        if "get_stats" in action_patterns:
+            if any(re.search(pattern, text, re.IGNORECASE) for pattern in action_patterns["get_stats"]):
+                entities["action"] = "get_stats"
 
-        # Pokud je to volný den, přeskočíme extrakci časů
-        if not entities["is_free_day"]:
+        if not entities["action"]: # Pokud nebyla detekována akce get_stats, zkusíme ostatní
+            for action_key, patterns in action_patterns.items():
+                if action_key == "get_stats": # Tuto akci jsme již zkontrolovali
+                    continue
+                if any(re.search(pattern, text, re.IGNORECASE) for pattern in patterns):
+                    # Pro record_time a record_free_day je základní akce "record_time"
+                    entities["action"] = "record_time"
+                    if action_key == "record_free_day":
+                        entities["is_free_day"] = True
+                        entities["start_time"] = "00:00"
+                        entities["end_time"] = "00:00"
+                        entities["lunch_duration"] = 0.0
+                    break # Našli jsme akci, můžeme přerušit
+
+        # Pokud je akce 'get_stats', extrahujeme specifické entity
+        if entities["action"] == "get_stats":
+            # Extrakce časového období
+            time_period_patterns = {
+                "week": [r"týden", r"týdenní"],
+                "month": [r"měsíc", r"měsíční"],
+                "year": [r"rok", r"roční"]
+            }
+            for period_key, patterns in time_period_patterns.items():
+                if any(re.search(pattern, text, re.IGNORECASE) for pattern in patterns):
+                    entities["time_period"] = period_key
+                    break
+            
+            # Extrakce jména zaměstnance (zjednodušený přístup)
+            # Načteme seznam zaměstnanců (jména jsou ve formátu "Příjmení Jméno")
+            employee_list_dicts = self._load_employees() # Vrací seznam slovníků [{'name': 'Jméno Příjmení', 'selected': True/False}]
+            employee_names = [emp['name'] for emp in employee_list_dicts]
+
+            for name in employee_names:
+                # Vytvoříme regex pro jméno, case-insensitive
+                # Jméno může být víceslovné, např. "Jan Novák"
+                # Musíme ošetřit speciální znaky v regexu, pokud by jména obsahovala např. tečky
+                safe_name_pattern = re.escape(name)
+                # Hledáme jméno v kontextu statistik, např. "statistiky pro Jan Novák", "Jan Novák přehled"
+                # nebo jen samotné jméno, pokud je kontext jasný z akce "get_stats"
+                patterns_with_name = [
+                    rf"pro\s+{safe_name_pattern}",
+                    rf"{safe_name_pattern}\s*statistik[ay]",
+                    rf"{safe_name_pattern}\s*přehled",
+                    rf"přehled\s*(?:pro\s*)?{safe_name_pattern}",
+                    rf"statistik[ay]\s*(?:pro\s*)?{safe_name_pattern}"
+                ]
+                # Přidáme i samotné jméno jako vzor, ale s nižší prioritou (pokud ostatní selžou)
+                # To by mohlo být problematické, pokud jméno je běžné slovo.
+                # Prozatím se držíme kontextových vzorů.
+                # Pokud by se mělo hledat jen samotné jméno:
+                # if re.search(rf"\b{safe_name_pattern}\b", text, re.IGNORECASE):
+                # entities["employee"] = name
+                # break
+
+                if any(re.search(pattern, text, re.IGNORECASE) for pattern in patterns_with_name):
+                    entities["employee"] = name
+                    logger.info(f"Nalezen zaměstnanec '{name}' pro statistiky.")
+                    break 
+            if not entities.get("employee"):
+                logger.info("Pro akci 'get_stats' nebyl specifikován/nalezen žádný konkrétní zaměstnanec.")
+
+
+        # Pokud je to volný den (a akce není get_stats), přeskočíme extrakci časů
+        if not entities["is_free_day"] and entities["action"] != "get_stats":
             # Extrakce časů pro pracovní dobu
             time_patterns = [
                 # Od sedmi do osmi

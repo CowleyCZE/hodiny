@@ -148,7 +148,7 @@
             Kliknutím na tlačítko níže ukončíte práci s aktuálním souborem. Pro archivaci <strong>musí být zadáno platné datum konce projektu</strong> výše.
             Soubor zůstane zachován v adresáři 'excel'. Při příští akci (např. záznamu času) bude automaticky vytvořen nový soubor z šablony.
         </p>
-        {# Formulář pro odeslání POST požadavku na archivaci #}
+        {# Formulář pro odeslání POST požadavku na archivaci. Používá nativní JavaScript confirm() pro potvrzení akce. #}
         <form method="POST" action="{{ url_for('start_new_file') }}" onsubmit="return confirm('Opravdu chcete archivovat aktuální soubor a připravit nový? Ujistěte se, že je zadáno platné datum konce projektu.');">
             {# Tlačítko je aktivní, pouze pokud je nastaven aktivní soubor #}
             <button type="submit" class="btn btn-danger" {% if not settings.active_excel_file %}disabled title="Není aktivní žádný soubor k archivaci"{% endif %}>

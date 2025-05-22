@@ -76,7 +76,7 @@ class EmployeeManager:
             self.zamestnanci = []
             self.vybrani_zamestnanci = []
         except Exception as e:
-            logger.error(f"Neočekávaná chyba při načítání konfigurace: {str(e)}")
+            logger.error(f"Neočekávaná chyba při načítání konfigurace: {str(e)}", exc_info=True)
             self.zamestnanci = []
             self.vybrani_zamestnanci = []
 
@@ -129,7 +129,7 @@ class EmployeeManager:
             logger.info("Konfigurace úspěšně uložena")
             return True
         except Exception as e:
-            logger.error(f"Chyba při ukládání konfigurace: {str(e)}")
+            logger.error(f"Chyba při ukládání konfigurace: {str(e)}", exc_info=True)
             return False
 
     def pridat_zamestnance(self, zamestnanec):
@@ -208,8 +208,8 @@ class EmployeeManager:
             return []
         return sorted([z for z in self.zamestnanci if z not in self.vybrani_zamestnanci])
 
-    def upravit_zamestnance(self, index, novy_nazev):
-        """Upraví jméno zaměstnance"""
+    def _upravit_zamestnance_podle_indexu(self, index, novy_nazev):
+        """Interní metoda pro úpravu jména zaměstnance podle 1-based indexu."""
         try:
             if not isinstance(index, int):
                 raise ValueError("Index musí být celé číslo")
@@ -217,37 +217,85 @@ class EmployeeManager:
             novy_nazev = self._validate_employee_name(novy_nazev)
 
             if not (1 <= index <= len(self.zamestnanci)):
-                raise ValueError(f"Index {index} je mimo rozsah")
+                raise ValueError(f"Index {index} je mimo rozsah (1 až {len(self.zamestnanci)})")
 
-            stary_nazev = self.zamestnanci[index - 1]
-            if novy_nazev != stary_nazev:
-                if novy_nazev in self.zamestnanci:
-                    raise ValueError(f"Zaměstnanec s jménem {novy_nazev} již existuje")
+            stary_nazev = self.zamestnanci[index - 1] # Převedení 1-based na 0-based
+            
+            # Pokud se název nemění, není co dělat
+            if novy_nazev == stary_nazev:
+                logger.info(f"Jméno zaměstnance '{stary_nazev}' se nemění.")
+                return True
 
-                self.zamestnanci[index - 1] = novy_nazev
-                
-                # Úprava v seznamu vybraných zaměstnanců
-                if stary_nazev in self.vybrani_zamestnanci:
-                    self.vybrani_zamestnanci.remove(stary_nazev)
-                    self.vybrani_zamestnanci.append(novy_nazev)
-                
-                # Pokud je nové jméno "Čáp Jakub", přidat do vybraných
-                if novy_nazev == "Čáp Jakub" and novy_nazev not in self.vybrani_zamestnanci:
-                    self.vybrani_zamestnanci.append(novy_nazev)
-                
-                # Seřadit seznamy
+            # Kontrola, zda nový název již neexistuje (pokud se liší od starého)
+            if novy_nazev in self.zamestnanci:
+                raise ValueError(f"Zaměstnanec s jménem '{novy_nazev}' již existuje")
+
+            self.zamestnanci[index - 1] = novy_nazev
+            
+            # Úprava v seznamu vybraných zaměstnanců
+            if stary_nazev in self.vybrani_zamestnanci:
+                self.vybrani_zamestnanci.remove(stary_nazev)
+                self.vybrani_zamestnanci.append(novy_nazev)
+            
+            # Pokud je nové jméno "Čáp Jakub" a není ve vybraných, přidat ho
+            if novy_nazev == "Čáp Jakub" and novy_nazev not in self.vybrani_zamestnanci:
+                self.vybrani_zamestnanci.append(novy_nazev)
+            
+            # Seřadit seznamy
+            self.zamestnanci.sort() # Seřadí hlavní seznam zaměstnanců
+            self._sort_selected_employees() # Seřadí seznam vybraných zaměstnanců
+            
+            if self.save_config():
+                logger.info(f"Zaměstnanec úspěšně upraven: '{stary_nazev}' -> '{novy_nazev}'")
+                return True
+            else:
+                # Pokud save_config selže, vrátíme změny zpět, aby byla zachována konzistence
+                logger.error(f"Nepodařilo se uložit konfiguraci po úpravě '{stary_nazev}' na '{novy_nazev}'. Změny se vrací.")
+                self.zamestnanci[index - 1] = stary_nazev # Vrácení původního jména
+                if novy_nazev in self.vybrani_zamestnanci: # Pokud byl nový název přidán do vybraných
+                    self.vybrani_zamestnanci.remove(novy_nazev)
+                    if stary_nazev not in self.vybrani_zamestnanci: # Pokud starý název nebyl ve vybraných (což by nemělo nastat, pokud byl nahrazen)
+                         self.vybrani_zamestnanci.append(stary_nazev)
                 self.zamestnanci.sort()
                 self._sort_selected_employees()
-                self.save_config()
+                return False
 
-            logger.info(f"Upraven zaměstnanec: {stary_nazev} -> {novy_nazev}")
-            return True
-
-        except ValueError as e:
-            logger.error(str(e))
+        except ValueError as e: # Chyby z _validate_employee_name nebo kontroly indexu/existence
+            logger.error(f"Chyba při úpravě zaměstnance: {str(e)}")
             return False
-        except Exception as e:
-            logger.error(f"Neočekávaná chyba při úpravě zaměstnance: {str(e)}")
+        except Exception as e: # Neočekávané chyby
+            logger.error(f"Neočekávaná chyba při úpravě zaměstnance ('{stary_nazev}' na '{novy_nazev}'): {str(e)}", exc_info=True)
+            return False
+
+    def upravit_zamestnance_podle_jmena(self, old_name, new_name):
+        """
+        Veřejná metoda pro úpravu jména zaměstnance.
+        Najde zaměstnance podle `old_name` a změní jeho jméno na `new_name`.
+        """
+        try:
+            # Validace starého a nového jména (nové jméno se validuje i v _upravit_zamestnance_podle_indexu)
+            validated_old_name = self._validate_employee_name(old_name)
+            validated_new_name = self._validate_employee_name(new_name)
+
+            if validated_old_name not in self.zamestnanci:
+                logger.warning(f"Zaměstnanec '{validated_old_name}' nebyl nalezen pro úpravu.")
+                return False
+            
+            # Najdeme 0-based index starého jména
+            try:
+                index_0_based = self.zamestnanci.index(validated_old_name)
+            except ValueError: # Mělo by být již pokryto kontrolou `if validated_old_name not in self.zamestnanci`
+                logger.warning(f"Zaměstnanec '{validated_old_name}' nebyl nalezen v seznamu (vnitřní chyba).")
+                return False
+
+            # _upravit_zamestnance_podle_indexu očekává 1-based index
+            return self._upravit_zamestnance_podle_indexu(index_0_based + 1, validated_new_name)
+
+        except ValueError as e: # Chyba z _validate_employee_name pro old_name nebo new_name
+            logger.error(f"Chyba při validaci jména pro úpravu ('{old_name}' na '{new_name}'): {str(e)}")
+            return False
+        except Exception as e: # Neočekávané chyby
+            logger.error(f"Neočekávaná chyba při úpravě zaměstnance podle jména ('{old_name}' na '{new_name}'): {str(e)}", exc_info=True)
             return False
 
     def smazat_zamestnance(self, index):
@@ -291,7 +339,7 @@ class EmployeeManager:
         try:
             return [{"name": name, "selected": name in self.vybrani_zamestnanci} for name in sorted(self.zamestnanci)]
         except Exception as e:
-            logger.error(f"Chyba při vytváření seznamu zaměstnanců: {str(e)}")
+            logger.error(f"Chyba při vytváření seznamu zaměstnanců: {str(e)}", exc_info=True)
             return []
 
     def get_selected_employees(self):

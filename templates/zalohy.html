@@ -65,6 +65,10 @@
     {% endwith %}
 
     <section>
+        {# Sekce pro historii záloh - aktuálně nezobrazuje data z backendu,
+           ale je připravena pro budoucí implementaci.
+           Formulář pro filtrování je přítomen, ale jeho funkčnost závisí na backend logice.
+        #}
         <h2 id="history-heading">Historie záloh</h2>
 
         <form method="GET" action="{{ url_for('zalohy') }}" role="search" aria-labelledby="search-heading">

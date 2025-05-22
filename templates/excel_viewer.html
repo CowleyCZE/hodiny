@@ -3,8 +3,12 @@
 {% block title %}Prohlížeč Excel souborů{% endblock %}
 
 {% block content %}
+    {# Hlavní nadpis stránky #}
     <h1 id="excel-heading">Prohlížeč Excel souborů</h1>
 
+    {# Formulář pro výběr souboru k zobrazení.
+       Při změně výběru se formulář automaticky odešle.
+    #}
     <form method="GET" action="{{ url_for('excel_viewer') }}" aria-labelledby="file-selection">
         <div class="form-group">
             <label for="file" id="file-selection">Vyberte soubor:</label>
@@ -16,10 +20,14 @@
         </div>
     </form>
 
+    {# Pokud je vybrán soubor, zobrazí se formulář pro výběr listu a tabulka s daty #}
     {% if selected_file %}
+        {# Formulář pro výběr listu z aktuálně vybraného souboru.
+           Při změně výběru se formulář automaticky odešle.
+        #}
         <form method="GET" action="{{ url_for('excel_viewer') }}" aria-labelledby="sheet-selection">
             <div class="form-group">
-                <input type="hidden" name="file" value="{{ selected_file }}">
+                <input type="hidden" name="file" value="{{ selected_file }}"> {# Udržuje vybraný soubor při změně listu #}
                 <label for="sheet" id="sheet-selection">Vyberte list:</label>
                 <select name="sheet" id="sheet" onchange="this.form.submit()" aria-required="true">
                     {% for sheet in sheet_names %}
@@ -29,8 +37,11 @@
             </div>
         </form>
 
+        {# Nadpis zobrazující název vybraného souboru a listu #}
         <h2 id="table-heading">{{ selected_file }} - {{ active_sheet }}</h2>
+        {# Kontejner pro responzivní zobrazení tabulky #}
         <div class="table-responsive">
+            {# Tabulka zobrazující data z Excel listu #}
             <table aria-labelledby="table-heading">
                 <thead>
                     <tr>

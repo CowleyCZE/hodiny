@@ -24,7 +24,7 @@ except ImportError:
     # Fallback na základní logger, pokud utils.logger není dostupný
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger("excel_manager")
-import datetime # Přidán import datetime
+from datetime import datetime # Přidán import datetime
 
 
 # Kontrola jestli je systém Windows
@@ -290,17 +290,51 @@ class ExcelManager:
          self._clear_workbook_cache()
 
 
-    def ulozit_pracovni_dobu(self, date, start_time, end_time, lunch_duration, employees):
+    def _copy_worksheet_deep(self, source_sheet, target_sheet):
+        """
+        Hloubková kopie listu, včetně stylů, rozměrů a podmíněného formátování.
+        Nekopíruje obrázky a grafy.
+        """
+        # Kopírování buněk (hodnoty a styly)
+        for row in source_sheet.iter_rows():
+            for cell in row:
+                new_cell = target_sheet.cell(row=cell.row, column=cell.col_idx, value=cell.value)
+                if cell.has_style:
+                    new_cell.font = cell.font.copy()
+                    new_cell.border = cell.border.copy()
+                    new_cell.fill = cell.fill.copy()
+                    new_cell.number_format = cell.number_format
+                    new_cell.protection = cell.protection.copy()
+                    new_cell.alignment = cell.alignment.copy()
+
+        # Kopírování sloučených buněk
+        for merged_cell_range in source_sheet.merged_cells.ranges:
+            target_sheet.merge_cells(str(merged_cell_range))
+
+        # Kopírování rozměrů sloupců a řádků
+        for col_letter, dim in source_sheet.column_dimensions.items():
+            target_sheet.column_dimensions[col_letter] = dim
+        for row_num, dim in source_sheet.row_dimensions.items():
+            target_sheet.row_dimensions[row_num] = dim
+
+        # Kopírování podmíněného formátování
+        for rule in source_sheet.conditional_formatting.rules:
+            target_sheet.conditional_formatting.add(rule.sqref, rule)
+
+    def ulozit_pracovni_dobu(self, date, start_time, end_time, lunch_duration, employees, week_number=None):
         """Uloží pracovní dobu do aktivního Excel souboru"""
         active_path = self.get_active_file_path() # Získáme cestu k aktivnímu souboru
         try:
             # Použijeme context manager pro aktivní soubor
             with self._get_workbook(active_path) as workbook:
-                # Získání čísla týdne z datumu
-                week_calendar_data = self.ziskej_cislo_tydne(date)
-                if not week_calendar_data: # Pokud ziskej_cislo_tydne selhalo
-                     raise ValueError("Nepodařilo se získat číslo týdne pro zadané datum.")
-                week_number = week_calendar_data.week
+                logger.debug(f"Ukládám pracovní dobu: Datum={date}, Start={start_time}, End={end_time}, Lunch={lunch_duration}, Zaměstnanci={employees}, Explicitní týden={week_number}")
+                
+                if week_number is None:
+                    # Získání čísla týdne z datumu, pokud není explicitně zadáno
+                    week_calendar_data = self.ziskej_cislo_tydne(date)
+                    if not week_calendar_data: # Pokud ziskej_cislo_tydne selhalo
+                         raise ValueError("Nepodařilo se získat číslo týdne pro zadané datum.")
+                    week_number = week_calendar_data.week
 
                 sheet_name = f"{Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME} {week_number}"
 
@@ -310,11 +344,13 @@ class ExcelManager:
                     if Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME in workbook.sheetnames:
                         source_sheet = workbook[Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME]
                         try:
-                            sheet = workbook.copy_worksheet(source_sheet)
-                            sheet.title = sheet_name
-                            logger.info(f"Zkopírován list '{Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME}' a přejmenován na '{sheet_name}' v souboru {self.active_filename}")
+                            # Vytvoříme nový list a použijeme naši hloubkovou kopii
+                            target_sheet = workbook.create_sheet(title=sheet_name)
+                            self._copy_worksheet_deep(source_sheet, target_sheet)
+                            sheet = target_sheet
+                            logger.info(f"Hloubkově zkopírován list '{Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME}' a přejmenován na '{sheet_name}' v souboru {self.active_filename}")
                         except Exception as copy_err:
-                             logger.error(f"Nepodařilo se zkopírovat list '{Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME}' v {self.active_filename}: {copy_err}", exc_info=True)
+                             logger.error(f"Nepodařilo se hloubkově zkopírovat list '{Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME}' v {self.active_filename}: {copy_err}", exc_info=True)
                              # Pokud kopírování selže, vytvoříme prázdný list
                              sheet = workbook.create_sheet(sheet_name)
                              logger.warning(f"Vytvořen nový prázdný list '{sheet_name}' v souboru {self.active_filename} kvůli chybě při kopírování.")
@@ -381,10 +417,23 @@ class ExcelManager:
                         logger.warning(f"Nepodařilo se najít ani vytvořit řádek pro zaměstnance '{employee}' v listu '{sheet_name}' souboru {self.active_filename}. Možná je dosažen limit řádků.")
 
                 # Ukládání časů začátku a konce do řádku 7
-                start_time_col_letter = get_column_letter(start_time_col_index + 1)
-                end_time_col_letter = get_column_letter(end_time_col_index + 1)
-                sheet[f"{start_time_col_letter}7"] = start_time
-                sheet[f"{end_time_col_letter}7"] = end_time
+                start_time_cell = sheet[f"{get_column_letter(start_time_col_index + 1)}7"]
+                end_time_cell = sheet[f"{get_column_letter(end_time_col_index + 1)}7"]
+                
+                # Převedeme časy na objekty datetime.time pro správný zápis
+                try:
+                    start_time_obj = datetime.strptime(start_time, "%H:%M").time()
+                    end_time_obj = datetime.strptime(end_time, "%H:%M").time()
+                except ValueError:
+                    logger.error(f"Neplatný formát času: Start='{start_time}', End='{end_time}'.")
+                    return False
+
+                start_time_cell.value = start_time_obj
+                end_time_cell.value = end_time_obj
+                start_time_cell.number_format = 'HH:MM' # Nastavení formátu
+                end_time_cell.number_format = 'HH:MM' # Nastavení formátu
+                logger.debug(f"Zapsáno do {start_time_cell.coordinate}: {start_time_cell.value} (typ: {type(start_time_cell.value)})")
+                logger.debug(f"Zapsáno do {end_time_cell.coordinate}: {end_time_cell.value} (typ: {type(end_time_cell.value)})")
 
                 # Uložení data do buňky v řádku 80
                 date_col_letter = get_column_letter(date_col_index + 1)
@@ -393,14 +442,24 @@ class ExcelManager:
                     date_cell = sheet[f"{date_col_letter}80"]
                     date_cell.value = date_obj
                     date_cell.number_format = 'DD.MM.YYYY' # Nastavení formátu
+                    logger.debug(f"Zapsáno do {date_cell.coordinate}: {date_cell.value} (typ: {type(date_cell.value)})")
                 except ValueError:
                      logger.error(f"Neplatný formát data '{date}' při ukládání do buňky {date_col_letter}80. Ukládání pracovní doby selhalo.")
-                     # sheet[f"{date_col_letter}80"] = date # Neukládáme nevalidní datum jako text, operace selže
                      return False
 
                 # Zápis názvu projektu do B79 (pokud je nastaven)
                 if self.current_project_name:
-                    sheet["B79"] = self.current_project_name
+                    project_cell = sheet["B79"]
+                    existing_projects = project_cell.value or ""
+                    # Převedeme na seznam, abychom se vyhnuli duplicitám
+                    project_list = [p.strip() for p in existing_projects.split(',') if p.strip()]
+                    
+                    # Přidáme nový projekt, pouze pokud ještě není v seznamu
+                    if self.current_project_name not in project_list:
+                        project_list.append(self.current_project_name)
+                    
+                    # Spojíme zpět do řetězce odděleného čárkou
+                    project_cell.value = ", ".join(project_list)
 
                 # Workbook se uloží automaticky context managerem _get_workbook
                 logger.info(f"Úspěšně uložena pracovní doba pro datum {date} do listu {sheet_name} v souboru {self.active_filename}")
@@ -434,7 +493,12 @@ class ExcelManager:
                     zalohy_sheet = workbook[Config.EXCEL_ADVANCES_SHEET_NAME]
 
                 # Aktualizace buněk A79, C81, D81
-                zalohy_sheet["A79"] = project_name
+                project_cell = zalohy_sheet["A79"]
+                existing_projects = project_cell.value or ""
+                project_list = [p.strip() for p in existing_projects.split(',') if p.strip()]
+                if project_name not in project_list:
+                    project_list.append(project_name)
+                project_cell.value = ", ".join(project_list)
 
                 # Zpracování datumu začátku
                 try:
@@ -608,14 +672,20 @@ class ExcelManager:
         Získá ISO kalendářní data (rok, číslo týdne, den v týdnu) pro zadané datum.
         """
         try:
+            logger.debug(f"Ziskej_cislo_tydne: Vstupní datum '{datum}', typ: {type(datum)}")
             if isinstance(datum, str):
-                datum_obj = datetime.strptime(datum, "%Y-%m-%d")
+                try:
+                    datum_obj = datetime.strptime(datum, "%Y-%m-%d %H:%M:%S")
+                except ValueError:
+                    datum_obj = datetime.strptime(datum, "%Y-%m-%d")
             elif isinstance(datum, datetime):
                  datum_obj = datum
             else:
                  raise TypeError("Datum musí být string ve formátu YYYY-MM-DD nebo datetime objekt")
 
-            return datum_obj.isocalendar()
+            iso_cal = datum_obj.isocalendar()
+            logger.debug(f"Ziskej_cislo_tydne: Datum objekt: {datum_obj}, isocalendar: {iso_cal}")
+            return iso_cal
         except (ValueError, TypeError) as e:
             logger.error(f"Chyba při zpracování data '{datum}' pro získání čísla týdne: {e}")
             # Vrátíme None nebo vyvoláme výjimku, aby volající věděl o chybě

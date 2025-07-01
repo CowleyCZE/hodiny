@@ -3,8 +3,9 @@
     "end_time": "18:00",
     "lunch_duration": 1.0,
     "project_info": {
-        "name": "Leroy Merlin",
-        "start_date": "2025-02-10",
-        "end_date": "2025-02-22"
-    }
+        "name": "Essone",
+        "start_date": "13.01.25",
+        "end_date": "17.01.25"
+    },
+    "active_excel_file": "Essone_20250701_141334.xlsx"
 }

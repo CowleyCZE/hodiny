@@ -276,7 +276,7 @@ def download_file():
         # Vytvoření názvu pro stažení - Použijeme název šablony jako základ
         template_stem = Path(Config.EXCEL_TEMPLATE_NAME).stem # Např. "Hodiny_Cap"
         if max_week_number > 0:
-            download_filename = f"{template_stem}_Tyden{max_week_number}.xlsx"
+            download_filename = f"{template_stem}_Tyden_{max_week_number}.xlsx"
         else:
             # Pokud nejsou týdny, stáhne se jako "Hodiny_Cap.xlsx"
             download_filename = Config.EXCEL_TEMPLATE_NAME

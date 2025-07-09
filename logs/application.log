@@ -1,0 +1,138 @@
+2025-03-26 19:19:28,542 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-03-26 19:19:28,560 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-03-26 19:28:32,789 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-03-26 19:28:32,812 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-03-26 19:32:18,330 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-03-26 19:32:18,362 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-03-27 20:14:52,931 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-03-27 20:14:52,994 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-03-27 22:32:06,247 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-03-27 22:32:06,283 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-03-31 20:18:30,026 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-03-31 20:18:30,048 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-04-02 07:06:48,079 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-04-02 07:06:48,107 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-04-03 22:34:46,486 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-04-03 22:34:46,504 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-04-17 21:59:00,475 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-04-17 21:59:00,510 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-04-29 18:03:47,147 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-04-29 18:03:47,212 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-02 20:39:03,961 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-02 20:39:04,007 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-02 20:39:28,606 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-02 20:39:28,622 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-02 20:39:56,248 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-02 20:39:56,264 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-02 21:50:19,493 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-02 21:50:19,553 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-02 21:59:33,890 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-02 21:59:33,917 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-02 22:22:46,158 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-02 22:22:46,207 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-02 22:25:00,301 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-02 22:25:00,319 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-02 22:37:40,030 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-02 22:37:40,047 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-02 23:10:43,116 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-02 23:10:43,151 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-04 20:35:16,914 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-04 20:35:17,081 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-04 20:46:36,677 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-04 20:46:36,731 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-04 21:08:21,152 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-04 21:08:21,212 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-04 21:13:15,349 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-04 21:13:15,523 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-04 21:35:16,745 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-04 21:35:16,804 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-04 21:48:02,812 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-04 21:48:02,879 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-05 19:10:16,489 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-05 19:10:16,535 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-05 19:10:42,613 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-05 19:10:42,659 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-05 19:11:14,626 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-05 19:11:14,755 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-05 19:12:17,140 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-05 19:12:17,194 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-05 19:25:29,457 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-05 19:25:29,498 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-05 19:39:47,020 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-05 19:39:47,060 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-05 19:40:23,878 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-05 19:40:23,912 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-05 19:51:47,129 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-05 19:51:47,165 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-05 20:01:59,723 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-05 20:01:59,788 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-05 20:21:29,821 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-05 20:21:29,896 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-05 20:29:01,818 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-05 20:29:01,864 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-05 20:38:14,072 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-05 20:38:15,489 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-05 20:48:36,528 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-05 20:48:38,010 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-05 20:54:57,299 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-05 20:55:03,412 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-05 20:55:40,787 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-05 20:55:43,977 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-05 21:08:26,097 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-05 21:08:26,141 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-06 19:09:12,484 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-06 19:09:12,512 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-07 16:24:58,065 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-07 16:24:59,971 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-07 16:38:07,201 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-07 16:38:08,401 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-07 16:43:54,707 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-07 16:43:55,312 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-07 16:44:09,170 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-07 16:44:10,283 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-07 17:13:47,548 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-07 17:13:49,272 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-07 17:31:18,641 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-07 17:31:19,309 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-07 17:32:00,776 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-07 17:32:01,943 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-07 17:39:35,498 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-07 17:39:36,297 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-07 17:43:10,848 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-07 17:43:11,729 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-07 17:55:54,218 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-07 17:55:55,234 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-07 18:09:51,372 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-07 18:09:52,161 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-07 19:08:01,870 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-07 19:08:04,388 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-09 18:52:23,881 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-09 18:52:25,331 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-17 17:22:30,420 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-17 17:22:32,175 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-20 09:53:40,427 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-20 09:53:41,801 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-21 19:40:03,253 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-21 19:40:05,597 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-23 06:43:00,695 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-23 06:43:01,986 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-25 15:02:33,232 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-25 15:02:34,525 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-27 14:38:05,695 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-27 14:38:07,568 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-05-28 13:10:16,056 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-05-28 13:10:17,659 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-06-03 11:25:34,454 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-06-03 11:25:36,964 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-06-13 18:42:52,231 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-06-13 18:42:54,010 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-06-16 21:47:57,121 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-06-16 21:47:58,437 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-07-02 13:11:54,505 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-07-02 13:11:56,690 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-07-04 11:34:58,043 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-07-04 11:34:59,851 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-07-09 01:17:01,128 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-07-09 01:17:06,274 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'
+2025-07-09 19:17:26,136 - app_logger - INFO - Logování bylo úspěšně inicializováno.
+2025-07-09 19:17:27,725 - app_logger - ERROR - Chyba při inicializaci konfigurace: module 'config' has no attribute 'initialize'

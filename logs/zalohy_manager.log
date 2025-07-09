@@ -1,493 +1,419 @@
-2025-07-01 08:15:35 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_081535.xlsx
-2025-07-01 08:18:31 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_081831.xlsx
-2025-07-01 08:19:08 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Bláha Jakub' do listu 'Zálohy' na řádek 9.
-2025-07-01 08:19:08 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Duben' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:19:08 - zalohy_manager - INFO - Workbook '_20250701_081831.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_081831.xlsx'.
-2025-07-01 08:19:08 - zalohy_manager - INFO - Záloha pro Bláha Jakub (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do _20250701_081831.xlsx
-2025-07-01 08:19:09 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Květen' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:19:09 - zalohy_manager - INFO - Workbook '_20250701_081831.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_081831.xlsx'.
-2025-07-01 08:19:09 - zalohy_manager - INFO - Záloha pro Bláha Jakub (300.0 EUR, Květen, 2025-02-27) úspěšně uložena do _20250701_081831.xlsx
-2025-07-01 08:19:10 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jiří' do listu 'Zálohy' na řádek 10.
-2025-07-01 08:19:10 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Duben' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:19:10 - zalohy_manager - INFO - Workbook '_20250701_081831.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_081831.xlsx'.
-2025-07-01 08:19:10 - zalohy_manager - INFO - Záloha pro Horčička Jiří (200.0 EUR, Duben, 2025-02-27) úspěšně uložena do _20250701_081831.xlsx
-2025-07-01 08:19:11 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Duben' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:19:11 - zalohy_manager - INFO - Workbook '_20250701_081831.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_081831.xlsx'.
-2025-07-01 08:19:11 - zalohy_manager - INFO - Záloha pro Horčička Jiří (2000.0 CZK, Duben, 2025-02-27) úspěšně uložena do _20250701_081831.xlsx
-2025-07-01 08:19:12 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Květen' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:19:12 - zalohy_manager - INFO - Workbook '_20250701_081831.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_081831.xlsx'.
-2025-07-01 08:19:12 - zalohy_manager - INFO - Záloha pro Horčička Jiří (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do _20250701_081831.xlsx
-2025-07-01 08:19:13 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Zdeněk Dlouhý' do listu 'Zálohy' na řádek 11.
-2025-07-01 08:19:13 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Duben' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:19:13 - zalohy_manager - INFO - Workbook '_20250701_081831.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_081831.xlsx'.
-2025-07-01 08:19:13 - zalohy_manager - INFO - Záloha pro Zdeněk Dlouhý (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do _20250701_081831.xlsx
-2025-07-01 08:19:14 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Květen' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:19:14 - zalohy_manager - INFO - Workbook '_20250701_081831.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_081831.xlsx'.
-2025-07-01 08:19:14 - zalohy_manager - INFO - Záloha pro Zdeněk Dlouhý (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do _20250701_081831.xlsx
-2025-07-01 08:19:14 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Jakub Richter' do listu 'Zálohy' na řádek 12.
-2025-07-01 08:19:14 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Duben' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:19:15 - zalohy_manager - INFO - Workbook '_20250701_081831.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_081831.xlsx'.
-2025-07-01 08:19:15 - zalohy_manager - INFO - Záloha pro Jakub Richter (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do _20250701_081831.xlsx
-2025-07-01 08:19:15 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Květen' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:19:15 - zalohy_manager - INFO - Workbook '_20250701_081831.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_081831.xlsx'.
-2025-07-01 08:19:15 - zalohy_manager - INFO - Záloha pro Jakub Richter (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do _20250701_081831.xlsx
-2025-07-01 08:19:16 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Coulibaly' do listu 'Zálohy' na řádek 13.
-2025-07-01 08:19:16 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Duben' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:19:16 - zalohy_manager - INFO - Workbook '_20250701_081831.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_081831.xlsx'.
-2025-07-01 08:19:16 - zalohy_manager - INFO - Záloha pro Coulibaly (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do _20250701_081831.xlsx
-2025-07-01 08:19:17 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Květen' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:19:17 - zalohy_manager - INFO - Workbook '_20250701_081831.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_081831.xlsx'.
-2025-07-01 08:19:17 - zalohy_manager - INFO - Záloha pro Coulibaly (200.0 EUR, Květen, 2025-02-27) úspěšně uložena do _20250701_081831.xlsx
-2025-07-01 08:19:18 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Lesák Marek' do listu 'Zálohy' na řádek 14.
-2025-07-01 08:19:18 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Květen' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:19:18 - zalohy_manager - INFO - Workbook '_20250701_081831.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_081831.xlsx'.
-2025-07-01 08:19:18 - zalohy_manager - INFO - Záloha pro Lesák Marek (100.0 EUR, Květen, 2025-02-01) úspěšně uložena do _20250701_081831.xlsx
-2025-07-01 08:25:07 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_082507.xlsx
-2025-07-01 08:25:08 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Bláha Jakub' do listu 'Zálohy' na řádek 9.
-2025-07-01 08:25:08 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Duben' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:25:09 - zalohy_manager - INFO - Workbook '_20250701_082507.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_082507.xlsx'.
-2025-07-01 08:25:09 - zalohy_manager - INFO - Záloha pro Bláha Jakub (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do _20250701_082507.xlsx
-2025-07-01 08:25:09 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Květen' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:25:09 - zalohy_manager - INFO - Workbook '_20250701_082507.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_082507.xlsx'.
-2025-07-01 08:25:09 - zalohy_manager - INFO - Záloha pro Bláha Jakub (300.0 EUR, Květen, 2025-02-27) úspěšně uložena do _20250701_082507.xlsx
-2025-07-01 08:25:10 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jiří' do listu 'Zálohy' na řádek 10.
-2025-07-01 08:25:10 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Duben' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:25:10 - zalohy_manager - INFO - Workbook '_20250701_082507.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_082507.xlsx'.
-2025-07-01 08:25:10 - zalohy_manager - INFO - Záloha pro Horčička Jiří (200.0 EUR, Duben, 2025-02-27) úspěšně uložena do _20250701_082507.xlsx
-2025-07-01 08:25:11 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Duben' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:25:11 - zalohy_manager - INFO - Workbook '_20250701_082507.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_082507.xlsx'.
-2025-07-01 08:25:11 - zalohy_manager - INFO - Záloha pro Horčička Jiří (2000.0 CZK, Duben, 2025-02-27) úspěšně uložena do _20250701_082507.xlsx
-2025-07-01 08:25:11 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Květen' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:25:11 - zalohy_manager - INFO - Workbook '_20250701_082507.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_082507.xlsx'.
-2025-07-01 08:25:11 - zalohy_manager - INFO - Záloha pro Horčička Jiří (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do _20250701_082507.xlsx
-2025-07-01 08:25:12 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Zdeněk Dlouhý' do listu 'Zálohy' na řádek 11.
-2025-07-01 08:25:12 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Duben' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:25:12 - zalohy_manager - INFO - Workbook '_20250701_082507.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_082507.xlsx'.
-2025-07-01 08:25:12 - zalohy_manager - INFO - Záloha pro Zdeněk Dlouhý (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do _20250701_082507.xlsx
-2025-07-01 08:25:13 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Květen' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:25:13 - zalohy_manager - INFO - Workbook '_20250701_082507.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_082507.xlsx'.
-2025-07-01 08:25:13 - zalohy_manager - INFO - Záloha pro Zdeněk Dlouhý (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do _20250701_082507.xlsx
-2025-07-01 08:25:14 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Jakub Richter' do listu 'Zálohy' na řádek 12.
-2025-07-01 08:25:14 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Duben' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:25:14 - zalohy_manager - INFO - Workbook '_20250701_082507.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_082507.xlsx'.
-2025-07-01 08:25:14 - zalohy_manager - INFO - Záloha pro Jakub Richter (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do _20250701_082507.xlsx
-2025-07-01 08:25:14 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Květen' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:25:14 - zalohy_manager - INFO - Workbook '_20250701_082507.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_082507.xlsx'.
-2025-07-01 08:25:14 - zalohy_manager - INFO - Záloha pro Jakub Richter (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do _20250701_082507.xlsx
-2025-07-01 08:25:15 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Coulibaly' do listu 'Zálohy' na řádek 13.
-2025-07-01 08:25:15 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Duben' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:25:15 - zalohy_manager - INFO - Workbook '_20250701_082507.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_082507.xlsx'.
-2025-07-01 08:25:15 - zalohy_manager - INFO - Záloha pro Coulibaly (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do _20250701_082507.xlsx
-2025-07-01 08:25:16 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Květen' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:25:16 - zalohy_manager - INFO - Workbook '_20250701_082507.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_082507.xlsx'.
-2025-07-01 08:25:16 - zalohy_manager - INFO - Záloha pro Coulibaly (200.0 EUR, Květen, 2025-02-27) úspěšně uložena do _20250701_082507.xlsx
-2025-07-01 08:25:17 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Lesák Marek' do listu 'Zálohy' na řádek 14.
-2025-07-01 08:25:17 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Květen' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:25:17 - zalohy_manager - INFO - Workbook '_20250701_082507.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/_20250701_082507.xlsx'.
-2025-07-01 08:25:17 - zalohy_manager - INFO - Záloha pro Lesák Marek (100.0 EUR, Květen, 2025-02-01) úspěšně uložena do _20250701_082507.xlsx
-2025-07-01 08:26:28 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_082628.xlsx
-2025-07-01 08:26:30 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Bláha Jakub' do listu 'Zálohy' na řádek 9.
-2025-07-01 08:26:30 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Duben' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:26:30 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_082628.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_082628.xlsx'.
-2025-07-01 08:26:30 - zalohy_manager - INFO - Záloha pro Bláha Jakub (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_082628.xlsx
-2025-07-01 08:26:30 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Květen' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:26:30 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_082628.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_082628.xlsx'.
-2025-07-01 08:26:30 - zalohy_manager - INFO - Záloha pro Bláha Jakub (300.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_082628.xlsx
-2025-07-01 08:26:31 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jiří' do listu 'Zálohy' na řádek 10.
-2025-07-01 08:26:31 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Duben' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:26:31 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_082628.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_082628.xlsx'.
-2025-07-01 08:26:31 - zalohy_manager - INFO - Záloha pro Horčička Jiří (200.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_082628.xlsx
-2025-07-01 08:26:32 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Duben' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:26:32 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_082628.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_082628.xlsx'.
-2025-07-01 08:26:32 - zalohy_manager - INFO - Záloha pro Horčička Jiří (2000.0 CZK, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_082628.xlsx
-2025-07-01 08:26:32 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Květen' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:26:33 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_082628.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_082628.xlsx'.
-2025-07-01 08:26:33 - zalohy_manager - INFO - Záloha pro Horčička Jiří (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_082628.xlsx
-2025-07-01 08:26:33 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Zdeněk Dlouhý' do listu 'Zálohy' na řádek 11.
-2025-07-01 08:26:33 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Duben' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:26:33 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_082628.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_082628.xlsx'.
-2025-07-01 08:26:33 - zalohy_manager - INFO - Záloha pro Zdeněk Dlouhý (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_082628.xlsx
-2025-07-01 08:26:34 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Květen' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:26:34 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_082628.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_082628.xlsx'.
-2025-07-01 08:26:34 - zalohy_manager - INFO - Záloha pro Zdeněk Dlouhý (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_082628.xlsx
-2025-07-01 08:26:35 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Jakub Richter' do listu 'Zálohy' na řádek 12.
-2025-07-01 08:26:35 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Duben' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:26:35 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_082628.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_082628.xlsx'.
-2025-07-01 08:26:35 - zalohy_manager - INFO - Záloha pro Jakub Richter (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_082628.xlsx
-2025-07-01 08:26:35 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Květen' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:26:36 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_082628.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_082628.xlsx'.
-2025-07-01 08:26:36 - zalohy_manager - INFO - Záloha pro Jakub Richter (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_082628.xlsx
-2025-07-01 08:26:36 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Coulibaly' do listu 'Zálohy' na řádek 13.
-2025-07-01 08:26:36 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Duben' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:26:36 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_082628.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_082628.xlsx'.
-2025-07-01 08:26:36 - zalohy_manager - INFO - Záloha pro Coulibaly (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_082628.xlsx
-2025-07-01 08:26:37 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Květen' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:26:37 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_082628.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_082628.xlsx'.
-2025-07-01 08:26:37 - zalohy_manager - INFO - Záloha pro Coulibaly (200.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_082628.xlsx
-2025-07-01 08:26:38 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Lesák Marek' do listu 'Zálohy' na řádek 14.
-2025-07-01 08:26:38 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Květen' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:26:38 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_082628.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_082628.xlsx'.
-2025-07-01 08:26:38 - zalohy_manager - INFO - Záloha pro Lesák Marek (100.0 EUR, Květen, 2025-02-01) úspěšně uložena do Frigo 8_20250701_082628.xlsx
-2025-07-01 08:27:31 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_082731.xlsx
-2025-07-01 08:27:33 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Bláha Jakub' do listu 'Zálohy' na řádek 9.
-2025-07-01 08:27:33 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Duben' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:27:33 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_082731.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_082731.xlsx'.
-2025-07-01 08:27:33 - zalohy_manager - INFO - Záloha pro Bláha Jakub (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_082731.xlsx
-2025-07-01 08:27:34 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Květen' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:27:34 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_082731.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_082731.xlsx'.
-2025-07-01 08:27:34 - zalohy_manager - INFO - Záloha pro Bláha Jakub (300.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_082731.xlsx
-2025-07-01 08:27:35 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jiří' do listu 'Zálohy' na řádek 10.
-2025-07-01 08:27:35 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Duben' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:27:35 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_082731.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_082731.xlsx'.
-2025-07-01 08:27:35 - zalohy_manager - INFO - Záloha pro Horčička Jiří (200.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_082731.xlsx
-2025-07-01 08:27:35 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Duben' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:27:36 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_082731.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_082731.xlsx'.
-2025-07-01 08:27:36 - zalohy_manager - INFO - Záloha pro Horčička Jiří (2000.0 CZK, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_082731.xlsx
-2025-07-01 08:27:36 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Květen' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:27:36 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_082731.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_082731.xlsx'.
-2025-07-01 08:27:36 - zalohy_manager - INFO - Záloha pro Horčička Jiří (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_082731.xlsx
-2025-07-01 08:27:37 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Zdeněk Dlouhý' do listu 'Zálohy' na řádek 11.
-2025-07-01 08:27:37 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Duben' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:27:37 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_082731.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_082731.xlsx'.
-2025-07-01 08:27:37 - zalohy_manager - INFO - Záloha pro Zdeněk Dlouhý (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_082731.xlsx
-2025-07-01 08:27:38 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Květen' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:27:38 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_082731.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_082731.xlsx'.
-2025-07-01 08:27:38 - zalohy_manager - INFO - Záloha pro Zdeněk Dlouhý (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_082731.xlsx
-2025-07-01 08:27:38 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Jakub Richter' do listu 'Zálohy' na řádek 12.
-2025-07-01 08:27:38 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Duben' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:27:39 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_082731.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_082731.xlsx'.
-2025-07-01 08:27:39 - zalohy_manager - INFO - Záloha pro Jakub Richter (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_082731.xlsx
-2025-07-01 08:27:39 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Květen' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:27:39 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_082731.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_082731.xlsx'.
-2025-07-01 08:27:39 - zalohy_manager - INFO - Záloha pro Jakub Richter (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_082731.xlsx
-2025-07-01 08:27:40 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Coulibaly' do listu 'Zálohy' na řádek 13.
-2025-07-01 08:27:40 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Duben' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:27:40 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_082731.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_082731.xlsx'.
-2025-07-01 08:27:40 - zalohy_manager - INFO - Záloha pro Coulibaly (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_082731.xlsx
-2025-07-01 08:27:41 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Květen' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:27:41 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_082731.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_082731.xlsx'.
-2025-07-01 08:27:41 - zalohy_manager - INFO - Záloha pro Coulibaly (200.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_082731.xlsx
-2025-07-01 08:27:41 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Lesák Marek' do listu 'Zálohy' na řádek 14.
-2025-07-01 08:27:41 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Květen' při ukládání. Používají se sloupce pro 'Listopad'.
-2025-07-01 08:27:42 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_082731.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_082731.xlsx'.
-2025-07-01 08:27:42 - zalohy_manager - INFO - Záloha pro Lesák Marek (100.0 EUR, Květen, 2025-02-01) úspěšně uložena do Frigo 8_20250701_082731.xlsx
-2025-07-01 08:30:42 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_083042.xlsx
-2025-07-01 08:32:54 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_083254.xlsx
-2025-07-01 08:39:51 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_083951.xlsx
-2025-07-01 08:40:18 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084018.xlsx
-2025-07-01 08:40:22 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Bláha Jakub' do listu 'Zálohy' na řádek 9.
-2025-07-01 08:40:22 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084018.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084018.xlsx'.
-2025-07-01 08:40:22 - zalohy_manager - INFO - Záloha pro Bláha Jakub (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084018.xlsx
-2025-07-01 08:40:23 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084018.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084018.xlsx'.
-2025-07-01 08:40:23 - zalohy_manager - INFO - Záloha pro Bláha Jakub (300.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084018.xlsx
-2025-07-01 08:40:24 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jiří' do listu 'Zálohy' na řádek 10.
-2025-07-01 08:40:24 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084018.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084018.xlsx'.
-2025-07-01 08:40:24 - zalohy_manager - INFO - Záloha pro Horčička Jiří (200.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084018.xlsx
-2025-07-01 08:40:25 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084018.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084018.xlsx'.
-2025-07-01 08:40:25 - zalohy_manager - INFO - Záloha pro Horčička Jiří (2000.0 CZK, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084018.xlsx
-2025-07-01 08:40:26 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084018.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084018.xlsx'.
-2025-07-01 08:40:26 - zalohy_manager - INFO - Záloha pro Horčička Jiří (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084018.xlsx
-2025-07-01 08:40:27 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Zdeněk Dlouhý' do listu 'Zálohy' na řádek 11.
-2025-07-01 08:40:27 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084018.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084018.xlsx'.
-2025-07-01 08:40:27 - zalohy_manager - INFO - Záloha pro Zdeněk Dlouhý (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084018.xlsx
-2025-07-01 08:40:28 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084018.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084018.xlsx'.
-2025-07-01 08:40:28 - zalohy_manager - INFO - Záloha pro Zdeněk Dlouhý (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084018.xlsx
-2025-07-01 08:40:29 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Jakub Richter' do listu 'Zálohy' na řádek 12.
-2025-07-01 08:40:29 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084018.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084018.xlsx'.
-2025-07-01 08:40:29 - zalohy_manager - INFO - Záloha pro Jakub Richter (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084018.xlsx
-2025-07-01 08:40:30 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084018.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084018.xlsx'.
-2025-07-01 08:40:30 - zalohy_manager - INFO - Záloha pro Jakub Richter (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084018.xlsx
-2025-07-01 08:40:30 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Coulibaly' do listu 'Zálohy' na řádek 13.
-2025-07-01 08:40:31 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084018.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084018.xlsx'.
-2025-07-01 08:40:31 - zalohy_manager - INFO - Záloha pro Coulibaly (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084018.xlsx
-2025-07-01 08:40:31 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084018.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084018.xlsx'.
-2025-07-01 08:40:31 - zalohy_manager - INFO - Záloha pro Coulibaly (200.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084018.xlsx
-2025-07-01 08:40:32 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Lesák Marek' do listu 'Zálohy' na řádek 14.
-2025-07-01 08:40:32 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084018.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084018.xlsx'.
-2025-07-01 08:40:32 - zalohy_manager - INFO - Záloha pro Lesák Marek (100.0 EUR, Květen, 2025-02-01) úspěšně uložena do Frigo 8_20250701_084018.xlsx
-2025-07-01 08:41:39 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084139.xlsx
-2025-07-01 08:41:41 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Bláha Jakub' do listu 'Zálohy' na řádek 9.
-2025-07-01 08:41:41 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084139.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084139.xlsx'.
-2025-07-01 08:41:41 - zalohy_manager - INFO - Záloha pro Bláha Jakub (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084139.xlsx
-2025-07-01 08:41:42 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084139.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084139.xlsx'.
-2025-07-01 08:41:42 - zalohy_manager - INFO - Záloha pro Bláha Jakub (300.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084139.xlsx
-2025-07-01 08:41:43 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jiří' do listu 'Zálohy' na řádek 10.
-2025-07-01 08:41:43 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084139.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084139.xlsx'.
-2025-07-01 08:41:43 - zalohy_manager - INFO - Záloha pro Horčička Jiří (200.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084139.xlsx
-2025-07-01 08:41:44 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084139.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084139.xlsx'.
-2025-07-01 08:41:44 - zalohy_manager - INFO - Záloha pro Horčička Jiří (2000.0 CZK, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084139.xlsx
-2025-07-01 08:41:45 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084139.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084139.xlsx'.
-2025-07-01 08:41:45 - zalohy_manager - INFO - Záloha pro Horčička Jiří (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084139.xlsx
-2025-07-01 08:41:45 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Zdeněk Dlouhý' do listu 'Zálohy' na řádek 11.
-2025-07-01 08:41:45 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084139.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084139.xlsx'.
-2025-07-01 08:41:45 - zalohy_manager - INFO - Záloha pro Zdeněk Dlouhý (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084139.xlsx
-2025-07-01 08:41:46 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084139.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084139.xlsx'.
-2025-07-01 08:41:46 - zalohy_manager - INFO - Záloha pro Zdeněk Dlouhý (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084139.xlsx
-2025-07-01 08:41:47 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Jakub Richter' do listu 'Zálohy' na řádek 12.
-2025-07-01 08:41:47 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084139.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084139.xlsx'.
-2025-07-01 08:41:47 - zalohy_manager - INFO - Záloha pro Jakub Richter (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084139.xlsx
-2025-07-01 08:41:48 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084139.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084139.xlsx'.
-2025-07-01 08:41:48 - zalohy_manager - INFO - Záloha pro Jakub Richter (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084139.xlsx
-2025-07-01 08:41:49 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Coulibaly' do listu 'Zálohy' na řádek 13.
-2025-07-01 08:41:49 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084139.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084139.xlsx'.
-2025-07-01 08:41:49 - zalohy_manager - INFO - Záloha pro Coulibaly (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084139.xlsx
-2025-07-01 08:41:50 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084139.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084139.xlsx'.
-2025-07-01 08:41:50 - zalohy_manager - INFO - Záloha pro Coulibaly (200.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084139.xlsx
-2025-07-01 08:41:50 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Lesák Marek' do listu 'Zálohy' na řádek 14.
-2025-07-01 08:41:50 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084139.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084139.xlsx'.
-2025-07-01 08:41:50 - zalohy_manager - INFO - Záloha pro Lesák Marek (100.0 EUR, Květen, 2025-02-01) úspěšně uložena do Frigo 8_20250701_084139.xlsx
-2025-07-01 08:42:39 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084239.xlsx
-2025-07-01 08:44:17 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Bláha Jakub' do listu 'Zálohy' na řádek 9.
-2025-07-01 08:44:17 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084239.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084239.xlsx'.
-2025-07-01 08:44:17 - zalohy_manager - INFO - Záloha pro Bláha Jakub (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084239.xlsx
-2025-07-01 08:44:18 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084239.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084239.xlsx'.
-2025-07-01 08:44:18 - zalohy_manager - INFO - Záloha pro Bláha Jakub (300.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084239.xlsx
-2025-07-01 08:44:19 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jiří' do listu 'Zálohy' na řádek 10.
-2025-07-01 08:44:19 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084239.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084239.xlsx'.
-2025-07-01 08:44:19 - zalohy_manager - INFO - Záloha pro Horčička Jiří (200.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084239.xlsx
-2025-07-01 08:44:20 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084239.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084239.xlsx'.
-2025-07-01 08:44:20 - zalohy_manager - INFO - Záloha pro Horčička Jiří (2000.0 CZK, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084239.xlsx
-2025-07-01 08:44:21 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084239.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084239.xlsx'.
-2025-07-01 08:44:21 - zalohy_manager - INFO - Záloha pro Horčička Jiří (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084239.xlsx
-2025-07-01 08:44:22 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Zdeněk Dlouhý' do listu 'Zálohy' na řádek 11.
-2025-07-01 08:44:22 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084239.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084239.xlsx'.
-2025-07-01 08:44:22 - zalohy_manager - INFO - Záloha pro Zdeněk Dlouhý (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084239.xlsx
-2025-07-01 08:44:23 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084239.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084239.xlsx'.
-2025-07-01 08:44:23 - zalohy_manager - INFO - Záloha pro Zdeněk Dlouhý (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084239.xlsx
-2025-07-01 08:44:23 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Jakub Richter' do listu 'Zálohy' na řádek 12.
-2025-07-01 08:44:24 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084239.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084239.xlsx'.
-2025-07-01 08:44:24 - zalohy_manager - INFO - Záloha pro Jakub Richter (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084239.xlsx
-2025-07-01 08:44:24 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084239.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084239.xlsx'.
-2025-07-01 08:44:24 - zalohy_manager - INFO - Záloha pro Jakub Richter (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084239.xlsx
-2025-07-01 08:44:25 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Coulibaly' do listu 'Zálohy' na řádek 13.
-2025-07-01 08:44:25 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084239.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084239.xlsx'.
-2025-07-01 08:44:25 - zalohy_manager - INFO - Záloha pro Coulibaly (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084239.xlsx
-2025-07-01 08:44:26 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084239.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084239.xlsx'.
-2025-07-01 08:44:26 - zalohy_manager - INFO - Záloha pro Coulibaly (200.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084239.xlsx
-2025-07-01 08:44:27 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Lesák Marek' do listu 'Zálohy' na řádek 14.
-2025-07-01 08:44:27 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084239.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084239.xlsx'.
-2025-07-01 08:44:27 - zalohy_manager - INFO - Záloha pro Lesák Marek (100.0 EUR, Květen, 2025-02-01) úspěšně uložena do Frigo 8_20250701_084239.xlsx
-2025-07-01 08:45:27 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084527.xlsx
-2025-07-01 08:47:07 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Bláha Jakub' do listu 'Zálohy' na řádek 9.
-2025-07-01 08:47:07 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084527.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084527.xlsx'.
-2025-07-01 08:47:07 - zalohy_manager - INFO - Záloha pro Bláha Jakub (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084527.xlsx
-2025-07-01 08:47:08 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084527.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084527.xlsx'.
-2025-07-01 08:47:08 - zalohy_manager - INFO - Záloha pro Bláha Jakub (300.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084527.xlsx
-2025-07-01 08:47:09 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jiří' do listu 'Zálohy' na řádek 10.
-2025-07-01 08:47:09 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084527.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084527.xlsx'.
-2025-07-01 08:47:09 - zalohy_manager - INFO - Záloha pro Horčička Jiří (200.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084527.xlsx
-2025-07-01 08:47:10 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084527.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084527.xlsx'.
-2025-07-01 08:47:10 - zalohy_manager - INFO - Záloha pro Horčička Jiří (2000.0 CZK, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084527.xlsx
-2025-07-01 08:47:11 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084527.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084527.xlsx'.
-2025-07-01 08:47:11 - zalohy_manager - INFO - Záloha pro Horčička Jiří (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084527.xlsx
-2025-07-01 08:47:12 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Zdeněk Dlouhý' do listu 'Zálohy' na řádek 11.
-2025-07-01 08:47:12 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084527.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084527.xlsx'.
-2025-07-01 08:47:12 - zalohy_manager - INFO - Záloha pro Zdeněk Dlouhý (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084527.xlsx
-2025-07-01 08:47:13 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084527.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084527.xlsx'.
-2025-07-01 08:47:13 - zalohy_manager - INFO - Záloha pro Zdeněk Dlouhý (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084527.xlsx
-2025-07-01 08:47:13 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Jakub Richter' do listu 'Zálohy' na řádek 12.
-2025-07-01 08:47:13 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084527.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084527.xlsx'.
-2025-07-01 08:47:13 - zalohy_manager - INFO - Záloha pro Jakub Richter (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084527.xlsx
-2025-07-01 08:47:14 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084527.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084527.xlsx'.
-2025-07-01 08:47:14 - zalohy_manager - INFO - Záloha pro Jakub Richter (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084527.xlsx
-2025-07-01 08:47:15 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Coulibaly' do listu 'Zálohy' na řádek 13.
-2025-07-01 08:47:15 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084527.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084527.xlsx'.
-2025-07-01 08:47:15 - zalohy_manager - INFO - Záloha pro Coulibaly (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084527.xlsx
-2025-07-01 08:47:16 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084527.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084527.xlsx'.
-2025-07-01 08:47:16 - zalohy_manager - INFO - Záloha pro Coulibaly (200.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_084527.xlsx
-2025-07-01 08:47:17 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Lesák Marek' do listu 'Zálohy' na řádek 14.
-2025-07-01 08:47:17 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_084527.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_084527.xlsx'.
-2025-07-01 08:47:17 - zalohy_manager - INFO - Záloha pro Lesák Marek (100.0 EUR, Květen, 2025-02-01) úspěšně uložena do Frigo 8_20250701_084527.xlsx
-2025-07-01 13:19:20 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_131920.xlsx
-2025-07-01 13:20:27 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Bláha Jakub' do listu 'Zálohy' na řádek 9.
-2025-07-01 13:20:27 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_131920.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_131920.xlsx'.
-2025-07-01 13:20:27 - zalohy_manager - INFO - Záloha pro Bláha Jakub (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_131920.xlsx
-2025-07-01 13:20:27 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_131920.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_131920.xlsx'.
-2025-07-01 13:20:27 - zalohy_manager - INFO - Záloha pro Bláha Jakub (300.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_131920.xlsx
-2025-07-01 13:20:28 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jiří' do listu 'Zálohy' na řádek 10.
-2025-07-01 13:20:28 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_131920.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_131920.xlsx'.
-2025-07-01 13:20:28 - zalohy_manager - INFO - Záloha pro Horčička Jiří (200.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_131920.xlsx
-2025-07-01 13:20:28 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_131920.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_131920.xlsx'.
-2025-07-01 13:20:28 - zalohy_manager - INFO - Záloha pro Horčička Jiří (2000.0 CZK, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_131920.xlsx
-2025-07-01 13:20:29 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_131920.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_131920.xlsx'.
-2025-07-01 13:20:29 - zalohy_manager - INFO - Záloha pro Horčička Jiří (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_131920.xlsx
-2025-07-01 13:20:30 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Zdeněk Dlouhý' do listu 'Zálohy' na řádek 11.
-2025-07-01 13:20:30 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_131920.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_131920.xlsx'.
-2025-07-01 13:20:30 - zalohy_manager - INFO - Záloha pro Zdeněk Dlouhý (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_131920.xlsx
-2025-07-01 13:20:30 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_131920.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_131920.xlsx'.
-2025-07-01 13:20:30 - zalohy_manager - INFO - Záloha pro Zdeněk Dlouhý (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_131920.xlsx
-2025-07-01 13:20:31 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Jakub Richter' do listu 'Zálohy' na řádek 12.
-2025-07-01 13:20:31 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_131920.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_131920.xlsx'.
-2025-07-01 13:20:31 - zalohy_manager - INFO - Záloha pro Jakub Richter (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_131920.xlsx
-2025-07-01 13:20:31 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_131920.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_131920.xlsx'.
-2025-07-01 13:20:31 - zalohy_manager - INFO - Záloha pro Jakub Richter (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_131920.xlsx
-2025-07-01 13:20:32 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Coulibaly' do listu 'Zálohy' na řádek 13.
-2025-07-01 13:20:32 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_131920.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_131920.xlsx'.
-2025-07-01 13:20:32 - zalohy_manager - INFO - Záloha pro Coulibaly (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_131920.xlsx
-2025-07-01 13:20:33 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_131920.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_131920.xlsx'.
-2025-07-01 13:20:33 - zalohy_manager - INFO - Záloha pro Coulibaly (200.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_131920.xlsx
-2025-07-01 13:20:33 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Lesák Marek' do listu 'Zálohy' na řádek 14.
-2025-07-01 13:20:33 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_131920.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_131920.xlsx'.
-2025-07-01 13:20:33 - zalohy_manager - INFO - Záloha pro Lesák Marek (100.0 EUR, Květen, 2025-02-01) úspěšně uložena do Frigo 8_20250701_131920.xlsx
-2025-07-01 13:22:05 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_132205.xlsx
-2025-07-01 13:22:07 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Bláha Jakub' do listu 'Zálohy' na řádek 9.
-2025-07-01 13:22:07 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_132205.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_132205.xlsx'.
-2025-07-01 13:22:07 - zalohy_manager - INFO - Záloha pro Bláha Jakub (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_132205.xlsx
-2025-07-01 13:22:08 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_132205.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_132205.xlsx'.
-2025-07-01 13:22:08 - zalohy_manager - INFO - Záloha pro Bláha Jakub (300.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_132205.xlsx
-2025-07-01 13:22:08 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jiří' do listu 'Zálohy' na řádek 10.
-2025-07-01 13:22:09 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_132205.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_132205.xlsx'.
-2025-07-01 13:22:09 - zalohy_manager - INFO - Záloha pro Horčička Jiří (200.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_132205.xlsx
-2025-07-01 13:22:09 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_132205.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_132205.xlsx'.
-2025-07-01 13:22:09 - zalohy_manager - INFO - Záloha pro Horčička Jiří (2000.0 CZK, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_132205.xlsx
-2025-07-01 13:22:10 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_132205.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_132205.xlsx'.
-2025-07-01 13:22:10 - zalohy_manager - INFO - Záloha pro Horčička Jiří (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_132205.xlsx
-2025-07-01 13:22:11 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Zdeněk Dlouhý' do listu 'Zálohy' na řádek 11.
-2025-07-01 13:22:11 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_132205.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_132205.xlsx'.
-2025-07-01 13:22:11 - zalohy_manager - INFO - Záloha pro Zdeněk Dlouhý (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_132205.xlsx
-2025-07-01 13:22:11 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_132205.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_132205.xlsx'.
-2025-07-01 13:22:11 - zalohy_manager - INFO - Záloha pro Zdeněk Dlouhý (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_132205.xlsx
-2025-07-01 13:22:12 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Jakub Richter' do listu 'Zálohy' na řádek 12.
-2025-07-01 13:22:12 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_132205.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_132205.xlsx'.
-2025-07-01 13:22:12 - zalohy_manager - INFO - Záloha pro Jakub Richter (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_132205.xlsx
-2025-07-01 13:22:13 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_132205.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_132205.xlsx'.
-2025-07-01 13:22:13 - zalohy_manager - INFO - Záloha pro Jakub Richter (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_132205.xlsx
-2025-07-01 13:22:14 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Coulibaly' do listu 'Zálohy' na řádek 13.
-2025-07-01 13:22:14 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_132205.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_132205.xlsx'.
-2025-07-01 13:22:14 - zalohy_manager - INFO - Záloha pro Coulibaly (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_132205.xlsx
-2025-07-01 13:22:14 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_132205.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_132205.xlsx'.
-2025-07-01 13:22:14 - zalohy_manager - INFO - Záloha pro Coulibaly (200.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_132205.xlsx
-2025-07-01 13:22:15 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Lesák Marek' do listu 'Zálohy' na řádek 14.
-2025-07-01 13:22:15 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_132205.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_132205.xlsx'.
-2025-07-01 13:22:15 - zalohy_manager - INFO - Záloha pro Lesák Marek (100.0 EUR, Květen, 2025-02-01) úspěšně uložena do Frigo 8_20250701_132205.xlsx
-2025-07-01 13:23:29 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_132329.xlsx
-2025-07-01 13:23:31 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Bláha Jakub' do listu 'Zálohy' na řádek 9.
-2025-07-01 13:23:31 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_132329.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_132329.xlsx'.
-2025-07-01 13:23:31 - zalohy_manager - INFO - Záloha pro Bláha Jakub (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_132329.xlsx
-2025-07-01 13:23:32 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_132329.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_132329.xlsx'.
-2025-07-01 13:23:32 - zalohy_manager - INFO - Záloha pro Bláha Jakub (300.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_132329.xlsx
-2025-07-01 13:23:33 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jiří' do listu 'Zálohy' na řádek 10.
-2025-07-01 13:23:33 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_132329.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_132329.xlsx'.
-2025-07-01 13:23:33 - zalohy_manager - INFO - Záloha pro Horčička Jiří (200.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_132329.xlsx
-2025-07-01 13:23:34 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_132329.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_132329.xlsx'.
-2025-07-01 13:23:34 - zalohy_manager - INFO - Záloha pro Horčička Jiří (2000.0 CZK, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_132329.xlsx
-2025-07-01 13:23:34 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_132329.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_132329.xlsx'.
-2025-07-01 13:23:34 - zalohy_manager - INFO - Záloha pro Horčička Jiří (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_132329.xlsx
-2025-07-01 13:23:35 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Zdeněk Dlouhý' do listu 'Zálohy' na řádek 11.
-2025-07-01 13:23:35 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_132329.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_132329.xlsx'.
-2025-07-01 13:23:35 - zalohy_manager - INFO - Záloha pro Zdeněk Dlouhý (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_132329.xlsx
-2025-07-01 13:23:36 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_132329.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_132329.xlsx'.
-2025-07-01 13:23:36 - zalohy_manager - INFO - Záloha pro Zdeněk Dlouhý (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_132329.xlsx
-2025-07-01 13:23:36 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Jakub Richter' do listu 'Zálohy' na řádek 12.
-2025-07-01 13:23:37 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_132329.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_132329.xlsx'.
-2025-07-01 13:23:37 - zalohy_manager - INFO - Záloha pro Jakub Richter (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_132329.xlsx
-2025-07-01 13:23:37 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_132329.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_132329.xlsx'.
-2025-07-01 13:23:37 - zalohy_manager - INFO - Záloha pro Jakub Richter (400.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_132329.xlsx
-2025-07-01 13:23:38 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Coulibaly' do listu 'Zálohy' na řádek 13.
-2025-07-01 13:23:38 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_132329.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_132329.xlsx'.
-2025-07-01 13:23:38 - zalohy_manager - INFO - Záloha pro Coulibaly (100.0 EUR, Duben, 2025-02-27) úspěšně uložena do Frigo 8_20250701_132329.xlsx
-2025-07-01 13:23:39 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_132329.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_132329.xlsx'.
-2025-07-01 13:23:39 - zalohy_manager - INFO - Záloha pro Coulibaly (200.0 EUR, Květen, 2025-02-27) úspěšně uložena do Frigo 8_20250701_132329.xlsx
-2025-07-01 13:23:40 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Lesák Marek' do listu 'Zálohy' na řádek 14.
-2025-07-01 13:23:40 - zalohy_manager - INFO - Workbook 'Frigo 8_20250701_132329.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Frigo 8_20250701_132329.xlsx'.
-2025-07-01 13:23:40 - zalohy_manager - INFO - Záloha pro Lesák Marek (100.0 EUR, Květen, 2025-02-01) úspěšně uložena do Frigo 8_20250701_132329.xlsx
-2025-07-01 13:36:43 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_133643.xlsx
-2025-07-01 13:36:45 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jan' do listu 'Zálohy' na řádek 9.
-2025-07-01 13:36:45 - zalohy_manager - INFO - Workbook 'Essone_20250701_133643.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_133643.xlsx'.
-2025-07-01 13:36:45 - zalohy_manager - INFO - Záloha pro Horčička Jan (150.0 EUR, Listopad, 2025-07-01) úspěšně uložena do Essone_20250701_133643.xlsx
-2025-07-01 13:40:40 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_134040.xlsx
-2025-07-01 13:40:42 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jan' do listu 'Zálohy' na řádek 9.
-2025-07-01 13:40:42 - zalohy_manager - INFO - Workbook 'Essone_20250701_134040.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_134040.xlsx'.
-2025-07-01 13:40:42 - zalohy_manager - INFO - Záloha pro Horčička Jan (150.0 EUR, Listopad, 2025-07-01) úspěšně uložena do Essone_20250701_134040.xlsx
-2025-07-01 13:41:42 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_134142.xlsx
-2025-07-01 13:41:43 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jan' do listu 'Zálohy' na řádek 9.
-2025-07-01 13:41:43 - zalohy_manager - INFO - Workbook 'Essone_20250701_134142.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_134142.xlsx'.
-2025-07-01 13:41:43 - zalohy_manager - INFO - Záloha pro Horčička Jan (150.0 EUR, Listopad, 2025-07-01) úspěšně uložena do Essone_20250701_134142.xlsx
-2025-07-01 13:42:48 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_134248.xlsx
-2025-07-01 13:42:50 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jan' do listu 'Zálohy' na řádek 9.
-2025-07-01 13:42:50 - zalohy_manager - INFO - Workbook 'Essone_20250701_134248.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_134248.xlsx'.
-2025-07-01 13:42:50 - zalohy_manager - INFO - Záloha pro Horčička Jan (150.0 EUR, Listopad, 2025-07-01) úspěšně uložena do Essone_20250701_134248.xlsx
-2025-07-01 13:43:51 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_134351.xlsx
-2025-07-01 13:43:53 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jan' do listu 'Zálohy' na řádek 9.
-2025-07-01 13:43:53 - zalohy_manager - INFO - Workbook 'Essone_20250701_134351.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_134351.xlsx'.
-2025-07-01 13:43:53 - zalohy_manager - INFO - Záloha pro Horčička Jan (150.0 EUR, Listopad, 2025-07-01) úspěšně uložena do Essone_20250701_134351.xlsx
-2025-07-01 13:45:04 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_134504.xlsx
-2025-07-01 13:45:06 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jan' do listu 'Zálohy' na řádek 9.
-2025-07-01 13:45:06 - zalohy_manager - INFO - Workbook 'Essone_20250701_134504.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_134504.xlsx'.
-2025-07-01 13:45:06 - zalohy_manager - INFO - Záloha pro Horčička Jan (150.0 EUR, Listopad, 2025-07-01) úspěšně uložena do Essone_20250701_134504.xlsx
-2025-07-01 13:46:08 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_134608.xlsx
-2025-07-01 13:46:10 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jan' do listu 'Zálohy' na řádek 9.
-2025-07-01 13:46:10 - zalohy_manager - INFO - Workbook 'Essone_20250701_134608.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_134608.xlsx'.
-2025-07-01 13:46:10 - zalohy_manager - INFO - Záloha pro Horčička Jan (150.0 EUR, Listopad, 2025-07-01) úspěšně uložena do Essone_20250701_134608.xlsx
-2025-07-01 13:48:04 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_134804.xlsx
-2025-07-01 13:48:06 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jan' do listu 'Zálohy' na řádek 9.
-2025-07-01 13:48:06 - zalohy_manager - INFO - Workbook 'Essone_20250701_134804.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_134804.xlsx'.
-2025-07-01 13:48:06 - zalohy_manager - INFO - Záloha pro Horčička Jan (150.0 EUR, Listopad, 2025-07-01) úspěšně uložena do Essone_20250701_134804.xlsx
-2025-07-01 13:49:10 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_134910.xlsx
-2025-07-01 13:49:12 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jan' do listu 'Zálohy' na řádek 9.
-2025-07-01 13:49:12 - zalohy_manager - INFO - Workbook 'Essone_20250701_134910.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_134910.xlsx'.
-2025-07-01 13:49:12 - zalohy_manager - INFO - Záloha pro Horčička Jan (150.0 EUR, Listopad, 2025-07-01) úspěšně uložena do Essone_20250701_134910.xlsx
-2025-07-01 13:50:12 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_135012.xlsx
-2025-07-01 13:50:14 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jan' do listu 'Zálohy' na řádek 9.
-2025-07-01 13:50:14 - zalohy_manager - INFO - Workbook 'Essone_20250701_135012.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_135012.xlsx'.
-2025-07-01 13:50:14 - zalohy_manager - INFO - Záloha pro Horčička Jan (150.0 EUR, Listopad, 2025-07-01) úspěšně uložena do Essone_20250701_135012.xlsx
-2025-07-01 13:51:22 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_135122.xlsx
-2025-07-01 13:51:24 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jan' do listu 'Zálohy' na řádek 9.
-2025-07-01 13:51:24 - zalohy_manager - INFO - Workbook 'Essone_20250701_135122.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_135122.xlsx'.
-2025-07-01 13:51:24 - zalohy_manager - INFO - Záloha pro Horčička Jan (150.0 EUR, Listopad, 2025-07-01) úspěšně uložena do Essone_20250701_135122.xlsx
-2025-07-01 13:52:33 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_135233.xlsx
-2025-07-01 13:52:35 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jan' do listu 'Zálohy' na řádek 9.
-2025-07-01 13:52:35 - zalohy_manager - INFO - Workbook 'Essone_20250701_135233.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_135233.xlsx'.
-2025-07-01 13:52:35 - zalohy_manager - INFO - Záloha pro Horčička Jan (150.0 EUR, Listopad, 2025-07-01) úspěšně uložena do Essone_20250701_135233.xlsx
-2025-07-01 13:54:17 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_135417.xlsx
-2025-07-01 13:54:19 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jan' do listu 'Zálohy' na řádek 9.
-2025-07-01 13:54:19 - zalohy_manager - INFO - Workbook 'Essone_20250701_135417.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_135417.xlsx'.
-2025-07-01 13:54:19 - zalohy_manager - INFO - Záloha pro Horčička Jan (150.0 EUR, Listopad, 2025-07-01) úspěšně uložena do Essone_20250701_135417.xlsx
-2025-07-01 13:55:50 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_135550.xlsx
-2025-07-01 13:55:51 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jan' do listu 'Zálohy' na řádek 9.
-2025-07-01 13:55:51 - zalohy_manager - INFO - Workbook 'Essone_20250701_135550.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_135550.xlsx'.
-2025-07-01 13:55:51 - zalohy_manager - INFO - Záloha pro Horčička Jan (150.0 EUR, Listopad, 2025-07-01) úspěšně uložena do Essone_20250701_135550.xlsx
-2025-07-01 13:56:56 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_135656.xlsx
-2025-07-01 13:56:58 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jan' do listu 'Zálohy' na řádek 9.
-2025-07-01 13:56:58 - zalohy_manager - INFO - Workbook 'Essone_20250701_135656.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_135656.xlsx'.
-2025-07-01 13:56:58 - zalohy_manager - INFO - Záloha pro Horčička Jan (150.0 EUR, Listopad, 2025-07-01) úspěšně uložena do Essone_20250701_135656.xlsx
-2025-07-01 13:58:14 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_135814.xlsx
-2025-07-01 13:58:16 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jan' do listu 'Zálohy' na řádek 9.
-2025-07-01 13:58:16 - zalohy_manager - INFO - Workbook 'Essone_20250701_135814.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_135814.xlsx'.
-2025-07-01 13:58:16 - zalohy_manager - INFO - Záloha pro Horčička Jan (150.0 EUR, Listopad, 2025-07-01) úspěšně uložena do Essone_20250701_135814.xlsx
-2025-07-01 13:59:28 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_135928.xlsx
-2025-07-01 13:59:30 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jan' do listu 'Zálohy' na řádek 9.
-2025-07-01 13:59:30 - zalohy_manager - INFO - Workbook 'Essone_20250701_135928.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_135928.xlsx'.
-2025-07-01 13:59:30 - zalohy_manager - INFO - Záloha pro Horčička Jan (150.0 EUR, Listopad, 2025-07-01) úspěšně uložena do Essone_20250701_135928.xlsx
-2025-07-01 14:01:37 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_140137.xlsx
-2025-07-01 14:01:39 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jan' do listu 'Zálohy' na řádek 9.
-2025-07-01 14:01:39 - zalohy_manager - INFO - Workbook 'Essone_20250701_140137.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_140137.xlsx'.
-2025-07-01 14:01:39 - zalohy_manager - INFO - Záloha pro Horčička Jan (150.0 EUR, Listopad, 2025-07-01) úspěšně uložena do Essone_20250701_140137.xlsx
-2025-07-01 14:03:07 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_140307.xlsx
-2025-07-01 14:03:10 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jan' do listu 'Zálohy' na řádek 9.
-2025-07-01 14:03:10 - zalohy_manager - INFO - Workbook 'Essone_20250701_140307.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_140307.xlsx'.
-2025-07-01 14:03:10 - zalohy_manager - INFO - Záloha pro Horčička Jan (150.0 EUR, Listopad, 2025-07-01) úspěšně uložena do Essone_20250701_140307.xlsx
-2025-07-01 14:05:17 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_140517.xlsx
-2025-07-01 14:05:20 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jan' do listu 'Zálohy' na řádek 9.
-2025-07-01 14:05:20 - zalohy_manager - INFO - Workbook 'Essone_20250701_140517.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_140517.xlsx'.
-2025-07-01 14:05:20 - zalohy_manager - INFO - Záloha pro Horčička Jan (150.0 EUR, Listopad, 2025-07-01) úspěšně uložena do Essone_20250701_140517.xlsx
-2025-07-01 14:06:41 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_140641.xlsx
-2025-07-01 14:06:44 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jan' do listu 'Zálohy' na řádek 9.
-2025-07-01 14:06:44 - zalohy_manager - INFO - Workbook 'Essone_20250701_140641.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_140641.xlsx'.
-2025-07-01 14:06:44 - zalohy_manager - INFO - Záloha pro Horčička Jan (150.0 EUR, Listopad, 2025-07-01) úspěšně uložena do Essone_20250701_140641.xlsx
-2025-07-01 14:08:15 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_140815.xlsx
-2025-07-01 14:08:18 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jan' do listu 'Zálohy' na řádek 9.
-2025-07-01 14:08:18 - zalohy_manager - INFO - Workbook 'Essone_20250701_140815.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_140815.xlsx'.
-2025-07-01 14:08:18 - zalohy_manager - INFO - Záloha pro Horčička Jan (150.0 EUR, Listopad, 2025-07-01) úspěšně uložena do Essone_20250701_140815.xlsx
-2025-07-01 14:09:37 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_140937.xlsx
-2025-07-01 14:09:40 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jan' do listu 'Zálohy' na řádek 9.
-2025-07-01 14:09:40 - zalohy_manager - INFO - Workbook 'Essone_20250701_140937.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_140937.xlsx'.
-2025-07-01 14:09:40 - zalohy_manager - INFO - Záloha pro Horčička Jan (150.0 EUR, Listopad, 2025-07-01) úspěšně uložena do Essone_20250701_140937.xlsx
-2025-07-01 14:11:27 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_141127.xlsx
-2025-07-01 14:11:30 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jan' do listu 'Zálohy' na řádek 9.
-2025-07-01 14:11:30 - zalohy_manager - INFO - Workbook 'Essone_20250701_141127.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_141127.xlsx'.
-2025-07-01 14:11:30 - zalohy_manager - INFO - Záloha pro Horčička Jan (150.0 EUR, Listopad, 2025-07-01) úspěšně uložena do Essone_20250701_141127.xlsx
-2025-07-01 14:13:34 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_141334.xlsx
-2025-07-01 14:13:37 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Horčička Jan' do listu 'Zálohy' na řádek 9.
-2025-07-01 14:13:37 - zalohy_manager - INFO - Workbook 'Essone_20250701_141334.xlsx' úspěšně uložen do '/data/data/com.termux/files/home/storage/Documents/HodinyAPP/excel/Essone_20250701_141334.xlsx'.
-2025-07-01 14:13:37 - zalohy_manager - INFO - Záloha pro Horčička Jan (150.0 EUR, Listopad, 2025-07-01) úspěšně uložena do Essone_20250701_141334.xlsx
+2025-07-02 13:12:01 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:12:01 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:12:01 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:12:01 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:12:02 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:12:02 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:12:05 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:12:06 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:12:06 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:12:06 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:12:06 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:12:06 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:12:06 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:12:11 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:12:11 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:12:11 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:12:11 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:12:11 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:12:12 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:12:13 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:12:13 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:12:13 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:12:13 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:09 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:09 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:09 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:09 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:09 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:09 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:16 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:16 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:16 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:16 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:16 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:16 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:19 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:19 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:19 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:19 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:19 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:20 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:21 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:21 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:21 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:22 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:22 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:22 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:49 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:49 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:49 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:49 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:49 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:13:49 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:33:10 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:33:10 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:33:10 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:33:10 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:33:10 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:33:10 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:33:42 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:33:42 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:33:43 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:33:43 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:33:43 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:33:43 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:08 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:08 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:08 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:08 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:08 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:08 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:26 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:27 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:27 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:27 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:27 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:27 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:40 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:40 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:40 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:40 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:40 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:40 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:44 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:44 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:45 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:45 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:45 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:45 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:51 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:51 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:51 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:51 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:51 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:51 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:59 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:59 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:59 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:59 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:59 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:34:59 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:16 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:16 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:16 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:16 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:16 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:16 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:21 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:21 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:21 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:21 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:21 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:21 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:27 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:27 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:28 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:28 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:28 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:28 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:39 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:39 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:40 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:40 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:40 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:40 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:50 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:50 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:51 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:51 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:51 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:35:51 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:17 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:17 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:17 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:17 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:17 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:17 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:32 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:32 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:32 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:32 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:32 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:32 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:37 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:38 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:38 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:38 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:38 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:38 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:42 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:42 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:42 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:42 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:46 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:46 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:46 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:46 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:47 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:47 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:47 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:47 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:47 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:47 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:51 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:51 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:51 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:52 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:52 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:52 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:56 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:56 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:56 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:56 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:59 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:59 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:59 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:36:59 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:37:31 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:37:31 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:37:31 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:37:31 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:39:38 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:39:50 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:39:56 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:39:57 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:39:57 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:39:57 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:39:57 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:39:57 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:39:57 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:39:57 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:40:28 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:40:33 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:40:33 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:40:33 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:40:33 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:40:37 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:40:38 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:40:38 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:40:38 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:40:38 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:40:38 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:03 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:15 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:15 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:15 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:15 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:29 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:35 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:36 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:36 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:36 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:38 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:39 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:39 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:39 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:40 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:40 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:40 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:40 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:40 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:40 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:48 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:48 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:48 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:48 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:52 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:53 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:53 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:53 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:53 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:53 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:57 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:58 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:58 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:41:58 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:42:02 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:42:02 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:42:03 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:42:03 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:42:03 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:42:04 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:42:18 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:42:18 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:42:18 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 13:42:18 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 14:01:19 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 14:01:19 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 14:01:20 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 14:01:20 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-02 14:01:20 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-04 11:35:03 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-04 11:35:50 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-04 11:35:50 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-04 11:35:50 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-05 04:24:01 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:17:12 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:17:39 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:17:39 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:17:39 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:17:39 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:17:39 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:17:40 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:17:42 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:17:43 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:17:43 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:17:43 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:17:43 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:17:43 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:17:43 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:17:43 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:17:48 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:17:48 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:17:48 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:17:48 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:17:50 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:17:50 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:17:50 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:17:51 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:17:51 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:17:51 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:18:12 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:18:13 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:18:13 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:18:13 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:23:03 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:23:03 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:23:03 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:23:03 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:23:03 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:24:52 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:24:52 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:24:52 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:24:52 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:24:53 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:24:53 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:25:53 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:25:53 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:25:53 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:25:53 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:25:53 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:25:53 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:26:31 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:26:32 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:26:32 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:26:32 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:26:32 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:26:32 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:27:31 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:27:31 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:27:31 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:27:31 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:27:31 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:28:28 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:28:28 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:28:28 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:28:28 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:28:28 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:28:28 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:28:42 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:28:42 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:28:42 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:28:42 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:28:42 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:28:42 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:29:23 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:29:23 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:29:23 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:29:23 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:29:23 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:29:24 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:29:49 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:29:49 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:29:49 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:29:49 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:29:49 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:29:49 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 01:37:29 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:17:30 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:17:30 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:17:30 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:17:31 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:17:31 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:17:31 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:18:41 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:18:42 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:18:42 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:18:42 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:18:42 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:18:42 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:18:46 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:18:47 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:18:47 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:18:47 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:18:47 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:18:47 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:18:54 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:18:54 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:18:54 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:18:54 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:18:59 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:18:59 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:18:59 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:18:59 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:18:59 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:18:59 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:05 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:10 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:10 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:10 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:10 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:14 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:14 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:15 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:15 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:15 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:15 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:27 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:30 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:30 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:30 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:30 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:34 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:35 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:35 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:35 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:35 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:35 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:47 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:51 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:51 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:51 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:51 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:55 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:56 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:56 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:56 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:56 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:19:56 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:20:02 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:20:02 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:20:02 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:20:03 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:20:09 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:20:09 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:20:09 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:20:09 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:20:13 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:20:13 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:20:14 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:20:14 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:20:14 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:20:15 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:20:18 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:20:19 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:20:19 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:20:19 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:20:19 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-09 19:20:21 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx

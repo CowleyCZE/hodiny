@@ -70,118 +70,39 @@ class ExcelManager:
         """
         Context manager pro bezpečné otevření, cachování a zavření workbooku.
         Pracuje s konkrétní cestou k souboru.
-
-        Životní cyklus sešitu a cachování:
-        1. Otevření/Načtení:
-           - Metoda nejprve zkontroluje, zda je platný workbook pro danou `file_path_to_open`
-             již v interní cache (`self._workbook_cache`).
-           - Cache klíč je absolutní cesta k souboru.
-           - Pokud je v cache nalezen použitelný workbook (ověřeno jednoduchým testem `wb.sheetnames`),
-             je tento workbook použit (`is_from_cache = True`).
-           - Pokud workbook v cache není, nebo je neplatný (např. byl mezitím zavřen nebo poškozen),
-             je načten ze souborového systému pomocí `load_workbook()`.
-           - Při načítání ze souboru:
-             - Pokud je `read_only=False`, nově načtený workbook je přidán do cache.
-               To umožňuje následným operacím ve stejném kontextu (např. v rámci jednoho HTTP requestu)
-               pracovat se stejnou instancí workbooku bez nutnosti opakovaného načítání a pro zápis změn.
-             - Pokud je `read_only=True`, workbook se do cache neukládá.
-
-        2. Použití workbooku:
-           - Workbook (buď z cache nebo nově načtený) je poskytnut volajícímu kódu přes `yield wb`.
-
-        3. Po použití (v `try` bloku za `yield`):
-           - Ukládání na disk:
-             - Pokud byl workbook otevřen pro zápis (`read_only=False`), *nebyl* načten z cache
-               (tj. byl nově načten v tomto volání `_get_workbook`), a je stále platný (`wb is not None`),
-               jeho změny jsou uloženy na disk pomocí `wb.save(str(file_path))`.
-             - Toto okamžité uložení je pro případy, kdy se s workbookem pracuje mimo cache
-               nebo je to první operace, která ho do cache přidá.
-             - Workbooky načtené z cache (které jsou vždy pro zápis) se zde *neukládají*. Jejich finální
-               uložení proběhne až při volání `_clear_workbook_cache()` (typicky na konci requestu
-               nebo při destrukci instance `ExcelManager`).
-
-        4. Zpracování chyb:
-           - Pokud dojde k jakékoliv chybě během načítání nebo používání workbooku,
-             a pokud je tento workbook v cache, je z cache odstraněn, aby se předešlo
-             použití potenciálně poškozeného nebo nekonzistentního stavu.
-
-        5. Uzavření (v `finally` bloku):
-           - Read-only workbooky:
-             - Pokud byl workbook otevřen jako `read_only=True` a je platný (`wb is not None`),
-               je vždy uzavřen pomocí `wb.close()`, bez ohledu na to, zda byl (hypoteticky) z cache
-               nebo nově načten. Read-only workbooky se totiž do cache standardně neukládají,
-               takže je bezpečné je po použití ihned uzavřít.
-           - Workbooky pro zápis (writeable):
-             - Pokud byl workbook otevřen pro zápis (`read_only=False`) a je v cache,
-               zde se *nezavírá* ani *neukládá*. Jeho životní cyklus (uložení a následné zavření)
-               je plně spravován metodou `_clear_workbook_cache()`. Tím se zajišťuje,
-               že všechny změny provedené během jeho "života" v cache jsou kumulativní
-               a uloží se najednou.
-             - Workbooky pro zápis, které *nebyly* z cache a byly uloženy v bodě 3,
-               zůstávají otevřené a jsou v cache (pokud byly přidány). Jejich uzavření
-               také proběhne až přes `_clear_workbook_cache()`.
-
-        Args:
-            file_path_to_open (str nebo Path): Cesta k Excel souboru, který má být otevřen.
-            read_only (bool): Pokud True, soubor se otevře pouze pro čtení.
-                              Výchozí je False (otevření pro čtení i zápis).
-
-        Yields:
-            openpyxl.Workbook: Otevřený workbook.
-
-        Raises:
-            FileNotFoundError: Pokud soubor na `file_path_to_open` neexistuje.
-            IOError: Pokud dojde k chybě při otevírání nebo ukládání souboru.
-            Exception: Jiné obecné chyby.
         """
-        # Použijeme předanou cestu
         file_path = Path(file_path_to_open)
-        cache_key = str(file_path.absolute()) # Cache klíč je absolutní cesta
+        cache_key = str(file_path.absolute())
         wb = None
-        is_from_cache = False # Příznak, zda byl workbook načten z cache
+        is_from_cache = False
 
-        # Zámek pro zajištění thread-safe operací se souborem a cache
         with self._file_lock:
             try:
-                # Fáze 1: Pokus o načtení z cache
                 if cache_key in self._workbook_cache:
                     try:
                         wb = self._workbook_cache[cache_key]
-                        # Jednoduchý test, zda je workbook stále použitelný (např. nebyl externě zavřen)
-                        _ = wb.sheetnames  # Vyvolá chybu, pokud je wb zavřený nebo neplatný
+                        _ = wb.sheetnames
                         is_from_cache = True
                         logger.debug(f"Workbook načten z cache: {cache_key}")
                     except Exception as cache_err:
                         logger.warning(f"Chyba při použití workbooku z cache ({cache_key}): {cache_err}. Workbook bude znovu načten.")
-                        # Odstraníme neplatný workbook z cache
-                        # Nejprve zkusíme zavřít, pokud by byl stále nějakým způsobem "aktivní"
-                        try:
-                             if self._workbook_cache[cache_key] is not None: # Kontrola pro jistotu
-                                 self._workbook_cache[cache_key].close()
-                        except Exception as close_ex:
-                             logger.warning(f"Nepodařilo se zavřít neplatný workbook z cache ({cache_key}): {close_ex}")
-                        finally:
-                             del self._workbook_cache[cache_key] # Odstranění z cache
-                        wb = None # Resetujeme wb, aby se načetl ze souboru
-                        is_from_cache = False # Resetujeme příznak
+                        if cache_key in self._workbook_cache:
+                            with contextlib.suppress(Exception):
+                                self._workbook_cache[cache_key].close()
+                            del self._workbook_cache[cache_key]
+                        wb = None
+                        is_from_cache = False
 
-                # Fáze 1 (pokračování): Pokud není v cache nebo byl neplatný, načteme ze souboru
                 if wb is None:
-                    # Ujistíme se, že adresář pro soubor existuje
                     file_path.parent.mkdir(parents=True, exist_ok=True)
-
                     if not file_path.exists():
-                         logger.error(f"Soubor {file_path} neexistuje!")
-                         raise FileNotFoundError(f"Požadovaný Excel soubor '{file_path.name}' nebyl nalezen na cestě '{file_path}'.")
-
+                        raise FileNotFoundError(f"Požadovaný Excel soubor '{file_path.name}' nebyl nalezen na cestě '{file_path}'.")
+                    
                     try:
-                        # Načteme workbook ze souboru
-                        wb = load_workbook(filename=str(file_path), read_only=read_only, data_only=True)
-                        logger.debug(f"Workbook načten ze souboru: {file_path} (read_only={read_only})")
+                        # OPRAVA: data_only=read_only. Pro zápis (read_only=False) potřebujeme načíst i vzorce (data_only=False).
+                        wb = load_workbook(filename=str(file_path), read_only=read_only, data_only=read_only)
+                        logger.debug(f"Workbook načten ze souboru: {file_path} (read_only={read_only}, data_only={read_only})")
                         
-                        # Pokud je workbook otevřen pro zápis (read_only=False), přidáme ho do cache.
-                        # To umožní dalším operacím v rámci tohoto kontextu (např. requestu)
-                        # pracovat se stejnou instancí a kumulovat změny.
                         if not read_only:
                             self._workbook_cache[cache_key] = wb
                             logger.debug(f"Workbook přidán do cache: {cache_key}")
@@ -189,76 +110,158 @@ class ExcelManager:
                         logger.error(f"Nelze načíst Excel soubor {file_path}: {load_err}", exc_info=True)
                         raise IOError(f"Chyba při otevírání souboru '{file_path.name}'.")
 
-                # Fáze 2: Předáme workbook kódu uvnitř 'with' bloku
                 yield wb
 
-                # Fáze 3: Po skončení 'with' bloku (pokud nebyly výjimky v 'yield' části)
-                # Ukládání na disk pro workbooky, které nebyly z cache a jsou pro zápis.
-                # Workbooky, které byly načteny z cache (a jsou tedy vždy pro zápis),
-                # se zde neukládají. Jejich uložení je řízeno metodou _clear_workbook_cache().
                 if not read_only and wb is not None and not is_from_cache:
                     try:
                         wb.save(str(file_path))
                         logger.debug(f"Workbook (nově načtený, pro zápis) uložen na disk po 'with' bloku: {file_path}")
                     except Exception as save_err:
                         logger.error(f"Chyba při ukládání workbooku {file_path} po 'with' bloku: {save_err}", exc_info=True)
-                        # Pokud uložení selže, a workbook je v cache (což by měl být, pokud not read_only),
-                        # odstraníme ho z cache, aby se neuložil potenciálně poškozený stav později.
                         if cache_key in self._workbook_cache:
-                             try:
-                                 # Není třeba zavírat, protože _clear_workbook_cache se o to postará,
-                                 # nebo pokud by byl workbook poškozen, close může selhat.
-                                 # Stačí odstranit z cache.
-                                 del self._workbook_cache[cache_key]
-                                 logger.warning(f"Workbook odstraněn z cache kvůli chybě při ukládání: {cache_key}")
-                             except KeyError:
-                                 pass # Workbook už tam z nějakého důvodu není
+                            del self._workbook_cache[cache_key]
+                            logger.warning(f"Workbook odstraněn z cache kvůli chybě při ukládání: {cache_key}")
                         raise IOError(f"Chyba při ukládání změn do souboru '{file_path.name}'.")
 
-            except Exception as e: # Fáze 4: Zpracování chyb
+            except Exception as e:
                 logger.error(f"Obecná chyba v _get_workbook pro {file_path}: {e}", exc_info=True)
-                # Pokud došlo k chybě (buď při načítání, nebo v 'yield' bloku),
-                # a workbook je v cache, odstraníme ho, aby se předešlo použití nekonzistentního stavu.
                 if cache_key in self._workbook_cache:
-                    try:
-                        # Opět, není třeba explicitně zavírat zde, stačí odstranit z cache.
-                        # _clear_workbook_cache se postará o případné zavření, pokud je to nutné.
-                        del self._workbook_cache[cache_key]
-                        logger.info(f"Workbook odstraněn z cache kvůli obecné chybě: {cache_key}")
-                    except KeyError:
-                        pass # Workbook už tam z nějakého důvodu není
-                raise # Znovu vyvoláme výjimku, aby byla zpracována volajícím kódem
+                    del self._workbook_cache[cache_key]
+                    logger.info(f"Workbook odstraněn z cache kvůli obecné chybě: {cache_key}")
+                raise
 
-            finally: # Fáze 5: Uzavření
-                # Tento blok se vykoná vždy, i po výjimkách.
-
-                # Read-only workbooky:
-                # Pokud byl workbook otevřen jako read_only=True, měl by být uzavřen.
-                # Standardně se read-only workbooky do cache neukládají.
-                # Pokud by se tam však nějakým způsobem dostal (což by byla chyba v logice),
-                # i takový read-only workbook z cache by měl být zde uzavřen,
-                # protože _clear_workbook_cache je primárně pro zapisovatelné workbooky.
+            finally:
                 if read_only and wb is not None:
-                     try:
-                          wb.close()
-                          logger.debug(f"Read-only workbook uzavřen v finally: {file_path}")
-                          # Pokud byl read-only workbook (hypoteticky) v cache, odstraníme ho,
-                          # protože read-only instance by v cache neměly přetrvávat.
-                          if cache_key in self._workbook_cache and self._workbook_cache[cache_key] is wb:
-                              del self._workbook_cache[cache_key]
-                              logger.debug(f"Read-only workbook odstraněn z cache v finally: {cache_key}")
-                     except Exception as close_err:
-                          logger.warning(f"Chyba při zavírání read-only workbooku {file_path} v finally: {close_err}")
+                    try:
+                        wb.close()
+                        logger.debug(f"Read-only workbook uzavřen v finally: {file_path}")
+                        if cache_key in self._workbook_cache and self._workbook_cache[cache_key] is wb:
+                            del self._workbook_cache[cache_key]
+                    except Exception as close_err:
+                        logger.warning(f"Chyba při zavírání read-only workbooku {file_path} v finally: {close_err}")
                 
-                # Workbooky pro zápis (writeable), které jsou v cache:
-                # Tyto workbooky se zde *NEZAVÍRAJÍ* ani *NEUKLÁDAJÍ*.
-                # Jejich životní cyklus (uložení všech změn a následné zavření) je plně
-                # spravován metodou `_clear_workbook_cache()`. To zajišťuje, že všechny změny
-                # provedené během "života" workbooku v cache jsou kumulativní a uloží se najednou
-                # na konci (např. na konci HTTP requestu nebo při destrukci ExcelManageru).
-                # Pokud by se zde zavřely, ztratily by se neuložené změny nebo by se cache stala neplatnou.
-                # Tato logika je implicitní - pokud `read_only` je `False`, neděláme nic s `wb` zde,
-                # protože jeho správa je přenechána `_clear_workbook_cache`.
+                elif not read_only and wb is not None and cache_key in self._workbook_cache:
+                    logger.debug(f"Workbook pro zápis '{file_path}' je v cache a nebude zde uzavřen ani uložen. Správu přebírá _clear_workbook_cache.")
+
+    def ulozit_pracovni_dobu(self, date, start_time, end_time, lunch_duration, employees, week_number=None):
+        """Uloží pracovní dobu do aktivního Excel souboru"""
+        active_path = self.get_active_file_path()
+        try:
+            # Zde potřebujeme zapisovat, takže read_only=False
+            with self._get_workbook(active_path, read_only=False) as workbook:
+                logger.debug(f"Ukládám pracovní dobu: Datum={date}, Start={start_time}, End={end_time}, Lunch={lunch_duration}, Zaměstnanci={employees}, Explicitní týden={week_number}")
+                
+                if week_number is None:
+                    week_calendar_data = self.ziskej_cislo_tydne(date)
+                    if not week_calendar_data:
+                        raise ValueError("Nepodařilo se získat číslo týdne pro zadané datum.")
+                    week_number = week_calendar_data.week
+
+                sheet_name = f"{Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME} {week_number}"
+
+                if sheet_name not in workbook.sheetnames:
+                    if Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME in workbook.sheetnames:
+                        source_sheet = workbook[Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME]
+                        try:
+                            # OPRAVA: Použití standardní a spolehlivé metody copy_worksheet
+                            target_sheet = workbook.copy_worksheet(source_sheet)
+                            target_sheet.title = sheet_name
+                            sheet = target_sheet
+                            logger.info(f"Zkopírován list '{Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME}' na '{sheet_name}' v souboru {self.active_filename}.")
+                        except Exception as copy_err:
+                            logger.error(f"Nepodařilo se zkopírovat list '{Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME}' v {self.active_filename}: {copy_err}", exc_info=True)
+                            sheet = workbook.create_sheet(sheet_name)
+                            logger.warning(f"Vytvořen nový prázdný list '{sheet_name}' v souboru {self.active_filename} kvůli chybě při kopírování.")
+                    else:
+                        sheet = workbook.create_sheet(sheet_name)
+                        logger.warning(f"Vytvořen nový prázdný list '{sheet_name}' v souboru {self.active_filename} (šablona '{Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME}' nenalezena).")
+
+                    sheet["A80"] = sheet_name
+                else:
+                    sheet = workbook[sheet_name]
+
+                weekday = datetime.strptime(date, "%Y-%m-%d").weekday()
+                day_column_index = 1 + 2 * weekday
+                start_time_col_index = day_column_index
+                end_time_col_index = day_column_index + 1
+                date_col_index = day_column_index
+
+                if start_time == "00:00" and end_time == "00:00" and lunch_duration == 0.0:
+                    total_hours = 0
+                else:
+                    start = datetime.strptime(start_time, "%H:%M")
+                    end = datetime.strptime(end_time, "%H:%M")
+                    lunch_duration_float = float(lunch_duration)
+                    total_hours = (end - start).total_seconds() / 3600 - lunch_duration_float
+                    total_hours = round(total_hours, 2)
+
+                start_row = Config.EXCEL_EMPLOYEE_START_ROW
+                for employee in employees:
+                    current_row = start_row
+                    row_found = False
+                    max_search_row = start_row + 1000
+
+                    while current_row < max_search_row:
+                        employee_cell = sheet.cell(row=current_row, column=1)
+                        if employee_cell.value == employee:
+                            sheet.cell(row=current_row, column=end_time_col_index + 2, value=total_hours)
+                            row_found = True
+                            break
+                        elif employee_cell.value is None or str(employee_cell.value).strip() == "":
+                            employee_cell.value = employee
+                            sheet.cell(row=current_row, column=end_time_col_index + 2, value=total_hours)
+                            row_found = True
+                            break
+                        current_row += 1
+
+                    if not row_found:
+                        logger.warning(f"Nepodařilo se najít ani vytvořit řádek pro zaměstnance '{employee}' v listu '{sheet_name}' souboru {self.active_filename}.")
+
+                start_time_cell = sheet[f"{get_column_letter(start_time_col_index + 1)}7"]
+                end_time_cell = sheet[f"{get_column_letter(end_time_col_index + 1)}7"]
+                
+                try:
+                    start_time_obj = datetime.strptime(start_time, "%H:%M").time()
+                    end_time_obj = datetime.strptime(end_time, "%H:%M").time()
+                except ValueError:
+                    logger.error(f"Neplatný formát času: Start='{start_time}', End='{end_time}'.")
+                    return False
+
+                start_time_cell.value = start_time_obj
+                end_time_cell.value = end_time_obj
+                start_time_cell.number_format = 'HH:MM'
+                end_time_cell.number_format = 'HH:MM'
+                logger.debug(f"Zapsáno do {start_time_cell.coordinate}: {start_time_cell.value}")
+                logger.debug(f"Zapsáno do {end_time_cell.coordinate}: {end_time_cell.value}")
+
+                date_col_letter = get_column_letter(date_col_index + 1)
+                try:
+                    date_obj = datetime.strptime(date, "%Y-%m-%d").date()
+                    date_cell = sheet[f"{date_col_letter}80"]
+                    date_cell.value = date_obj
+                    date_cell.number_format = 'DD.MM.YYYY'
+                    logger.debug(f"Zapsáno do {date_cell.coordinate}: {date_cell.value}")
+                except ValueError:
+                    logger.error(f"Neplatný formát data '{date}' při ukládání do buňky {date_col_letter}80.")
+                    return False
+
+                if self.current_project_name:
+                    project_cell = sheet["B79"]
+                    existing_projects = project_cell.value or ""
+                    project_list = [p.strip() for p in existing_projects.split(',') if p.strip()]
+                    if self.current_project_name not in project_list:
+                        project_list.append(self.current_project_name)
+                    project_cell.value = ", ".join(project_list)
+
+                logger.info(f"Úspěšně uložena pracovní doba pro datum {date} do listu {sheet_name} v souboru {self.active_filename}")
+                return True
+
+        except (FileNotFoundError, ValueError, IOError) as e:
+            logger.error(f"Chyba při ukládání pracovní doby do {self.active_filename}: {e}", exc_info=True)
+            return False
+        except Exception as e:
+            logger.error(f"Neočekávaná chyba při ukládání pracovní doby do {self.active_filename}: {e}", exc_info=True)
+            return False
                 elif not read_only and wb is not None and cache_key in self._workbook_cache:
                     logger.debug(f"Workbook pro zápis '{file_path}' je v cache a nebude zde uzavřen ani uložen. Správu přebírá _clear_workbook_cache.")
 
@@ -290,36 +293,7 @@ class ExcelManager:
          self._clear_workbook_cache()
 
 
-    def _copy_worksheet_deep(self, source_sheet, target_sheet):
-        """
-        Hloubková kopie listu, včetně stylů, rozměrů a podmíněného formátování.
-        Nekopíruje obrázky a grafy.
-        """
-        # Kopírování buněk (hodnoty a styly)
-        for row in source_sheet.iter_rows():
-            for cell in row:
-                new_cell = target_sheet.cell(row=cell.row, column=cell.col_idx, value=cell.value)
-                if cell.has_style:
-                    new_cell.font = cell.font.copy()
-                    new_cell.border = cell.border.copy()
-                    new_cell.fill = cell.fill.copy()
-                    new_cell.number_format = cell.number_format
-                    new_cell.protection = cell.protection.copy()
-                    new_cell.alignment = cell.alignment.copy()
-
-        # Kopírování sloučených buněk
-        for merged_cell_range in source_sheet.merged_cells.ranges:
-            target_sheet.merge_cells(str(merged_cell_range))
-
-        # Kopírování rozměrů sloupců a řádků
-        for col_letter, dim in source_sheet.column_dimensions.items():
-            target_sheet.column_dimensions[col_letter] = dim
-        for row_num, dim in source_sheet.row_dimensions.items():
-            target_sheet.row_dimensions[row_num] = dim
-
-        # Kopírování podmíněného formátování
-        for rule in source_sheet.conditional_formatting.rules:
-            target_sheet.conditional_formatting.add(rule.sqref, rule)
+    
 
     def ulozit_pracovni_dobu(self, date, start_time, end_time, lunch_duration, employees, week_number=None):
         """Uloží pracovní dobu do aktivního Excel souboru"""

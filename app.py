@@ -451,6 +451,7 @@ def record_time():
     is_free_day = request.form.get("is_free_day") == "on" # Získáme stav checkboxu
 
     if request.method == "POST":
+        # Zpracování formuláře pro záznam času
         try:
             date_str = request.form.get("date", "")
             is_free_day_submitted = request.form.get("is_free_day") == "on"
@@ -463,7 +464,7 @@ def record_time():
 
             if is_free_day_submitted:
                 # Záznam volného dne
-                start_time_str = "00:00" # Nebo jiné zástupné hodnoty
+                start_time_str = "00:00"
                 end_time_str = "00:00"
                 lunch_duration = 0.0
                 logger.info(f"Zaznamenává se volný den pro datum {date_str}")
@@ -472,13 +473,11 @@ def record_time():
                 start_time_str = request.form.get("start_time", "")
                 end_time_str = request.form.get("end_time", "")
                 lunch_duration_str = request.form.get("lunch_duration", "")
-                # Validace časů
                 try:
                     start = datetime.strptime(start_time_str, "%H:%M")
                     end = datetime.strptime(end_time_str, "%H:%M")
                     if end <= start: raise ValueError("Konec musí být po začátku")
                 except ValueError as e: raise ValueError(f"Neplatný formát času: {e}")
-                # Validace pauzy
                 try:
                     lunch_duration = float(lunch_duration_str.replace(",", "."))
                     if lunch_duration < 0: raise ValueError("Pauza nemůže být záporná")
@@ -495,13 +494,10 @@ def record_time():
 
             if success:
                 flash("Záznam byl úspěšně uložen.", "success")
-                # Vypočítáme další pracovní den
                 next_day = selected_date + timedelta(days=1)
-                # Přeskakujeme víkendy
-                while next_day.weekday() >= 5: # 5 = Sobota, 6 = Neděle
+                while next_day.weekday() >= 5:
                     next_day += timedelta(days=1)
                 next_date_str = next_day.strftime("%Y-%m-%d")
-                # Přesměrujeme zpět na formulář s dalším datem
                 return redirect(url_for('record_time', next_date=next_date_str))
             else:
                 raise IOError("Nepodařilo se uložit záznam do Excel souboru.")
@@ -518,7 +514,16 @@ def record_time():
         except Exception as e:
             flash("Došlo k neočekávané chybě při zpracování záznamu.", "error")
             logger.error(f"Neočekávaná chyba při záznamu pracovní doby/volna: {e}", exc_info=True)
-            # Vrátíme výchozí hodnoty
+
+    # Získání seznamu Excel souborů
+    excel_files = []
+    try:
+        excel_files = sorted([f.name for f in Config.EXCEL_BASE_PATH.glob('*.xlsx')], reverse=True)
+    except Exception as e:
+        flash("Nepodařilo se načíst seznam Excel souborů.", "error")
+        logger.error(f"Chyba při načítání seznamu souborů z {Config.EXCEL_BASE_PATH}: {e}")
+
+    active_excel_file = settings.get("active_excel_file")
 
     # Formátování délky pauzy pro zobrazení
     try: lunch_duration_formatted = str(float(lunch_duration_input.replace(",", ".")))
@@ -527,12 +532,44 @@ def record_time():
     return render_template(
         "record_time.html",
         selected_employees=selected_employees,
-        current_date=current_date, # Použijeme hodnotu z GET nebo formuláře
+        current_date=current_date,
         start_time=start_time,
         end_time=end_time,
         lunch_duration=lunch_duration_formatted,
-        is_free_day=is_free_day, # Předáme stav checkboxu
+        is_free_day=is_free_day,
+        excel_files=excel_files,
+        active_excel_file=active_excel_file
     )
+
+
+@app.route("/set_active_file", methods=["POST"])
+def set_active_file():
+    """Nastaví aktivní Excel soubor pro zápis."""
+    selected_file = request.form.get("excel_file")
+    if not selected_file:
+        flash("Nebyl vybrán žádný soubor.", "error")
+        return redirect(url_for('record_time'))
+
+    file_path = Config.EXCEL_BASE_PATH / selected_file
+    if not file_path.exists():
+        flash(f"Vybraný soubor '{selected_file}' neexistuje.", "error")
+        return redirect(url_for('record_time'))
+
+    try:
+        settings = load_settings_from_file()
+        settings["active_excel_file"] = selected_file
+        if save_settings_to_file(settings):
+            session['settings'] = settings # Aktualizujeme session
+            flash(f"Aktivní soubor byl nastaven na '{selected_file}'.", "success")
+            logger.info(f"Aktivní soubor změněn na: {selected_file}")
+        else:
+            flash("Nepodařilo se uložit nastavení aktivního souboru.", "error")
+    except Exception as e:
+        flash("Došlo k chybě při nastavování aktivního souboru.", "error")
+        logger.error(f"Chyba při nastavování aktivního souboru na '{selected_file}': {e}", exc_info=True)
+
+    return redirect(url_for('record_time'))
+
 
 
 @app.route("/excel_viewer", methods=["GET"])

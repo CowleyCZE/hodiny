@@ -571,6 +571,79 @@ def set_active_file():
     return redirect(url_for('record_time'))
 
 
+@app.route("/rename_project", methods=["POST"])
+def rename_project():
+    """Přejmenuje existující Excel soubor (projekt)."""
+    old_filename = request.form.get("old_excel_file")
+    new_filename = request.form.get("new_excel_file")
+
+    if not old_filename or not new_filename:
+        flash("Starý a nový název souboru musí být vyplněn.", "error")
+        return redirect(url_for('settings_page'))
+
+    if not new_filename.endswith(".xlsx"):
+        new_filename += ".xlsx"
+
+    old_path = Config.EXCEL_BASE_PATH / old_filename
+    new_path = Config.EXCEL_BASE_PATH / new_filename
+
+    if not old_path.exists():
+        flash(f"Soubor '{old_filename}' neexistuje.", "error")
+        return redirect(url_for('settings_page'))
+
+    if new_path.exists():
+        flash(f"Soubor s názvem '{new_filename}' již existuje. Zvolte jiný název.", "error")
+        return redirect(url_for('settings_page'))
+
+    try:
+        os.rename(old_path, new_path)
+        logger.info(f"Soubor '{old_filename}' přejmenován na '{new_filename}'.")
+
+        settings = load_settings_from_file()
+        if settings.get("active_excel_file") == old_filename:
+            settings["active_excel_file"] = new_filename
+            save_settings_to_file(settings)
+            session['settings'] = settings
+            logger.info(f"Aktivní soubor v nastavení aktualizován na '{new_filename}'.")
+
+        flash(f"Soubor '{old_filename}' byl úspěšně přejmenován na '{new_filename}'.", "success")
+    except Exception as e:
+        flash(f"Chyba při přejmenování souboru: {e}", "error")
+        logger.error(f"Chyba při přejmenování souboru '{old_filename}' na '{new_filename}': {e}", exc_info=True)
+
+    return redirect(url_for('settings_page'))
+
+
+@app.route("/delete_project", methods=["POST"])
+def delete_project():
+    """Smaže existující Excel soubor (projekt)."""
+    filename_to_delete = request.form.get("excel_file_to_delete")
+
+    if not filename_to_delete:
+        flash("Nebyl vybrán žádný soubor ke smazání.", "error")
+        return redirect(url_for('settings_page'))
+
+    file_path = Config.EXCEL_BASE_PATH / filename_to_delete
+
+    if not file_path.exists():
+        flash(f"Soubor '{filename_to_delete}' neexistuje.", "error")
+        return redirect(url_for('settings_page'))
+
+    try:
+        settings = load_settings_from_file()
+        if settings.get("active_excel_file") == filename_to_delete:
+            flash(f"Nelze smazat aktivní soubor '{filename_to_delete}'. Nejprve archivujte nebo vyberte jiný aktivní soubor.", "error")
+            return redirect(url_for('settings_page'))
+
+        os.remove(file_path)
+        logger.info(f"Soubor '{filename_to_delete}' byl smazán.")
+        flash(f"Soubor '{filename_to_delete}' byl úspěšně smazán.", "success")
+    except Exception as e:
+        flash(f"Chyba při mazání souboru: {e}", "error")
+        logger.error(f"Chyba při mazání souboru '{filename_to_delete}': {e}", exc_info=True)
+
+    return redirect(url_for('settings_page'))
+
 
 @app.route("/excel_viewer", methods=["GET"])
 @require_excel_managers

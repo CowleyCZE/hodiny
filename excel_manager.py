@@ -277,6 +277,10 @@ class ExcelManager:
          """Metoda pro explicitní vyčištění cache (např. na konci requestu)."""
          self._clear_workbook_cache()
 
+    def set_project_name(self, project_name):
+         """Nastaví aktuální název projektu pro použití v jiných metodách."""
+         self.current_project_name = project_name if project_name else None
+
 
     
 

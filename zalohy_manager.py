@@ -170,6 +170,8 @@ class ZalohyManager:
              # Nastavíme výchozí názvy možností
              sheet["B80"] = Config.DEFAULT_ADVANCE_OPTION_1
              sheet["D80"] = Config.DEFAULT_ADVANCE_OPTION_2
+             sheet["F80"] = Config.DEFAULT_ADVANCE_OPTION_3
+             sheet["H80"] = Config.DEFAULT_ADVANCE_OPTION_4
              logger.info(f"Vytvořen list '{self.ZALOHY_SHEET_NAME}' v souboru {self.active_filename}.")
              return sheet
          else:
@@ -248,6 +250,8 @@ class ZalohyManager:
             # Získáme aktuální názvy možností záloh přímo z listu
             option1_value = sheet["B80"].value or Config.DEFAULT_ADVANCE_OPTION_1
             option2_value = sheet["D80"].value or Config.DEFAULT_ADVANCE_OPTION_2
+            option3_value = sheet["F80"].value or Config.DEFAULT_ADVANCE_OPTION_3
+            option4_value = sheet["H80"].value or Config.DEFAULT_ADVANCE_OPTION_4
 
             # Najdeme řádek zaměstnance nebo vytvoříme nový
             row = self._get_employee_row(sheet, employee_name)
@@ -261,6 +265,10 @@ class ZalohyManager:
                 column_index = 2 if currency == "EUR" else 3 # B nebo C
             elif option == option2_value:
                 column_index = 4 if currency == "EUR" else 5 # D nebo E
+            elif option == option3_value:
+                column_index = 6 if currency == "EUR" else 7 # F nebo G
+            elif option == option4_value:
+                column_index = 8 if currency == "EUR" else 9 # H nebo I
             else:
                 logger.error(f"Neznámá možnost zálohy '{option}' při ukládání. Používají se sloupce pro '{option1_value}'.")
                 # Můžeme vyvolat chybu nebo použít fallback
@@ -346,7 +354,9 @@ class ZalohyManager:
                    sheet = workbook[self.ZALOHY_SHEET_NAME]
                    option1 = sheet["B80"].value or Config.DEFAULT_ADVANCE_OPTION_1
                    option2 = sheet["D80"].value or Config.DEFAULT_ADVANCE_OPTION_2
-                   return str(option1).strip(), str(option2).strip()
+                   option3 = sheet["F80"].value or Config.DEFAULT_ADVANCE_OPTION_3
+                   option4 = sheet["H80"].value or Config.DEFAULT_ADVANCE_OPTION_4
+                   return str(option1).strip(), str(option2).strip(), str(option3).strip(), str(option4).strip()
               else:
                    logger.warning(f"List '{self.ZALOHY_SHEET_NAME}' nenalezen v souboru '{self.active_filename}' při čtení názvů možností. Používají se výchozí názvy.")
                    return Config.DEFAULT_ADVANCE_OPTION_1, Config.DEFAULT_ADVANCE_OPTION_2 # Výchozí hodnoty

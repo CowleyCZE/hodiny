@@ -417,3 +417,95 @@
 2025-07-09 19:20:19 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
 2025-07-09 19:20:19 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
 2025-07-09 19:20:21 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /home/Cowley/hodiny/excel/Coca_cola_20250502_224202.xlsx
+2025-07-10 21:39:54 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/usr/tmp/tmp04p_lkqb/test_zalohy.xlsx
+2025-07-10 21:39:54 - zalohy_manager - ERROR - Chyba při ukládání zálohy do test_zalohy.xlsx: Částka musí být větší než 0
+2025-07-10 21:39:54 - zalohy_manager - ERROR - Chyba při ukládání zálohy do test_zalohy.xlsx: Částka musí být číslo
+2025-07-10 21:39:54 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/usr/tmp/tmpisl6nbla/test_zalohy.xlsx
+2025-07-10 21:39:54 - zalohy_manager - ERROR - Chyba při ukládání zálohy do test_zalohy.xlsx: Neplatná měna. Povolené měny jsou: EUR, CZK
+2025-07-10 21:39:54 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/usr/tmp/tmp1364x3sw/test_zalohy.xlsx
+2025-07-10 21:39:54 - zalohy_manager - ERROR - Chyba při ukládání zálohy do test_zalohy.xlsx: Neplatný formát data. Použijte formát YYYY-MM-DD
+2025-07-10 21:39:54 - zalohy_manager - ERROR - Chyba při ukládání zálohy do test_zalohy.xlsx: Neplatný formát data. Použijte formát YYYY-MM-DD
+2025-07-10 21:39:54 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/usr/tmp/tmp5srroo4e/test_zalohy.xlsx
+2025-07-10 21:39:54 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Test Invalid Option' do listu 'Zálohy' na řádek 9.
+2025-07-10 21:39:54 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Neplatná Možnost' při ukládání. Používají se sloupce pro 'Option 1'.
+2025-07-10 21:39:54 - zalohy_manager - INFO - Workbook 'test_zalohy.xlsx' úspěšně uložen do '/data/data/com.termux/files/usr/tmp/tmp5srroo4e/test_zalohy.xlsx'.
+2025-07-10 21:39:54 - zalohy_manager - INFO - Záloha pro Test Invalid Option (50.0 EUR, Neplatná Možnost, 2025-07-10) úspěšně uložena do test_zalohy.xlsx
+2025-07-10 21:39:54 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/usr/tmp/tmp30f8rbum/test_zalohy.xlsx
+2025-07-10 21:39:54 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Nový Zaměstnanec' do listu 'Zálohy' na řádek 9.
+2025-07-10 21:39:54 - zalohy_manager - INFO - Workbook 'test_zalohy.xlsx' úspěšně uložen do '/data/data/com.termux/files/usr/tmp/tmp30f8rbum/test_zalohy.xlsx'.
+2025-07-10 21:39:54 - zalohy_manager - INFO - Záloha pro Nový Zaměstnanec (100.0 EUR, Option 1, 2025-07-10) úspěšně uložena do test_zalohy.xlsx
+2025-07-10 21:39:54 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/usr/tmp/tmp4jlbrkx2/test_zalohy.xlsx
+2025-07-10 21:39:54 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Test Zaměstnanec 1' do listu 'Zálohy' na řádek 9.
+2025-07-10 21:39:54 - zalohy_manager - INFO - Workbook 'test_zalohy.xlsx' úspěšně uložen do '/data/data/com.termux/files/usr/tmp/tmp4jlbrkx2/test_zalohy.xlsx'.
+2025-07-10 21:39:54 - zalohy_manager - INFO - Záloha pro Test Zaměstnanec 1 (50.0 EUR, Option 1, 2025-07-10) úspěšně uložena do test_zalohy.xlsx
+2025-07-10 21:39:54 - zalohy_manager - INFO - Workbook 'test_zalohy.xlsx' úspěšně uložen do '/data/data/com.termux/files/usr/tmp/tmp4jlbrkx2/test_zalohy.xlsx'.
+2025-07-10 21:39:54 - zalohy_manager - INFO - Záloha pro Test Zaměstnanec 1 (1000.0 CZK, Option 1, 2025-07-10) úspěšně uložena do test_zalohy.xlsx
+2025-07-10 21:39:54 - zalohy_manager - INFO - Workbook 'test_zalohy.xlsx' úspěšně uložen do '/data/data/com.termux/files/usr/tmp/tmp4jlbrkx2/test_zalohy.xlsx'.
+2025-07-10 21:39:54 - zalohy_manager - INFO - Záloha pro Test Zaměstnanec 1 (25.0 EUR, Option 1, 2025-07-10) úspěšně uložena do test_zalohy.xlsx
+2025-07-10 21:39:54 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/usr/tmp/tmpdiyo3wme/test_zalohy.xlsx
+2025-07-10 21:39:54 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Test Zaměstnanec 2' do listu 'Zálohy' na řádek 9.
+2025-07-10 21:39:54 - zalohy_manager - INFO - Workbook 'test_zalohy.xlsx' úspěšně uložen do '/data/data/com.termux/files/usr/tmp/tmpdiyo3wme/test_zalohy.xlsx'.
+2025-07-10 21:39:54 - zalohy_manager - INFO - Záloha pro Test Zaměstnanec 2 (75.0 EUR, Option 2, 2025-07-11) úspěšně uložena do test_zalohy.xlsx
+2025-07-10 21:39:54 - zalohy_manager - INFO - Workbook 'test_zalohy.xlsx' úspěšně uložen do '/data/data/com.termux/files/usr/tmp/tmpdiyo3wme/test_zalohy.xlsx'.
+2025-07-10 21:39:54 - zalohy_manager - INFO - Záloha pro Test Zaměstnanec 2 (2000.0 CZK, Option 2, 2025-07-11) úspěšně uložena do test_zalohy.xlsx
+2025-07-10 21:39:54 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/usr/tmp/tmp_39v3sy9/test_zalohy.xlsx
+2025-07-10 21:39:54 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Test Zaměstnanec 3' do listu 'Zálohy' na řádek 9.
+2025-07-10 21:39:54 - zalohy_manager - INFO - Workbook 'test_zalohy.xlsx' úspěšně uložen do '/data/data/com.termux/files/usr/tmp/tmp_39v3sy9/test_zalohy.xlsx'.
+2025-07-10 21:39:54 - zalohy_manager - INFO - Záloha pro Test Zaměstnanec 3 (120.0 EUR, Option 3, 2025-07-12) úspěšně uložena do test_zalohy.xlsx
+2025-07-10 21:39:54 - zalohy_manager - INFO - Workbook 'test_zalohy.xlsx' úspěšně uložen do '/data/data/com.termux/files/usr/tmp/tmp_39v3sy9/test_zalohy.xlsx'.
+2025-07-10 21:39:54 - zalohy_manager - INFO - Záloha pro Test Zaměstnanec 3 (3000.0 CZK, Option 3, 2025-07-12) úspěšně uložena do test_zalohy.xlsx
+2025-07-10 21:39:54 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/usr/tmp/tmpt7a8a45o/test_zalohy.xlsx
+2025-07-10 21:39:54 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Test Zaměstnanec 4' do listu 'Zálohy' na řádek 9.
+2025-07-10 21:39:54 - zalohy_manager - INFO - Workbook 'test_zalohy.xlsx' úspěšně uložen do '/data/data/com.termux/files/usr/tmp/tmpt7a8a45o/test_zalohy.xlsx'.
+2025-07-10 21:39:54 - zalohy_manager - INFO - Záloha pro Test Zaměstnanec 4 (200.0 EUR, Option 4, 2025-07-13) úspěšně uložena do test_zalohy.xlsx
+2025-07-10 21:39:54 - zalohy_manager - INFO - Workbook 'test_zalohy.xlsx' úspěšně uložen do '/data/data/com.termux/files/usr/tmp/tmpt7a8a45o/test_zalohy.xlsx'.
+2025-07-10 21:39:54 - zalohy_manager - INFO - Záloha pro Test Zaměstnanec 4 (4000.0 CZK, Option 4, 2025-07-13) úspěšně uložena do test_zalohy.xlsx
+2025-07-10 21:39:54 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/usr/tmp/tmpadx77bj1/test_zalohy.xlsx
+2025-07-10 21:39:54 - zalohy_manager - INFO - Vytvořen list 'Zálohy' v souboru test_zalohy.xlsx.
+2025-07-10 21:39:54 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/usr/tmp/tmpiuy9ch1s/test_zalohy.xlsx
+2025-07-10 21:40:36 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/usr/tmp/tmp2uvnoo5g/test_zalohy.xlsx
+2025-07-10 21:40:36 - zalohy_manager - ERROR - Chyba při ukládání zálohy do test_zalohy.xlsx: Částka musí být větší než 0
+2025-07-10 21:40:36 - zalohy_manager - ERROR - Chyba při ukládání zálohy do test_zalohy.xlsx: Částka musí být číslo
+2025-07-10 21:40:36 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/usr/tmp/tmpbdfo8ck1/test_zalohy.xlsx
+2025-07-10 21:40:36 - zalohy_manager - ERROR - Chyba při ukládání zálohy do test_zalohy.xlsx: Neplatná měna. Povolené měny jsou: EUR, CZK
+2025-07-10 21:40:36 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/usr/tmp/tmpctkl0l2v/test_zalohy.xlsx
+2025-07-10 21:40:36 - zalohy_manager - ERROR - Chyba při ukládání zálohy do test_zalohy.xlsx: Neplatný formát data. Použijte formát YYYY-MM-DD
+2025-07-10 21:40:36 - zalohy_manager - ERROR - Chyba při ukládání zálohy do test_zalohy.xlsx: Neplatný formát data. Použijte formát YYYY-MM-DD
+2025-07-10 21:40:36 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/usr/tmp/tmp_ahr5hqf/test_zalohy.xlsx
+2025-07-10 21:40:36 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Test Invalid Option' do listu 'Zálohy' na řádek 9.
+2025-07-10 21:40:36 - zalohy_manager - ERROR - Neznámá možnost zálohy 'Neplatná Možnost' při ukládání. Používají se sloupce pro 'Option 1'.
+2025-07-10 21:40:36 - zalohy_manager - INFO - Workbook 'test_zalohy.xlsx' úspěšně uložen do '/data/data/com.termux/files/usr/tmp/tmp_ahr5hqf/test_zalohy.xlsx'.
+2025-07-10 21:40:36 - zalohy_manager - INFO - Záloha pro Test Invalid Option (50.0 EUR, Neplatná Možnost, 2025-07-10) úspěšně uložena do test_zalohy.xlsx
+2025-07-10 21:40:36 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/usr/tmp/tmpvazdylly/test_zalohy.xlsx
+2025-07-10 21:40:36 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Nový Zaměstnanec' do listu 'Zálohy' na řádek 9.
+2025-07-10 21:40:36 - zalohy_manager - INFO - Workbook 'test_zalohy.xlsx' úspěšně uložen do '/data/data/com.termux/files/usr/tmp/tmpvazdylly/test_zalohy.xlsx'.
+2025-07-10 21:40:36 - zalohy_manager - INFO - Záloha pro Nový Zaměstnanec (100.0 EUR, Option 1, 2025-07-10) úspěšně uložena do test_zalohy.xlsx
+2025-07-10 21:40:36 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/usr/tmp/tmpwuoxd1vq/test_zalohy.xlsx
+2025-07-10 21:40:36 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Test Zaměstnanec 1' do listu 'Zálohy' na řádek 9.
+2025-07-10 21:40:36 - zalohy_manager - INFO - Workbook 'test_zalohy.xlsx' úspěšně uložen do '/data/data/com.termux/files/usr/tmp/tmpwuoxd1vq/test_zalohy.xlsx'.
+2025-07-10 21:40:36 - zalohy_manager - INFO - Záloha pro Test Zaměstnanec 1 (50.0 EUR, Option 1, 2025-07-10) úspěšně uložena do test_zalohy.xlsx
+2025-07-10 21:40:36 - zalohy_manager - INFO - Workbook 'test_zalohy.xlsx' úspěšně uložen do '/data/data/com.termux/files/usr/tmp/tmpwuoxd1vq/test_zalohy.xlsx'.
+2025-07-10 21:40:36 - zalohy_manager - INFO - Záloha pro Test Zaměstnanec 1 (1000.0 CZK, Option 1, 2025-07-10) úspěšně uložena do test_zalohy.xlsx
+2025-07-10 21:40:36 - zalohy_manager - INFO - Workbook 'test_zalohy.xlsx' úspěšně uložen do '/data/data/com.termux/files/usr/tmp/tmpwuoxd1vq/test_zalohy.xlsx'.
+2025-07-10 21:40:36 - zalohy_manager - INFO - Záloha pro Test Zaměstnanec 1 (25.0 EUR, Option 1, 2025-07-10) úspěšně uložena do test_zalohy.xlsx
+2025-07-10 21:40:36 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/usr/tmp/tmp_7d0s2v2/test_zalohy.xlsx
+2025-07-10 21:40:36 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Test Zaměstnanec 2' do listu 'Zálohy' na řádek 9.
+2025-07-10 21:40:36 - zalohy_manager - INFO - Workbook 'test_zalohy.xlsx' úspěšně uložen do '/data/data/com.termux/files/usr/tmp/tmp_7d0s2v2/test_zalohy.xlsx'.
+2025-07-10 21:40:36 - zalohy_manager - INFO - Záloha pro Test Zaměstnanec 2 (75.0 EUR, Option 2, 2025-07-11) úspěšně uložena do test_zalohy.xlsx
+2025-07-10 21:40:36 - zalohy_manager - INFO - Workbook 'test_zalohy.xlsx' úspěšně uložen do '/data/data/com.termux/files/usr/tmp/tmp_7d0s2v2/test_zalohy.xlsx'.
+2025-07-10 21:40:36 - zalohy_manager - INFO - Záloha pro Test Zaměstnanec 2 (2000.0 CZK, Option 2, 2025-07-11) úspěšně uložena do test_zalohy.xlsx
+2025-07-10 21:40:36 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/usr/tmp/tmph507z5jh/test_zalohy.xlsx
+2025-07-10 21:40:36 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Test Zaměstnanec 3' do listu 'Zálohy' na řádek 9.
+2025-07-10 21:40:36 - zalohy_manager - INFO - Workbook 'test_zalohy.xlsx' úspěšně uložen do '/data/data/com.termux/files/usr/tmp/tmph507z5jh/test_zalohy.xlsx'.
+2025-07-10 21:40:36 - zalohy_manager - INFO - Záloha pro Test Zaměstnanec 3 (120.0 EUR, Option 3, 2025-07-12) úspěšně uložena do test_zalohy.xlsx
+2025-07-10 21:40:36 - zalohy_manager - INFO - Workbook 'test_zalohy.xlsx' úspěšně uložen do '/data/data/com.termux/files/usr/tmp/tmph507z5jh/test_zalohy.xlsx'.
+2025-07-10 21:40:36 - zalohy_manager - INFO - Záloha pro Test Zaměstnanec 3 (3000.0 CZK, Option 3, 2025-07-12) úspěšně uložena do test_zalohy.xlsx
+2025-07-10 21:40:36 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/usr/tmp/tmpdw1hw__6/test_zalohy.xlsx
+2025-07-10 21:40:36 - zalohy_manager - INFO - Přidán nový zaměstnanec 'Test Zaměstnanec 4' do listu 'Zálohy' na řádek 9.
+2025-07-10 21:40:36 - zalohy_manager - INFO - Workbook 'test_zalohy.xlsx' úspěšně uložen do '/data/data/com.termux/files/usr/tmp/tmpdw1hw__6/test_zalohy.xlsx'.
+2025-07-10 21:40:36 - zalohy_manager - INFO - Záloha pro Test Zaměstnanec 4 (200.0 EUR, Option 4, 2025-07-13) úspěšně uložena do test_zalohy.xlsx
+2025-07-10 21:40:36 - zalohy_manager - INFO - Workbook 'test_zalohy.xlsx' úspěšně uložen do '/data/data/com.termux/files/usr/tmp/tmpdw1hw__6/test_zalohy.xlsx'.
+2025-07-10 21:40:36 - zalohy_manager - INFO - Záloha pro Test Zaměstnanec 4 (4000.0 CZK, Option 4, 2025-07-13) úspěšně uložena do test_zalohy.xlsx
+2025-07-10 21:40:36 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/usr/tmp/tmph2yiiwv7/test_zalohy.xlsx
+2025-07-10 21:40:36 - zalohy_manager - INFO - Vytvořen list 'Zálohy' v souboru test_zalohy.xlsx.
+2025-07-10 21:40:36 - zalohy_manager - INFO - ZalohyManager inicializován pro soubor: /data/data/com.termux/files/usr/tmp/tmp1f4j3buj/test_zalohy.xlsx

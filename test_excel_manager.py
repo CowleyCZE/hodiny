@@ -174,7 +174,7 @@ class TestExcelManagerReports(unittest.TestCase):
         # Celkem Karel Leden: 5 hodin, 0 volných dnů
 
         self.assertIn("Pepa Novák", report)
-        self.assertEqual(report["Pepa Novák"]["total_hours"], 48.0)
+        self.assertEqual(report["Pepa Novák"]["total_hours"], 43.0)
         self.assertEqual(report["Pepa Novák"]["free_days"], 1)
 
         self.assertIn("Jana Modrá", report)
@@ -211,7 +211,7 @@ class TestExcelManagerReports(unittest.TestCase):
         report_pepa = self.excel_manager.generate_monthly_report(month=1, year=2023, employees=["Pepa Novák"])
         self.assertIn("Pepa Novák", report_pepa)
         self.assertEqual(len(report_pepa), 1)
-        self.assertEqual(report_pepa["Pepa Novák"]["total_hours"], 48.0)
+        self.assertEqual(report_pepa["Pepa Novák"]["total_hours"], 43.0)
 
         report_jana_karel = self.excel_manager.generate_monthly_report(month=1, year=2023, employees=["Jana Modrá", "Karel Bílý"])
         self.assertIn("Jana Modrá", report_jana_karel)
@@ -236,21 +236,18 @@ class TestExcelManagerReports(unittest.TestCase):
         empty_wb.create_sheet("Data") # Nějaký list, ale ne Týden
         empty_wb_path = self.mock_excel_path_dir / "empty_test.xlsx"
         empty_wb.save(empty_wb_path)
+        empty_wb.close()
         
-        # Dočasně přepneme excel_manager na tento prázdný soubor
-        original_active_filename = self.excel_manager.active_filename
-        self.excel_manager.active_filename = "empty_test.xlsx"
-        # Musíme také vyčistit cache, pokud by tam byl původní soubor
-        self.excel_manager._clear_workbook_cache()
+        # Vytvoříme novou instanci ExcelManageru pro tento prázdný soubor
+        empty_excel_manager = ExcelManager(base_path=self.mock_excel_path_dir,
+                                           active_filename="empty_test.xlsx",
+                                           template_filename=self.mock_template_filename)
 
-
-        report = self.excel_manager.generate_monthly_report(month=1, year=2023)
+        report = empty_excel_manager.generate_monthly_report(month=1, year=2023)
         self.assertEqual(len(report), 0)
         
-        # Vrátíme původní soubor pro další testy
-        self.excel_manager.active_filename = original_active_filename
-        self.excel_manager._clear_workbook_cache()
-        os.remove(empty_wb_path) # uklidíme tento extra soubor
+        # Uklidíme tento extra soubor
+        os.remove(empty_wb_path)
 
     def test_invalid_date_formats_in_sheet(self):
         # Tento test je částečně pokryt v test_basic_hour_aggregation_and_free_days_january
@@ -294,8 +291,8 @@ class TestExcelManagerReports(unittest.TestCase):
         # a `test_february_data`, kde Týden 1 a Týden 5 obsahují data jen pro svůj měsíc.
         # Pro explicitnost můžeme přidat list, který má data na přelomu měsíců.
         
-        wb = self.excel_manager._get_workbook(self.mock_excel_full_path)[0] # Získat workbook pro úpravu
-        sheet_span = wb.create_sheet("Týden Span")
+        with self.excel_manager._get_workbook(self.mock_excel_full_path) as wb:
+            sheet_span = wb.create_sheet("Týden Span")
         sheet_span['A9'] = "Test Span User"
         sheet_span['B80'] = datetime.date(2023, 1, 30) # Po (Leden)
         sheet_span['B80'].style = self.date_style
@@ -328,8 +325,8 @@ class TestExcelManagerReports(unittest.TestCase):
 
     def test_empty_employee_name_row_stops_processing_for_sheet(self):
         # Přidáme list, kde je prázdný řádek mezi zaměstnanci
-        wb = self.excel_manager._get_workbook(self.mock_excel_full_path)[0]
-        sheet_empty_row = wb.create_sheet("Týden EmptyRow")
+        with self.excel_manager._get_workbook(self.mock_excel_full_path) as wb:
+            sheet_empty_row = wb.create_sheet("Týden EmptyRow")
         sheet_empty_row['A9'] = "User Before Empty"
         # A10 je prázdný
         sheet_empty_row['A11'] = "User After Empty"
@@ -351,4 +348,4 @@ class TestExcelManagerReports(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-```
+

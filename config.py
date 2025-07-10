@@ -76,6 +76,8 @@ class Config:
     # Výchozí názvy pro možnosti záloh, pokud nejsou definovány v Excelu
     DEFAULT_ADVANCE_OPTION_1 = "Option 1"
     DEFAULT_ADVANCE_OPTION_2 = "Option 2"
+    DEFAULT_ADVANCE_OPTION_3 = "Option 3"
+    DEFAULT_ADVANCE_OPTION_4 = "Option 4"
 
     # Validace
     # Regulární výraz pro validaci jména zaměstnance. Povoluje písmena (včetně českých), číslice, mezery, pomlčky a tečky.

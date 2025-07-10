@@ -310,22 +310,28 @@ class ExcelManager:
         # Pokud aktivní soubor není nastaven, vrátíme výchozí
         if not self.active_file_path:
              logger.warning("Nelze načíst možnosti záloh, aktivní soubor není nastaven. Používají se výchozí.")
-             return [Config.DEFAULT_ADVANCE_OPTION_1, Config.DEFAULT_ADVANCE_OPTION_2]
+             return [Config.DEFAULT_ADVANCE_OPTION_1, Config.DEFAULT_ADVANCE_OPTION_2, Config.DEFAULT_ADVANCE_OPTION_3, Config.DEFAULT_ADVANCE_OPTION_4]
 
         try:
             # Použijeme read-only mód
             with self._get_workbook(self.active_file_path, read_only=True) as workbook:
                 options = []
-                default_options = [Config.DEFAULT_ADVANCE_OPTION_1, Config.DEFAULT_ADVANCE_OPTION_2]
+                default_options = [Config.DEFAULT_ADVANCE_OPTION_1, Config.DEFAULT_ADVANCE_OPTION_2, Config.DEFAULT_ADVANCE_OPTION_3, Config.DEFAULT_ADVANCE_OPTION_4]
 
                 if Config.EXCEL_ADVANCES_SHEET_NAME in workbook.sheetnames:
                     zalohy_sheet = workbook[Config.EXCEL_ADVANCES_SHEET_NAME]
-                    option1 = zalohy_sheet["B80"].value
-                    option2 = zalohy_sheet["D80"].value
+                    option1 = zalohy_sheet["B6"].value
+                    option2 = zalohy_sheet["D6"].value
+                    option3 = zalohy_sheet["F6"].value
+                    option4 = zalohy_sheet["H6"].value
                     options = [
                         str(option1).strip() if option1 else default_options[0],
-                        str(option2).strip() if option2 else default_options[1]
+                        str(option2).strip() if option2 else default_options[1],
+                        str(option3).strip() if option3 else default_options[2],
+                        str(option4).strip() if option4 else default_options[3]
                     ]
+                    # Filter out empty strings if any option is not set in Excel
+                    options = [opt for opt in options if opt]
                     logger.info(f"Načteny možnosti záloh z {self.active_filename}: {options}")
                 else:
                     logger.warning(f"List '{Config.EXCEL_ADVANCES_SHEET_NAME}' nebyl nalezen v souboru {self.active_filename}, použity výchozí možnosti.")
@@ -334,14 +340,104 @@ class ExcelManager:
                 return options
         except FileNotFoundError:
              logger.error(f"Aktivní soubor {self.active_filename} nebyl nalezen při načítání možností záloh.")
-             return [Config.DEFAULT_ADVANCE_OPTION_1, Config.DEFAULT_ADVANCE_OPTION_2]
+             return [Config.DEFAULT_ADVANCE_OPTION_1, Config.DEFAULT_ADVANCE_OPTION_2, Config.DEFAULT_ADVANCE_OPTION_3, Config.DEFAULT_ADVANCE_OPTION_4]
         except Exception as e:
             logger.error(f"Chyba při načítání možností záloh z {self.active_filename}: {str(e)}", exc_info=True)
-            return [Config.DEFAULT_ADVANCE_OPTION_1, Config.DEFAULT_ADVANCE_OPTION_2]
+            return [Config.DEFAULT_ADVANCE_OPTION_1, Config.DEFAULT_ADVANCE_OPTION_2, Config.DEFAULT_ADVANCE_OPTION_3, Config.DEFAULT_ADVANCE_OPTION_4]
 
 
-    
 
-    
+    def generate_monthly_report(self, month, year, employees=None):
+        """
+        Generuje měsíční report pracovní doby a volných dnů pro zadaný měsíc a rok.
+        
+        Args:
+            month (int): Měsíc (1-12).
+            year (int): Rok.
+            employees (list, optional): Seznam jmen zaměstnanců, pro které se má report generovat.
+                                        Pokud None, generuje se pro všechny nalezené.
+        
+        Returns:
+            dict: Slovník, kde klíčem je jméno zaměstnance a hodnotou je slovník
+                  s 'total_hours' a 'free_days'.
+        """
+        if not (1 <= month <= 12):
+            raise ValueError("Měsíc musí být v rozsahu 1-12.")
+        if not (2000 <= year <= 2100): # Rozumný rozsah pro roky
+            raise ValueError("Rok musí být v rozsahu 2000-2100.")
 
-    
+        report_data = {}
+        active_path = self.get_active_file_path()
+        workbook = None
+
+        try:
+            with self._get_workbook(active_path, read_only=True) as workbook:
+                for sheet_name in workbook.sheetnames:
+                    if sheet_name.startswith(Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME):
+                        sheet = workbook[sheet_name]
+                        
+                        # Získání dat pro dny v týdnu z řádku 80
+                        week_dates = []
+                        for col_idx in range(2, 12, 2): # Sloupce B, D, F, H, J (indexy 2, 4, 6, 8, 10)
+                            date_cell_coord = f"{get_column_letter(col_idx)}80"
+                            date_cell_value = sheet[date_cell_coord].value
+                            
+                            current_date = None
+                            if isinstance(date_cell_value, datetime):
+                                current_date = date_cell_value.date()
+                            elif isinstance(date_cell_value, str):
+                                try:
+                                    current_date = datetime.strptime(date_cell_value, "%d.%m.%Y").date()
+                                except ValueError:
+                                    try:
+                                        current_date = datetime.strptime(date_cell_value, "%Y-%m-%d").date()
+                                    except ValueError:
+                                        logger.warning(f"Neplatný formát data v buňce {date_cell_coord} listu {sheet_name}: {date_cell_value}. Tento den bude ignorován.")
+                            
+                            week_dates.append(current_date)
+
+                        # Procházení zaměstnanců
+                        for row_idx in range(Config.EXCEL_EMPLOYEE_START_ROW, sheet.max_row + 1):
+                            employee_name = sheet.cell(row=row_idx, column=1).value
+                            if employee_name is None or str(employee_name).strip() == "":
+                                break # Předpokládáme, že prázdný řádek znamená konec seznamu zaměstnanců
+                            
+                            employee_name = str(employee_name).strip()
+
+                            if employees and employee_name not in employees:
+                                continue # Přeskočíme, pokud není ve vybraných zaměstnancích
+
+                            if employee_name not in report_data:
+                                report_data[employee_name] = {"total_hours": 0.0, "free_days": 0}
+
+                            # Procházení hodin pro daného zaměstnance
+                            for i, date_obj in enumerate(week_dates):
+                                if date_obj and date_obj.month == month and date_obj.year == year:
+                                    # Sloupce pro hodiny jsou C, E, G, I, K (indexy 3, 5, 7, 9, 11)
+                                    hours_col_idx = (i * 2) + 3 
+                                    hours_cell_value = sheet.cell(row=row_idx, column=hours_col_idx).value
+                                    
+                                    if hours_cell_value is not None:
+                                        try:
+                                            hours = float(hours_cell_value)
+                                            if hours > 0:
+                                                report_data[employee_name]["total_hours"] += hours
+                                            elif hours == 0:
+                                                report_data[employee_name]["free_days"] += 1
+                                        except ValueError:
+                                            logger.warning(f"Neplatná hodnota hodin pro {employee_name} v buňce {get_column_letter(hours_col_idx)}{row_idx} listu {sheet_name}: {hours_cell_value}. Bude ignorováno.")
+                                    # else: pokud je buňka prázdná, ignorujeme ji (není to ani práce, ani volno)
+        except FileNotFoundError:
+            logger.error(f"Aktivní soubor {self.active_filename} nebyl nalezen při generování reportu.")
+            return {}
+        except Exception as e:
+            logger.error(f"Chyba při generování měsíčního reportu z {self.active_filename}: {str(e)}", exc_info=True)
+            return {}
+        
+        # Odstraníme zaměstnance, kteří nemají žádné hodiny ani volné dny v daném měsíci
+        final_report = {
+            employee: data for employee, data in report_data.items()
+            if data["total_hours"] > 0 or data["free_days"] > 0
+        }
+        
+        return final_report

@@ -28,3 +28,9 @@ Thumbs.db
 
 # Excel Files
 *.xlsx
+
+# Logy
+logs/excel_manager.log
+logs/zalohy_manager.log
+excel_manager.log
+zalohy_manager.log

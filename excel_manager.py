@@ -305,6 +305,40 @@ class ExcelManager:
             # Vrátíme None nebo vyvoláme výjimku, aby volající věděl o chybě
             return None
 
+    def get_advance_options(self):
+        """Získá možnosti záloh z aktivního Excel souboru"""
+        # Pokud aktivní soubor není nastaven, vrátíme výchozí
+        if not self.active_file_path:
+             logger.warning("Nelze načíst možnosti záloh, aktivní soubor není nastaven. Používají se výchozí.")
+             return [Config.DEFAULT_ADVANCE_OPTION_1, Config.DEFAULT_ADVANCE_OPTION_2]
+
+        try:
+            # Použijeme read-only mód
+            with self._get_workbook(self.active_file_path, read_only=True) as workbook:
+                options = []
+                default_options = [Config.DEFAULT_ADVANCE_OPTION_1, Config.DEFAULT_ADVANCE_OPTION_2]
+
+                if Config.EXCEL_ADVANCES_SHEET_NAME in workbook.sheetnames:
+                    zalohy_sheet = workbook[Config.EXCEL_ADVANCES_SHEET_NAME]
+                    option1 = zalohy_sheet["B80"].value
+                    option2 = zalohy_sheet["D80"].value
+                    options = [
+                        str(option1).strip() if option1 else default_options[0],
+                        str(option2).strip() if option2 else default_options[1]
+                    ]
+                    logger.info(f"Načteny možnosti záloh z {self.active_filename}: {options}")
+                else:
+                    logger.warning(f"List '{Config.EXCEL_ADVANCES_SHEET_NAME}' nebyl nalezen v souboru {self.active_filename}, použity výchozí možnosti.")
+                    options = default_options
+
+                return options
+        except FileNotFoundError:
+             logger.error(f"Aktivní soubor {self.active_filename} nebyl nalezen při načítání možností záloh.")
+             return [Config.DEFAULT_ADVANCE_OPTION_1, Config.DEFAULT_ADVANCE_OPTION_2]
+        except Exception as e:
+            logger.error(f"Chyba při načítání možností záloh z {self.active_filename}: {str(e)}", exc_info=True)
+            return [Config.DEFAULT_ADVANCE_OPTION_1, Config.DEFAULT_ADVANCE_OPTION_2]
+
 
     
 

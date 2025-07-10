@@ -281,6 +281,30 @@ class ExcelManager:
          """Nastaví aktuální název projektu pro použití v jiných metodách."""
          self.current_project_name = project_name if project_name else None
 
+    def ziskej_cislo_tydne(self, datum):
+        """
+        Získá ISO kalendářní data (rok, číslo týdne, den v týdnu) pro zadané datum.
+        """
+        try:
+            logger.debug(f"Ziskej_cislo_tydne: Vstupní datum '{datum}', typ: {type(datum)}")
+            if isinstance(datum, str):
+                try:
+                    datum_obj = datetime.strptime(datum, "%Y-%m-%d %H:%M:%S")
+                except ValueError:
+                    datum_obj = datetime.strptime(datum, "%Y-%m-%d")
+            elif isinstance(datum, datetime):
+                 datum_obj = datum
+            else:
+                 raise TypeError("Datum musí být string ve formátu YYYY-MM-DD nebo datetime objekt")
+
+            iso_cal = datum_obj.isocalendar()
+            logger.debug(f"Ziskej_cislo_tydne: Datum objekt: {datum_obj}, isocalendar: {iso_cal}")
+            return iso_cal
+        except (ValueError, TypeError) as e:
+            logger.error(f"Chyba při zpracování data '{datum}' pro získání čísla týdne: {e}")
+            # Vrátíme None nebo vyvoláme výjimku, aby volající věděl o chybě
+            return None
+
 
     
 

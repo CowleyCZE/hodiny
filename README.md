@@ -2,7 +2,6 @@
 
 Kompletní webová aplikace ve Flasku pro evidenci pracovní doby do Excelu, správu zaměstnanců, správu záloh (zálohy/výplaty), generování měsíčních přehledů, náhled Excel souborů a základní „hlasové“ ovládání přes textové příkazy. Aplikace pracuje s jedním „aktivním“ Excel souborem (kopie šablony), který se průběžně doplňuje a lze ho stáhnout nebo poslat e‑mailem.
 
-
 ## Hlavní schopnosti
 
 - Aktivní Excel soubor na bázi šablony Hodiny_Cap.xlsx (automaticky vytvořen, pokud chybí)
@@ -15,7 +14,6 @@ Kompletní webová aplikace ve Flasku pro evidenci pracovní doby do Excelu, spr
 - Přejmenování/smazání projektových souborů, archivace a založení nového aktivního souboru
 - Textové „hlasové“ příkazy pro záznam času a rychlé statistiky
 - Pružné logování do souborů s rotací
-
 
 ## Architektura a soubory
 
@@ -33,7 +31,6 @@ Kompletní webová aplikace ve Flasku pro evidenci pracovní doby do Excelu, spr
 - excel/ – šablona a generované/aktivní Excel soubory
 - logs/ – aplikační logy (rotace)
 
-
 ## Datový model v Excelu (zjednodušeně)
 
 - Šablona: excel/Hodiny_Cap.xlsx
@@ -44,7 +41,6 @@ Kompletní webová aplikace ve Flasku pro evidenci pracovní doby do Excelu, spr
   - datum do řádku 80 (B80/D80/F80/H80/J80)
   - čisté hodiny (po odečtení pauzy) k řádku zaměstnance do sloupce daného dne
 - Zálohy: list „Zálohy“, volby v buňkách B80/D80/F80/H80 (popisky možností), hodnoty po zaměstnancích ve sloupcích B..I, datum do sloupce Z
-
 
 ## Webové rozhraní (routy)
 
@@ -64,7 +60,6 @@ Kompletní webová aplikace ve Flasku pro evidenci pracovní doby do Excelu, spr
 
 Pozn.: Některé akce vyžadují inicializované Excel/Zálohy managery; ochrana je přes dekorátor require_excel_managers.
 
-
 ## Hlasové/textové příkazy
 
 Endpoint POST /voice-command očekává JSON:
@@ -83,40 +78,37 @@ Detekuje:
 
 V této aplikaci se používá textový vstup (neposílá se audio). Soubor utils/voice_processor.py obsahuje i skeleton pro volání externího API (Gemini) – pro něj nastavte GEMINI_* proměnné prostředí, pokud chcete rozšířit na reálný STT/LLM.
 
-
 ## Požadavky a prostředí
 
 - Python: viz runtime.txt (doporučeno 3.12.7)
 - Závislosti: requirements.txt
 - OS: Linux/Windows; cesty a logování jsou ošetřené pro běh lokálně i na PythonAnywhere
 
-
 ## Instalace a spuštění
 
 1. Vytvoření a aktivace prostředí
 
-	Doporučujeme virtuální prostředí (venv/conda).
+   Doporučujeme virtuální prostředí (venv/conda).
 
-1. Instalace závislostí
+2. Instalace závislostí
 
-	```bash
-	pip install -r requirements.txt
-	```
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-1. Lokální vývojový běh
+3. Lokální vývojový běh
 
-	```bash
-	python app.py
-	```
+    ```bash
+    python app.py
+    ```
 
-1. Produkční běh (např. Gunicorn)
+4. Produkční běh (např. Gunicorn)
 
-	```bash
-	gunicorn wsgi:application
-	```
+    ```bash
+    gunicorn wsgi:application
+    ```
 
 Adresáře data/, excel/ a logs/ se vytvoří automaticky. Při prvním běhu se do excel/ vygeneruje šablona Hodiny_Cap.xlsx, pokud chybí.
-
 
 ## Konfigurace (proměnné prostředí)
 
@@ -134,7 +126,6 @@ Adresáře data/, excel/ a logs/ se vytvoří automaticky. Při prvním běhu se
 
 Poznámka: Tajné hodnoty nesdílejte v repozitáři; nastavte je přes prostředí (např. .env / CI / hosting).
 
-
 ## Práce s aktivním souborem a projekty
 
 - Aktivní soubor je trackován v data/settings.json (klíč active_excel_file)
@@ -142,25 +133,21 @@ Poznámka: Tajné hodnoty nesdílejte v repozitáři; nastavte je přes prostře
 - V Nastavení vyplňte název projektu a datum začátku; datum konce je povinné před archivací
 - Archivace (POST /start_new_file) pouze resetuje active_excel_file – soubory zůstávají v excel/
 
-
 ## Logování
 
 - logs/app.log, excel_manager.log, employee_management.log, verify_excel_data.log apod.
 - Rotace po ~1 MB, až 5 záloh
 - V lokálním vývoji také výstup na konzoli
 
-
 ## Testy
 
 - K dispozici jsou testovací soubory (pytest). Spusťte: `pytest`
 - Doporučení: oddělit integrační testy Excelu (práce se soubory) a jednotkové testy
 
-
 ## Nasazení (příklad)
 
 - Gunicorn: `gunicorn wsgi:application`
 - PythonAnywhere: wsgi.py nastaví cesty, vytvoří složky a inicializuje aplikaci; logy v `~/hodiny/logs`
-
 
 ## Známá omezení a tipy
 
@@ -169,12 +156,10 @@ Poznámka: Tajné hodnoty nesdílejte v repozitáři; nastavte je přes prostře
 - Hlasové příkazy: v základu textové; pro audio a LLM transkripci doplňte reálné API a bezpečné zacházení s klíči
 - SMTP: některé služby vyžadují specifická hesla pro aplikace (Gmail – App Passwords)
 
-
 ## Rychlá reference rout
 
 - /, /zaznam, /zamestnanci, /zalohy, /excel_viewer, /settings, /monthly_report
 - POST: /send_email, /set_active_file, /rename_project, /delete_project, /start_new_file, /voice-command
-
 
 ## Licence a autorství
 

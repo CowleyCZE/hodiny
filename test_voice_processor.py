@@ -1,11 +1,10 @@
 import pytest
 import time
-import os
+from datetime import datetime
 import requests
-from datetime import datetime, timedelta
 from utils.voice_processor import VoiceProcessor, RateLimiter
-from unittest.mock import patch, mock_open, MagicMock, PropertyMock
-import requests_cache
+from unittest.mock import patch, MagicMock
+
 
 @pytest.fixture
 def mock_config():
@@ -17,6 +16,7 @@ def mock_config():
         mock_config.GEMINI_CACHE_TTL = 3600
         yield mock_config
 
+
 @pytest.fixture
 def voice_processor(mock_config):
     with patch('requests_cache.CachedSession') as mock_cache:
@@ -26,15 +26,18 @@ def voice_processor(mock_config):
         processor.init_cache_session()  # Inicializujeme cache session
         yield processor
 
+
 @pytest.fixture
 def rate_limiter():
     return RateLimiter(max_requests=2, time_window=1)
+
 
 @pytest.fixture
 def mock_audio_file(tmp_path):
     audio_file = tmp_path / "test_audio.wav"
     audio_file.write_bytes(b"mock audio data")
     return str(audio_file)
+
 
 def test_rate_limiter(rate_limiter):
     assert rate_limiter.can_make_request() is True
@@ -45,32 +48,34 @@ def test_rate_limiter(rate_limiter):
     time.sleep(1.1)
     assert rate_limiter.can_make_request() is True
 
+
 @patch('requests.post')
 def test_gemini_api_call_with_rate_limit(mock_post, voice_processor, mock_audio_file):
     mock_response = MagicMock()
     mock_response.json.return_value = {"text": "Test response"}
     mock_response.status_code = 200
     mock_post.return_value = mock_response
-    
+
     result1 = voice_processor._call_gemini_api(mock_audio_file)
     assert "text" in result1
     assert result1["text"] == "Test response"
     
     result2 = voice_processor._call_gemini_api(mock_audio_file)
     assert "text" in result2
-    
+
     # Simulujeme překročení rate limitu
     voice_processor.rate_limiter.requests.extend([time.time()] * 3)
     result3 = voice_processor._call_gemini_api(mock_audio_file)
     assert "error" in result3
     assert "Překročen rate limit" in result3["error"]
 
+
 def test_gemini_api_caching(voice_processor, mock_audio_file):
     mock_response = MagicMock()
     mock_response.json.return_value = {"text": "Cached response"}
     mock_response.status_code = 200
     voice_processor.session.post.return_value = mock_response
-    
+
     # První volání
     result1 = voice_processor._call_gemini_api(mock_audio_file)
     assert result1 == {"text": "Cached response"}
@@ -79,6 +84,7 @@ def test_gemini_api_caching(voice_processor, mock_audio_file):
     result2 = voice_processor._call_gemini_api(mock_audio_file)
     assert voice_processor.session.post.call_count == 1
     assert result1 == result2
+
 
 def test_extract_entities(voice_processor):
     # Test pro částku a měnu
@@ -103,11 +109,13 @@ def test_extract_entities(voice_processor):
     assert entities["date"] == datetime.now().strftime("%Y-%m-%d")
     assert entities["action"] == "get_stats"
 
+
 def test_normalize_date(voice_processor):
     assert voice_processor._normalize_date("2025-05-06") == "2025-05-06"
     assert voice_processor._normalize_date("06.05.2025") == "2025-05-06"
     assert voice_processor._normalize_date("06/05/2025") == "2025-05-06"
     assert voice_processor._normalize_date("invalid") is None
+
 
 def test_validate_data(voice_processor):
     valid_data = {
@@ -132,6 +140,7 @@ def test_validate_data(voice_processor):
     assert is_valid is False
     assert len(errors) > 0
 
+
 def test_call_gemini_api_success(voice_processor, mock_audio_file):
     with patch('requests.Session.post') as mock_post:
         mock_response = MagicMock()
@@ -147,6 +156,7 @@ def test_call_gemini_api_success(voice_processor, mock_audio_file):
         assert result["confidence"] == 0.95
         mock_post.assert_called_once()
 
+
 def test_call_gemini_api_failure(voice_processor, mock_audio_file):
     with patch('requests.Session.post') as mock_post:
         mock_post.side_effect = requests.exceptions.RequestException("Internal Server Error")
@@ -154,6 +164,7 @@ def test_call_gemini_api_failure(voice_processor, mock_audio_file):
         result = voice_processor._call_gemini_api(mock_audio_file)
         assert "error" in result
         assert "API volání selhalo" in result["error"]
+
 
 def test_process_voice_command_success(voice_processor, mock_audio_file):
     mock_gemini_response = {

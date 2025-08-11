@@ -3,7 +3,6 @@ import os
 import secrets
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 import logging
 from openpyxl import Workbook
 
@@ -55,11 +54,14 @@ class Config:
 
     # Gemini API konfigurace
     GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "AIzaSyBvfpvviIHxJgOxkQeVyZCT2rnhyzI7bMo")
-    GEMINI_API_URL = os.environ.get("GEMINI_API_URL", "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent")
+    GEMINI_API_URL = os.environ.get(
+        "GEMINI_API_URL",
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent",
+    )
     GEMINI_REQUEST_TIMEOUT = int(os.environ.get("GEMINI_REQUEST_TIMEOUT", 10))
     GEMINI_MAX_RETRIES = int(os.environ.get("GEMINI_MAX_RETRIES", 3))
     GEMINI_CACHE_TTL = int(os.environ.get("GEMINI_CACHE_TTL", 3600))  # 1 hodina v sekundách
-    
+
     # Rate limiting
     RATE_LIMIT_REQUESTS = int(os.environ.get("RATE_LIMIT_REQUESTS", 100))  # počet požadavků
     RATE_LIMIT_WINDOW = int(os.environ.get("RATE_LIMIT_WINDOW", 3600))    # časové okno v sekundách
@@ -67,7 +69,7 @@ class Config:
     # UI a obecné konstanty aplikace
     DEFAULT_APP_NAME = 'Evidence pracovní doby'
     SMTP_TIMEOUT = 60  # Timeout pro SMTP operace v sekundách
-    MAX_ROWS_TO_DISPLAY_EXCEL_VIEWER = 500 # Maximální počet řádků pro zobrazení v excel vieweru
+    MAX_ROWS_TO_DISPLAY_EXCEL_VIEWER = 500  # Maximální počet řádků pro zobrazení v excel vieweru
 
     # Konstanty pro Excel operace
     EXCEL_EMPLOYEE_START_ROW = 9  # Řádek, kde začínají jména zaměstnanců v Excelu
@@ -80,11 +82,11 @@ class Config:
     DEFAULT_ADVANCE_OPTION_4 = "Option 4"
 
     # Validace
-    # Regulární výraz pro validaci jména zaměstnance. Povoluje písmena (včetně českých), číslice, mezery, pomlčky a tečky.
+    # Regulární výraz pro validaci jména zaměstnance. Povoluje písmena
+    # (včetně českých), číslice, mezery, pomlčky a tečky.
     # Python raw string r"..." se používá, takže \w a \. jsou interpretovány správně pro regex.
     EMPLOYEE_NAME_VALIDATION_REGEX = r"^[\w\s\-.ěščřžýáíéúůďťňĚŠČŘŽÝÁÍÉÚŮĎŤŇ]+$"
-    EMPLOYEE_NAME_MAX_LENGTH = 100 # Maximální povolená délka jména zaměstnance
-
+    EMPLOYEE_NAME_MAX_LENGTH = 100  # Maximální povolená délka jména zaměstnance
 
     @classmethod
     def get_default_settings(cls):
@@ -108,28 +110,32 @@ class Config:
         # Zajistíme existenci šablony při inicializaci (volitelné)
         template_path = cls.EXCEL_BASE_PATH / cls.EXCEL_TEMPLATE_NAME
         if not template_path.exists():
-             try:
-                  wb = Workbook()
-                  # Přidáme základní listy do šablony, pokud neexistuje
-                  if "Sheet" in wb.sheetnames:
-                       sheet = wb["Sheet"]
-                       sheet.title = "Týden"
-                  else:
-                       wb.create_sheet("Týden")
-                  if "Zálohy" not in wb.sheetnames:
-                      wb.create_sheet("Zálohy")
-                      # Můžeme přidat i výchozí hlavičky nebo hodnoty do šablony zde
-                      zalohy_sheet = wb["Zálohy"]
-                      zalohy_sheet["B80"] = "Option 1"
-                      zalohy_sheet["D80"] = "Option 2"
-                      # Případně další buňky A79, C81, D81 atd.
+            try:
+                wb = Workbook()
+                # Přidáme základní listy do šablony, pokud neexistuje
+                if "Sheet" in wb.sheetnames:
+                    sheet = wb["Sheet"]
+                    sheet.title = "Týden"
+                else:
+                    wb.create_sheet("Týden")
+                if "Zálohy" not in wb.sheetnames:
+                    wb.create_sheet("Zálohy")
+                    # Můžeme přidat i výchozí hlavičky nebo hodnoty do šablony zde
+                    zalohy_sheet = wb["Zálohy"]
+                    zalohy_sheet["B80"] = "Option 1"
+                    zalohy_sheet["D80"] = "Option 2"
+                    # Případně další buňky A79, C81, D81 atd.
 
-                  wb.save(template_path)
-                  wb.close()
-                  logging.info(f"Vytvořena chybějící šablona Excel souboru: {template_path}")
-             except Exception as e:
-                  logging.error(f"Nepodařilo se vytvořit chybějící šablonu {template_path}: {e}", exc_info=True)
-
+                wb.save(template_path)
+                wb.close()
+                logging.info(
+                    f"Vytvořena chybějící šablona Excel souboru: {template_path}"
+                )
+            except Exception as e:
+                logging.error(
+                    f"Nepodařilo se vytvořit chybějící šablonu {template_path}: {e}",
+                    exc_info=True,
+                )
 
         # Nastavení logovacího adresáře
         log_dir = cls.BASE_DIR / "logs"

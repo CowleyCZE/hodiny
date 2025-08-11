@@ -95,25 +95,25 @@ V této aplikaci se používá textový vstup (neposílá se audio). Soubor util
 
 1. Vytvoření a aktivace prostředí
 
-	Doporučujeme virtuální prostředí (venv/conda).
+  Doporučujeme virtuální prostředí (venv/conda).
 
 1. Instalace závislostí
 
-	```bash
-	pip install -r requirements.txt
-	```
+  ```bash
+  pip install -r requirements.txt
+  ```
 
 1. Lokální vývojový běh
 
-	```bash
-	python app.py
-	```
+  ```bash
+  python app.py
+  ```
 
 1. Produkční běh (např. Gunicorn)
 
-	```bash
-	gunicorn wsgi:application
-	```
+  ```bash
+  gunicorn wsgi:application
+  ```
 
 Adresáře data/, excel/ a logs/ se vytvoří automaticky. Při prvním běhu se do excel/ vygeneruje šablona Hodiny_Cap.xlsx, pokud chybí.
 

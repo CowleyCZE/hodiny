@@ -1,4 +1,5 @@
 # excel_manager.py
+import shutil
 from config import Config
 import logging
 from contextlib import contextmanager
@@ -18,80 +19,86 @@ except ImportError:
 
 
 class ExcelManager:
-    def __init__(self, base_path, active_filename, template_filename):
+    def __init__(self, base_path):
         self.base_path = Path(base_path)
-        self.active_filename = active_filename
-        self.template_filename = template_filename
-        self.active_file_path = self.base_path / self.active_filename if self.active_filename else None
-        self.template_file_path = self.base_path / self.template_filename
+        self.active_filename = Config.EXCEL_TEMPLATE_NAME
+        self.active_file_path = self.base_path / self.active_filename
         self.current_project_name = None
         self._file_lock = Lock()
         self._workbook_cache = {}
         logger.info(f"ExcelManager inicializován pro: {self.active_file_path}")
 
     def get_active_file_path(self):
-        if not self.active_file_path:
-            raise ValueError("Aktivní Excel soubor není definován.")
         return self.active_file_path
 
     @contextmanager
-    def _get_workbook(self, file_path_to_open, read_only=False):
-        file_path = Path(file_path_to_open)
-        cache_key = str(file_path.absolute())
+    def _get_workbook(self, read_only=False):
+        cache_key = str(self.active_file_path.absolute())
         wb = None
         with self._file_lock:
             if cache_key in self._workbook_cache:
                 try:
                     wb = self._workbook_cache[cache_key]
-                    _ = wb.sheetnames  # Check if workbook is alive
+                    _ = wb.sheetnames
                 except Exception:
                     wb = None
             if wb is None:
-                if not file_path.exists():
-                    raise FileNotFoundError(f"Soubor '{file_path.name}' nenalezen.")
+                if not self.active_file_path.exists():
+                    raise FileNotFoundError(f"Soubor '{self.active_filename}' nenalezen.")
                 try:
-                    wb = load_workbook(filename=str(file_path), read_only=read_only, data_only=not read_only)
+                    wb = load_workbook(filename=str(self.active_file_path), read_only=read_only, data_only=not read_only)
                     if not read_only:
                         self._workbook_cache[cache_key] = wb
                 except Exception as e:
-                    raise IOError(f"Chyba při otevírání souboru '{file_path.name}': {e}")
+                    raise IOError(f"Chyba při otevírání souboru '{self.active_filename}': {e}")
         try:
             yield wb
         finally:
             if read_only and wb:
                 wb.close()
 
-    def ulozit_pracovni_dobu(self, date, start_time, end_time, lunch_duration, employees, week_number=None):
-        active_path = self.get_active_file_path()
-        try:
-            with self._get_workbook(active_path, read_only=False) as workbook:
-                if week_number is None:
-                    week_number = self.ziskej_cislo_tydne(date).week
-                
-                sheet_name = f"{Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME} {week_number}"
-                if sheet_name not in workbook.sheetnames:
-                    if Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME in workbook.sheetnames:
-                        source_sheet = workbook[Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME]
-                        sheet = workbook.copy_worksheet(source_sheet)
-                        sheet.title = sheet_name
-                    else:
-                        sheet = workbook.create_sheet(sheet_name)
-                    sheet["A80"] = sheet_name
-                else:
-                    sheet = workbook[sheet_name]
+    def archive_if_needed(self, current_week_number, settings):
+        last_archived_week = settings.get("last_archived_week", 0)
+        if current_week_number > last_archived_week:
+            archive_filename = f"Hodiny_Cap_Tyden_{last_archived_week}.xlsx"
+            archive_path = self.base_path / archive_filename
+            
+            # 1. Vytvoření archivní kopie
+            shutil.copy(self.active_file_path, archive_path)
+            logger.info(f"Archivován soubor: {archive_path}")
 
+            # 2. Vyčištění hlavního souboru
+            with self._get_workbook() as wb:
+                for sheet_name in wb.sheetnames:
+                    if sheet_name.startswith(Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME):
+                        wb.remove(wb[sheet_name])
+                
+                # Vytvoření nového čistého listu pro aktuální týden
+                wb.create_sheet(Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME)
+            
+            # 3. Aktualizace nastavení
+            settings["last_archived_week"] = current_week_number
+            # Tuto funkci bude muset zavolat app.py, protože excel_manager nemá přístup k save_settings_to_file
+            return True 
+        return False
+
+    def ulozit_pracovni_dobu(self, date, start_time, end_time, lunch_duration, employees):
+        try:
+            week_number = self.ziskej_cislo_tydne(date).week
+            sheet_name = f"{Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME} {week_number}"
+            
+            with self._get_workbook() as workbook:
+                if sheet_name not in workbook.sheetnames:
+                    workbook.create_sheet(sheet_name)
+
+                sheet = workbook[sheet_name]
                 weekday = datetime.strptime(date, "%Y-%m-%d").weekday()
                 day_column_index = 2 + 2 * weekday
                 
-                if start_time == "00:00" and end_time == "00:00":
-                    total_hours = 0
-                else:
-                    start = datetime.strptime(start_time, "%H:%M")
-                    end = datetime.strptime(end_time, "%H:%M")
-                    total_hours = round(((end - start).total_seconds() / 3600) - float(lunch_duration), 2)
+                total_hours = round(((datetime.strptime(end_time, "%H:%M") - datetime.strptime(start_time, "%H:%M")).total_seconds() / 3600) - float(lunch_duration), 2)
                 
                 employee_rows = {sheet.cell(row=r, column=1).value: r for r in range(Config.EXCEL_EMPLOYEE_START_ROW, sheet.max_row + 1)}
-                next_empty_row = sheet.max_row + 1
+                next_empty_row = sheet.max_row + 1 if sheet.max_row >= Config.EXCEL_EMPLOYEE_START_ROW else Config.EXCEL_EMPLOYEE_START_ROW
 
                 for employee in employees:
                     row = employee_rows.get(employee)
@@ -105,11 +112,6 @@ class ExcelManager:
                 sheet.cell(row=7, column=day_column_index).number_format = 'HH:MM'
                 sheet.cell(row=80, column=day_column_index).value = datetime.strptime(date, "%Y-%m-%d").date()
                 sheet.cell(row=80, column=day_column_index).number_format = 'DD.MM.YYYY'
-                
-                if self.current_project_name:
-                    project_cell = sheet["B79"]
-                    if self.current_project_name not in (project_cell.value or ""):
-                        project_cell.value = ", ".join(filter(None, [(project_cell.value or ""), self.current_project_name]))
                 
                 logger.info(f"Uložena pracovní doba pro {date} do listu {sheet_name}.")
                 return True
@@ -127,9 +129,6 @@ class ExcelManager:
                     logger.error(f"Chyba při ukládání/zavírání workbooku {path_str}: {e}", exc_info=True)
             self._workbook_cache.clear()
 
-    def set_project_name(self, project_name):
-        self.current_project_name = project_name if project_name else None
-
     def ziskej_cislo_tydne(self, datum):
         try:
             datum_obj = datetime.strptime(datum, "%Y-%m-%d") if isinstance(datum, str) else datum
@@ -143,9 +142,8 @@ class ExcelManager:
             raise ValueError("Neplatný měsíc nebo rok.")
         
         report_data = {}
-        active_path = self.get_active_file_path()
         try:
-            with self._get_workbook(active_path, read_only=True) as workbook:
+            with self._get_workbook(read_only=True) as workbook:
                 for sheet_name in workbook.sheetnames:
                     if sheet_name.startswith(Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME):
                         sheet = workbook[sheet_name]
@@ -173,6 +171,4 @@ class ExcelManager:
         return {emp: data for emp, data in report_data.items() if data["total_hours"] > 0 or data["free_days"] > 0}
     
     def update_project_info(self, project_name, start_date, end_date):
-        # Tato metoda by měla být implementována, pokud je potřeba.
-        # Prozatím vrací True.
         return True

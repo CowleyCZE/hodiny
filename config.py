@@ -1,16 +1,9 @@
 # config.py
 import os
 import secrets
-from dataclasses import dataclass
 from pathlib import Path
 import logging
 from openpyxl import Workbook
-
-@dataclass
-class TimeConfig:
-    start_time: str = "07:00"
-    end_time: str = "18:00"
-    lunch_duration: float = 1.0
 
 class Config:
     IS_PYTHONANYWHERE = "PYTHONANYWHERE_SITE" in os.environ
@@ -28,7 +21,6 @@ class Config:
     SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD")
     RECIPIENT_EMAIL = os.environ.get("RECIPIENT_EMAIL")
 
-    DEFAULT_TIME_CONFIG = TimeConfig()
     DEFAULT_APP_NAME = 'Evidence pracovní doby'
     SMTP_TIMEOUT = 60
     MAX_ROWS_TO_DISPLAY_EXCEL_VIEWER = 500
@@ -42,6 +34,14 @@ class Config:
     EMPLOYEE_NAME_VALIDATION_REGEX = r"^[\w\s\-.ěščřžýáíéúůďťňĚŠČŘŽÝÁÍÉÚŮĎŤŇ]+$"
     EMPLOYEE_NAME_MAX_LENGTH = 100
 
+    @dataclass
+    class TimeConfig:
+        start_time: str = "07:00"
+        end_time: str = "18:00"
+        lunch_duration: float = 1.0
+
+    DEFAULT_TIME_CONFIG = TimeConfig()
+
     @classmethod
     def get_default_settings(cls):
         return {
@@ -49,7 +49,7 @@ class Config:
             "end_time": cls.DEFAULT_TIME_CONFIG.end_time,
             "lunch_duration": cls.DEFAULT_TIME_CONFIG.lunch_duration,
             "project_info": {"name": "", "start_date": "", "end_date": ""},
-            "active_excel_file": None,
+            "last_archived_week": 0,  # Sledování posledního archivovaného týdne
         }
 
     @classmethod
@@ -61,8 +61,8 @@ class Config:
         if not template_path.exists():
             try:
                 wb = Workbook()
-                wb.create_sheet("Týden")
-                zalohy_sheet = wb.create_sheet("Zálohy")
+                wb.create_sheet(cls.EXCEL_WEEK_SHEET_TEMPLATE_NAME)
+                zalohy_sheet = wb.create_sheet(cls.EXCEL_ADVANCES_SHEET_NAME)
                 zalohy_sheet["B80"] = cls.DEFAULT_ADVANCE_OPTION_1
                 zalohy_sheet["D80"] = cls.DEFAULT_ADVANCE_OPTION_2
                 zalohy_sheet["F80"] = cls.DEFAULT_ADVANCE_OPTION_3

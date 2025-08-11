@@ -54,6 +54,7 @@ def save_settings_to_file(settings_data):
         logger.error(f"Neočekávaná chyba při ukládání nastavení do souboru: {e}", exc_info=True)
         return False
 
+
 def load_settings_from_file():
     """Načte nastavení z JSON souboru, vrátí výchozí při chybě."""
     default_settings = Config.get_default_settings()
@@ -213,12 +214,16 @@ def require_excel_managers(f):
                 for msg in get_flashed_messages(with_categories=True)
             ):
                 flash(
-                    "Chyba: Není definován aktivní Excel soubor pro práci. Zkuste archivovat a začít nový nebo kontaktujte administrátora.",
+                    (
+                        "Chyba: Není definován aktivní Excel soubor pro práci. "
+                        "Zkuste archivovat a začít nový nebo kontaktujte administrátora."
+                    ),
                     "error",
                 )
             return redirect(url_for('index'))
         return f(*args, **kwargs)
     return decorated_function
+
 
 # --- Routes ---
 
@@ -717,7 +722,13 @@ def delete_project():
     try:
         settings = load_settings_from_file()
         if settings.get("active_excel_file") == filename_to_delete:
-            flash(f"Nelze smazat aktivní soubor '{filename_to_delete}'. Nejprve archivujte nebo vyberte jiný aktivní soubor.", "error")
+            flash(
+                (
+                    f"Nelze smazat aktivní soubor '{filename_to_delete}'. "
+                    "Nejprve archivujte nebo vyberte jiný aktivní soubor."
+                ),
+                "error"
+            )
             return redirect(url_for('settings_page'))
 
         os.remove(file_path)
@@ -738,7 +749,7 @@ def excel_viewer():
     active_file_path = excel_manager_instance.get_active_file_path()
     active_filename = active_file_path.name
 
-    excel_files = [active_filename] # Jen aktivní soubor
+    excel_files = [active_filename]  # Jen aktivní soubor
     selected_file = active_filename
 
     active_sheet_name = request.args.get("sheet", None)
@@ -781,7 +792,8 @@ def excel_viewer():
         flash("Neočekávaná chyba při zobrazení Excel souboru.", "error")
         return redirect(url_for("index"))
     finally:
-        if workbook: workbook.close()
+        if workbook:
+            workbook.close()
 
     return render_template(
         "excel_viewer.html",
@@ -808,7 +820,7 @@ def settings_page():
             lunch_duration_str = request.form.get("lunch_duration", "")
             project_name = request.form.get("project_name", "").strip()
             project_start_str = request.form.get("start_date", "")
-            project_end_str = request.form.get("end_date", "") # Nepovinné zde
+            project_end_str = request.form.get("end_date", "")  # Nepovinné zde
 
             # Validace (stejná jako dříve, ale end_date není required)
             try:
@@ -846,7 +858,7 @@ def settings_page():
                 "lunch_duration": lunch_duration,
                 "project_info": {
                     "name": project_name, "start_date": project_start_str,
-                    "end_date": project_end_str, # Uložíme i prázdný string
+                    "end_date": project_end_str,  # Uložíme i prázdný string
                 },
             })
 
@@ -887,7 +899,7 @@ def zalohy():
 
     employees_list = employee_manager_instance.zamestnanci
     advance_options = excel_manager_instance.get_advance_options()
-    advance_history = [] # Historie se nenačítá
+    advance_history = []  # Historie se nenačítá
 
     if request.method == "POST":
         try:
@@ -913,10 +925,10 @@ def zalohy():
 
             # Uložení zálohy
             success = zalohy_manager_instance.add_or_update_employee_advance(
-                employee_name=employee_name, 
-                amount=amount, 
-                currency=currency, 
-                option=option, 
+                employee_name=employee_name,
+                amount=amount,
+                currency=currency,
+                option=option,
                 date=date_str
             )
             if success:
@@ -968,7 +980,6 @@ def start_new_file():
         except ValueError as e:
             # Zobrazíme specifickou chybu z validace data
             raise ValueError(f"Neplatné datum konce projektu pro archivaci: {e}")
-
 
         # Resetujeme aktivní soubor v nastavení
         settings["active_excel_file"] = None
@@ -1031,13 +1042,13 @@ def voice_command():
                     'success': False,
                     'error': 'Nejsou vybráni žádní zaměstnanci'
                 })
-            
+
             # Pokud je to volný den, použijeme speciální hodnoty
             if entities.get('is_free_day'):
                 entities['start_time'] = "00:00"
                 entities['end_time'] = "00:00"
                 entities['lunch_duration'] = 0.0
-            
+
             # Záznam pracovní doby nebo volna pro všechny vybrané zaměstnance
             success, message = excel_manager.record_time(
                 employee=selected_employees,
@@ -1075,12 +1086,12 @@ def voice_command():
 def monthly_report_route():
     employee_manager_instance = g.employee_manager
     excel_manager_instance = g.excel_manager
-    
+
     all_employees_data = employee_manager_instance.get_all_employees()
     employee_names = [emp['name'] for emp in all_employees_data]
-    
+
     report_data = None
-    
+
     if request.method == 'POST':
         try:
             selected_month = request.form.get('month', type=int)
@@ -1088,9 +1099,9 @@ def monthly_report_route():
             # getlist pro případ, že by frontend posílal vícekrát stejný název parametru
             # Pokud chceme, aby 'employees' byl vždy seznam, i když je vybrán jen jeden nebo žádný,
             # getlist je správná volba. Pokud by 'employees' mohlo chybět, zvážili bychom default.
-            selected_employees = request.form.getlist('employees') 
-            if not selected_employees: # Pokud je seznam prázdný (žádný zaměstnanec nebyl vybrán)
-                selected_employees = None # Nastavíme na None pro metodu generate_monthly_report
+            selected_employees = request.form.getlist('employees')
+            if not selected_employees:  # Pokud je seznam prázdný (žádný zaměstnanec nebyl vybrán)
+                selected_employees = None  # Nastavíme na None pro metodu generate_monthly_report
 
             # Validace vstupů
             if selected_month is None or not (1 <= selected_month <= 12):
@@ -1101,41 +1112,44 @@ def monthly_report_route():
                                        current_month=datetime.now().month,
                                        current_year=datetime.now().year,
                                        report_data=None,
-                                       selected_employees_post=request.form.getlist('employees')) # Předáme zpět vybrané
+                                       # Předáme zpět vybrané
+                                       selected_employees_post=request.form.getlist('employees'))
 
             if selected_year is None or not (2000 <= selected_year <= 2100):  # Rozumný rozsah pro rok
                 flash('Neplatný rok. Zadejte hodnotu např. mezi 2000 a 2100.', 'error')
                 return render_template("monthly_report.html",
                                        employee_names=employee_names,
-                                       current_month=selected_month, # Použijeme již zadaný měsíc
-                                       current_year=datetime.now().year, # Rok můžeme resetovat nebo ponechat
+                                       current_month=selected_month,  # Použijeme již zadaný měsíc
+                                       current_year=datetime.now().year,  # Rok můžeme resetovat nebo ponechat
                                        report_data=None,
                                        selected_employees_post=request.form.getlist('employees'))
 
-            logger.info(f"Generování měsíčního reportu pro {selected_month}/{selected_year}. Zaměstnanci: {selected_employees}")
-            
+            logger.info(f"Generování měsíčního reportu pro {selected_month}/{selected_year}. "
+                        f"Zaměstnanci: {selected_employees}")
+
             report_data = excel_manager_instance.generate_monthly_report(
                 month=selected_month,
                 year=selected_year,
                 employees=selected_employees
             )
-            
+
             if not report_data:
                 flash('Nebyly nalezeny žádné záznamy pro zadané období a zaměstnance.', 'info')
-            
+
             # Vykreslení šablony s výsledky (nebo prázdnými daty, pokud nic nebylo nalezeno)
             return render_template("monthly_report.html",
                                    employee_names=employee_names,
                                    current_month=selected_month,
                                    current_year=selected_year,
                                    report_data=report_data,
-                                   selected_employees_post=selected_employees if selected_employees else [])  # Předáme vybrané pro zachování stavu
+                                   # Předáme vybrané pro zachování stavu
+                                   selected_employees_post=selected_employees if selected_employees else [])
 
-        except ValueError as e: # Chyby z generate_monthly_report nebo validace typů
+        except ValueError as e:  # Chyby z generate_monthly_report nebo validace typů
             flash(str(e), 'error')
             logger.warning(f"Chyba hodnoty při generování měsíčního reportu: {e}")
             report_data = None
-        except IOError as e: # Chyby souboru z generate_monthly_report
+        except IOError as e:  # Chyby souboru z generate_monthly_report
             flash(str(e), 'error')
             logger.error(f"Chyba souboru při generování měsíčního reportu: {e}", exc_info=True)
             report_data = None
@@ -1143,7 +1157,7 @@ def monthly_report_route():
             logger.error(f"Neočekávaná chyba při generování měsíčního reportu: {e}", exc_info=True)
             flash('Došlo k neočekávané chybě při generování reportu.', 'error')
             report_data = None
-            
+
         # Pokud došlo k chybě, znovu vykreslíme formulář s chybovou hláškou
         # a zachováme co nejvíce zadaných hodnot
         return render_template("monthly_report.html",
@@ -1153,7 +1167,7 @@ def monthly_report_route():
                                report_data=report_data,  # Bude None
                                selected_employees_post=request.form.getlist('employees'))
 
-    else: # GET request
+    else:  # GET request
         current_month = datetime.now().month
         current_year = datetime.now().year
         return render_template("monthly_report.html",
@@ -1161,7 +1175,7 @@ def monthly_report_route():
                                current_month=current_month,
                                current_year=current_year,
                                report_data=None,
-                               selected_employees_post=[]) # Pro GET je seznam vybraných prázdný
+                               selected_employees_post=[])  # Pro GET je seznam vybraných prázdný
 
 
 def validate_email(email):

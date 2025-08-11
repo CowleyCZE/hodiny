@@ -59,7 +59,7 @@ def test_gemini_api_call_with_rate_limit(mock_post, voice_processor, mock_audio_
     result1 = voice_processor._call_gemini_api(mock_audio_file)
     assert "text" in result1
     assert result1["text"] == "Test response"
-    
+
     result2 = voice_processor._call_gemini_api(mock_audio_file)
     assert "text" in result2
 
@@ -79,7 +79,7 @@ def test_gemini_api_caching(voice_processor, mock_audio_file):
     # První volání
     result1 = voice_processor._call_gemini_api(mock_audio_file)
     assert result1 == {"text": "Cached response"}
-    
+
     # Druhé volání by mělo použít cache
     result2 = voice_processor._call_gemini_api(mock_audio_file)
     assert voice_processor.session.post.call_count == 1
@@ -128,7 +128,7 @@ def test_validate_data(voice_processor):
     is_valid, errors = voice_processor._validate_data(valid_data)
     assert is_valid is True
     assert len(errors) == 0
-    
+
     invalid_data = {
         "employee": None,
         "date": "invalid",
@@ -175,7 +175,7 @@ def test_process_voice_command_success(voice_processor, mock_audio_file):
     with patch.object(voice_processor, "_call_gemini_api", return_value=mock_gemini_response), \
          patch("utils.voice_processor.EmployeeManager.get_selected_employees", return_value=["Bláha Jakub"]), \
          patch.object(voice_processor, "_load_employees", return_value=["Bláha Jakub"]):
-        
+
         voice_processor.employee_list = ["Bláha Jakub"]
         result = voice_processor.process_voice_command(mock_audio_file)
 

@@ -20,6 +20,7 @@ from openpyxl.utils.exceptions import InvalidFileException
 from config import Config
 from employee_management import EmployeeManager
 from excel_manager import ExcelManager
+from hodiny2025_manager import Hodiny2025Manager
 from utils.logger import setup_logger
 from zalohy_manager import ZalohyManager
 from utils.voice_processor import VoiceProcessor
@@ -58,6 +59,7 @@ def before_request():
     g.employee_manager = EmployeeManager(Config.DATA_PATH)
     g.excel_manager = ExcelManager(Config.EXCEL_BASE_PATH)
     g.zalohy_manager = ZalohyManager(Config.EXCEL_BASE_PATH)
+    g.hodiny2025_manager = Hodiny2025Manager(Config.EXCEL_BASE_PATH)
 
     # Archivace na začátku týdne
     current_week = datetime.now().isocalendar().week
@@ -160,6 +162,7 @@ def record_time():
         try:
             date = datetime.strptime(form_data["date"], "%Y-%m-%d").date()
             g.excel_manager.ulozit_pracovni_dobu(form_data["date"], form_data["start_time"], form_data["end_time"], form_data["lunch_duration"], selected_employees)
+            g.hodiny2025_manager.zapis_pracovni_doby(form_data["date"], form_data["start_time"], form_data["end_time"], form_data["lunch_duration"], len(selected_employees))
             flash("Záznam byl úspěšně uložen.", "success")
             next_day = (date + timedelta(days=1))
             while next_day.weekday() >= 5: next_day += timedelta(days=1)

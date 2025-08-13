@@ -3,13 +3,18 @@ import os
 import secrets
 from pathlib import Path
 import logging
+from dataclasses import dataclass
 from openpyxl import Workbook
+
 
 class Config:
     IS_PYTHONANYWHERE = "PYTHONANYWHERE_SITE" in os.environ
     SECRET_KEY = os.environ.get("SECRET_KEY", secrets.token_hex(32))
 
-    BASE_DIR = Path(os.path.expanduser("~/hodiny") if IS_PYTHONANYWHERE else os.environ.get("HODINY_BASE_DIR", ".")).resolve()
+    BASE_DIR = Path(
+        os.path.expanduser("~/hodiny") if IS_PYTHONANYWHERE
+        else os.environ.get("HODINY_BASE_DIR", ".")
+    ).resolve()
     DATA_PATH = Path(os.environ.get("HODINY_DATA_PATH", BASE_DIR / "data"))
     EXCEL_BASE_PATH = Path(os.environ.get("HODINY_EXCEL_PATH", BASE_DIR / "excel"))
     EXCEL_TEMPLATE_NAME = "Hodiny_Cap.xlsx"

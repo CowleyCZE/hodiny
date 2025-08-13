@@ -7,8 +7,18 @@
 <div class="container mt-4">
     <h2 class="mb-4">Měsíční Report Odpracovaných Hodin</h2>
 
-    {# Vložení šablony pro zobrazení flash zpráv (např. o úspěchu nebo chybě) #}
-    {% include '_flash_messages.html' %}
+    {# Zobrazení flash zpráv #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages" role="alert" aria-live="polite">
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
 
     {# Formulář pro výběr kritérií pro generování reportu #}
     <form method="POST" action="{{ url_for('monthly_report_route') }}" class="mb-4 p-4 border rounded shadow-sm">

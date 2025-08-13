@@ -21,32 +21,11 @@
         .time-fields.hidden {
             display: none;
         }
-        .file-selector-form {
-            margin-bottom: 2rem;
-            padding: 1rem;
-            background-color: #333;
-            border-radius: 5px;
-        }
     </style>
 {% endblock %}
 
 
 {% block content %}
-    <section class="file-selector-form">
-        <h2>Aktivní soubor pro zápis</h2>
-        <form method="POST" action="{{ url_for('set_active_file') }}">
-            <div class="form-group">
-                <label for="excel_file">Vyberte soubor:</label>
-                <select name="excel_file" id="excel_file" class="form-control">
-                    {% for file in excel_files %}
-                        <option value="{{ file }}" {% if file == active_excel_file %}selected{% endif %}>{{ file }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <button type="submit" class="btn btn-secondary">Nastavit jako aktivní</button>
-        </form>
-    </section>
-
     {% if selected_employees %}
     <section>
         <h2>Vybraní zaměstnanci:</h2>

@@ -120,7 +120,6 @@ def test_hodiny2025_manager():
             else:
                 print(f"   ❌ Chyba v přesčasech: očekáváno {record['expected_overtime']}h, "
                       f"získáno {daily_data.get('overtime', 0)}h")
-                      
         except Exception as e:
             print(f"❌ Záznam {i}: Chyba při čtení - {e}")
     
@@ -131,14 +130,13 @@ def test_hodiny2025_manager():
     current_month = datetime.now().month
     try:
         summary = manager.get_monthly_summary(current_month, 2025)
-        
         print(f"\n📈 Souhrn pro {summary['month_name']} 2025:")
         print(f"   List: {summary['sheet_name']}")
-        print(f"   Celkem hodin: {summary['total_hours']}h")
-        print(f"   Celkem přesčasů: {summary['total_overtime']}h") 
-        print(f"   Celkem za všechny zaměstnance: {summary['total_all_employees']}h")
-        print("✅ Měsíční souhrn úspěšně načten")
-        
+        print(f"   Celkem hodin (Excel vzorec): {summary['total_hours']}h")
+        print(f"   Celkem přesčasů (Excel vzorec): {summary['total_overtime']}h")
+        print(f"   Celkem za všechny zaměstnance (Excel vzorec): {summary['total_all_employees']}h")
+        print("   Poznámka: Hodnoty mohou být 0, pokud Excel neprovedl přepočet vzorců. Denní hodnoty jsou počítány v Pythonu.")
+        print("✅ Měsíční souhrn načten (s upozorněním na přepočet)")
     except Exception as e:
         print(f"❌ Chyba při načítání měsíčního souhrnu: {e}")
     

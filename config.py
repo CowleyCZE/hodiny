@@ -47,13 +47,25 @@ class Config:
 
     DEFAULT_TIME_CONFIG = TimeConfig()
 
+    @dataclass
+    class ProjectConfig:
+        name: str = ""
+        start_date: str = ""
+        end_date: str = ""
+
+    DEFAULT_PROJECT_CONFIG = ProjectConfig()
+
     @classmethod
     def get_default_settings(cls):
         return {
             "start_time": cls.DEFAULT_TIME_CONFIG.start_time,
             "end_time": cls.DEFAULT_TIME_CONFIG.end_time,
             "lunch_duration": cls.DEFAULT_TIME_CONFIG.lunch_duration,
-            "project_info": {"name": "", "start_date": "", "end_date": ""},
+            "project_info": {
+                "name": cls.DEFAULT_PROJECT_CONFIG.name,
+                "start_date": cls.DEFAULT_PROJECT_CONFIG.start_date,
+                "end_date": cls.DEFAULT_PROJECT_CONFIG.end_date,
+            },
             "last_archived_week": 0,  # Sledování posledního archivovaného týdne
         }
 

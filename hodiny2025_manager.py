@@ -93,7 +93,7 @@ class Hodiny2025Manager:
     COL_OVERTIME = 9     # I - Přesčasy
     COL_NIGHT = 10       # J - Noční práce
     COL_WEEKEND = 11     # K - Víkend
-    COL_HOLIDAY_HOURS = 12 # L - Sváteční hodiny
+    COL_HOLIDAY_HOURS = 12  # L - Sváteční hodiny
     COL_EMPLOYEES = 13   # M - Počet zaměstnanců
     COL_TOTAL_ALL = 14   # N - Celkem za všechny
     

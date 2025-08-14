@@ -156,3 +156,38 @@
 2025-08-14 19:22:31 - hodiny2025_manager - INFO - Pracovní doba pro 2025-08-14 byla zapsána do listu 08hod25, řádek 16, sloupce E-F-G-M: 07:00-1.0-18:00-3
 2025-08-14 19:22:37 - hodiny2025_manager - INFO - Pracovní doba pro 2025-08-15 byla zapsána do listu 08hod25, řádek 17, sloupce E-F-G-M: 00:00-0-00:00-0
 2025-08-14 19:36:02 - hodiny2025_manager - INFO - Vytváří se nový soubor: /home/runner/work/hodiny/hodiny/excel/Hodiny2025.xlsx
+2025-08-14 20:19:24 - hodiny2025_manager - INFO - Hodiny2025Manager inicializován pro soubor: /workspaces/hodiny/excel/Hodiny2025.xlsx
+2025-08-14 20:19:24 - hodiny2025_manager - INFO - Vytváří se testovací data pro Hodiny2025.xlsx
+2025-08-14 20:19:30 - hodiny2025_manager - INFO - Pracovní doba pro 2025-01-02 byla zapsána do listu 01hod25, řádek 4, sloupce E-F-G-M: 07:00-0.5-15:30-3
+2025-08-14 20:19:30 - hodiny2025_manager - INFO - ✅ Testovací záznam vytvořen: 2025-01-02
+2025-08-14 20:19:36 - hodiny2025_manager - INFO - Pracovní doba pro 2025-01-03 byla zapsána do listu 01hod25, řádek 5, sloupce E-F-G-M: 07:00-1.0-16:00-3
+2025-08-14 20:19:36 - hodiny2025_manager - INFO - ✅ Testovací záznam vytvořen: 2025-01-03
+2025-08-14 20:19:42 - hodiny2025_manager - INFO - Pracovní doba pro 2025-01-06 byla zapsána do listu 01hod25, řádek 8, sloupce E-F-G-M: 08:00-0.5-16:30-2
+2025-08-14 20:19:42 - hodiny2025_manager - INFO - ✅ Testovací záznam vytvořen: 2025-01-06
+2025-08-14 20:19:49 - hodiny2025_manager - INFO - Pracovní doba pro 2025-01-07 byla zapsána do listu 01hod25, řádek 9, sloupce E-F-G-M: 07:30-1.0-15:30-4
+2025-08-14 20:19:49 - hodiny2025_manager - INFO - ✅ Testovací záznam vytvořen: 2025-01-07
+2025-08-14 20:19:55 - hodiny2025_manager - INFO - Pracovní doba pro 2025-01-08 byla zapsána do listu 01hod25, řádek 10, sloupce E-F-G-M: 07:00-1.0-17:00-3
+2025-08-14 20:19:55 - hodiny2025_manager - INFO - ✅ Testovací záznam vytvořen: 2025-01-08
+2025-08-14 20:19:57 - hodiny2025_manager - INFO - ✅ Vytvořen list pro měsíc 1: 01hod25
+2025-08-14 20:20:00 - hodiny2025_manager - INFO - ✅ Vytvořen list pro měsíc 2: 02hod25
+2025-08-14 20:20:02 - hodiny2025_manager - INFO - ✅ Vytvořen list pro měsíc 3: 03hod25
+2025-08-14 20:20:02 - hodiny2025_manager - INFO - Testovací data byla vytvořena!
+2025-08-14 20:20:33 - hodiny2025_manager - INFO - Hodiny2025Manager inicializován pro soubor: /workspaces/hodiny/excel/Hodiny2025.xlsx
+2025-08-14 20:20:33 - hodiny2025_manager - INFO - Vytváří se testovací data pro Hodiny2025.xlsx
+2025-08-14 20:20:38 - hodiny2025_manager - INFO - Pracovní doba pro 2025-01-02 byla zapsána do listu 01hod25, řádek 4, sloupce E-F-G-M: 07:00-0.5-15:30-3
+2025-08-14 20:20:38 - hodiny2025_manager - INFO - ✅ Testovací záznam vytvořen: 2025-01-02
+2025-08-14 20:20:43 - hodiny2025_manager - INFO - Pracovní doba pro 2025-01-03 byla zapsána do listu 01hod25, řádek 5, sloupce E-F-G-M: 07:00-1.0-16:00-3
+2025-08-14 20:20:43 - hodiny2025_manager - INFO - ✅ Testovací záznam vytvořen: 2025-01-03
+2025-08-14 20:20:48 - hodiny2025_manager - INFO - Pracovní doba pro 2025-01-06 byla zapsána do listu 01hod25, řádek 8, sloupce E-F-G-M: 08:00-0.5-16:30-2
+2025-08-14 20:20:48 - hodiny2025_manager - INFO - ✅ Testovací záznam vytvořen: 2025-01-06
+2025-08-14 20:20:53 - hodiny2025_manager - INFO - Pracovní doba pro 2025-01-07 byla zapsána do listu 01hod25, řádek 9, sloupce E-F-G-M: 07:30-1.0-15:30-4
+2025-08-14 20:20:53 - hodiny2025_manager - INFO - ✅ Testovací záznam vytvořen: 2025-01-07
+2025-08-14 20:20:58 - hodiny2025_manager - INFO - Pracovní doba pro 2025-01-08 byla zapsána do listu 01hod25, řádek 10, sloupce E-F-G-M: 07:00-1.0-17:00-3
+2025-08-14 20:20:58 - hodiny2025_manager - INFO - ✅ Testovací záznam vytvořen: 2025-01-08
+2025-08-14 20:21:00 - hodiny2025_manager - INFO - ✅ Vytvořen list pro měsíc 1: 01hod25
+2025-08-14 20:21:02 - hodiny2025_manager - INFO - ✅ Vytvořen list pro měsíc 2: 02hod25
+2025-08-14 20:21:04 - hodiny2025_manager - INFO - ✅ Vytvořen list pro měsíc 3: 03hod25
+2025-08-14 20:21:04 - hodiny2025_manager - INFO - Testovací data byla vytvořena!
+2025-08-14 20:21:09 - hodiny2025_manager - INFO - Pracovní doba pro 2025-08-13 byla zapsána do listu 08hod25, řádek 15, sloupce E-F-G-M: 08:00-1.0-16:30-5
+2025-08-14 20:21:15 - hodiny2025_manager - INFO - Pracovní doba pro 2025-08-14 byla zapsána do listu 08hod25, řádek 16, sloupce E-F-G-M: 07:00-1.0-18:00-3
+2025-08-14 20:21:20 - hodiny2025_manager - INFO - Pracovní doba pro 2025-08-15 byla zapsána do listu 08hod25, řádek 17, sloupce E-F-G-M: 00:00-0-00:00-0

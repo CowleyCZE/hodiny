@@ -31,7 +31,7 @@ def test_hodiny2025_manager():
         print("✅ Hodiny2025Manager úspěšně inicializován")
     except Exception as e:
         print(f"❌ Chyba při inicializaci: {e}")
-        return False
+        assert False, f"Inicializace selhala: {e}"
     
     # Test 1: Vytvoření testovacích dat
     print("\n📝 TEST 1: Vytváření testovacích dat")
@@ -42,7 +42,7 @@ def test_hodiny2025_manager():
         print("✅ Testovací data byla vytvořena")
     except Exception as e:
         print(f"❌ Chyba při vytváření testovacích dat: {e}")
-        return False
+        assert False, f"Vytváření testovacích dat selhalo: {e}"
     
     # Test 2: Zápis jednotlivých záznamů
     print("\n✏️ TEST 2: Zápis pracovní doby")
@@ -188,7 +188,8 @@ def test_hodiny2025_manager():
     print("\n🎉 TEST DOKONČEN!")
     print("=" * 50)
     
-    return True
+    # Don't return True - pytest functions should not return anything
+    assert True
 
 def print_cell_mapping_reference():
     """Vypíše referenční přehled mapování buněk."""

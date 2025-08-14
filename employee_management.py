@@ -26,13 +26,13 @@ class EmployeeManager:
         try:
             with open(self.config_file, "r", encoding="utf-8") as f:
                 config = json.load(f)
-            
+
             self.zamestnanci = sorted(config.get("zamestnanci", []))
             self.vybrani_zamestnanci = config.get("vybrani_zamestnanci", [])
 
             if "Čáp Jakub" in self.zamestnanci and "Čáp Jakub" not in self.vybrani_zamestnanci:
                 self.vybrani_zamestnanci.append("Čáp Jakub")
-            
+
             self._sort_selected_employees()
         except (json.JSONDecodeError, Exception) as e:
             logger.error(f"Chyba při načítání konfigurace: {e}", exc_info=True)
@@ -49,10 +49,12 @@ class EmployeeManager:
             self._sort_selected_employees()
             self.data_path.mkdir(parents=True, exist_ok=True)
             with open(self.config_file, "w", encoding="utf-8") as f:
-                json.dump({
-                    "zamestnanci": sorted(self.zamestnanci),
-                    "vybrani_zamestnanci": self.vybrani_zamestnanci
-                }, f, ensure_ascii=False, indent=4)
+                json.dump(
+                    {"zamestnanci": sorted(self.zamestnanci), "vybrani_zamestnanci": self.vybrani_zamestnanci},
+                    f,
+                    ensure_ascii=False,
+                    indent=4,
+                )
             return True
         except Exception as e:
             logger.error(f"Chyba při ukládání konfigurace: {e}", exc_info=True)
@@ -92,7 +94,7 @@ class EmployeeManager:
             validated_new_name = self._validate_employee_name(new_name)
             if validated_new_name in self.zamestnanci:
                 raise ValueError(f"Zaměstnanec '{validated_new_name}' již existuje.")
-            
+
             if old_name in self.zamestnanci:
                 self.zamestnanci[self.zamestnanci.index(old_name)] = validated_new_name
                 if old_name in self.vybrani_zamestnanci:

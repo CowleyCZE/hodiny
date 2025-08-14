@@ -1,18 +1,19 @@
-import unittest
 import tempfile
-from pathlib import Path
+import unittest
 from datetime import datetime
+from pathlib import Path
+
 from openpyxl import Workbook, load_workbook
 
-from zalohy_manager import ZalohyManager
 from config import Config
+from zalohy_manager import ZalohyManager
+
 
 class TestZalohyManager(unittest.TestCase):
     def setUp(self):
         self.temp_dir = tempfile.TemporaryDirectory()
         self.excel_base_path = Path(self.temp_dir.name)
-        self.active_filename = "test_zalohy.xlsx"
-        self.active_file_path = self.excel_base_path / self.active_filename
+        self.active_file_path = self.excel_base_path / Config.EXCEL_TEMPLATE_NAME
 
         wb = Workbook()
         ws = wb.create_sheet(Config.EXCEL_ADVANCES_SHEET_NAME)
@@ -23,18 +24,17 @@ class TestZalohyManager(unittest.TestCase):
         if "Sheet" in wb.sheetnames:
             wb.remove(wb["Sheet"])
         wb.save(self.active_file_path)
-        
-        self.zalohy_manager = ZalohyManager(
-            base_path=str(self.excel_base_path),
-            active_filename=self.active_filename
-        )
+
+        self.zalohy_manager = ZalohyManager(base_path=str(self.excel_base_path))
 
     def tearDown(self):
         self.temp_dir.cleanup()
 
     def _read_cell(self, cell):
-        with load_workbook(self.active_file_path, data_only=True) as wb:
-            return wb[Config.EXCEL_ADVANCES_SHEET_NAME][cell].value
+        wb = load_workbook(self.active_file_path, data_only=True)
+        value = wb[Config.EXCEL_ADVANCES_SHEET_NAME][cell].value
+        wb.close()
+        return value
 
     def test_get_option_names(self):
         options = self.zalohy_manager.get_option_names()
@@ -42,25 +42,47 @@ class TestZalohyManager(unittest.TestCase):
         self.assertEqual(options[0], Config.DEFAULT_ADVANCE_OPTION_1)
 
     def test_add_advance_new_employee(self):
-        self.zalohy_manager.add_or_update_employee_advance("Nový", 100, "EUR", Config.DEFAULT_ADVANCE_OPTION_1, "2025-01-01")
+        self.zalohy_manager.add_or_update_employee_advance(
+            "Nový", 100, "EUR", Config.DEFAULT_ADVANCE_OPTION_1, "2025-01-01"
+        )
         self.assertEqual(self._read_cell("A9"), "Nový")
         self.assertEqual(self._read_cell("B9"), 100)
         self.assertEqual(self._read_cell("Z9").date(), datetime(2025, 1, 1).date())
 
     def test_add_advances_to_existing_employee(self):
-        self.zalohy_manager.add_or_update_employee_advance("Stávající", 50, "EUR", Config.DEFAULT_ADVANCE_OPTION_1, "2025-01-01")
-        self.zalohy_manager.add_or_update_employee_advance("Stávající", 25, "EUR", Config.DEFAULT_ADVANCE_OPTION_1, "2025-01-02")
+        self.zalohy_manager.add_or_update_employee_advance(
+            "Stávající", 50, "EUR", Config.DEFAULT_ADVANCE_OPTION_1, "2025-01-01"
+        )
+        self.zalohy_manager.add_or_update_employee_advance(
+            "Stávající", 25, "EUR", Config.DEFAULT_ADVANCE_OPTION_1, "2025-01-02"
+        )
         self.assertEqual(self._read_cell("B9"), 75)
-    
+
     def test_advance_options_and_currencies(self):
-        self.zalohy_manager.add_or_update_employee_advance("Test", 1, "EUR", Config.DEFAULT_ADVANCE_OPTION_1, "2025-01-01")
-        self.zalohy_manager.add_or_update_employee_advance("Test", 2, "CZK", Config.DEFAULT_ADVANCE_OPTION_1, "2025-01-01")
-        self.zalohy_manager.add_or_update_employee_advance("Test", 3, "EUR", Config.DEFAULT_ADVANCE_OPTION_2, "2025-01-01")
-        self.zalohy_manager.add_or_update_employee_advance("Test", 4, "CZK", Config.DEFAULT_ADVANCE_OPTION_2, "2025-01-01")
-        self.zalohy_manager.add_or_update_employee_advance("Test", 5, "EUR", Config.DEFAULT_ADVANCE_OPTION_3, "2025-01-01")
-        self.zalohy_manager.add_or_update_employee_advance("Test", 6, "CZK", Config.DEFAULT_ADVANCE_OPTION_3, "2025-01-01")
-        self.zalohy_manager.add_or_update_employee_advance("Test", 7, "EUR", Config.DEFAULT_ADVANCE_OPTION_4, "2025-01-01")
-        self.zalohy_manager.add_or_update_employee_advance("Test", 8, "CZK", Config.DEFAULT_ADVANCE_OPTION_4, "2025-01-01")
+        self.zalohy_manager.add_or_update_employee_advance(
+            "Test", 1, "EUR", Config.DEFAULT_ADVANCE_OPTION_1, "2025-01-01"
+        )
+        self.zalohy_manager.add_or_update_employee_advance(
+            "Test", 2, "CZK", Config.DEFAULT_ADVANCE_OPTION_1, "2025-01-01"
+        )
+        self.zalohy_manager.add_or_update_employee_advance(
+            "Test", 3, "EUR", Config.DEFAULT_ADVANCE_OPTION_2, "2025-01-01"
+        )
+        self.zalohy_manager.add_or_update_employee_advance(
+            "Test", 4, "CZK", Config.DEFAULT_ADVANCE_OPTION_2, "2025-01-01"
+        )
+        self.zalohy_manager.add_or_update_employee_advance(
+            "Test", 5, "EUR", Config.DEFAULT_ADVANCE_OPTION_3, "2025-01-01"
+        )
+        self.zalohy_manager.add_or_update_employee_advance(
+            "Test", 6, "CZK", Config.DEFAULT_ADVANCE_OPTION_3, "2025-01-01"
+        )
+        self.zalohy_manager.add_or_update_employee_advance(
+            "Test", 7, "EUR", Config.DEFAULT_ADVANCE_OPTION_4, "2025-01-01"
+        )
+        self.zalohy_manager.add_or_update_employee_advance(
+            "Test", 8, "CZK", Config.DEFAULT_ADVANCE_OPTION_4, "2025-01-01"
+        )
         self.assertEqual(self._read_cell("B9"), 1)
         self.assertEqual(self._read_cell("C9"), 2)
         self.assertEqual(self._read_cell("D9"), 3)
@@ -72,13 +94,20 @@ class TestZalohyManager(unittest.TestCase):
 
     def test_invalid_inputs(self):
         with self.assertRaises(ValueError):
-            self.zalohy_manager.add_or_update_employee_advance("Test", -1, "EUR", Config.DEFAULT_ADVANCE_OPTION_1, "2025-01-01")
+            self.zalohy_manager.add_or_update_employee_advance(
+                "Test", -1, "EUR", Config.DEFAULT_ADVANCE_OPTION_1, "2025-01-01"
+            )
         with self.assertRaises(ValueError):
-            self.zalohy_manager.add_or_update_employee_advance("Test", 100, "USD", Config.DEFAULT_ADVANCE_OPTION_1, "2025-01-01")
+            self.zalohy_manager.add_or_update_employee_advance(
+                "Test", 100, "USD", Config.DEFAULT_ADVANCE_OPTION_1, "2025-01-01"
+            )
         with self.assertRaises(ValueError):
             self.zalohy_manager.add_or_update_employee_advance("Test", 100, "EUR", "Neplatná", "2025-01-01")
         with self.assertRaises(ValueError):
-            self.zalohy_manager.add_or_update_employee_advance("Test", 100, "EUR", Config.DEFAULT_ADVANCE_OPTION_1, "neplatne-datum")
+            self.zalohy_manager.add_or_update_employee_advance(
+                "Test", 100, "EUR", Config.DEFAULT_ADVANCE_OPTION_1, "neplatne-datum"
+            )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

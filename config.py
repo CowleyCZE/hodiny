@@ -1,9 +1,10 @@
 # config.py
+import logging
 import os
 import secrets
-from pathlib import Path
-import logging
 from dataclasses import dataclass
+from pathlib import Path
+
 from openpyxl import Workbook
 
 
@@ -12,8 +13,7 @@ class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", secrets.token_hex(32))
 
     BASE_DIR = Path(
-        os.path.expanduser("~/hodiny") if IS_PYTHONANYWHERE
-        else os.environ.get("HODINY_BASE_DIR", ".")
+        os.path.expanduser("~/hodiny") if IS_PYTHONANYWHERE else os.environ.get("HODINY_BASE_DIR", ".")
     ).resolve()
     DATA_PATH = Path(os.environ.get("HODINY_DATA_PATH", BASE_DIR / "data"))
     EXCEL_BASE_PATH = Path(os.environ.get("HODINY_EXCEL_PATH", BASE_DIR / "excel"))
@@ -26,7 +26,7 @@ class Config:
     SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD")
     RECIPIENT_EMAIL = os.environ.get("RECIPIENT_EMAIL")
 
-    DEFAULT_APP_NAME = 'Evidence pracovní doby'
+    DEFAULT_APP_NAME = "Evidence pracovní doby"
     SMTP_TIMEOUT = 60
     MAX_ROWS_TO_DISPLAY_EXCEL_VIEWER = 500
     EXCEL_EMPLOYEE_START_ROW = 9
@@ -88,6 +88,6 @@ class Config:
             SESSION_COOKIE_HTTPONLY=True,
             PERMANENT_SESSION_LIFETIME=3600,
             PROPAGATE_EXCEPTIONS=cls.IS_PYTHONANYWHERE,
-            PREFERRED_URL_SCHEME="https" if cls.IS_PYTHONANYWHERE else "http"
+            PREFERRED_URL_SCHEME="https" if cls.IS_PYTHONANYWHERE else "http",
         )
         return app

@@ -1,17 +1,18 @@
 # excel_manager.py
-import shutil
-from config import Config
 import logging
+import shutil
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 from threading import Lock
 
-from openpyxl import Workbook, load_workbook
-from openpyxl.utils import get_column_letter
+from openpyxl import load_workbook
+
+from config import Config
 
 try:
     from utils.logger import setup_logger
+
     logger = setup_logger("excel_manager")
 except ImportError:
     logging.basicConfig(level=logging.INFO)
@@ -46,7 +47,9 @@ class ExcelManager:
                 if not self.active_file_path.exists():
                     raise FileNotFoundError(f"Soubor '{self.active_filename}' nenalezen.")
                 try:
-                    wb = load_workbook(filename=str(self.active_file_path), read_only=read_only, data_only=not read_only)
+                    wb = load_workbook(
+                        filename=str(self.active_file_path), read_only=read_only, data_only=not read_only
+                    )
                     if not read_only:
                         self._workbook_cache[cache_key] = wb
                 except Exception as e:
@@ -62,7 +65,7 @@ class ExcelManager:
         if current_week_number > last_archived_week:
             archive_filename = f"Hodiny_Cap_Tyden_{last_archived_week}.xlsx"
             archive_path = self.base_path / archive_filename
-            
+
             # 1. Vytvoření archivní kopie
             shutil.copy(self.active_file_path, archive_path)
             logger.info(f"Archivován soubor: {archive_path}")
@@ -72,21 +75,21 @@ class ExcelManager:
                 for sheet_name in wb.sheetnames:
                     if sheet_name.startswith(Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME):
                         wb.remove(wb[sheet_name])
-                
+
                 # Vytvoření nového čistého listu pro aktuální týden
                 wb.create_sheet(Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME)
-            
+
             # 3. Aktualizace nastavení
             settings["last_archived_week"] = current_week_number
             # Tuto funkci bude muset zavolat app.py, protože excel_manager nemá přístup k save_settings_to_file
-            return True 
+            return True
         return False
 
     def ulozit_pracovni_dobu(self, date, start_time, end_time, lunch_duration, employees):
         try:
             week_number = self.ziskej_cislo_tydne(date).week
             sheet_name = f"{Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME} {week_number}"
-            
+
             with self._get_workbook() as workbook:
                 if sheet_name not in workbook.sheetnames:
                     workbook.create_sheet(sheet_name)
@@ -94,11 +97,25 @@ class ExcelManager:
                 sheet = workbook[sheet_name]
                 weekday = datetime.strptime(date, "%Y-%m-%d").weekday()
                 day_column_index = 2 + 2 * weekday
-                
-                total_hours = round(((datetime.strptime(end_time, "%H:%M") - datetime.strptime(start_time, "%H:%M")).total_seconds() / 3600) - float(lunch_duration), 2)
-                
-                employee_rows = {sheet.cell(row=r, column=1).value: r for r in range(Config.EXCEL_EMPLOYEE_START_ROW, sheet.max_row + 1)}
-                next_empty_row = sheet.max_row + 1 if sheet.max_row >= Config.EXCEL_EMPLOYEE_START_ROW else Config.EXCEL_EMPLOYEE_START_ROW
+
+                total_hours = round(
+                    (
+                        (datetime.strptime(end_time, "%H:%M") - datetime.strptime(start_time, "%H:%M")).total_seconds()
+                        / 3600
+                    )
+                    - float(lunch_duration),
+                    2,
+                )
+
+                employee_rows = {
+                    sheet.cell(row=r, column=1).value: r
+                    for r in range(Config.EXCEL_EMPLOYEE_START_ROW, sheet.max_row + 1)
+                }
+                next_empty_row = (
+                    sheet.max_row + 1
+                    if sheet.max_row >= Config.EXCEL_EMPLOYEE_START_ROW
+                    else Config.EXCEL_EMPLOYEE_START_ROW
+                )
 
                 for employee in employees:
                     row = employee_rows.get(employee)
@@ -106,13 +123,13 @@ class ExcelManager:
                         row = next_empty_row
                         sheet.cell(row=row, column=1, value=employee)
                         next_empty_row += 1
-                    sheet.cell(row=row, column=day_column_index + 1, value=total_hours).number_format = '0.00'
-                
+                    sheet.cell(row=row, column=day_column_index + 1, value=total_hours).number_format = "0.00"
+
                 sheet.cell(row=7, column=day_column_index).value = datetime.strptime(start_time, "%H:%M").time()
-                sheet.cell(row=7, column=day_column_index).number_format = 'HH:MM'
+                sheet.cell(row=7, column=day_column_index).number_format = "HH:MM"
                 sheet.cell(row=80, column=day_column_index).value = datetime.strptime(date, "%Y-%m-%d").date()
-                sheet.cell(row=80, column=day_column_index).number_format = 'DD.MM.YYYY'
-                
+                sheet.cell(row=80, column=day_column_index).number_format = "DD.MM.YYYY"
+
                 logger.info(f"Uložena pracovní doba pro {date} do listu {sheet_name}.")
                 return True
         except (FileNotFoundError, ValueError, IOError, Exception) as e:
@@ -140,7 +157,7 @@ class ExcelManager:
     def generate_monthly_report(self, month, year, employees=None):
         if not (1 <= month <= 12 and 2000 <= year <= 2100):
             raise ValueError("Neplatný měsíc nebo rok.")
-        
+
         report_data = {}
         try:
             with self._get_workbook(read_only=True) as workbook:
@@ -151,7 +168,7 @@ class ExcelManager:
                             employee_name = sheet.cell(row=r_idx, column=1).value
                             if not employee_name or (employees and employee_name not in employees):
                                 continue
-                            
+
                             if employee_name not in report_data:
                                 report_data[employee_name] = {"total_hours": 0.0, "free_days": 0}
 
@@ -167,8 +184,8 @@ class ExcelManager:
         except (FileNotFoundError, IOError, Exception) as e:
             logger.error(f"Chyba při generování měsíčního reportu: {e}", exc_info=True)
             return {}
-        
+
         return {emp: data for emp, data in report_data.items() if data["total_hours"] > 0 or data["free_days"] > 0}
-    
+
     def update_project_info(self, project_name, start_date, end_date):
         return True

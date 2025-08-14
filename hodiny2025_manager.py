@@ -49,13 +49,13 @@ I[řádek]: =MAX(0,H[řádek]-8)                # Přesčasy = max(0, celkem-8)
 N[řádek]: =H[řádek]*M[řádek]                # Celkem za všechny = hodiny*počet_zaměstnanců
 """
 
-from datetime import datetime, time, timedelta
+from datetime import datetime, time
 from pathlib import Path
 import logging
 import calendar
 from openpyxl import load_workbook, Workbook
 from openpyxl.utils.exceptions import InvalidFileException
-from openpyxl.styles import Font, Border, Side, Alignment, PatternFill
+from openpyxl.styles import Font, Alignment, PatternFill
 from openpyxl.worksheet.worksheet import Worksheet
 
 try:
@@ -347,12 +347,16 @@ class Hodiny2025Manager:
                 sheet.cell(row=row, column=self.COL_TOTAL_ALL).value = \
                     f"=H{row}*M{row}"
             
-            # Uložení a vynucení přepočtu formulí
-            workbook.calculation.calcMode = 'auto'
+            # Uložení a vynucení automatického přepočtu formulí
+            try:
+                workbook.calculation.calcMode = 'auto'
+            except Exception:  # kompatibilita pokud atribut není dostupný
+                pass
             workbook.save(self.file_path)
-            
-            logger.info(f"Pracovní doba pro {date} byla zapsána do listu {sheet.title}, "
-                       f"řádek {row}, sloupce E-F-G-M: {start_time}-{lunch_duration}-{end_time}-{num_employees}")
+            logger.info(
+                f"Pracovní doba pro {date} byla zapsána do listu {sheet.title}, řádek {row}, "
+                f"sloupce E-F-G-M: {start_time}-{lunch_duration}-{end_time}-{num_employees}"
+            )
             
         except Exception as e:
             logger.error(f"Chyba při zápisu pracovní doby pro {date}: {e}", exc_info=True)

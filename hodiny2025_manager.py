@@ -232,19 +232,19 @@ class Hodiny2025Manager:
         cell = sheet.cell(row=self.SUMMARY_ROW, column=1)
         if not isinstance(cell, MergedCell):
             cell.value = "SOUHRN:"
-        
+
         cell = sheet.cell(row=self.SUMMARY_ROW, column=self.COL_TOTAL_HOURS)
         if not isinstance(cell, MergedCell):
             cell.value = (
                 f"=SUM(H{self.DATA_START_ROW}:H{self.DATA_END_ROW})"
             )
-        
+
         cell = sheet.cell(row=self.SUMMARY_ROW, column=self.COL_OVERTIME)
         if not isinstance(cell, MergedCell):
             cell.value = (
                 f"=SUM(I{self.DATA_START_ROW}:I{self.DATA_END_ROW})"
             )
-        
+
         cell = sheet.cell(row=self.SUMMARY_ROW, column=self.COL_TOTAL_ALL)
         if not isinstance(cell, MergedCell):
             cell.value = (

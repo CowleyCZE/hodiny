@@ -37,8 +37,8 @@ def save_settings_to_file(settings_data):
         with open(Config.SETTINGS_FILE_PATH, "w", encoding="utf-8") as f:
             json.dump(settings_data, f, indent=4, ensure_ascii=False)
         return True
-    except (IOError, Exception) as e:
-        logger.error(f"Chyba při ukládání nastavení: {e}", exc_info=True)
+    except (IOError, TypeError) as e:
+        logger.error("Chyba při ukládání nastavení: %s", e, exc_info=True)
         return False
 
 
@@ -49,8 +49,8 @@ def load_settings_from_file():
     try:
         with open(Config.SETTINGS_FILE_PATH, "r", encoding="utf-8") as f:
             return json.load(f)
-    except (json.JSONDecodeError, Exception) as e:
-        logger.error(f"Chyba při načítání nastavení: {e}", exc_info=True)
+    except (json.JSONDecodeError, IOError) as e:
+        logger.error("Chyba při načítání nastavení: %s", e, exc_info=True)
         return Config.get_default_settings()
 
 
@@ -74,7 +74,7 @@ def before_request():
 
 
 @app.teardown_request
-def teardown_request(exception=None):
+def teardown_request(_exception=None):
     """Uzavře případné otevřené workbooky (flush cache)."""
     if hasattr(g, "excel_manager") and g.excel_manager:
         g.excel_manager.close_cached_workbooks()
@@ -88,7 +88,7 @@ def index():
     current_date = datetime.now().strftime("%Y-%m-%d")
     try:
         excel_exists = g.excel_manager.get_active_file_path().exists()
-    except Exception:
+    except FileNotFoundError:
         excel_exists = False
     return render_template(
         "index.html",
@@ -104,8 +104,8 @@ def download_file():
     """Stáhne aktuálně aktivní Excel soubor."""
     try:
         return send_file(g.excel_manager.get_active_file_path(), as_attachment=True)
-    except Exception as e:
-        logger.error(f"Chyba při stahování souboru: {e}", exc_info=True)
+    except FileNotFoundError as e:
+        logger.error("Chyba při stahování souboru: %s", e, exc_info=True)
         flash("Chyba při stahování souboru.", "error")
         return redirect(url_for("index"))
 
@@ -126,16 +126,22 @@ def send_email():
         msg.attach(MIMEText("V příloze zasílám výkaz práce.", "plain", "utf-8"))
 
         with open(g.excel_manager.get_active_file_path(), "rb") as f:
-            attachment = MIMEApplication(f.read(), _subtype="vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-            attachment.add_header("Content-Disposition", "attachment", filename=g.excel_manager.active_filename)
+            attachment = MIMEApplication(
+                f.read(), _subtype="vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+            attachment.add_header(
+                "Content-Disposition", "attachment", filename=g.excel_manager.active_filename
+            )
             msg.attach(attachment)
 
-        with smtplib.SMTP_SSL(Config.SMTP_SERVER, Config.SMTP_PORT, timeout=Config.SMTP_TIMEOUT) as smtp:
+        with smtplib.SMTP_SSL(
+            Config.SMTP_SERVER, Config.SMTP_PORT, timeout=Config.SMTP_TIMEOUT
+        ) as smtp:
             smtp.login(sender, Config.SMTP_PASSWORD if Config.SMTP_PASSWORD is not None else "")
             smtp.send_message(msg)
         flash("Email byl úspěšně odeslán.", "success")
-    except (ValueError, smtplib.SMTPException, Exception) as e:
-        logger.error(f"Chyba při odesílání emailu: {e}", exc_info=True)
+    except (ValueError, smtplib.SMTPException, FileNotFoundError) as e:
+        logger.error("Chyba při odesílání emailu: %s", e, exc_info=True)
         flash("Chyba při odesílání emailu.", "error")
     return redirect(url_for("index"))
 
@@ -159,8 +165,10 @@ def manage_employees():
                 new_name = request.form.get("new_name", "").strip()
                 g.employee_manager.upravit_zamestnance_podle_jmena(old_name, new_name)
             elif action == "delete":
-                g.employee_manager.smazat_zamestnance_podle_jmena(request.form.get("employee_name", ""))
-        except (ValueError, Exception) as e:
+                g.employee_manager.smazat_zamestnance_podle_jmena(
+                    request.form.get("employee_name", "")
+                )
+        except ValueError as e:
             flash(str(e), "error")
     return render_template("employees.html", employees=g.employee_manager.get_all_employees())
 
@@ -193,8 +201,12 @@ def record_time():
             date = datetime.strptime(current_date, "%Y-%m-%d").date()
             if is_free_day:
                 # Volný den = explicitně 0 hodin, zachová konzistentní záznam
-                g.excel_manager.ulozit_pracovni_dobu(current_date, "00:00", "00:00", "0", selected_employees)
-                g.hodiny2025_manager.zapis_pracovni_doby(current_date, "00:00", "00:00", "0", len(selected_employees))
+                g.excel_manager.ulozit_pracovni_dobu(
+                    current_date, "00:00", "00:00", "0", selected_employees
+                )
+                g.hodiny2025_manager.zapis_pracovni_doby(
+                    current_date, "00:00", "00:00", "0", len(selected_employees)
+                )
             else:
                 g.excel_manager.ulozit_pracovni_dobu(
                     current_date, start_time, end_time, lunch_duration, selected_employees
@@ -208,7 +220,7 @@ def record_time():
             while next_day.weekday() >= 5:
                 next_day += timedelta(days=1)
             return redirect(url_for("record_time", next_date=next_day.strftime("%Y-%m-%d")))
-        except (ValueError, IOError, Exception) as e:
+        except (ValueError, IOError, FileNotFoundError) as e:
             flash(str(e), "error")
 
     return render_template(
@@ -241,7 +253,9 @@ def excel_viewer():
             data=[],
         )
 
-    selected_file = requested_file if requested_file in excel_files else g.excel_manager.active_filename
+    selected_file = (
+        requested_file if requested_file in excel_files else g.excel_manager.active_filename
+    )
     selected_path = base_path / selected_file
     try:
         wb = load_workbook(selected_path, read_only=True, data_only=True)
@@ -256,14 +270,16 @@ def excel_viewer():
                 active_sheet=None,
                 data=[],
             )
-        active_sheet_name = active_sheet_name if active_sheet_name in sheet_names else sheet_names[0]
+        active_sheet_name = (
+            active_sheet_name if active_sheet_name in sheet_names else sheet_names[0]
+        )
         sheet = wb[active_sheet_name]
         for i, row in enumerate(sheet.iter_rows(values_only=True)):
             if i >= Config.MAX_ROWS_TO_DISPLAY_EXCEL_VIEWER:
                 break
             data.append([str(c) if c is not None else "" for c in row])
         wb.close()
-    except (FileNotFoundError, InvalidFileException, Exception) as e:
+    except (FileNotFoundError, InvalidFileException) as e:
         flash(f"Chyba při zobrazení souboru: {e}", "error")
         return redirect(url_for("index"))
 
@@ -290,10 +306,11 @@ def settings_page():
                     "lunch_duration": float(request.form["lunch_duration"].replace(",", ".")),
                 }
             )
-            save_settings_to_file(settings_to_save)
+            if not save_settings_to_file(settings_to_save):
+                raise IOError("Nepodařilo se uložit nastavení.")
             session["settings"] = settings_to_save
             flash("Nastavení bylo úspěšně uloženo.", "success")
-        except (ValueError, Exception) as e:
+        except (ValueError, IOError) as e:
             flash(str(e), "error")
 
     return render_template("settings_page.html", settings=session.get("settings", {}))
@@ -307,10 +324,14 @@ def zalohy():
             form = request.form
             amount = float(form["amount"].replace(",", "."))
             g.zalohy_manager.add_or_update_employee_advance(
-                form["employee_name"], amount, form["currency"], form["option"], form["date"]
+                form["employee_name"],
+                amount,
+                form["currency"],
+                form["option"],
+                form["date"],
             )
             flash("Záloha byla úspěšně uložena.", "success")
-        except (ValueError, Exception) as e:
+        except (ValueError, IOError) as e:
             flash(str(e), "error")
 
     return render_template(
@@ -330,10 +351,12 @@ def monthly_report_route():
             month = int(request.form["month"])
             year = int(request.form["year"])
             employees = request.form.getlist("employees") or None
-            report_data = g.excel_manager.generate_monthly_report(month, year, employees)
+            report_data = g.excel_manager.generate_monthly_report(
+                month, year, employees
+            )
             if not report_data:
                 flash("Nebyly nalezeny žádné záznamy.", "info")
-        except (ValueError, Exception) as e:
+        except (ValueError, FileNotFoundError) as e:
             flash(str(e), "error")
 
     employee_names = [emp["name"] for emp in g.employee_manager.get_all_employees()]

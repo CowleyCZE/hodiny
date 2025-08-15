@@ -7,29 +7,35 @@ Funkce:
 """
 import os
 import re
-import requests
+import time
+from collections import deque
 from datetime import datetime, timedelta
+from functools import lru_cache
+
+import requests
+from requests_cache import CachedSession
+from tenacity import (
+    retry, retry_if_exception_type, stop_after_attempt,
+    wait_exponential
+)
+
+from config import Config
 from employee_management import EmployeeManager
 from utils.logger import setup_logger
-from functools import lru_cache
-from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
-from requests_cache import CachedSession
-from collections import deque
-import time
-from config import Config
 
 logger = setup_logger("voice_processor")
 
 
 class RateLimiter:
+    """Simple sliding window rate limiter (in-memory)."""
+
     def __init__(self, max_requests, time_window):
-        """Simple sliding window limiter (in‑memory)."""
         self.max_requests = max_requests
         self.time_window = time_window
         self.requests = deque()
 
     def can_make_request(self):
-        """Vrátí True pokud lze provést další požadavek (v rámci limitu)."""
+        """Vrátí True pokud lze provést další požadavek."""
         now = time.time()
         while self.requests and self.requests[0] < now - self.time_window:
             self.requests.popleft()
@@ -41,20 +47,17 @@ class RateLimiter:
 
 
 class VoiceProcessor:
+    """Zpracovává hlasové nebo textové příkazy a extrahuje z nich entity."""
+
     def __init__(self):
-        """Inicializace procesoru hlasu"""
-        # Volitelné atributy (nemusí být v Config definovány)
         self.gemini_api_key = getattr(Config, "GEMINI_API_KEY", os.environ.get("GEMINI_API_KEY"))
         self.gemini_api_url = getattr(Config, "GEMINI_API_URL", os.environ.get("GEMINI_API_URL"))
         self.employee_manager = EmployeeManager(data_path="data")
-        self.default_lunch_duration = 1.0  # Přednastavená délka oběda na 1 hodinu
-
-        # Inicializace rate limiteru
+        self.default_lunch_duration = 1.0
         self.rate_limiter = RateLimiter(
             getattr(Config, "RATE_LIMIT_REQUESTS", 5),
             getattr(Config, "RATE_LIMIT_WINDOW", 60),
         )
-
         self.session = requests.Session()
 
     def init_cache_session(self):
@@ -69,239 +72,141 @@ class VoiceProcessor:
 
     @lru_cache(maxsize=100)
     def _load_employees(self):
-        """Načte seznam zaměstnanců z konfiguračního souboru s cachováním"""
+        """Načte seznam zaměstnanců s cachováním."""
         try:
             return self.employee_manager.get_all_employees()
         except Exception as e:
-            logger.error(f"Chyba při načítání zaměstnanců: {e}")
+            logger.error("Chyba při načítání zaměstnanců: %s", e)
             return []
 
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=4, max=10),
-        retry=retry_if_exception_type((requests.exceptions.RequestException, Exception))
+        retry=retry_if_exception_type(requests.exceptions.RequestException)
     )
     def _call_gemini_api(self, audio_file_path):
-        """Volání Gemini API (transkripce) – respektuje rate limit + retry."""
-        try:
-            if not os.path.exists(audio_file_path):
-                raise FileNotFoundError(f"Audio soubor nebyl nalezen: {audio_file_path}")
+        """Volání Gemini API (transkripce) s rate limiting a retry."""
+        if not os.path.exists(audio_file_path):
+            raise FileNotFoundError(f"Audio soubor nebyl nalezen: {audio_file_path}")
+        if not self.rate_limiter.can_make_request():
+            return {"error": "Překročen rate limit pro API požadavky"}
+        self.rate_limiter.add_request()
 
-            # Kontrola rate limitu
-            if not self.rate_limiter.can_make_request():
-                return {"error": "Překročen rate limit pro API požadavky"}
+        with open(audio_file_path, "rb") as audio_file:
+            files = {"audio": audio_file}
+            headers = {"Authorization": f"Bearer {self.gemini_api_key}"}
+            if not self.gemini_api_url:
+                return {"error": "Gemini API URL není nakonfigurována"}
 
-            self.rate_limiter.add_request()
-
-            with open(audio_file_path, "rb") as audio_file:
-                files = {"audio": audio_file}
-                headers = {
-                    "Authorization": f"Bearer {self.gemini_api_key}",
-                    "X-Request-ID": str(datetime.now().timestamp())
-                }
-                # Použití základní session pro testy nebo cache session pro produkci
-                if not self.gemini_api_url:
-                    return {"error": "Gemini API URL není nakonfigurována"}
+            try:
                 response = self.session.post(
-                    str(self.gemini_api_url),
+                    self.gemini_api_url,
                     headers=headers,
                     files=files,
                     timeout=getattr(Config, "GEMINI_REQUEST_TIMEOUT", 30),
                 )
-                
                 response.raise_for_status()
                 return response.json()
-
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Síťová chyba při volání Gemini API: {e}", exc_info=True)
-            raise
-        except Exception as e:
-            logger.error(f"Neočekávaná chyba při volání Gemini API: {e}", exc_info=True)
-            return {"error": f"API volání selhalo: {str(e)}"}
+            except requests.exceptions.RequestException as e:
+                logger.error("Síťová chyba při volání Gemini API: %s", e, exc_info=True)
+                raise
+            except Exception as e:
+                logger.error("Neočekávaná chyba při volání Gemini API: %s", e, exc_info=True)
+                return {"error": f"API volání selhalo: {e}"}
 
     def _extract_entities(self, text):
-        """Regex extrakce entit z přirozeného jazyka (čeština)."""
+        """Regex extrakce entit z textu."""
         text = text.lower()
+        action = self._extract_action(text)
+
         entities = {
-            "date": None,
-            "start_time": None,
-            "end_time": None,
+            "date": self._extract_date(text),
+            "start_time": None, "end_time": None,
             "lunch_duration": self.default_lunch_duration,
-            "action": None,
-            "is_free_day": False
+            "action": action, "is_free_day": False,
+            "employee": None, "time_period": None,
         }
 
-        # Detekce akce
-        action_patterns = {
-            "record_time": [
-                r"práce",
-                r"pracovní\s*dob[au]",
-                r"odpracovan[éý]",
-                r"zapiš\s*(?:čas|hodiny)",
-                r"zaznamenej.*dob[au]",
-                r"přidej.*(?:čas|hodiny|dobu)"
-            ],
-            "record_free_day": [
-                r"voln[oý]",
-                r"dovolen[áa]",
-                r"sick\s*day",
-                r"náhradní\s*volno",
-                r"nepřítomnost"
-            ],
-            "get_stats": [
-                r"statistik[ay]",
-                r"ukaž\s*(mi)?\s*statistik[uy]",
-                r"jak[ée]\s*jsou\s*statistik[ay]",
-                r"přehled"
-            ]
-        }
+        if action == "record_free_day":
+            entities.update({"is_free_day": True, "start_time": "00:00", "end_time": "00:00", "lunch_duration": 0.0})
+        elif action == "record_time":
+            entities.update(self._extract_time(text))
+            entities["lunch_duration"] = self._extract_lunch(text) or self.default_lunch_duration
+        elif action == "get_stats":
+            entities["employee"] = self._extract_employee(text)
+            entities["time_period"] = self._extract_time_period(text)
 
-        # Priorita akcí - get_stats má vyšší prioritu
-        # Pokud je nalezena "get_stats", nastaví se a ostatní se přeskočí.
-        # Jinak se pokračuje s ostatními akcemi.
-        # Toto je zjednodušené řešení konfliktů.
-        if "get_stats" in action_patterns:
-            if any(re.search(pattern, text, re.IGNORECASE) for pattern in action_patterns["get_stats"]):
-                entities["action"] = "get_stats"
-        # Pokud nebyla detekována akce get_stats, zkusíme ostatní
-        if not entities["action"]:
-            for action_key, patterns in action_patterns.items():
-                if action_key == "get_stats":  # Tuto akci jsme již zkontrolovali
-                    continue
-                if any(re.search(pattern, text, re.IGNORECASE) for pattern in patterns):
-                    entities["action"] = "record_time"  # default pro oba typy
-                    if action_key == "record_free_day":
-                        entities["is_free_day"] = True
-                        entities["start_time"] = "00:00"
-                        entities["end_time"] = "00:00"
-                        entities["lunch_duration"] = 0.0
-                    break  # Našli jsme akci, můžeme přerušit
-
-        # Pokud je akce 'get_stats', extrahujeme specifické entity
-        if entities["action"] == "get_stats":
-            # Extrakce časového období
-            time_period_patterns = {
-                "week": [r"týden", r"týdenní"],
-                "month": [r"měsíc", r"měsíční"],
-                "year": [r"rok", r"roční"]
-            }
-            for period_key, patterns in time_period_patterns.items():
-                if any(re.search(pattern, text, re.IGNORECASE) for pattern in patterns):
-                    entities["time_period"] = period_key
-                    break
-            
-            # Extrakce jména zaměstnance (zjednodušený přístup)
-            # Načteme seznam zaměstnanců (jména jsou ve formátu "Příjmení Jméno")
-            employee_list_dicts = self._load_employees()  # [{'name': '...'}]
-            employee_names = [emp['name'] for emp in employee_list_dicts]
-
-            for name in employee_names:
-                # Vytvoříme regex pro jméno, case-insensitive
-                # Jméno může být víceslovné, např. "Jan Novák"
-                # Musíme ošetřit speciální znaky v regexu, pokud by jména obsahovala např. tečky
-                safe_name_pattern = re.escape(name)
-                # Hledáme jméno v kontextu statistik, např. "statistiky pro Jan Novák", "Jan Novák přehled"
-                # nebo jen samotné jméno, pokud je kontext jasný z akce "get_stats"
-                patterns_with_name = [
-                    rf"pro\s+{safe_name_pattern}",
-                    rf"{safe_name_pattern}\s*statistik[ay]",
-                    rf"{safe_name_pattern}\s*přehled",
-                    rf"přehled\s*(?:pro\s*)?{safe_name_pattern}",
-                    rf"statistik[ay]\s*(?:pro\s*)?{safe_name_pattern}"
-                ]
-                # Přidáme i samotné jméno jako vzor, ale s nižší prioritou (pokud ostatní selžou)
-                # To by mohlo být problematické, pokud jméno je běžné slovo.
-                # Prozatím se držíme kontextových vzorů.
-                # Pokud by se mělo hledat jen samotné jméno:
-                # if re.search(rf"\b{safe_name_pattern}\b", text, re.IGNORECASE):
-                # entities["employee"] = name
-                # break
-
-                if any(re.search(pattern, text, re.IGNORECASE) for pattern in patterns_with_name):
-                    entities["employee"] = name
-                    logger.info(f"Nalezen zaměstnanec '{name}' pro statistiky.")
-                    break
-            if not entities.get("employee"):
-                logger.info("Pro akci 'get_stats' nebyl specifikován/nalezen žádný konkrétní zaměstnanec.")
-        # Pokud je to volný den (a akce není get_stats), přeskočíme extrakci časů
-        if not entities["is_free_day"] and entities["action"] != "get_stats":
-            long_range_pattern = (
-                r"od\s+(\d{1,2}|sedmi|osmi|devíti|desíti|jedenácti|dvanácti|třinácti|čtrnácti|patnácti|"
-                r"šestnácti|sedmnácti|osmnácti|devatenácti|dvaceti|dvaceti ?jedné|dvaceti ?dvou|dvaceti ?tří)"
-                r"\s+(?:hodin(?:y)?)?(?:\s+)?do\s+(\d{1,2}|sedmi|osmi|devíti|desíti|jedenácti|dvanácti|třinácti|"
-                r"čtrnácti|patnácti|šestnácti|sedmnácti|osmnácti|devatenácti|dvaceti|dvaceti ?jedné|dvaceti ?dvou|"
-                r"dvaceti ?tří)"
-            )
-            time_patterns = [
-                (long_range_pattern, lambda x, y: (self._word_to_hour(x), self._word_to_hour(y))),
-                (r"(\d{1,2})(?::\d{2})?\s*[-–]\s*(\d{1,2})(?::\d{2})?", lambda x, y: (int(x), int(y))),
-                (r"od\s+(\d{1,2})(?::\d{2})?\s+do\s+(\d{1,2})(?::\d{2})?", lambda x, y: (int(x), int(y))),
-            ]
-
-            for pattern, converter in time_patterns:
-                match = re.search(pattern, text)
-                if match:
-                    start, end = converter(match.group(1), match.group(2))
-                    if 0 <= start <= 23 and 0 <= end <= 23:
-                        entities["start_time"] = f"{start:02d}:00"
-                        entities["end_time"] = f"{end:02d}:00"
-                        break
-
-        # Extrakce data
-        date_patterns = [
-            (r"\bdnes\b", datetime.now()),
-            (r"\bvčera\b", datetime.now() - timedelta(days=1)),
-            (r"\bzítra\b", datetime.now() + timedelta(days=1)),
-            (r"\b(\d{4}-\d{2}-\d{2})\b", None),
-            (r"\b(\d{1,2}\.\s*\d{1,2}\.\s*\d{4})\b", None),
-            (r"\b(\d{1,2}/\d{1,2}/\d{4})\b", None),
-        ]
-
-        for pattern, date_value in date_patterns:
-            match = re.search(pattern, text)
-            if match:
-                if date_value:
-                    entities["date"] = date_value.strftime("%Y-%m-%d")
-                else:
-                    date_str = match.group(1).replace(" ", "")
-                    entities["date"] = self._normalize_date(date_str)
-                break
-
-        # Pokud není zadáno datum, použijeme dnešek
-        if not entities["date"] and entities["action"] == "record_time":
+        if not entities["date"] and action in ["record_time", "record_free_day"]:
             entities["date"] = datetime.now().strftime("%Y-%m-%d")
-
-        # Pro volný den není délka oběda potřeba
-        if not entities["is_free_day"]:
-            # Extrakce délky oběda (pokud je explicitně uvedena)
-            lunch_match = re.search(r"ob[ěe]d\s+(\d+(?:[.,]\d+)?)\s*(?:hodiny?|hodin|h)?", text)
-            if lunch_match:
-                lunch_duration = float(lunch_match.group(1).replace(",", "."))
-                if 0 <= lunch_duration <= 4:  # Kontrola rozumného rozsahu
-                    entities["lunch_duration"] = lunch_duration
 
         return entities
 
-    def _word_to_hour(self, word):
-        """Mapování slovních označení hodin -> integer (fallback 0)."""
-        word = word.lower().strip()
-        if word.isdigit():
-            return int(word)
-        hour_map = {
-            "sedmi": 7, "osmi": 8, "devíti": 9, "desíti": 10,
-            "jedenácti": 11, "dvanácti": 12, "třinácti": 13,
-            "čtrnácti": 14, "patnácti": 15, "šestnácti": 16,
-            "sedmnácti": 17, "osmnácti": 18, "devatenácti": 19,
-            "dvaceti": 20, "dvaceti jedné": 21, "dvacetijedné": 21,
-            "dvaceti dvou": 22, "dvacetidvou": 22,
-            "dvaceti tří": 23, "dvacetitří": 23
+    def _extract_action(self, text):
+        action_patterns = {
+            "get_stats": [r"statistik[ay]", r"přehled"],
+            "record_free_day": [r"voln[oý]", r"dovolen[áa]", r"sick\s*day", r"nepřítomnost"],
+            "record_time": [r"práce", r"pracovní\s*dob[au]", r"zapiš", r"zaznamenej"],
         }
-        
-        return hour_map.get(word, 0)
+        for action, patterns in action_patterns.items():
+            if any(re.search(p, text, re.IGNORECASE) for p in patterns):
+                return action
+        return None
+
+    def _extract_time(self, text):
+        time_patterns = [
+            r"od\s+(\d{1,2}):\d{2}\s+do\s+(\d{1,2}):\d{2}",
+            r"(\d{1,2}):\d{2}\s*-\s*(\d{1,2}):\d{2}",
+        ]
+        for pattern in time_patterns:
+            match = re.search(pattern, text)
+            if match:
+                start, end = int(match.group(1)), int(match.group(2))
+                if 0 <= start <= 23 and 0 <= end <= 23:
+                    return {"start_time": f"{start:02d}:00", "end_time": f"{end:02d}:00"}
+        return {}
+
+    def _extract_lunch(self, text):
+        match = re.search(r"ob[ěe]d\s+(\d+(?:[.,]\d+)?)\s*h", text)
+        if match:
+            try:
+                duration = float(match.group(1).replace(",", "."))
+                return duration if 0 <= duration <= 4 else None
+            except ValueError:
+                return None
+        return None
+
+    def _extract_date(self, text):
+        date_patterns = {
+            r"\bdnes\b": lambda: datetime.now(),
+            r"\bvčera\b": lambda: datetime.now() - timedelta(days=1),
+            r"\bzítra\b": lambda: datetime.now() + timedelta(days=1),
+        }
+        for pattern, func in date_patterns.items():
+            if re.search(pattern, text):
+                return func().strftime("%Y-%m-%d")
+
+        date_str_match = re.search(r"\b(\d{1,2}[./]\d{1,2}[./]\d{4})\b", text)
+        if date_str_match:
+            return self._normalize_date(date_str_match.group(1))
+        return None
+
+    def _extract_employee(self, text):
+        employee_names = [emp['name'] for emp in self._load_employees()]
+        for name in employee_names:
+            if re.search(re.escape(name), text, re.IGNORECASE):
+                logger.info("Nalezen zaměstnanec '%s' pro statistiky.", name)
+                return name
+        return None
+
+    def _extract_time_period(self, text):
+        periods = {"week": r"týden", "month": r"měsíc", "year": r"rok"}
+        for period, pattern in periods.items():
+            if re.search(pattern, text, re.IGNORECASE):
+                return period
+        return None
 
     def _normalize_date(self, date_str):
-        """Různé formáty -> YYYY-MM-DD nebo None."""
-        for fmt in ["%Y-%m-%d", "%d.%m.%Y", "%d/%m/%Y"]:
+        for fmt in ("%d.%m.%Y", "%d/%m/%Y"):
             try:
                 return datetime.strptime(date_str, fmt).strftime("%Y-%m-%d")
             except ValueError:
@@ -309,99 +214,35 @@ class VoiceProcessor:
         return None
 
     def _validate_data(self, data):
-        """Validace základních polí pro následné zpracování."""
-        errors = []
-
-        # Validace data
-        if data.get("date") and not re.match(r"\d{4}-\d{2}-\d{2}", data["date"]):
-            errors.append("Neplatný formát data")
-
-        # Validace časů pro záznam pracovní doby
-        if data.get("action") == "record_time":
-            if not data.get("start_time"):
-                errors.append("Chybí čas začátku")
-            if not data.get("end_time"):
-                errors.append("Chybí čas konce")
-            if data.get("lunch_duration") is not None and (data["lunch_duration"] < 0 or data["lunch_duration"] > 4):
-                errors.append("Délka oběda musí být mezi 0 a 4 hodinami")
-
-        # Validace akce
         if not data.get("action"):
-            errors.append("Neznámá akce")
+            return False, ["Neznámá akce"]
+        if data["action"] == "record_time" and not (data.get("start_time") and data.get("end_time")):
+            return False, ["Chybí čas začátku nebo konce"]
+        return True, []
 
-        return len(errors) == 0, errors
-
-    def process_voice_command(self, audio_file_path):
-        """End‑to‑end pipeline pro audio: API -> extrakce -> validace -> JSON výstup."""
+    def process_command(self, text=None, audio_file_path=None):
+        """Hlavní metoda pro zpracování příkazu (text nebo audio)."""
         try:
-            # 1. Převod hlasu na text přes Gemini API
-            gemini_response = self._call_gemini_api(audio_file_path)
-            
-            if "error" in gemini_response:
-                logger.error(f"Chyba v Gemini API odpovědi: {gemini_response['error']}")
-                return {"success": False, "error": gemini_response["error"]}
-            
-            # 2. Extrahujeme entity z textu
-            text = gemini_response.get("text", "")
+            if audio_file_path:
+                api_response = self._call_gemini_api(audio_file_path)
+                if "error" in api_response:
+                    return {"success": False, "error": api_response["error"]}
+                text = api_response.get("text", "")
+
             if not text:
-                return {"success": False, "error": "Prázdná odpověď od Gemini API"}
-                
+                return {"success": False, "error": "Prázdný vstupní text"}
+
             entities = self._extract_entities(text)
-            
-            # 3. Validace dat
-            is_valid, validation_errors = self._validate_data(entities)
-            
+            is_valid, errors = self._validate_data(entities)
             if not is_valid:
-                return {"success": False, "errors": validation_errors, "original_text": text}
-            
-            # 4. Přidání dodatečných informací
+                return {"success": False, "errors": errors, "original_text": text}
+
             entities.update({
-                "success": True,  # Explicitně nastavíme na True když validace prošla
-                "confidence": gemini_response.get("confidence", 0.8),
-                "processed_at": datetime.now().isoformat(),
-                "original_text": text
-            })
-            
-            return entities
-            
-        except Exception as e:
-            logger.error(f"Kritická chyba při zpracování hlasového příkazu: {e}", exc_info=True)
-            return {
-                "success": False,
-                "error": "Interní chyba při zpracování",
-                "details": str(e)
-            }
-
-    def process_voice_text(self, text):
-        """Stejné jako process_voice_command, ale vstup je již text (bez API)."""
-        try:
-            if not text:
-                return {"success": False, "error": "Prázdný textový vstup"}
-                
-            # Extrahujeme entity z textu
-            entities = self._extract_entities(text)
-            
-            # Validace dat
-            is_valid, validation_errors = self._validate_data(entities)
-            
-            if not is_valid:
-                return {
-                    "success": False,
-                    "errors": validation_errors,
-                    "original_text": text
-                }
-            
-            # Přidání dodatečných informací
-            result = {
                 "success": True,
-                "entities": entities,
-                "confidence": 1.0,  # Pro textový vstup máme 100% jistotu textu
                 "processed_at": datetime.now().isoformat(),
-                "original_text": text
-            }
-            
-            return result
-            
+                "original_text": text,
+            })
+            return entities
         except Exception as e:
-            logger.error(f"Kritická chyba při zpracování textového příkazu: {e}", exc_info=True)
+            logger.error("Kritická chyba při zpracování příkazu: %s", e, exc_info=True)
             return {"success": False, "error": "Interní chyba při zpracování", "details": str(e)}

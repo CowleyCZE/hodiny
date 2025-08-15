@@ -86,8 +86,16 @@ def index():
     active_filename = Config.EXCEL_TEMPLATE_NAME
     week_num_int = datetime.now().isocalendar().week
     current_date = datetime.now().strftime("%Y-%m-%d")
+    try:
+        excel_exists = g.excel_manager.get_active_file_path().exists()
+    except Exception:
+        excel_exists = False
     return render_template(
-        "index.html", active_filename=active_filename, week_number=week_num_int, current_date=current_date
+        "index.html",
+        active_filename=active_filename,
+        week_number=week_num_int,
+        current_date=current_date,
+        excel_exists=excel_exists,
     )
 
 
@@ -217,11 +225,37 @@ def record_time():
 @app.route("/excel_viewer", methods=["GET"])
 def excel_viewer():
     """Read‑only náhled omezeného počtu řádků aktivního Excelu (výkon)."""
+    requested_file = request.args.get("file")
     active_sheet_name = request.args.get("sheet")
     data, sheet_names = [], []
+    base_path = Config.EXCEL_BASE_PATH
+    excel_files = sorted([p.name for p in base_path.glob("*.xlsx")])
+    if not excel_files:
+        flash("Nenalezeny žádné Excel soubory.", "warning")
+        return render_template(
+            "excel_viewer.html",
+            excel_files=[],
+            selected_file=None,
+            sheet_names=[],
+            active_sheet=None,
+            data=[],
+        )
+
+    selected_file = requested_file if requested_file in excel_files else g.excel_manager.active_filename
+    selected_path = base_path / selected_file
     try:
-        wb = load_workbook(g.excel_manager.get_active_file_path(), read_only=True, data_only=True)
+        wb = load_workbook(selected_path, read_only=True, data_only=True)
         sheet_names = wb.sheetnames
+        if not sheet_names:
+            flash("Vybraný soubor nemá žádné listy.", "warning")
+            return render_template(
+                "excel_viewer.html",
+                excel_files=excel_files,
+                selected_file=selected_file,
+                sheet_names=[],
+                active_sheet=None,
+                data=[],
+            )
         active_sheet_name = active_sheet_name if active_sheet_name in sheet_names else sheet_names[0]
         sheet = wb[active_sheet_name]
         for i, row in enumerate(sheet.iter_rows(values_only=True)):
@@ -233,7 +267,14 @@ def excel_viewer():
         flash(f"Chyba při zobrazení souboru: {e}", "error")
         return redirect(url_for("index"))
 
-    return render_template("excel_viewer.html", sheet_names=sheet_names, active_sheet=active_sheet_name, data=data)
+    return render_template(
+        "excel_viewer.html",
+        excel_files=excel_files,
+        selected_file=selected_file,
+        sheet_names=sheet_names,
+        active_sheet=active_sheet_name,
+        data=data,
+    )
 
 
 @app.route("/settings", methods=["GET", "POST"])

@@ -1,9 +1,16 @@
-# zalohy_manager.py
+"""Správa listu záloh (Zálohy) v hlavním Excel souboru.
+
+Funkce:
+ - validace vstupů (částka, měna, datum, jméno)
+ - kumulativní přičítání částek do správného měnového sloupce dle vybrané "option"
+ - zápis data poslední transakce do dedikovaného sloupce
+"""
 import logging
 from datetime import datetime
 from pathlib import Path
 
 from openpyxl import load_workbook
+from openpyxl.cell.cell import MergedCell
 
 from config import Config
 
@@ -18,6 +25,7 @@ except ImportError:
 
 class ZalohyManager:
     def __init__(self, base_path):
+        """base_path: adresář s hlavním souborem Hodiny_Cap.xlsx."""
         self.base_path = Path(base_path)
         self.active_filename = Config.EXCEL_TEMPLATE_NAME
         self.active_file_path = self.base_path / self.active_filename
@@ -42,21 +50,25 @@ class ZalohyManager:
             raise IOError(f"Nepodařilo se uložit změny do souboru '{self.active_filename}'.")
 
     def validate_amount(self, amount):
+        """Částka musí být kladná (int/float)."""
         if not isinstance(amount, (int, float)) or amount <= 0:
             raise ValueError("Částka musí být kladné číslo.")
         return True
 
     def validate_currency(self, currency):
+        """Kontrola proti whitelistu měn."""
         if currency not in self.VALID_CURRENCIES:
             raise ValueError("Neplatná měna.")
         return True
 
     def validate_employee_name(self, employee_name):
+        """Nesmí být prázdné; další validace (regex) lze doplnit později."""
         if not isinstance(employee_name, str) or not employee_name.strip():
             raise ValueError("Jméno zaměstnance nemůže být prázdné.")
         return True
 
     def validate_date(self, date_str):
+        """YYYY-MM-DD datum; ValueError při neplatném formátu."""
         try:
             datetime.strptime(date_str, "%Y-%m-%d")
         except ValueError:
@@ -64,6 +76,7 @@ class ZalohyManager:
         return True
 
     def add_or_update_employee_advance(self, employee_name, amount, currency, option, date):
+        """Přičte zálohu zaměstnanci (vytvoří řádek pokud chybí)."""
         workbook = None
         try:
             self.validate_employee_name(employee_name)
@@ -87,13 +100,23 @@ class ZalohyManager:
             column_index = 2 + (option_index * 2) + (1 if currency == "CZK" else 0)
 
             target_cell = sheet.cell(row=row, column=column_index)
-            current_value = float(target_cell.value or 0)
-            target_cell.value = current_value + float(amount)
-            target_cell.number_format = "#,##0.00"
+            # Bezpečný převod existující hodnoty (ignoruje nečíselné / vzorce)
+            if not isinstance(target_cell, MergedCell):
+                raw_val = target_cell.value
+                try:
+                    if isinstance(raw_val, (int, float, str)) and str(raw_val).strip():
+                        current_value = float(raw_val)
+                    else:
+                        current_value = 0.0
+                except (ValueError, TypeError):
+                    current_value = 0.0
+                target_cell.value = current_value + float(amount)
+                target_cell.number_format = "#,##0.00"
 
             date_cell = sheet.cell(row=row, column=self.DATE_COLUMN_INDEX)
-            date_cell.value = datetime.strptime(date, "%Y-%m-%d").date()
-            date_cell.number_format = "DD.MM.YYYY"
+            if not isinstance(date_cell, MergedCell):
+                date_cell.value = datetime.strptime(date, "%Y-%m-%d").date()
+                date_cell.number_format = "DD.MM.YYYY"
 
             self._save_workbook(workbook)
             return True
@@ -105,18 +128,21 @@ class ZalohyManager:
                 workbook.close()
 
     def _get_employee_row(self, sheet, employee_name):
+        """Najde existující řádek zaměstnance nebo vrátí None."""
         for row in range(self.EMPLOYEE_START_ROW, sheet.max_row + 1):
             if sheet.cell(row=row, column=1).value == employee_name:
                 return row
         return None
 
     def _get_next_empty_row(self, sheet):
+        """První volný řádek od konfigurované start row."""
         row = self.EMPLOYEE_START_ROW
         while sheet.cell(row=row, column=1).value is not None:
             row += 1
         return row
 
     def get_option_names(self):
+        """Názvy 4 možností čtené z buněk (fallback na default)."""
         default_options = (
             Config.DEFAULT_ADVANCE_OPTION_1,
             Config.DEFAULT_ADVANCE_OPTION_2,

@@ -1,3 +1,8 @@
+"""Správa seznamu zaměstnanců a výběru pro zápis docházky.
+
+Odděleno od Excel logiky – perzistence do JSON souboru `employee_config.json`.
+"""
+
 import json
 from pathlib import Path
 
@@ -16,9 +21,11 @@ class EmployeeManager:
         logger.info("EmployeeManager inicializován.")
 
     def _sort_selected_employees(self):
+        """Preferuje pevně 'Čáp Jakub' na začátku (firemní priorita)."""
         self.vybrani_zamestnanci.sort(key=lambda x: (x != "Čáp Jakub", x))
 
     def load_config(self):
+        """Načte konfiguraci (tichý fallback na prázdné seznamy)."""
         if not self.config_file.exists():
             logger.warning(f"Konfigurační soubor {self.config_file} nenalezen.")
             return
@@ -39,12 +46,14 @@ class EmployeeManager:
             self.zamestnanci, self.vybrani_zamestnanci = [], []
 
     def _validate_employee_name(self, name):
+        """Trim + základní validace délky a absence číslic."""
         name = name.strip()
         if not (2 <= len(name) <= 100) or any(char.isdigit() for char in name):
             raise ValueError("Neplatné jméno zaměstnance.")
         return name
 
     def save_config(self):
+        """Uloží konfiguraci; řadí zaměstnance i vybraný seznam deterministicky."""
         try:
             self._sort_selected_employees()
             self.data_path.mkdir(parents=True, exist_ok=True)
@@ -114,7 +123,9 @@ class EmployeeManager:
         return False
 
     def get_all_employees(self):
+        """Vrací seznam slovníků se stavem výběru (pro UI)."""
         return [{"name": name, "selected": name in self.vybrani_zamestnanci} for name in sorted(self.zamestnanci)]
 
     def get_vybrani_zamestnanci(self):
+        """Seznam aktuálně vybraných zaměstnanců (preferenční řazení)."""
         return sorted(self.vybrani_zamestnanci, key=lambda x: (x != "Čáp Jakub", x))

@@ -1,52 +1,14 @@
-# hodiny2025_manager.py
-"""
-Hodiny2025Manager - Správa Excel souboru pro evidenci pracovních hodin v roce 2025
+"""Správa souboru Hodiny2025.xlsx – měsíční evidence (1 sheet = 1 měsíc).
 
-MAPOVÁNÍ BUNĚK V SOUBORU Hodiny2025.xlsx:
-=========================================
+Zjednodušené schema listu:
+ A=Den, B=Datum, C=Den v týdnu, D=Svátek, E/F/G=Začátek/Oběd/Konec,
+ H=Celkem hodin (vzorec), I=Přesčasy, M=Počet zaměstnanců, N=Celkem * M.
 
-STRUKTURA LISTU (např. "01hod25" pro leden 2025):
--------------------------------------------------
-A1: "Měsíční výkaz práce - [Měsíc] 2025"
-B1: Název společnosti/oddělení
-
-ZÁHLAVÍ TABULKY (řádek 2):
---------------------------
-A2: "Den"         B2: "Datum"       C2: "Den v týdnu"  D2: "Svátek"
-E2: "Začátek"     F2: "Oběd (h)"    G2: "Konec"       H2: "Celkem hodin"
-I2: "Přesčasy"    J2: "Noční práce" K2: "Víkend"      L2: "Svátky"
-M2: "Zaměstnanci" N2: "Celkem odpracováno"
-
-DATOVÁ OBLAST (řádky 3-33):
----------------------------
-- Řádek = den v měsíci + 2 (tzn. 1. den = řádek 3, 2. den = řádek 4, atd.)
-- A[řádek]: Den v měsíci (1-31)
-- B[řádek]: Datum (DD.MM.YYYY)
-- C[řádek]: Den v týdnu (Po, Út, St, Čt, Pá, So, Ne)
-- D[řádek]: Označení svátku (pokud je)
-- E[řádek]: Čas začátku práce (HH:MM)
-- F[řádek]: Délka oběda v hodinách (desetinné číslo)
-- G[řádek]: Čas konce práce (HH:MM)
-- H[řádek]: Celkem odpracovaných hodin (vzorec)
-- I[řádek]: Přesčasové hodiny (vzorec)
-- J[řádek]: Noční práce (vzorec)
-- K[řádek]: Víkendové hodiny (vzorec)
-- L[řádek]: Sváteční hodiny (vzorec)
-- M[řádek]: Počet zaměstnanců
-- N[řádek]: Celkem odpracováno všemi zaměstnanci (vzorec)
-
-SOUHRNY (řádky 34-40):
-----------------------
-A34: "SOUHRN:"
-H34: =SUM(H3:H33) - Celkem hodin za měsíc
-I34: =SUM(I3:I33) - Celkem přesčasů za měsíc
-N34: =SUM(N3:N33) - Celkem odpracováno všemi za měsíc
-
-VZORCE:
--------
-H[řádek]: =(G[řádek]-E[řádek])*24-F[řádek]  # Celkem hodin = (konec-začátek)*24-oběd
-I[řádek]: =MAX(0,H[řádek]-8)                # Přesčasy = max(0, celkem-8)
-N[řádek]: =H[řádek]*M[řádek]                # Celkem za všechny = hodiny*počet_zaměstnanců
+Třída zajišťuje:
+ - lazy vytvoření pracovního sešitu + template list
+ - generování / inicializaci listu pro měsíc (01hod25 ... 12hod25)
+ - zápis denních údajů + udržení vzorců
+ - načítání souhrnů, denních záznamů a validaci integrity
 """
 
 import calendar
@@ -137,13 +99,13 @@ class Hodiny2025Manager:
         logger.info(f"Hodiny2025Manager inicializován pro soubor: {self.file_path}")
 
     def _ensure_excel_file_exists(self):
-        """Zajistí, že Excel soubor existuje. Pokud ne, vytvoří ho s template."""
+        """Existence souboru – pokud chybí, vytvoří nový s template listem."""
         if not self.file_path.exists():
             logger.info(f"Vytváří se nový soubor: {self.file_path}")
             self._create_new_workbook()
 
     def _create_new_workbook(self):
-        """Vytvoří nový Excel soubor s template listem."""
+        """Inicializace nového workbooku (template + aktuální měsíc)."""
         workbook = Workbook()
 
         # Odstraň výchozí list
@@ -166,12 +128,7 @@ class Hodiny2025Manager:
         logger.info(f"Vytvořen nový Excel soubor: {self.file_path}")
 
     def _setup_template_sheet(self, sheet: Worksheet):
-        """
-        Nastaví template list s formátováním a vzorci.
-
-        Args:
-            sheet: Worksheet objekt
-        """
+        """Základní šablona: hlavičky, vzorce, souhrn a styling."""
         # Záhlaví
         sheet["A1"] = "Měsíční výkaz práce - [Měsíc] 2025"
         sheet["B1"] = "Hodiny Evidence System"
@@ -258,14 +215,7 @@ class Hodiny2025Manager:
             cell.fill = PatternFill(start_color="CCCCCC", end_color="CCCCCC", fill_type="solid")
 
     def _setup_month_sheet(self, sheet: Worksheet, month: int, year: int):
-        """
-        Nastaví specifický měsíční list s daty a formátováním.
-
-        Args:
-            sheet: Worksheet objekt
-            month: Číslo měsíce (1-12)
-            year: Rok
-        """
+        """Naplní list konkrétního měsíce daty + zvýrazní víkendy."""
         # Aktualizuj název
         month_name = self.CZECH_MONTHS[month]
         cell = sheet.cell(row=1, column=1)
@@ -305,16 +255,7 @@ class Hodiny2025Manager:
                     cell.value = ""
 
     def get_or_create_month_sheet(self, month: int, year: int = 2025) -> Worksheet:
-        """
-        Získá nebo vytvoří list pro zadaný měsíc.
-
-        Args:
-            month: Číslo měsíce (1-12)
-            year: Rok (default 2025)
-
-        Returns:
-            Worksheet objekt
-        """
+        """Vrátí (nebo zkopíruje z template) list pro měsíc MMhod25."""
         sheet_name = f"{month:02d}hod{str(year)[2:]}"
 
         try:
@@ -338,16 +279,7 @@ class Hodiny2025Manager:
         return workbook[sheet_name]
 
     def zapis_pracovni_doby(self, date: str, start_time: str, end_time: str, lunch_duration: str, num_employees: int):
-        """
-        Zapíše pracovní dobu do Excel souboru.
-
-        Args:
-            date: Datum ve formátu YYYY-MM-DD
-            start_time: Čas začátku ve formátu HH:MM
-            end_time: Čas konce ve formátu HH:MM
-            lunch_duration: Délka oběda v hodinách (string)
-            num_employees: Počet zaměstnanců
-        """
+        """Zápis pracovní doby do měsíčního listu (udržuje/vkládá potřebné vzorce)."""
         try:
             date_obj = datetime.strptime(date, "%Y-%m-%d")
             month = date_obj.month
@@ -418,16 +350,7 @@ class Hodiny2025Manager:
             raise
 
     def get_monthly_summary(self, month: int, year: int = 2025) -> dict:
-        """
-        Získá měsíční souhrn z Excel souboru.
-
-        Args:
-            month: Číslo měsíce (1-12)
-            year: Rok (default 2025)
-
-        Returns:
-            Dictionary se souhrnem dat
-        """
+        """Souhrn (H/I/N) za měsíc – již vyhodnocené vzorce nebo 0 při chybě."""
         try:
             sheet = self.get_or_create_month_sheet(month, year)
 
@@ -462,15 +385,7 @@ class Hodiny2025Manager:
             }
 
     def get_daily_record(self, date: str) -> dict:
-        """
-        Získá záznam pro konkrétní den.
-
-        Args:
-            date: Datum ve formátu YYYY-MM-DD
-
-        Returns:
-            Dictionary s údaji o dni
-        """
+        """Vrátí hodnoty buněk daného dne + fallback manuálního výpočtu při 0."""
         try:
             date_obj = datetime.strptime(date, "%Y-%m-%d")
             month = date_obj.month
@@ -593,7 +508,7 @@ class Hodiny2025Manager:
             return {"date": date, "error": str(e)}
 
     def create_test_data(self):
-        """Vytvoří testovací data pro ověření funkčnosti."""
+        """Pomocná utilita pro lokální ověření (manuální volání)."""
         logger.info("Vytváří se testovací data pro Hodiny2025.xlsx")
 
         # Testovací data pro první týden ledna 2025
@@ -623,12 +538,7 @@ class Hodiny2025Manager:
         logger.info("Testovací data byla vytvořena!")
 
     def validate_data_integrity(self) -> dict:
-        """
-        Ověří integritu dat v Excel souboru.
-
-        Returns:
-            Dictionary s výsledky validace
-        """
+        """Základní kontrola vzorců a konzistence časů (start/end)."""
         results = {"valid": True, "errors": [], "warnings": [], "sheets_checked": [], "records_checked": 0}
 
         try:

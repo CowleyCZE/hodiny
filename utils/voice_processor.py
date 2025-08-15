@@ -1,12 +1,14 @@
-# utils/voice_processor.py
+"""VoiceProcessor: extrakce strukturovaných příkazů (čas, datum, akce) z řeči / textu.
+
+Funkce:
+ - volání (volitelného) Gemini API s retry + rate limiting
+ - regulární extrakce entit (start/end, oběd, datum, typ akce, zaměstnanec)
+ - validace dat a jednotný výstup vhodný pro další zpracování
+"""
 import os
 import re
-import json
 import requests
-import logging
 from datetime import datetime, timedelta
-from pathlib import Path
-from config import Config
 from employee_management import EmployeeManager
 from utils.logger import setup_logger
 from functools import lru_cache
@@ -14,46 +16,53 @@ from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_excep
 from requests_cache import CachedSession
 from collections import deque
 import time
+from config import Config
 
 logger = setup_logger("voice_processor")
 
+
 class RateLimiter:
     def __init__(self, max_requests, time_window):
+        """Simple sliding window limiter (in‑memory)."""
         self.max_requests = max_requests
         self.time_window = time_window
         self.requests = deque()
 
     def can_make_request(self):
+        """Vrátí True pokud lze provést další požadavek (v rámci limitu)."""
         now = time.time()
         while self.requests and self.requests[0] < now - self.time_window:
             self.requests.popleft()
         return len(self.requests) < self.max_requests
 
     def add_request(self):
+        """Zaloguje timestamp provedeného požadavku."""
         self.requests.append(time.time())
+
 
 class VoiceProcessor:
     def __init__(self):
         """Inicializace procesoru hlasu"""
-        self.gemini_api_key = Config.GEMINI_API_KEY
-        self.gemini_api_url = Config.GEMINI_API_URL
+        # Volitelné atributy (nemusí být v Config definovány)
+        self.gemini_api_key = getattr(Config, "GEMINI_API_KEY", os.environ.get("GEMINI_API_KEY"))
+        self.gemini_api_url = getattr(Config, "GEMINI_API_URL", os.environ.get("GEMINI_API_URL"))
         self.employee_manager = EmployeeManager(data_path="data")
         self.default_lunch_duration = 1.0  # Přednastavená délka oběda na 1 hodinu
-        
+
         # Inicializace rate limiteru
         self.rate_limiter = RateLimiter(
-            Config.RATE_LIMIT_REQUESTS,
-            Config.RATE_LIMIT_WINDOW
+            getattr(Config, "RATE_LIMIT_REQUESTS", 5),
+            getattr(Config, "RATE_LIMIT_WINDOW", 60),
         )
-        
+
         self.session = requests.Session()
 
     def init_cache_session(self):
-        """Inicializace cache session pro produkční prostředí"""
+        """Inicializace cache session (idempotentní)."""
         if not isinstance(self.session, CachedSession):
             self.session = CachedSession(
                 'gemini_cache',
-                expire_after=Config.GEMINI_CACHE_TTL,
+                expire_after=getattr(Config, "GEMINI_CACHE_TTL", 300),
                 allowable_methods=['GET', 'POST'],
                 stale_if_error=True
             )
@@ -73,10 +82,7 @@ class VoiceProcessor:
         retry=retry_if_exception_type((requests.exceptions.RequestException, Exception))
     )
     def _call_gemini_api(self, audio_file_path):
-        """
-        Komunikace s Gemini API pro transkripci a analýzu hlasu s retry mechanismem
-        a rate limitingem
-        """
+        """Volání Gemini API (transkripce) – respektuje rate limit + retry."""
         try:
             if not os.path.exists(audio_file_path):
                 raise FileNotFoundError(f"Audio soubor nebyl nalezen: {audio_file_path}")
@@ -93,13 +99,14 @@ class VoiceProcessor:
                     "Authorization": f"Bearer {self.gemini_api_key}",
                     "X-Request-ID": str(datetime.now().timestamp())
                 }
-                
                 # Použití základní session pro testy nebo cache session pro produkci
+                if not self.gemini_api_url:
+                    return {"error": "Gemini API URL není nakonfigurována"}
                 response = self.session.post(
-                    self.gemini_api_url,
+                    str(self.gemini_api_url),
                     headers=headers,
                     files=files,
-                    timeout=Config.GEMINI_REQUEST_TIMEOUT
+                    timeout=getattr(Config, "GEMINI_REQUEST_TIMEOUT", 30),
                 )
                 
                 response.raise_for_status()
@@ -113,7 +120,7 @@ class VoiceProcessor:
             return {"error": f"API volání selhalo: {str(e)}"}
 
     def _extract_entities(self, text):
-        """Extrahuje entity z textu pomocí regulárních výrazů"""
+        """Regex extrakce entit z přirozeného jazyka (čeština)."""
         text = text.lower()
         entities = {
             "date": None,
@@ -156,20 +163,19 @@ class VoiceProcessor:
         if "get_stats" in action_patterns:
             if any(re.search(pattern, text, re.IGNORECASE) for pattern in action_patterns["get_stats"]):
                 entities["action"] = "get_stats"
-
-        if not entities["action"]: # Pokud nebyla detekována akce get_stats, zkusíme ostatní
+        # Pokud nebyla detekována akce get_stats, zkusíme ostatní
+        if not entities["action"]:
             for action_key, patterns in action_patterns.items():
-                if action_key == "get_stats": # Tuto akci jsme již zkontrolovali
+                if action_key == "get_stats":  # Tuto akci jsme již zkontrolovali
                     continue
                 if any(re.search(pattern, text, re.IGNORECASE) for pattern in patterns):
-                    # Pro record_time a record_free_day je základní akce "record_time"
-                    entities["action"] = "record_time"
+                    entities["action"] = "record_time"  # default pro oba typy
                     if action_key == "record_free_day":
                         entities["is_free_day"] = True
                         entities["start_time"] = "00:00"
                         entities["end_time"] = "00:00"
                         entities["lunch_duration"] = 0.0
-                    break # Našli jsme akci, můžeme přerušit
+                    break  # Našli jsme akci, můžeme přerušit
 
         # Pokud je akce 'get_stats', extrahujeme specifické entity
         if entities["action"] == "get_stats":
@@ -186,7 +192,7 @@ class VoiceProcessor:
             
             # Extrakce jména zaměstnance (zjednodušený přístup)
             # Načteme seznam zaměstnanců (jména jsou ve formátu "Příjmení Jméno")
-            employee_list_dicts = self._load_employees() # Vrací seznam slovníků [{'name': 'Jméno Příjmení', 'selected': True/False}]
+            employee_list_dicts = self._load_employees()  # [{'name': '...'}]
             employee_names = [emp['name'] for emp in employee_list_dicts]
 
             for name in employee_names:
@@ -214,21 +220,22 @@ class VoiceProcessor:
                 if any(re.search(pattern, text, re.IGNORECASE) for pattern in patterns_with_name):
                     entities["employee"] = name
                     logger.info(f"Nalezen zaměstnanec '{name}' pro statistiky.")
-                    break 
+                    break
             if not entities.get("employee"):
                 logger.info("Pro akci 'get_stats' nebyl specifikován/nalezen žádný konkrétní zaměstnanec.")
-
-
         # Pokud je to volný den (a akce není get_stats), přeskočíme extrakci časů
         if not entities["is_free_day"] and entities["action"] != "get_stats":
-            # Extrakce časů pro pracovní dobu
+            long_range_pattern = (
+                r"od\s+(\d{1,2}|sedmi|osmi|devíti|desíti|jedenácti|dvanácti|třinácti|čtrnácti|patnácti|"
+                r"šestnácti|sedmnácti|osmnácti|devatenácti|dvaceti|dvaceti ?jedné|dvaceti ?dvou|dvaceti ?tří)"
+                r"\s+(?:hodin(?:y)?)?(?:\s+)?do\s+(\d{1,2}|sedmi|osmi|devíti|desíti|jedenácti|dvanácti|třinácti|"
+                r"čtrnácti|patnácti|šestnácti|sedmnácti|osmnácti|devatenácti|dvaceti|dvaceti ?jedné|dvaceti ?dvou|"
+                r"dvaceti ?tří)"
+            )
             time_patterns = [
-                # Od sedmi do osmi
-                (r"od\s+(\d{1,2}|sedmi|osmi|devíti|desíti|jedenácti|dvanácti|třinácti|čtrnácti|patnácti|šestnácti|sedmnácti|osmnácti|devatenácti|dvaceti|dvaceti ?jedné|dvaceti ?dvou|dvaceti ?tří)\s+(?:hodin(?:y)?)?(?:\s+)?do\s+(\d{1,2}|sedmi|osmi|devíti|desíti|jedenácti|dvanácti|třinácti|čtrnácti|patnácti|šestnácti|sedmnácti|osmnácti|devatenácti|dvaceti|dvaceti ?jedné|dvaceti ?dvou|dvaceti ?tří)", lambda x, y: (self._word_to_hour(x), self._word_to_hour(y))),
-                # 7-17 nebo 7:00-17:00
+                (long_range_pattern, lambda x, y: (self._word_to_hour(x), self._word_to_hour(y))),
                 (r"(\d{1,2})(?::\d{2})?\s*[-–]\s*(\d{1,2})(?::\d{2})?", lambda x, y: (int(x), int(y))),
-                # Od 7 do 17
-                (r"od\s+(\d{1,2})(?::\d{2})?\s+do\s+(\d{1,2})(?::\d{2})?", lambda x, y: (int(x), int(y)))
+                (r"od\s+(\d{1,2})(?::\d{2})?\s+do\s+(\d{1,2})(?::\d{2})?", lambda x, y: (int(x), int(y))),
             ]
 
             for pattern, converter in time_patterns:
@@ -276,11 +283,10 @@ class VoiceProcessor:
         return entities
 
     def _word_to_hour(self, word):
-        """Převede slovní vyjádření hodiny na číslo"""
+        """Mapování slovních označení hodin -> integer (fallback 0)."""
         word = word.lower().strip()
         if word.isdigit():
             return int(word)
-            
         hour_map = {
             "sedmi": 7, "osmi": 8, "devíti": 9, "desíti": 10,
             "jedenácti": 11, "dvanácti": 12, "třinácti": 13,
@@ -294,7 +300,7 @@ class VoiceProcessor:
         return hour_map.get(word, 0)
 
     def _normalize_date(self, date_str):
-        """Převede různé formáty data na standardní formát YYYY-MM-DD"""
+        """Různé formáty -> YYYY-MM-DD nebo None."""
         for fmt in ["%Y-%m-%d", "%d.%m.%Y", "%d/%m/%Y"]:
             try:
                 return datetime.strptime(date_str, fmt).strftime("%Y-%m-%d")
@@ -303,13 +309,13 @@ class VoiceProcessor:
         return None
 
     def _validate_data(self, data):
-        """Validace extrahovaných dat"""
+        """Validace základních polí pro následné zpracování."""
         errors = []
-        
+
         # Validace data
         if data.get("date") and not re.match(r"\d{4}-\d{2}-\d{2}", data["date"]):
             errors.append("Neplatný formát data")
-        
+
         # Validace časů pro záznam pracovní doby
         if data.get("action") == "record_time":
             if not data.get("start_time"):
@@ -318,17 +324,15 @@ class VoiceProcessor:
                 errors.append("Chybí čas konce")
             if data.get("lunch_duration") is not None and (data["lunch_duration"] < 0 or data["lunch_duration"] > 4):
                 errors.append("Délka oběda musí být mezi 0 a 4 hodinami")
-        
+
         # Validace akce
         if not data.get("action"):
             errors.append("Neznámá akce")
-        
+
         return len(errors) == 0, errors
 
     def process_voice_command(self, audio_file_path):
-        """
-        Zpracuje hlasový příkaz s vylepšeným error handlingem a retry logikou
-        """
+        """End‑to‑end pipeline pro audio: API -> extrakce -> validace -> JSON výstup."""
         try:
             # 1. Převod hlasu na text přes Gemini API
             gemini_response = self._call_gemini_api(audio_file_path)
@@ -348,11 +352,7 @@ class VoiceProcessor:
             is_valid, validation_errors = self._validate_data(entities)
             
             if not is_valid:
-                return {
-                    "success": False, 
-                    "errors": validation_errors,
-                    "original_text": text
-                }
+                return {"success": False, "errors": validation_errors, "original_text": text}
             
             # 4. Přidání dodatečných informací
             entities.update({
@@ -367,22 +367,13 @@ class VoiceProcessor:
         except Exception as e:
             logger.error(f"Kritická chyba při zpracování hlasového příkazu: {e}", exc_info=True)
             return {
-                "success": False, 
+                "success": False,
                 "error": "Interní chyba při zpracování",
                 "details": str(e)
             }
 
     def process_voice_text(self, text):
-        """
-        Zpracuje textový příkaz podobně jako hlasový příkaz, ale přeskočí krok s Gemini API.
-        Používá stejné metody pro extrakci entit a validaci jako hlasový vstup.
-        
-        Args:
-            text (str): Textový příkaz k zpracování
-            
-        Returns:
-            dict: Výsledek zpracování s extrahovanými entitami nebo chybou
-        """
+        """Stejné jako process_voice_command, ale vstup je již text (bez API)."""
         try:
             if not text:
                 return {"success": False, "error": "Prázdný textový vstup"}
@@ -395,7 +386,7 @@ class VoiceProcessor:
             
             if not is_valid:
                 return {
-                    "success": False, 
+                    "success": False,
                     "errors": validation_errors,
                     "original_text": text
                 }
@@ -413,8 +404,4 @@ class VoiceProcessor:
             
         except Exception as e:
             logger.error(f"Kritická chyba při zpracování textového příkazu: {e}", exc_info=True)
-            return {
-                "success": False, 
-                "error": "Interní chyba při zpracování",
-                "details": str(e)
-            }
+            return {"success": False, "error": "Interní chyba při zpracování", "details": str(e)}

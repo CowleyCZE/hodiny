@@ -1,4 +1,11 @@
-# excel_manager.py
+"""Správa týdenního Excel souboru (šablona + dynamické listy týdnů, reporty).
+
+Zodpovědnosti:
+ - Lazy/cached otevření workbooku (thread‑safe)
+ - Archivace starého týdne a vyčištění listů
+ - Zápis denních hodin pro vybrané zaměstnance do listu konkrétního týdne
+ - Generace měsíčního reportu agregací z týdenních listů
+"""
 import logging
 import shutil
 from contextlib import contextmanager
@@ -22,6 +29,7 @@ except ImportError:
 
 class ExcelManager:
     def __init__(self, base_path):
+        """base_path: adresář kde je hlavní soubor (Hodiny_Cap.xlsx)."""
         self.base_path = Path(base_path)
         self.active_filename = Config.EXCEL_TEMPLATE_NAME
         self.active_file_path = self.base_path / self.active_filename
@@ -31,10 +39,16 @@ class ExcelManager:
         logger.info(f"ExcelManager inicializován pro: {self.active_file_path}")
 
     def get_active_file_path(self):
+        """Cesta k aktivnímu Excel souboru (šablona)."""
         return self.active_file_path
 
     @contextmanager
     def _get_workbook(self, read_only=False):
+        """Context manager vracející workbook (cache pro read_write režim).
+
+        read_only=True -> vždy otevře nový objekt (neukládá do cache),
+        jinak recykluje instanci pro snížení IO.
+        """
         cache_key = str(self.active_file_path.absolute())
         wb = None
         with self._file_lock:
@@ -62,6 +76,12 @@ class ExcelManager:
                 wb.close()
 
     def archive_if_needed(self, current_week_number, settings):
+        """Archivuje minulé týdny při posunu čísla týdne.
+
+        1) Kopie celého souboru pod názvem s číslem posledního archivovaného týdne
+        2) Odstranění všech listů začínajících šablonou "Týden"
+        3) Vytvoření čistého listu pro nový týden
+        """
         last_archived_week = settings.get("last_archived_week", 0)
         if current_week_number > last_archived_week:
             archive_filename = f"Hodiny_Cap_Tyden_{last_archived_week}.xlsx"
@@ -87,6 +107,7 @@ class ExcelManager:
         return False
 
     def ulozit_pracovni_dobu(self, date, start_time, end_time, lunch_duration, employees):
+        """Zapíše pracovní dobu do listu týdne; vytvoří list z template pokud chybí."""
         try:
             week_calendar_data = self.ziskej_cislo_tydne(date)
             if not week_calendar_data:
@@ -160,6 +181,7 @@ class ExcelManager:
             return False
 
     def close_cached_workbooks(self):
+        """Flush + zavření všech workbooků v cache (volat při ukončení requestu)."""
         with self._file_lock:
             for path_str, wb in self._workbook_cache.items():
                 try:
@@ -170,6 +192,7 @@ class ExcelManager:
             self._workbook_cache.clear()
 
     def ziskej_cislo_tydne(self, datum):
+        """Vrátí ISO kalendář (year, week, weekday) nebo None při chybě."""
         try:
             datum_obj = datetime.strptime(datum, "%Y-%m-%d") if isinstance(datum, str) else datum
             return datum_obj.isocalendar()
@@ -178,6 +201,11 @@ class ExcelManager:
             return None
 
     def generate_monthly_report(self, month, year, employees=None):
+        """Agreguje hodiny / volné dny z týdenních listů pro daný měsíc.
+
+        employees: subset jmen (None = všichni). Vrací dict pouze pro zaměstnance
+        se záznamem (hodiny > 0 nebo free_days > 0).
+        """
         if not (1 <= month <= 12 and 2000 <= year <= 2100):
             raise ValueError("Neplatný měsíc nebo rok.")
 
@@ -211,4 +239,5 @@ class ExcelManager:
         return {emp: data for emp, data in report_data.items() if data["total_hours"] > 0 or data["free_days"] > 0}
 
     def update_project_info(self, project_name, start_date, end_date):
+        """Placeholder pro budoucí implementaci údajů o projektu (aktuálně no-op)."""
         return True

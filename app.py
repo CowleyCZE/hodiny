@@ -1,4 +1,11 @@
-# app.py
+"""Hlavní Flask aplikace: routing, inicializace managerů, práce s nastavením.
+
+Tento modul:
+ - načítá / ukládá runtime nastavení (pracovní doba, archivovaný týden)
+ - instancuje *manager* třídy pro zaměstnance, excel, zálohy a roční souhrn 2025
+ - poskytuje web UI (zaměstnanci, záznam času, přehled Excel, zálohy, měsíční report)
+ - odesílá aktivní Excel e‑mailem
+"""
 import json
 import smtplib
 from datetime import datetime, timedelta
@@ -25,6 +32,7 @@ Config.init_app(app)
 
 
 def save_settings_to_file(settings_data):
+    """Persistuje nastavení do JSON. Vrací True při úspěchu."""
     try:
         with open(Config.SETTINGS_FILE_PATH, "w", encoding="utf-8") as f:
             json.dump(settings_data, f, indent=4, ensure_ascii=False)
@@ -35,6 +43,7 @@ def save_settings_to_file(settings_data):
 
 
 def load_settings_from_file():
+    """Načte nastavení z disku nebo vrátí výchozí při chybě / neexistenci."""
     if not Config.SETTINGS_FILE_PATH.exists():
         return Config.get_default_settings()
     try:
@@ -47,13 +56,17 @@ def load_settings_from_file():
 
 @app.before_request
 def before_request():
+    """Před každým requestem připraví managers + synchronizuje nastavení v session.
+
+    Současně kontroluje, zda nezačal nový týden = případná archivace starého.
+    """
     session["settings"] = load_settings_from_file()
     g.employee_manager = EmployeeManager(Config.DATA_PATH)
     g.excel_manager = ExcelManager(Config.EXCEL_BASE_PATH)
     g.zalohy_manager = ZalohyManager(Config.EXCEL_BASE_PATH)
     g.hodiny2025_manager = Hodiny2025Manager(Config.EXCEL_BASE_PATH)
 
-    # Archivace na začátku týdne
+    # Automatická archivace při přechodu na nový týden
     current_week = datetime.now().isocalendar().week
     if g.excel_manager.archive_if_needed(current_week, session["settings"]):
         save_settings_to_file(session["settings"])
@@ -62,12 +75,14 @@ def before_request():
 
 @app.teardown_request
 def teardown_request(exception=None):
+    """Uzavře případné otevřené workbooky (flush cache)."""
     if hasattr(g, "excel_manager") and g.excel_manager:
         g.excel_manager.close_cached_workbooks()
 
 
 @app.route("/")
 def index():
+    """Úvodní stránka s rychlými informacemi (aktuální datum + týden)."""
     active_filename = Config.EXCEL_TEMPLATE_NAME
     week_num_int = datetime.now().isocalendar().week
     current_date = datetime.now().strftime("%Y-%m-%d")
@@ -78,6 +93,7 @@ def index():
 
 @app.route("/download")
 def download_file():
+    """Stáhne aktuálně aktivní Excel soubor."""
     try:
         return send_file(g.excel_manager.get_active_file_path(), as_attachment=True)
     except Exception as e:
@@ -88,6 +104,7 @@ def download_file():
 
 @app.route("/send_email", methods=["POST"])
 def send_email():
+    """Odešle aktivní Excel jako přílohu na konfigurovaný e‑mail (SMTP SSL)."""
     try:
         recipient = Config.RECIPIENT_EMAIL or ""
         sender = Config.SMTP_USERNAME or ""
@@ -117,6 +134,7 @@ def send_email():
 
 @app.route("/zamestnanci", methods=["GET", "POST"])
 def manage_employees():
+    """Správa zaměstnanců (přidání, výběr pro zapisování, editace, mazání)."""
     if request.method == "POST":
         action = request.form.get("action")
         try:
@@ -141,6 +159,10 @@ def manage_employees():
 
 @app.route("/zaznam", methods=["GET", "POST"])
 def record_time():
+    """Formulář pro zápis pracovní doby / označení volného dne.
+
+    Po úspěšném uložení posune datum na další pracovní den (přeskakuje víkend).
+    """
     selected_employees = g.employee_manager.get_vybrani_zamestnanci()
     if not selected_employees:
         flash("Nejsou vybráni žádní zaměstnanci.", "warning")
@@ -162,7 +184,7 @@ def record_time():
         try:
             date = datetime.strptime(current_date, "%Y-%m-%d").date()
             if is_free_day:
-                # Pro volný den nastavíme 0 hodin
+                # Volný den = explicitně 0 hodin, zachová konzistentní záznam
                 g.excel_manager.ulozit_pracovni_dobu(current_date, "00:00", "00:00", "0", selected_employees)
                 g.hodiny2025_manager.zapis_pracovni_doby(current_date, "00:00", "00:00", "0", len(selected_employees))
             else:
@@ -194,6 +216,7 @@ def record_time():
 
 @app.route("/excel_viewer", methods=["GET"])
 def excel_viewer():
+    """Read‑only náhled omezeného počtu řádků aktivního Excelu (výkon)."""
     active_sheet_name = request.args.get("sheet")
     data, sheet_names = [], []
     try:
@@ -215,6 +238,7 @@ def excel_viewer():
 
 @app.route("/settings", methods=["GET", "POST"])
 def settings_page():
+    """Nastavení výchozí pracovní doby (start/end + oběd)."""
     if request.method == "POST":
         try:
             settings_to_save = session["settings"].copy()
@@ -236,6 +260,7 @@ def settings_page():
 
 @app.route("/zalohy", methods=["GET", "POST"])
 def zalohy():
+    """Správa záloh (půjček / plateb) pro zaměstnance."""
     if request.method == "POST":
         try:
             form = request.form
@@ -257,6 +282,7 @@ def zalohy():
 
 @app.route("/monthly_report", methods=["GET", "POST"])
 def monthly_report_route():
+    """Generuje měsíční agregace z týdenních listů podle zvolených zaměstnanců."""
     report_data = None
     if request.method == "POST":
         try:

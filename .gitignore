@@ -3,15 +3,20 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.pyc
+*.pyo
+*.pyd
 
 # Distribution / packaging
 dist/
 build/
 *.egg-info/
+*.egg
 
 # Virtual environment
 venv/
 env/
+.env
+.venv/
 
 # IDE specific files
 .vscode/
@@ -22,15 +27,63 @@ env/
 # System files
 .DS_Store
 Thumbs.db
+*.tmp
+*.temp
 
 # Visual Studio specific files
 .vs/
 
-# Excel Files
-*.xlsx
+# Citlivé konfigurační soubory
+.env
+config_local.py
+instance/
 
-# Logy
-logs/excel_manager.log
-logs/zalohy_manager.log
-excel_manager.log
-zalohy_manager.log
+# Databázové soubory
+*.db
+*.sqlite
+*.sqlite3
+gemini_cache.sqlite
+
+# Excel soubory (kromě šablony)
+excel/*.xlsx
+!excel/Hodiny_Cap.xlsx
+
+# Logy - všechny log soubory
+logs/
+*.log
+*.log.*
+
+# Data soubory (pokud obsahují citlivé údaje)
+data/settings.json
+data/employee_config.json
+
+# Testovací soubory a cache
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Flask specific
+instance/
+.webassets-cache
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Procfiles a runtime pro deployment
+# (odkomentujte pokud chcete verzovat deployment konfigurace)
+# Procfile
+# runtime.txt
+
+# Backup soubory
+*.bak
+*.backup
+*~
+
+# Komprimované soubory
+*.zip
+*.7z
+*.tar.gz
+
+# Hint reports (vývojářské)
+hint-report/

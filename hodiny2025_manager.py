@@ -55,6 +55,7 @@ from datetime import datetime, time
 from pathlib import Path
 
 from openpyxl import Workbook, load_workbook
+from openpyxl.cell import MergedCell
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils.exceptions import InvalidFileException
 from openpyxl.worksheet.worksheet import Worksheet
@@ -147,7 +148,8 @@ class Hodiny2025Manager:
 
         # Odstraň výchozí list
         default_sheet = workbook.active
-        workbook.remove(default_sheet)
+        if default_sheet:
+            workbook.remove(default_sheet)
 
         # Vytvoř template list
         template_sheet = workbook.create_sheet(title=self.template_sheet_name)
@@ -194,40 +196,60 @@ class Hodiny2025Manager:
 
         for col, header in enumerate(headers, 1):
             cell = sheet.cell(row=self.HEADER_ROW, column=col)
-            cell.value = header
-            cell.font = Font(bold=True)
-            cell.alignment = Alignment(horizontal="center")
+            if not isinstance(cell, MergedCell):
+                cell.value = header
+                cell.font = Font(bold=True)
+                cell.alignment = Alignment(horizontal="center")
 
         # Formátování a vzorce pro datovou oblast
         for day in range(1, 32):  # 1-31 dní
             row = self.DATA_START_ROW + day - 1
 
             # Den v měsíci
-            sheet.cell(row=row, column=self.COL_DAY).value = day
+            cell = sheet.cell(row=row, column=self.COL_DAY)
+            if not isinstance(cell, MergedCell):
+                cell.value = day
 
             # Vzorce
             # Celkem hodin = (konec - začátek) * 24 - oběd
-            sheet.cell(row=row, column=self.COL_TOTAL_HOURS).value = (
-                f'=IF(AND(E{row}<>"",G{row}<>""),(G{row}-E{row})*24-F{row},0)'
-            )
+            cell = sheet.cell(row=row, column=self.COL_TOTAL_HOURS)
+            if not isinstance(cell, MergedCell):
+                cell.value = (
+                    f'=IF(AND(E{row}<>"",G{row}<>""),(G{row}-E{row})*24-F{row},0)'
+                )
 
             # Přesčasy = max(0, celkem - 8)
-            sheet.cell(row=row, column=self.COL_OVERTIME).value = f"=MAX(0,H{row}-8)"
+            cell = sheet.cell(row=row, column=self.COL_OVERTIME)
+            if not isinstance(cell, MergedCell):
+                cell.value = f"=MAX(0,H{row}-8)"
 
             # Celkem za všechny = hodiny * počet zaměstnanců
-            sheet.cell(row=row, column=self.COL_TOTAL_ALL).value = f"=H{row}*M{row}"
+            cell = sheet.cell(row=row, column=self.COL_TOTAL_ALL)
+            if not isinstance(cell, MergedCell):
+                cell.value = f"=H{row}*M{row}"
 
         # Souhrny
-        sheet.cell(row=self.SUMMARY_ROW, column=1).value = "SOUHRN:"
-        sheet.cell(row=self.SUMMARY_ROW, column=self.COL_TOTAL_HOURS).value = (
-            f"=SUM(H{self.DATA_START_ROW}:H{self.DATA_END_ROW})"
-        )
-        sheet.cell(row=self.SUMMARY_ROW, column=self.COL_OVERTIME).value = (
-            f"=SUM(I{self.DATA_START_ROW}:I{self.DATA_END_ROW})"
-        )
-        sheet.cell(row=self.SUMMARY_ROW, column=self.COL_TOTAL_ALL).value = (
-            f"=SUM(N{self.DATA_START_ROW}:N{self.DATA_END_ROW})"
-        )
+        cell = sheet.cell(row=self.SUMMARY_ROW, column=1)
+        if not isinstance(cell, MergedCell):
+            cell.value = "SOUHRN:"
+        
+        cell = sheet.cell(row=self.SUMMARY_ROW, column=self.COL_TOTAL_HOURS)
+        if not isinstance(cell, MergedCell):
+            cell.value = (
+                f"=SUM(H{self.DATA_START_ROW}:H{self.DATA_END_ROW})"
+            )
+        
+        cell = sheet.cell(row=self.SUMMARY_ROW, column=self.COL_OVERTIME)
+        if not isinstance(cell, MergedCell):
+            cell.value = (
+                f"=SUM(I{self.DATA_START_ROW}:I{self.DATA_END_ROW})"
+            )
+        
+        cell = sheet.cell(row=self.SUMMARY_ROW, column=self.COL_TOTAL_ALL)
+        if not isinstance(cell, MergedCell):
+            cell.value = (
+                f"=SUM(N{self.DATA_START_ROW}:N{self.DATA_END_ROW})"
+            )
 
         # Styling pro souhrny
         for col in [1, self.COL_TOTAL_HOURS, self.COL_OVERTIME, self.COL_TOTAL_ALL]:
@@ -246,7 +268,9 @@ class Hodiny2025Manager:
         """
         # Aktualizuj název
         month_name = self.CZECH_MONTHS[month]
-        sheet["A1"] = f"Měsíční výkaz práce - {month_name} {year}"
+        cell = sheet.cell(row=1, column=1)
+        if not isinstance(cell, MergedCell):
+            cell.value = f"Měsíční výkaz práce - {month_name} {year}"
 
         # Naplň data pro dny v měsíci
         days_in_month = calendar.monthrange(year, month)[1]
@@ -256,11 +280,15 @@ class Hodiny2025Manager:
             date_obj = datetime(year, month, day)
 
             # Datum
-            sheet.cell(row=row, column=self.COL_DATE).value = date_obj.strftime("%d.%m.%Y")
+            cell = sheet.cell(row=row, column=self.COL_DATE)
+            if not isinstance(cell, MergedCell):
+                cell.value = date_obj.strftime("%d.%m.%Y")
 
             # Den v týdnu
             weekday = self.CZECH_WEEKDAYS[date_obj.weekday()]
-            sheet.cell(row=row, column=self.COL_WEEKDAY).value = weekday
+            cell = sheet.cell(row=row, column=self.COL_WEEKDAY)
+            if not isinstance(cell, MergedCell):
+                cell.value = weekday
 
             # Víkendové označení
             if date_obj.weekday() >= 5:  # Sobota, Neděle
@@ -272,7 +300,9 @@ class Hodiny2025Manager:
         for day in range(days_in_month + 1, 32):
             row = self.DATA_START_ROW + day - 1
             for col in range(1, 15):
-                sheet.cell(row=row, column=col).value = ""
+                cell = sheet.cell(row=row, column=col)
+                if not isinstance(cell, MergedCell):
+                    cell.value = ""
 
     def get_or_create_month_sheet(self, month: int, year: int = 2025) -> Worksheet:
         """
@@ -336,38 +366,41 @@ class Hodiny2025Manager:
 
             # Zápis dat do buněk
             if start_time and start_time != "00:00":
-                sheet.cell(row=row, column=self.COL_START).value = datetime.strptime(start_time, "%H:%M").time()
+                cell = sheet.cell(row=row, column=self.COL_START)
+                if not isinstance(cell, MergedCell):
+                    cell.value = datetime.strptime(start_time, "%H:%M").time()
 
             if end_time and end_time != "00:00":
-                sheet.cell(row=row, column=self.COL_END).value = datetime.strptime(end_time, "%H:%M").time()
+                cell = sheet.cell(row=row, column=self.COL_END)
+                if not isinstance(cell, MergedCell):
+                    cell.value = datetime.strptime(end_time, "%H:%M").time()
 
             # Oběd jako číslo (ne čas!) - vždy nastavíme hodnotu
             lunch_hours = float(lunch_duration) if lunch_duration else 0.0
             lunch_cell = sheet.cell(row=row, column=self.COL_LUNCH)
-            lunch_cell.value = lunch_hours
-            lunch_cell.number_format = "0.0"  # Explicitně nastavit jako číselný formát
+            if not isinstance(lunch_cell, MergedCell):
+                lunch_cell.value = lunch_hours
+                lunch_cell.number_format = "0.0"  # Explicitně nastavit jako číselný formát
 
             # Počet zaměstnanců - vždy nastavíme hodnotu
             employee_cell = sheet.cell(row=row, column=self.COL_EMPLOYEES)
-            employee_cell.value = num_employees if num_employees > 0 else 0
+            if not isinstance(employee_cell, MergedCell):
+                employee_cell.value = num_employees if num_employees > 0 else 0
 
             # Ujisti se, že formule jsou správně nastavené
-            if not sheet.cell(row=row, column=self.COL_TOTAL_HOURS).value or not str(
-                sheet.cell(row=row, column=self.COL_TOTAL_HOURS).value
-            ).startswith("="):
-                sheet.cell(row=row, column=self.COL_TOTAL_HOURS).value = (
+            cell = sheet.cell(row=row, column=self.COL_TOTAL_HOURS)
+            if not isinstance(cell, MergedCell) and (not cell.value or not str(cell.value).startswith("=")):
+                cell.value = (
                     f'=IF(AND(E{row}<>"",G{row}<>""),(G{row}-E{row})*24-F{row},0)'
                 )
 
-            if not sheet.cell(row=row, column=self.COL_OVERTIME).value or not str(
-                sheet.cell(row=row, column=self.COL_OVERTIME).value
-            ).startswith("="):
-                sheet.cell(row=row, column=self.COL_OVERTIME).value = f"=MAX(0,H{row}-8)"
+            cell = sheet.cell(row=row, column=self.COL_OVERTIME)
+            if not isinstance(cell, MergedCell) and (not cell.value or not str(cell.value).startswith("=")):
+                cell.value = f"=MAX(0,H{row}-8)"
 
-            if not sheet.cell(row=row, column=self.COL_TOTAL_ALL).value or not str(
-                sheet.cell(row=row, column=self.COL_TOTAL_ALL).value
-            ).startswith("="):
-                sheet.cell(row=row, column=self.COL_TOTAL_ALL).value = f"=H{row}*M{row}"
+            cell = sheet.cell(row=row, column=self.COL_TOTAL_ALL)
+            if not isinstance(cell, MergedCell) and (not cell.value or not str(cell.value).startswith("=")):
+                cell.value = f"=H{row}*M{row}"
 
             # Uložení a vynucení automatického přepočtu formulí
             try:
@@ -615,7 +648,8 @@ class Hodiny2025Manager:
                     # Zkontroluj, zda jsou vzorce správné
                     total_formula = sheet.cell(row=row, column=self.COL_TOTAL_HOURS).value
                     if isinstance(total_formula, str) and not total_formula.startswith("="):
-                        results["warnings"].append(f"List {sheet_name}, řádek {row}: Chybí vzorec pro celkové hodiny")
+                        results["valid"] = False
+                        results["errors"].append(f"List {sheet_name}, řádek {row}: Chybí vzorec pro celkové hodiny")
 
                     # Zkontroluj konzistenci dat
                     start_time = sheet.cell(row=row, column=self.COL_START).value

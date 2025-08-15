@@ -6,8 +6,7 @@ from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from flask import (Flask, flash, redirect, render_template, request,
-                   send_file, session, url_for, g)
+from flask import Flask, flash, g, redirect, render_template, request, send_file, session, url_for
 from openpyxl import load_workbook
 from openpyxl.utils.exceptions import InvalidFileException
 
@@ -48,7 +47,7 @@ def load_settings_from_file():
 
 @app.before_request
 def before_request():
-    session['settings'] = load_settings_from_file()
+    session["settings"] = load_settings_from_file()
     g.employee_manager = EmployeeManager(Config.DATA_PATH)
     g.excel_manager = ExcelManager(Config.EXCEL_BASE_PATH)
     g.zalohy_manager = ZalohyManager(Config.EXCEL_BASE_PATH)
@@ -56,14 +55,14 @@ def before_request():
 
     # Archivace na začátku týdne
     current_week = datetime.now().isocalendar().week
-    if g.excel_manager.archive_if_needed(current_week, session['settings']):
-        save_settings_to_file(session['settings'])
+    if g.excel_manager.archive_if_needed(current_week, session["settings"]):
+        save_settings_to_file(session["settings"])
         flash(f"Týden {session['settings']['last_archived_week'] - 1} byl archivován.", "info")
 
 
 @app.teardown_request
 def teardown_request(exception=None):
-    if hasattr(g, 'excel_manager') and g.excel_manager:
+    if hasattr(g, "excel_manager") and g.excel_manager:
         g.excel_manager.close_cached_workbooks()
 
 
@@ -72,10 +71,9 @@ def index():
     active_filename = Config.EXCEL_TEMPLATE_NAME
     week_num_int = datetime.now().isocalendar().week
     current_date = datetime.now().strftime("%Y-%m-%d")
-    return render_template("index.html",
-                           active_filename=active_filename,
-                           week_number=week_num_int,
-                           current_date=current_date)
+    return render_template(
+        "index.html", active_filename=active_filename, week_number=week_num_int, current_date=current_date
+    )
 
 
 @app.route("/download")
@@ -148,10 +146,10 @@ def record_time():
         flash("Nejsou vybráni žádní zaměstnanci.", "warning")
         return redirect(url_for("manage_employees"))
 
-    current_date = request.args.get('next_date', datetime.now().strftime("%Y-%m-%d"))
-    start_time = session['settings'].get("start_time", "07:00")
-    end_time = session['settings'].get("end_time", "18:00")
-    lunch_duration = str(session['settings'].get("lunch_duration", 1.0))
+    current_date = request.args.get("next_date", datetime.now().strftime("%Y-%m-%d"))
+    start_time = session["settings"].get("start_time", "07:00")
+    end_time = session["settings"].get("end_time", "18:00")
+    lunch_duration = str(session["settings"].get("lunch_duration", 1.0))
     is_free_day = False
 
     if request.method == "POST":
@@ -165,31 +163,33 @@ def record_time():
             date = datetime.strptime(current_date, "%Y-%m-%d").date()
             if is_free_day:
                 # Pro volný den nastavíme 0 hodin
-                g.excel_manager.ulozit_pracovni_dobu(
-                    current_date, "00:00", "00:00", "0", selected_employees)
-                g.hodiny2025_manager.zapis_pracovni_doby(
-                    current_date, "00:00", "00:00", "0", len(selected_employees))
+                g.excel_manager.ulozit_pracovni_dobu(current_date, "00:00", "00:00", "0", selected_employees)
+                g.hodiny2025_manager.zapis_pracovni_doby(current_date, "00:00", "00:00", "0", len(selected_employees))
             else:
                 g.excel_manager.ulozit_pracovni_dobu(
-                    current_date, start_time, end_time, lunch_duration, selected_employees)
+                    current_date, start_time, end_time, lunch_duration, selected_employees
+                )
                 g.hodiny2025_manager.zapis_pracovni_doby(
-                    current_date, start_time, end_time, lunch_duration, len(selected_employees))
+                    current_date, start_time, end_time, lunch_duration, len(selected_employees)
+                )
 
             flash("Záznam byl úspěšně uložen.", "success")
-            next_day = (date + timedelta(days=1))
+            next_day = date + timedelta(days=1)
             while next_day.weekday() >= 5:
                 next_day += timedelta(days=1)
-            return redirect(url_for('record_time', next_date=next_day.strftime("%Y-%m-%d")))
+            return redirect(url_for("record_time", next_date=next_day.strftime("%Y-%m-%d")))
         except (ValueError, IOError, Exception) as e:
             flash(str(e), "error")
 
-    return render_template("record_time.html",
-                           selected_employees=selected_employees,
-                           current_date=current_date,
-                           start_time=start_time,
-                           end_time=end_time,
-                           lunch_duration=lunch_duration,
-                           is_free_day=is_free_day)
+    return render_template(
+        "record_time.html",
+        selected_employees=selected_employees,
+        current_date=current_date,
+        start_time=start_time,
+        end_time=end_time,
+        lunch_duration=lunch_duration,
+        is_free_day=is_free_day,
+    )
 
 
 @app.route("/excel_viewer", methods=["GET"])
@@ -210,27 +210,28 @@ def excel_viewer():
         flash(f"Chyba při zobrazení souboru: {e}", "error")
         return redirect(url_for("index"))
 
-    return render_template("excel_viewer.html", sheet_names=sheet_names,
-                           active_sheet=active_sheet_name, data=data)
+    return render_template("excel_viewer.html", sheet_names=sheet_names, active_sheet=active_sheet_name, data=data)
 
 
 @app.route("/settings", methods=["GET", "POST"])
 def settings_page():
     if request.method == "POST":
         try:
-            settings_to_save = session['settings'].copy()
-            settings_to_save.update({
-                "start_time": request.form["start_time"],
-                "end_time": request.form["end_time"],
-                "lunch_duration": float(request.form["lunch_duration"].replace(",", ".")),
-            })
+            settings_to_save = session["settings"].copy()
+            settings_to_save.update(
+                {
+                    "start_time": request.form["start_time"],
+                    "end_time": request.form["end_time"],
+                    "lunch_duration": float(request.form["lunch_duration"].replace(",", ".")),
+                }
+            )
             save_settings_to_file(settings_to_save)
-            session['settings'] = settings_to_save
+            session["settings"] = settings_to_save
             flash("Nastavení bylo úspěšně uloženo.", "success")
         except (ValueError, Exception) as e:
             flash(str(e), "error")
 
-    return render_template("settings_page.html", settings=session.get('settings', {}))
+    return render_template("settings_page.html", settings=session.get("settings", {}))
 
 
 @app.route("/zalohy", methods=["GET", "POST"])
@@ -240,39 +241,43 @@ def zalohy():
             form = request.form
             amount = float(form["amount"].replace(",", "."))
             g.zalohy_manager.add_or_update_employee_advance(
-                form["employee_name"], amount, form["currency"],
-                form["option"], form["date"])
+                form["employee_name"], amount, form["currency"], form["option"], form["date"]
+            )
             flash("Záloha byla úspěšně uložena.", "success")
         except (ValueError, Exception) as e:
             flash(str(e), "error")
 
-    return render_template("zalohy.html",
-                           employees=g.employee_manager.zamestnanci,
-                           options=g.zalohy_manager.get_option_names(),
-                           current_date=datetime.now().strftime("%Y-%m-%d"))
+    return render_template(
+        "zalohy.html",
+        employees=g.employee_manager.zamestnanci,
+        options=g.zalohy_manager.get_option_names(),
+        current_date=datetime.now().strftime("%Y-%m-%d"),
+    )
 
 
-@app.route('/monthly_report', methods=['GET', 'POST'])
+@app.route("/monthly_report", methods=["GET", "POST"])
 def monthly_report_route():
     report_data = None
-    if request.method == 'POST':
+    if request.method == "POST":
         try:
-            month = int(request.form['month'])
-            year = int(request.form['year'])
-            employees = request.form.getlist('employees') or None
+            month = int(request.form["month"])
+            year = int(request.form["year"])
+            employees = request.form.getlist("employees") or None
             report_data = g.excel_manager.generate_monthly_report(month, year, employees)
             if not report_data:
-                flash('Nebyly nalezeny žádné záznamy.', 'info')
+                flash("Nebyly nalezeny žádné záznamy.", "info")
         except (ValueError, Exception) as e:
-            flash(str(e), 'error')
+            flash(str(e), "error")
 
-    employee_names = [emp['name'] for emp in g.employee_manager.get_all_employees()]
-    return render_template("monthly_report.html",
-                           employee_names=employee_names,
-                           report_data=report_data,
-                           current_month=datetime.now().month,
-                           current_year=datetime.now().year)
+    employee_names = [emp["name"] for emp in g.employee_manager.get_all_employees()]
+    return render_template(
+        "monthly_report.html",
+        employee_names=employee_names,
+        report_data=report_data,
+        current_month=datetime.now().month,
+        current_year=datetime.now().year,
+    )
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host="0.0.0.0", port=5000)

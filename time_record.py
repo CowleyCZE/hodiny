@@ -1,10 +1,9 @@
 import logging
 import re
 from datetime import datetime
-from typing import Optional, Union
+from typing import Union
 
 from config import Config
-from employee_management import EmployeeManager
 from excel_manager import ExcelManager
 from settings import load_settings
 from utils.logger import setup_logger
@@ -136,3 +135,6 @@ class TimeRecord:
         except Exception as e:
             logger.error(f"Nepodařilo se uložit záznam: {e}")
             return False, f"Nepodařilo se uložit záznam: {e}"
+
+
+"Nepodařilo se uložit záznam: {e}"

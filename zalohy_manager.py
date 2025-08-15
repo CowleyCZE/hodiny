@@ -1,13 +1,15 @@
 # zalohy_manager.py
-from config import Config
 import logging
 from datetime import datetime
 from pathlib import Path
 
-from openpyxl import Workbook, load_workbook
+from openpyxl import load_workbook
+
+from config import Config
 
 try:
     from utils.logger import setup_logger
+
     logger = setup_logger("zalohy_manager")
 except ImportError:
     logging.basicConfig(level=logging.INFO)
@@ -30,13 +32,13 @@ class ZalohyManager:
             raise FileNotFoundError(f"Soubor '{self.active_filename}' neexistuje.")
         try:
             return load_workbook(filename=self.active_file_path, read_only=read_only, data_only=True)
-        except Exception as e:
+        except Exception:
             raise IOError(f"Nepodařilo se otevřít soubor '{self.active_filename}'.")
 
     def _save_workbook(self, workbook):
         try:
             workbook.save(self.active_file_path)
-        except Exception as e:
+        except Exception:
             raise IOError(f"Nepodařilo se uložit změny do souboru '{self.active_filename}'.")
 
     def validate_amount(self, amount):
@@ -46,7 +48,7 @@ class ZalohyManager:
 
     def validate_currency(self, currency):
         if currency not in self.VALID_CURRENCIES:
-            raise ValueError(f"Neplatná měna.")
+            raise ValueError("Neplatná měna.")
         return True
 
     def validate_employee_name(self, employee_name):
@@ -87,11 +89,11 @@ class ZalohyManager:
             target_cell = sheet.cell(row=row, column=column_index)
             current_value = float(target_cell.value or 0)
             target_cell.value = current_value + float(amount)
-            target_cell.number_format = '#,##0.00'
+            target_cell.number_format = "#,##0.00"
 
             date_cell = sheet.cell(row=row, column=self.DATE_COLUMN_INDEX)
             date_cell.value = datetime.strptime(date, "%Y-%m-%d").date()
-            date_cell.number_format = 'DD.MM.YYYY'
+            date_cell.number_format = "DD.MM.YYYY"
 
             self._save_workbook(workbook)
             return True
@@ -116,15 +118,20 @@ class ZalohyManager:
 
     def get_option_names(self):
         default_options = (
-            Config.DEFAULT_ADVANCE_OPTION_1, Config.DEFAULT_ADVANCE_OPTION_2,
-            Config.DEFAULT_ADVANCE_OPTION_3, Config.DEFAULT_ADVANCE_OPTION_4
+            Config.DEFAULT_ADVANCE_OPTION_1,
+            Config.DEFAULT_ADVANCE_OPTION_2,
+            Config.DEFAULT_ADVANCE_OPTION_3,
+            Config.DEFAULT_ADVANCE_OPTION_4,
         )
         workbook = None
         try:
             workbook = self._get_active_workbook(read_only=True)
             if self.ZALOHY_SHEET_NAME in workbook.sheetnames:
                 sheet = workbook[self.ZALOHY_SHEET_NAME]
-                return tuple(str(sheet[cell].value or default).strip() for cell, default in zip(["B80", "D80", "F80", "H80"], default_options))
+                return tuple(
+                    str(sheet[cell].value or default).strip()
+                    for cell, default in zip(["B80", "D80", "F80", "H80"], default_options)
+                )
             return default_options
         except (FileNotFoundError, IOError, Exception) as e:
             logger.error(f"Chyba při čtení názvů možností: {e}", exc_info=True)

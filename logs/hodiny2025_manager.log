@@ -191,3 +191,6 @@
 2025-08-14 20:21:09 - hodiny2025_manager - INFO - Pracovní doba pro 2025-08-13 byla zapsána do listu 08hod25, řádek 15, sloupce E-F-G-M: 08:00-1.0-16:30-5
 2025-08-14 20:21:15 - hodiny2025_manager - INFO - Pracovní doba pro 2025-08-14 byla zapsána do listu 08hod25, řádek 16, sloupce E-F-G-M: 07:00-1.0-18:00-3
 2025-08-14 20:21:20 - hodiny2025_manager - INFO - Pracovní doba pro 2025-08-15 byla zapsána do listu 08hod25, řádek 17, sloupce E-F-G-M: 00:00-0-00:00-0
+2025-08-14 21:44:40 - hodiny2025_manager - INFO - Vytváří se nový soubor: /home/runner/work/hodiny/hodiny/excel/Hodiny2025.xlsx
+2025-08-14 21:48:00 - hodiny2025_manager - INFO - Vytváří se nový soubor: /home/runner/work/hodiny/hodiny/excel/Hodiny2025.xlsx
+2025-08-14 21:54:07 - hodiny2025_manager - INFO - Vytváří se nový soubor: /home/runner/work/hodiny/hodiny/excel/Hodiny2025.xlsx

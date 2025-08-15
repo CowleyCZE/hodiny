@@ -23,8 +23,13 @@ class TestExcelManagerReports(unittest.TestCase):
         self.excel_manager = ExcelManager(base_path=self.mock_excel_path_dir)
 
         wb = Workbook()
-        sheet1 = wb.active
-        sheet1.title = "Týden 1"
+        # Ensure we have a valid active sheet and rename it
+        if wb.active is not None:
+            wb.active.title = "Týden 1"
+            sheet1 = wb.active
+        else:
+            sheet1 = wb.create_sheet("Týden 1")
+
         sheet1["A9"], sheet1["A10"], sheet1["A11"] = "Pepa Novák", "Jana Modrá", "Karel Bílý"
         sheet1["B80"], sheet1["D80"], sheet1["F80"], sheet1["H80"], sheet1["J80"] = (
             datetime.date(2023, 1, 2),

@@ -3,19 +3,22 @@
 ## 📊 Struktura Excel souboru Hodiny2025.xlsx
 
 ### 🗂️ Organizace listů
+
 - **Template list**: `MMhod25` - Šablona pro vytváření nových měsíčních listů
 - **Měsíční listy**: `01hod25`, `02hod25`, ..., `12hod25` (leden až prosinec 2025)
 
 ### 📋 Mapování buněk pro každý měsíční list
 
 #### 🏷️ ZÁHLAVÍ SOUBORU
-```
+
+```text
 A1: "Měsíční výkaz práce - [Název měsíce] 2025"
 B1: "Hodiny Evidence System"
 ```
 
 #### 📝 HLAVIČKY TABULKY (řádek 2)
-```
+
+```text
 A2: "Den"                 - Den v měsíci (1-31)
 B2: "Datum"               - Datum ve formátu DD.MM.YYYY
 C2: "Den v týdnu"         - Po, Út, St, Čt, Pá, So, Ne
@@ -35,13 +38,15 @@ N2: "Celkem odpracováno"  - Celkově odpracováno všemi zaměstnanci (vzorec)
 #### 💾 DATOVÁ OBLAST (řádky 3-33)
 
 **Indexování řádků**: `řádek = den_v_měsíci + 2`
+
 - 1. den měsíce → řádek 3
-- 2. den měsíce → řádek 4
+- další den měsíce → řádek 4
 - ...
-- 31. den měsíce → řádek 33
+- poslední den měsíce → řádek 33
 
 **Mapování sloupců**:
-```
+
+```text
 A[řádek]:  Den v měsíci (1, 2, 3, ..., 31)
 B[řádek]:  Datum (01.01.2025, 02.01.2025, ...)
 C[řádek]:  Den v týdnu (Po, Út, St, ...)
@@ -61,28 +66,35 @@ N[řádek]:  Celkem za všechny = vzorec             ← VYPOČÍTÁNO
 #### 🧮 VZORCE
 
 **Celkové hodiny (sloupec H)**:
+
 ```excel
 =IF(AND(E[řádek]<>"",G[řádek]<>""),(G[řádek]-E[řádek])*24-F[řádek],0)
 ```
+
 - Počítá rozdíl mezi koncem a začátkem práce v hodinách
 - Odečte dobu oběda
 - Pokud nejsou zadány časy, vrátí 0
 
 **Přesčasy (sloupec I)**:
+
 ```excel
 =MAX(0,H[řádek]-8)
 ```
+
 - Vše nad 8 hodin je považováno za přesčas
 - Minimálně 0 (záporné přesčasy nejsou)
 
 **Celkem za všechny zaměstnance (sloupec N)**:
+
 ```excel
 =H[řádek]*M[řádek]
 ```
+
 - Vynásobí odpracované hodiny počtem zaměstnanců
 
 #### 📊 SOUHRNY (řádek 34)
-```
+
+```text
 A34: "SOUHRN:"
 H34: =SUM(H3:H33)  - Celkem hodin za měsíc
 I34: =SUM(I3:I33)  - Celkem přesčasů za měsíc  
@@ -91,15 +103,18 @@ N34: =SUM(N3:N33)  - Celkem odpracováno všemi za měsíc
 
 ### 🎨 FORMÁTOVÁNÍ
 
-#### Víkendové dny (sobota, neděle):
+#### Víkendové dny (sobota, neděle)
+
 - Světle červené pozadí (#FFE6E6)
 - Aplikuje se na celý řádek
 
-#### Souhrny (řádek 34):
+#### Souhrny (řádek 34)
+
 - Tučné písmo
 - Šedé pozadí (#CCCCCC)
 
-#### Hlavičky (řádek 2):
+#### Hlavičky (řádek 2)
+
 - Tučné písmo
 - Středové zarovnání
 
@@ -132,7 +147,9 @@ COL_TOTAL_ALL = 14    # N - Celkem za všechny
 ### 📅 NÁZVY LISTŮ
 
 **Template**: `MMhod25`
+
 **Měsíční listy**:
+
 - Leden: `01hod25`
 - Únor: `02hod25`
 - Březen: `03hod25`
@@ -149,7 +166,9 @@ COL_TOTAL_ALL = 14    # N - Celkem za všechny
 ### 🚀 HLAVNÍ API METODY
 
 #### `zapis_pracovni_doby(date, start_time, end_time, lunch_duration, num_employees)`
+
 **Vstupní parametry**:
+
 - `date`: "2025-01-15" (YYYY-MM-DD)
 - `start_time`: "07:00" (HH:MM)
 - `end_time`: "15:30" (HH:MM)  
@@ -157,13 +176,16 @@ COL_TOTAL_ALL = 14    # N - Celkem za všechny
 - `num_employees`: 3 (integer)
 
 **Zapisuje do buněk**:
+
 - E[řádek]: start_time jako time objekt
 - F[řádek]: lunch_duration jako float
 - G[řádek]: end_time jako time objekt  
 - M[řádek]: num_employees jako integer
 
 #### `get_daily_record(date)`
+
 **Vrací dictionary s údaji o dni**:
+
 ```python
 {
     'date': '2025-01-15',
@@ -178,7 +200,9 @@ COL_TOTAL_ALL = 14    # N - Celkem za všechny
 ```
 
 #### `get_monthly_summary(month, year)`
+
 **Vrací měsíční souhrn**:
+
 ```python
 {
     'month': 1,
@@ -192,14 +216,17 @@ COL_TOTAL_ALL = 14    # N - Celkem za všechny
 
 ### ✅ TESTOVACÍ SCÉNÁŘE
 
-#### Běžný pracovní den:
+#### Běžný pracovní den
+
 - Začátek: 07:00, Konec: 15:30, Oběd: 0.5h, Zaměstnanci: 3
 - Výsledek: 8h práce, 0h přesčasů, 24h celkem za všechny
 
-#### Přesčasový den:
+#### Přesčasový den
+
 - Začátek: 07:00, Konec: 17:00, Oběd: 1.0h, Zaměstnanci: 2  
 - Výsledek: 9h práce, 1h přesčasů, 18h celkem za všechny
 
-#### Volný den:
+#### Volný den
+
 - Začátek: 00:00, Konec: 00:00, Oběd: 0h, Zaměstnanci: 0
 - Výsledek: 0h práce, 0h přesčasů, 0h celkem za všechny

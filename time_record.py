@@ -14,7 +14,7 @@ logger = setup_logger("time_record")
 class TimeRecord:
     def __init__(self, employee_manager):
         self.employee_manager = employee_manager
-        self.excel_manager = ExcelManager(Config.EXCEL_BASE_PATH, Config.EXCEL_FILE_NAME)
+        self.excel_manager = ExcelManager(Config.EXCEL_BASE_PATH)
         self.settings = None
         self.pracovni_doba = 0
         self.time_pattern = re.compile(r"^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$")
@@ -135,6 +135,3 @@ class TimeRecord:
         except Exception as e:
             logger.error(f"Nepodařilo se uložit záznam: {e}")
             return False, f"Nepodařilo se uložit záznam: {e}"
-
-
-"Nepodařilo se uložit záznam: {e}"

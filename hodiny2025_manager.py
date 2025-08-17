@@ -206,7 +206,7 @@ class Hodiny2025Manager:
     def get_daily_record(self, date_str: str) -> dict:
         try:
             date_obj = datetime.strptime(date_str, "%Y-%m-%d")
-            workbook, sheet = self.get_or_create_month_sheet(date_obj.month, date_obj.year)
+            _, sheet = self.get_or_create_month_sheet(date_obj.month, date_obj.year)
             row = self.DATA_START_ROW + date_obj.day - 1
 
             # Load with data_only=True to get calculated values

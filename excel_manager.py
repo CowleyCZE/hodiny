@@ -264,15 +264,15 @@ class ExcelManager:
                 # Zkontroluj odpovídající datum pro tento sloupec
                 date_column = c_idx - 1  # Datum je v předchozím sloupci
                 date_val = sheet.cell(row=80, column=date_column).value
-                
+
                 # Pouze pokud datum odpovídá cílovému měsíci a roku
                 if not (isinstance(date_val, datetime) and date_val.month == month and date_val.year == year):
                     continue
-                    
+
                 hours = sheet.cell(row=r_idx, column=c_idx).value
                 if not isinstance(hours, (int, float)):
                     continue
-                    
+
                 if hours > 0:
                     report_data[employee_name]["total_hours"] += hours
                 else:

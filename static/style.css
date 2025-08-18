@@ -15,6 +15,7 @@ header {
     align-items: center;
     background-color: #222;
     padding: 10px 20px;
+    flex-wrap: wrap;
 }
 
 .logo {
@@ -27,13 +28,17 @@ header {
     justify-content: center;
     background-color: #444;
     padding: 10px 0;
+    flex-wrap: wrap;
+    gap: 5px;
 }
 
 .nav a {
     color: #fff;
     text-decoration: none;
-    padding: 10px 20px;
+    padding: 10px 15px;
     font-weight: bold;
+    border-radius: 4px;
+    white-space: nowrap;
 }
 
 .nav a:hover {
@@ -43,6 +48,7 @@ header {
 .main {
     flex: 1;
     padding: 20px;
+    overflow-x: auto;
 }
 
 h1, h2, h3 {
@@ -55,6 +61,8 @@ h1, h2, h3 {
     cursor: pointer;
     text-decoration: none;
     display: inline-block;
+    border-radius: 4px;
+    margin: 2px;
 }
 
 .btn-primary {
@@ -87,6 +95,8 @@ footer {
     padding: 10px 20px;
     display: flex;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .excel-actions {
@@ -97,6 +107,7 @@ footer {
     display: flex;
     gap: 10px;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .alert {
@@ -118,4 +129,168 @@ footer {
 .alert-error {
     background-color: #dc3545;
     color: #fff;
+}
+
+/* Responsive table styles */
+.table-responsive {
+    overflow-x: auto;
+    margin: 20px 0;
+}
+
+.table-responsive table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+.table-responsive th,
+.table-responsive td {
+    border: 1px solid #555;
+    padding: 8px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.table-responsive th {
+    background-color: #444;
+    color: #fff;
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.table-responsive td {
+    background-color: #222;
+}
+
+/* Form responsiveness */
+.form-group {
+    margin: 10px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.form-group label {
+    font-weight: bold;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 8px;
+    background-color: #444;
+    color: #fff;
+    border: 1px solid #555;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    header {
+        padding: 10px;
+        text-align: center;
+    }
+    
+    .logo {
+        height: 40px;
+        margin: 0 auto 10px auto;
+    }
+    
+    .nav {
+        flex-direction: column;
+        padding: 5px;
+    }
+    
+    .nav a {
+        padding: 8px 12px;
+        text-align: center;
+        margin: 2px 0;
+    }
+    
+    .main {
+        padding: 10px;
+    }
+    
+    .info-bar {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .button-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .btn {
+        width: 100%;
+        text-align: center;
+        margin: 5px 0;
+    }
+    
+    .form-group {
+        margin: 15px 0;
+    }
+    
+    h1 {
+        font-size: 1.5em;
+    }
+    
+    h2 {
+        font-size: 1.3em;
+    }
+    
+    .table-responsive {
+        font-size: 14px;
+    }
+    
+    .table-responsive th,
+    .table-responsive td {
+        padding: 6px 4px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main {
+        padding: 5px;
+    }
+    
+    h1 {
+        font-size: 1.3em;
+    }
+    
+    .table-responsive {
+        font-size: 12px;
+    }
+    
+    .table-responsive th,
+    .table-responsive td {
+        padding: 4px 2px;
+    }
+    
+    .nav a {
+        padding: 6px 8px;
+        font-size: 14px;
+    }
+}
+
+/* Print styles */
+@media print {
+    .nav,
+    .btn,
+    .alert {
+        display: none;
+    }
+    
+    body {
+        background-color: white;
+        color: black;
+    }
+    
+    .main {
+        padding: 0;
+    }
 }

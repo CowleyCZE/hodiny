@@ -293,6 +293,115 @@ def excel_viewer():
     )
 
 
+@app.route("/excel_editor", methods=["GET", "POST"])
+def excel_editor():
+    """Editable náhled Excel souborů s možností úprav přímo v prohlížeči."""
+    if request.method == "POST":
+        # Handle cell edit
+        try:
+            file_name = request.form.get("file")
+            sheet_name = request.form.get("sheet")
+            row = int(request.form.get("row"))
+            col = int(request.form.get("col"))
+            value = request.form.get("value")
+            
+            if not file_name or not sheet_name:
+                flash("Chybí název souboru nebo listu.", "error")
+                return redirect(url_for("excel_editor"))
+            
+            base_path = Config.EXCEL_BASE_PATH
+            file_path = base_path / file_name
+            
+            # Load workbook for editing
+            wb = load_workbook(file_path)
+            sheet = wb[sheet_name]
+            
+            # Update cell value
+            sheet.cell(row=row, column=col, value=value)
+            
+            # Save the workbook
+            wb.save(file_path)
+            wb.close()
+            
+            flash("Buňka byla úspěšně aktualizována.", "success")
+            return redirect(url_for("excel_editor", file=file_name, sheet=sheet_name))
+            
+        except Exception as e:
+            flash(f"Chyba při ukládání: {e}", "error")
+            return redirect(url_for("excel_editor"))
+    
+    # GET request - display the editor
+    requested_file = request.args.get("file")
+    active_sheet_name = request.args.get("sheet")
+    data, sheet_names = [], []
+    base_path = Config.EXCEL_BASE_PATH
+    excel_files = sorted([p.name for p in base_path.glob("*.xlsx")])
+    
+    if not excel_files:
+        flash("Nenalezeny žádné Excel soubory.", "warning")
+        return render_template(
+            "excel_editor.html",
+            excel_files=[],
+            selected_file=None,
+            sheet_names=[],
+            active_sheet=None,
+            data=[],
+        )
+
+    selected_file = (
+        requested_file if requested_file in excel_files else g.excel_manager.active_filename
+    )
+    selected_path = base_path / selected_file
+    
+    try:
+        wb = load_workbook(selected_path, data_only=False)
+        sheet_names = wb.sheetnames
+        if not sheet_names:
+            flash("Vybraný soubor nemá žádné listy.", "warning")
+            return render_template(
+                "excel_editor.html",
+                excel_files=excel_files,
+                selected_file=selected_file,
+                sheet_names=[],
+                active_sheet=None,
+                data=[],
+            )
+        
+        active_sheet_name = (
+            active_sheet_name if active_sheet_name in sheet_names else sheet_names[0]
+        )
+        sheet = wb[active_sheet_name]
+        
+        # Prepare data with row/column indices for editing
+        data_with_coords = []
+        for row_idx, row in enumerate(sheet.iter_rows(values_only=True), 1):
+            if row_idx > Config.MAX_ROWS_TO_DISPLAY_EXCEL_VIEWER:
+                break
+            row_data = []
+            for col_idx, cell_value in enumerate(row, 1):
+                row_data.append({
+                    'value': str(cell_value) if cell_value is not None else "",
+                    'row': row_idx,
+                    'col': col_idx
+                })
+            data_with_coords.append(row_data)
+        
+        wb.close()
+        
+    except (FileNotFoundError, InvalidFileException) as e:
+        flash(f"Chyba při zobrazení souboru: {e}", "error")
+        return redirect(url_for("index"))
+
+    return render_template(
+        "excel_editor.html",
+        excel_files=excel_files,
+        selected_file=selected_file,
+        sheet_names=sheet_names,
+        active_sheet=active_sheet_name,
+        data=data_with_coords,
+    )
+
+
 @app.route("/settings", methods=["GET", "POST"])
 def settings_page():
     """Nastavení výchozí pracovní doby (start/end + oběd)."""

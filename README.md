@@ -14,6 +14,8 @@ Kompletní webová aplikace ve Flasku pro evidenci pracovní doby do Excelu, spr
 - Přejmenování/smazání projektových souborů, archivace a založení nového aktivního souboru
 - Textové „hlasové“ příkazy pro záznam času a rychlé statistiky
 - Pružné logování do souborů s rotací
+- **🆕 Editor Excel souborů – úprava buněk přímo v prohlížeči s automatickým uložením**
+- **🆕 Responzivní design pro všechny velikosti obrazovek**
 
 ## Architektura a soubory
 
@@ -52,6 +54,7 @@ Kompletní webová aplikace ve Flasku pro evidenci pracovní doby do Excelu, spr
 - POST /rename_project – přejmenování existujícího excel souboru
 - POST /delete_project – smazání excel souboru (neaktivního)
 - GET /excel_viewer – read‑only náhled aktivního souboru (výběr listu)
+- **🆕 GET+POST /excel_editor – interaktivní editor Excel souborů s možností úprav buněk přímo v prohlížeči**
 - GET+POST /settings – uložení časových defaultů a projektových informací, propsání do Excelu
 - GET+POST /zalohy – přidání/aktualizace zálohy pro zaměstnance
 - POST /start_new_file – „archivace“: zneaktivnění aktuálního souboru (po nastavení data konce v Nastavení)
@@ -77,6 +80,30 @@ Detekuje:
 - get_stats: time_period „week|month|year“ a volitelně jméno zaměstnance
 
 V této aplikaci se používá textový vstup (neposílá se audio). Soubor utils/voice_processor.py obsahuje i skeleton pro volání externího API (Gemini) – pro něj nastavte GEMINI_* proměnné prostředí, pokud chcete rozšířit na reálný STT/LLM.
+
+## Excel Editor - Interaktivní úpravy
+
+Nová funkce **Excel Editor** umožňuje editaci buněk přímo v prohlížeči bez nutnosti stahování souborů:
+
+### Hlavní funkce:
+- **Interaktivní tabulka**: Každá buňka je editovatelná textové pole
+- **Automatické ukládání**: Změny se okamžitě ukládají do Excel souboru při opuštění buňky nebo stisknutí Enter
+- **Vizuální feedback**: Indikátor ukládání zobrazuje stav operace (⏳ Ukládá se... → ✅ Uloženo)
+- **Výběr souborů a listů**: Stejně jako u Excel Viewer lze vybrat konkrétní soubor a list
+- **Responzivní design**: Plně optimalizováno pro mobilní zařízení a tablety
+
+### Použití:
+1. Klikněte na "Editor Tabulek" v navigaci
+2. Vyberte soubor a list, který chcete editovat
+3. Kliknutím na libovolnou buňku začněte editaci
+4. Potvrzení změn: stiskněte Enter nebo klikněte mimo buňku
+5. Změny se automaticky uloží a zobrazí se potvrzovací zpráva
+
+### Technické detaily:
+- Bezpečná validace vstupů na backend straně
+- Ochrana proti souběžným úpravám
+- Podpora pro všechny typy dat (text, čísla, formule)
+- Kompatibilní se stávající Excel infrastrukturou aplikace
 
 ## Požadavky a prostředí
 
@@ -158,7 +185,7 @@ Poznámka: Tajné hodnoty nesdílejte v repozitáři; nastavte je přes prostře
 
 ## Rychlá reference rout
 
-- /, /zaznam, /zamestnanci, /zalohy, /excel_viewer, /settings, /monthly_report
+- /, /zaznam, /zamestnanci, /zalohy, /excel_viewer, **/excel_editor**, /settings, /monthly_report
 - POST: /send_email, /set_active_file, /rename_project, /delete_project, /start_new_file, /voice-command
 
 ## Licence a autorství

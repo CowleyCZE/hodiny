@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}Editor Excel souborů{% endblock %}
+
+{% block extra_css %}
+<style>
+.editable-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.editable-table th,
+.editable-table td {
+    border: 1px solid #555;
+    padding: 8px;
+    text-align: left;
+    min-width: 100px;
+    position: relative;
+}
+
+.editable-table th {
+    background-color: #444;
+    color: #fff;
+    font-weight: bold;
+}
+
+.editable-table td {
+    background-color: #222;
+}
+
+.editable-cell {
+    background: transparent;
+    border: none;
+    color: #fff;
+    width: 100%;
+    padding: 4px;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+.editable-cell:focus {
+    background-color: #333;
+    outline: 2px solid #004EA3;
+}
+
+.table-container {
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 70vh;
+    border: 1px solid #555;
+}
+
+.form-group {
+    margin: 10px 0;
+}
+
+.form-group label {
+    display: inline-block;
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.form-group select {
+    padding: 5px;
+    background-color: #444;
+    color: #fff;
+    border: 1px solid #555;
+}
+
+.editor-info {
+    background-color: #444;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 4px;
+}
+
+.save-indicator {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background-color: #28a745;
+    color: white;
+    padding: 10px;
+    border-radius: 4px;
+    display: none;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+    <h1 id="excel-heading">Editor Excel souborů</h1>
+    
+    <div class="editor-info">
+        <p><strong>📝 Nápověda:</strong> Kliknutím na buňku ji můžete upravit. Změny se automaticky ukládají po potvrzení (Enter nebo klik mimo buňku).</p>
+    </div>
+
+    <form method="GET" action="{{ url_for('excel_editor') }}" aria-labelledby="file-selection">
+        <div class="form-group">
+            <label for="file" id="file-selection">Vyberte soubor:</label>
+            <select name="file" id="file" onchange="this.form.submit()" aria-required="true">
+                {% for file in excel_files %}
+                    <option value="{{ file }}" {% if file == selected_file %}selected{% endif %}>{{ file }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+
+    {% if selected_file %}
+        <form method="GET" action="{{ url_for('excel_editor') }}" aria-labelledby="sheet-selection">
+            <div class="form-group">
+                <input type="hidden" name="file" value="{{ selected_file }}">
+                <label for="sheet" id="sheet-selection">Vyberte list:</label>
+                <select name="sheet" id="sheet" onchange="this.form.submit()" aria-required="true">
+                    {% for sheet in sheet_names %}
+                        <option value="{{ sheet }}" {% if sheet == active_sheet %}selected{% endif %}>{{ sheet }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+
+        <h2 id="table-heading">📊 {{ selected_file }} - {{ active_sheet }}</h2>
+        
+        {% if data %}
+        <div class="table-container">
+            <table class="editable-table" aria-labelledby="table-heading">
+                <thead>
+                    <tr>
+                        {% for cell in data[0] %}
+                            <th scope="col">{{ loop.index }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in data %}
+                        <tr>
+                            {% for cell in row %}
+                                <td>
+                                    <input 
+                                        type="text" 
+                                        class="editable-cell"
+                                        value="{{ cell.value }}"
+                                        data-row="{{ cell.row }}"
+                                        data-col="{{ cell.col }}"
+                                        data-file="{{ selected_file }}"
+                                        data-sheet="{{ active_sheet }}"
+                                        onblur="saveCell(this)"
+                                        onkeypress="handleKeyPress(event, this)"
+                                        />
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p>Žádná data k zobrazení.</p>
+        {% endif %}
+    {% endif %}
+    
+    <div class="save-indicator" id="save-indicator">
+        ✅ Uloženo
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function saveCell(element) {
+    const row = element.dataset.row;
+    const col = element.dataset.col;
+    const file = element.dataset.file;
+    const sheet = element.dataset.sheet;
+    const value = element.value;
+    
+    // Show saving indicator
+    const indicator = document.getElementById('save-indicator');
+    indicator.style.display = 'block';
+    indicator.innerHTML = '💾 Ukládá se...';
+    indicator.style.backgroundColor = '#ffc107';
+    
+    // Create form and submit
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{{ url_for("excel_editor") }}';
+    
+    const fields = {
+        'file': file,
+        'sheet': sheet,
+        'row': row,
+        'col': col,
+        'value': value
+    };
+    
+    for (const [name, val] of Object.entries(fields)) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name;
+        input.value = val;
+        form.appendChild(input);
+    }
+    
+    document.body.appendChild(form);
+    
+    // Submit the form using fetch to avoid page reload
+    const formData = new FormData(form);
+    fetch('{{ url_for("excel_editor") }}', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.ok) {
+            indicator.innerHTML = '✅ Uloženo';
+            indicator.style.backgroundColor = '#28a745';
+            setTimeout(() => {
+                indicator.style.display = 'none';
+            }, 2000);
+        } else {
+            indicator.innerHTML = '❌ Chyba';
+            indicator.style.backgroundColor = '#dc3545';
+            setTimeout(() => {
+                indicator.style.display = 'none';
+            }, 3000);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        indicator.innerHTML = '❌ Chyba';
+        indicator.style.backgroundColor = '#dc3545';
+        setTimeout(() => {
+            indicator.style.display = 'none';
+        }, 3000);
+    });
+    
+    document.body.removeChild(form);
+}
+
+function handleKeyPress(event, element) {
+    if (event.key === 'Enter') {
+        element.blur(); // This will trigger the onblur event (saveCell)
+    }
+}
+</script>
+{% endblock %}
+
+{% block footer_title %}Evidence pracovní doby{% endblock %}

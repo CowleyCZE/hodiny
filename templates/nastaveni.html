@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+
+{% block title %}Nastavení ukládání do XLSX{% endblock %}
+
+{% block extra_css %}
+<style>
+    .settings-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .setting-item {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .setting-header {
+        font-weight: bold;
+        color: #495057;
+        margin-bottom: 15px;
+        font-size: 1.1em;
+    }
+    
+    .setting-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr auto auto;
+        gap: 15px;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-group label {
+        font-weight: 500;
+        margin-bottom: 5px;
+        color: #495057;
+    }
+    
+    .form-group select {
+        padding: 8px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        background-color: white;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+    
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+    
+    .btn-success {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .btn:hover {
+        opacity: 0.9;
+    }
+    
+    .current-setting {
+        font-style: italic;
+        color: #6c757d;
+        margin-top: 5px;
+        font-size: 0.9em;
+    }
+    
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+    
+    .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 1000px;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    
+    .close:hover {
+        color: black;
+    }
+    
+    .sheet-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    
+    .sheet-table th,
+    .sheet-table td {
+        border: 1px solid #dee2e6;
+        padding: 8px;
+        text-align: center;
+        cursor: pointer;
+        user-select: none;
+    }
+    
+    .sheet-table th {
+        background-color: #f8f9fa;
+        font-weight: bold;
+    }
+    
+    .sheet-table td:hover {
+        background-color: #e9ecef;
+    }
+    
+    .sheet-table td.selected {
+        background-color: #007bff;
+        color: white;
+    }
+    
+    .selected-cell-info {
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        border-radius: 4px;
+        color: #155724;
+    }
+    
+    .flash-messages {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 20px;
+    }
+    
+    .flash-message {
+        padding: 10px 15px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+        border: 1px solid transparent;
+    }
+    
+    .flash-message.success {
+        color: #155724;
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+    }
+    
+    .flash-message.error {
+        color: #721c24;
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+    }
+    
+    .flash-message.warning {
+        color: #856404;
+        background-color: #fff3cd;
+        border-color: #ffeeba;
+    }
+    
+    .flash-message.info {
+        color: #0c5460;
+        background-color: #d1ecf1;
+        border-color: #bee5eb;
+    }
+    
+    .save-all-container {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 2px solid #dee2e6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+    <h1>Nastavení ukládání do XLSX souborů</h1>
+    <p>Zde si můžete pro každý sledovaný údaj definovat cílové umístění pro uložení – soubor .xlsx, název listu a buňku.</p>
+    
+    {# Zobrazení flash zpráv #}
+    {% with messages = get_flashed_messages(with_categories=true) %} 
+        {% if messages %}
+            <ul class="flash-messages" role="alert" aria-live="polite">
+                {% for category, message in messages %}
+                    <li class="flash-message {{ category }}">
+                        {{ message }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+    
+    <div id="settings-container">
+        <!-- Dynamicky naplněno přes JavaScript -->
+    </div>
+    
+    <div class="save-all-container">
+        <button id="save-all-btn" class="btn btn-success">💾 Uložit všechna nastavení</button>
+    </div>
+</div>
+
+<!-- Modal pro zobrazení obsahu listu -->
+<div id="sheet-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modal-title">Výběr buňky</h2>
+            <span class="close">&times;</span>
+        </div>
+        <div id="modal-body">
+            <!-- Obsah listu bude dynamicky načten -->
+        </div>
+        <div id="selected-cell-info" class="selected-cell-info" style="display: none;">
+            <strong>Vybraná buňka:</strong> <span id="selected-cell-address">-</span>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/nastaveni.js') }}"></script>
+{% endblock %}

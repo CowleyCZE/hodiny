@@ -13,7 +13,7 @@ from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from flask import Flask, flash, g, redirect, render_template, request, send_file, session, url_for
+from flask import Flask, flash, g, jsonify, redirect, render_template, request, send_file, session, url_for
 from openpyxl import load_workbook
 from openpyxl.utils.exceptions import InvalidFileException
 
@@ -476,6 +476,133 @@ def monthly_report_route():
         current_month=datetime.now().month,
         current_year=datetime.now().year,
     )
+
+
+def load_dynamic_config():
+    """Načte dynamickou konfiguraci pro ukládání do XLSX souborů."""
+    if not Config.CONFIG_FILE_PATH.exists():
+        return {}
+    try:
+        with open(Config.CONFIG_FILE_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, IOError) as e:
+        logger.error("Chyba při načítání dynamické konfigurace: %s", e, exc_info=True)
+        return {}
+
+
+def save_dynamic_config(config_data):
+    """Uloží dynamickou konfiguraci do JSON. Vrací True při úspěchu."""
+    try:
+        with open(Config.CONFIG_FILE_PATH, "w", encoding="utf-8") as f:
+            json.dump(config_data, f, indent=4, ensure_ascii=False)
+        return True
+    except (IOError, TypeError) as e:
+        logger.error("Chyba při ukládání dynamické konfigurace: %s", e, exc_info=True)
+        return False
+
+
+# API endpoints pro dynamickou konfiguraci
+@app.route("/api/settings", methods=["GET"])
+def api_get_settings():
+    """Vrací aktuální obsah souboru config.json."""
+    try:
+        config = load_dynamic_config()
+        return jsonify(config)
+    except Exception as e:
+        logger.error("Chyba při načítání API nastavení: %s", e, exc_info=True)
+        return jsonify({"error": "Chyba při načítání nastavení"}), 500
+
+
+@app.route("/api/settings", methods=["POST"])
+def api_save_settings():
+    """Přijímá nová nastavení ve formátu JSON a ukládá je do config.json."""
+    try:
+        config_data = request.get_json()
+        if not config_data:
+            return jsonify({"error": "Žádná data nebyla odeslána"}), 400
+        
+        if not save_dynamic_config(config_data):
+            return jsonify({"error": "Nepodařilo se uložit nastavení"}), 500
+        
+        return jsonify({"success": True, "message": "Nastavení bylo úspěšně uloženo"})
+    except Exception as e:
+        logger.error("Chyba při ukládání API nastavení: %s", e, exc_info=True)
+        return jsonify({"error": "Chyba při ukládání nastavení"}), 500
+
+
+@app.route("/api/files", methods=["GET"])
+def api_get_files():
+    """Prohledá Excel složku a vrátí seznam všech .xlsx souborů."""
+    try:
+        excel_files = sorted([p.name for p in Config.EXCEL_BASE_PATH.glob("*.xlsx")])
+        return jsonify({"files": excel_files})
+    except Exception as e:
+        logger.error("Chyba při načítání Excel souborů: %s", e, exc_info=True)
+        return jsonify({"error": "Chyba při načítání souborů"}), 500
+
+
+@app.route("/api/sheets/<filename>", methods=["GET"])
+def api_get_sheets(filename):
+    """Přijme název souboru a vrátí seznam názvů všech listů."""
+    try:
+        file_path = Config.EXCEL_BASE_PATH / filename
+        if not file_path.exists():
+            return jsonify({"error": "Soubor nenalezen"}), 404
+        
+        wb = load_workbook(file_path, read_only=True)
+        sheet_names = wb.sheetnames
+        wb.close()
+        
+        return jsonify({"sheets": sheet_names})
+    except Exception as e:
+        logger.error("Chyba při načítání listů ze souboru %s: %s", filename, e, exc_info=True)
+        return jsonify({"error": "Chyba při načítání listů"}), 500
+
+
+@app.route("/api/sheet_content/<filename>/<sheetname>", methods=["GET"])
+def api_get_sheet_content(filename, sheetname):
+    """Vrátí obsah zadaného listu ve formátu JSON (pole polí)."""
+    try:
+        file_path = Config.EXCEL_BASE_PATH / filename
+        if not file_path.exists():
+            return jsonify({"error": "Soubor nenalezen"}), 404
+        
+        wb = load_workbook(file_path, read_only=True, data_only=True)
+        if sheetname not in wb.sheetnames:
+            wb.close()
+            return jsonify({"error": "List nenalezen"}), 404
+        
+        sheet = wb[sheetname]
+        data = []
+        
+        # Omezíme počet řádků pro výkon
+        max_rows = min(sheet.max_row, Config.MAX_ROWS_TO_DISPLAY_EXCEL_VIEWER)
+        max_cols = min(sheet.max_column, 26)  # Omezení na sloupce A-Z
+        
+        for row_idx in range(1, max_rows + 1):
+            row_data = []
+            for col_idx in range(1, max_cols + 1):
+                cell_value = sheet.cell(row=row_idx, column=col_idx).value
+                row_data.append(str(cell_value) if cell_value is not None else "")
+            data.append(row_data)
+        
+        wb.close()
+        
+        # Vrátíme také informace o rozměrech pro frontend
+        return jsonify({
+            "data": data,
+            "rows": max_rows,
+            "cols": max_cols
+        })
+    except Exception as e:
+        logger.error("Chyba při načítání obsahu listu %s/%s: %s", filename, sheetname, e, exc_info=True)
+        return jsonify({"error": "Chyba při načítání obsahu listu"}), 500
+
+
+@app.route("/nastaveni")
+def nastaveni_page():
+    """Stránka pro dynamické nastavení ukládání dat do XLSX souborů."""
+    return render_template("nastaveni.html")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,17 @@
+{
+    "employee_name": {
+        "file": "Hodiny_Cap.xlsx",
+        "sheet": "Týden",
+        "cell": "A9"
+    },
+    "date": {
+        "file": "Hodiny_Cap.xlsx",
+        "sheet": "Týden",
+        "cell": "B80"
+    },
+    "start_time": {
+        "file": "Hodiny_Cap.xlsx",
+        "sheet": "Týden",
+        "cell": "A1"
+    }
+}

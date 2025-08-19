@@ -11,6 +11,7 @@ Třída zajišťuje:
  - načítání souhrnů, denních záznamů a validaci integrity
 """
 import calendar
+import json
 import logging
 from datetime import datetime, time
 from pathlib import Path
@@ -19,7 +20,10 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.cell import MergedCell
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils.exceptions import InvalidFileException
+from openpyxl.utils import coordinate_to_tuple
 from openpyxl.worksheet.worksheet import Worksheet
+
+from config import Config
 
 try:
     from utils.logger import setup_logger
@@ -54,6 +58,61 @@ class Hodiny2025Manager:
         self.file_path = self.excel_path / self.workbook_name
         self._ensure_excel_file_exists()
         logger.info("Hodiny2025Manager inicializován pro soubor: %s", self.file_path)
+
+    def _load_dynamic_config(self):
+        """Načte dynamickou konfiguraci pro ukládání do XLSX souborů."""
+        from config import Config
+        if not Config.CONFIG_FILE_PATH.exists():
+            return {}
+        try:
+            with open(Config.CONFIG_FILE_PATH, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except (json.JSONDecodeError, IOError) as e:
+            logger.error("Chyba při načítání dynamické konfigurace: %s", e, exc_info=True)
+            return {}
+
+    def _get_cell_coordinates(self, field_key, sheet_name=None):
+        """Vrátí seznam (row, col) souřadnic pro daný field z dynamické konfigurace.
+        
+        Args:
+            field_key: Klíč pole z konfigurace (např. 'start_time', 'date')
+            sheet_name: Název listu, pokud chceme ověřit shodu
+            
+        Returns:
+            list: Seznam (row, col) souřadnic nebo prázdný seznam pokud není nakonfigurováno
+        """
+        config = self._load_dynamic_config()
+        monthly_config = config.get('monthly_time', {})
+        field_configs = monthly_config.get(field_key, [])
+        
+        if not field_configs:
+            return []
+            
+        coordinates = []
+        for field_config in field_configs:
+            # Ověř, že konfigurace je pro správný soubor a list
+            if field_config.get('file') != self.workbook_name:
+                logger.warning("Konfigurace pro monthly_time/%s odkazuje na jiný soubor: %s", 
+                             field_key, field_config.get('file'))
+                continue
+                
+            if sheet_name and field_config.get('sheet') != sheet_name:
+                logger.warning("Konfigurace pro monthly_time/%s odkazuje na jiný list: %s (očekáván %s)", 
+                             field_key, field_config.get('sheet'), sheet_name)
+                continue
+                
+            cell = field_config.get('cell')
+            if not cell:
+                continue
+                
+            try:
+                coordinates.append(coordinate_to_tuple(cell))  # Převede např. "A1" na (1, 1)
+            except ValueError as e:
+                logger.error("Neplatná buňka v konfiguraci pro monthly_time/%s: %s - %s", 
+                            field_key, cell, e)
+                continue
+                
+        return coordinates
 
     def _ensure_excel_file_exists(self):
         if not self.file_path.exists():
@@ -162,17 +221,58 @@ class Hodiny2025Manager:
             raise
 
     def _update_day_record(self, sheet, row, start_time_str, end_time_str, lunch_duration_str, num_employees):
-        if start_time_str and start_time_str != "00:00":
+        # Zápis času začátku s dynamickou konfigurací
+        start_time_coords = self._get_cell_coordinates('start_time', sheet.title)
+        if start_time_coords and start_time_str and start_time_str != "00:00":
+            for start_row, start_col in start_time_coords:
+                actual_row = start_row if start_row != row else row
+                self._set_cell_value(sheet, actual_row, start_col, datetime.strptime(start_time_str, "%H:%M").time())
+                logger.info("Čas začátku zapsán do buňky %s%d (dynamická konfigurace)", 
+                           chr(64 + start_col), actual_row)
+        elif start_time_str and start_time_str != "00:00":
+            # Fallback na původní logiku
             self._set_cell_value(sheet, row, self.COL_START, datetime.strptime(start_time_str, "%H:%M").time())
-        if end_time_str and end_time_str != "00:00":
+            
+        # Zápis času konce s dynamickou konfigurací
+        end_time_coords = self._get_cell_coordinates('end_time', sheet.title)
+        if end_time_coords and end_time_str and end_time_str != "00:00":
+            for end_row, end_col in end_time_coords:
+                actual_row = end_row if end_row != row else row
+                self._set_cell_value(sheet, actual_row, end_col, datetime.strptime(end_time_str, "%H:%M").time())
+                logger.info("Čas konce zapsán do buňky %s%d (dynamická konfigurace)", 
+                           chr(64 + end_col), actual_row)
+        elif end_time_str and end_time_str != "00:00":
+            # Fallback na původní logiku
             self._set_cell_value(sheet, row, self.COL_END, datetime.strptime(end_time_str, "%H:%M").time())
 
+        # Zápis doby oběda s dynamickou konfigurací
         lunch_hours = float(lunch_duration_str) if lunch_duration_str else 0.0
-        lunch_cell = self._set_cell_value(sheet, row, self.COL_LUNCH, lunch_hours)
-        if lunch_cell:
-            lunch_cell.number_format = "0.0"
+        lunch_coords = self._get_cell_coordinates('lunch_hours', sheet.title)
+        if lunch_coords:
+            for lunch_row, lunch_col in lunch_coords:
+                actual_row = lunch_row if lunch_row != row else row
+                lunch_cell = self._set_cell_value(sheet, actual_row, lunch_col, lunch_hours)
+                if lunch_cell:
+                    lunch_cell.number_format = "0.0"
+                logger.info("Doba oběda zapsána do buňky %s%d (dynamická konfigurace)", 
+                           chr(64 + lunch_col), actual_row)
+        else:
+            # Fallback na původní logiku
+            lunch_cell = self._set_cell_value(sheet, row, self.COL_LUNCH, lunch_hours)
+            if lunch_cell:
+                lunch_cell.number_format = "0.0"
 
-        self._set_cell_value(sheet, row, self.COL_EMPLOYEES, num_employees if num_employees > 0 else 0)
+        # Zápis počtu zaměstnanců s dynamickou konfigurací
+        employees_coords = self._get_cell_coordinates('num_employees', sheet.title)
+        if employees_coords:
+            for emp_row, emp_col in employees_coords:
+                actual_row = emp_row if emp_row != row else row
+                self._set_cell_value(sheet, actual_row, emp_col, num_employees if num_employees > 0 else 0)
+                logger.info("Počet zaměstnanců zapsán do buňky %s%d (dynamická konfigurace)", 
+                           chr(64 + emp_col), actual_row)
+        else:
+            # Fallback na původní logiku
+            self._set_cell_value(sheet, row, self.COL_EMPLOYEES, num_employees if num_employees > 0 else 0)
 
     def _ensure_formulas_are_set(self, sheet, row):
         formulas = {

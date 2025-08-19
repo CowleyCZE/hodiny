@@ -9,7 +9,7 @@ Kompletní webová aplikace ve Flasku pro evidenci pracovní doby do Excelu, spr
 - Správa zaměstnanců (přidání, úprava, smazání, výběr pro záznam)
 - Zálohy (příspěvky) se sumací po „možnostech“ a měnách (EUR/CZK)
 - Měsíční report souhrnů hodin a počtu volných dní
-- Náhled obsahu aktivního Excel souboru (read‑only, s omezením řádků)
+- Nřáhled obsahu aktivního Excel souboru (read‑only, s omezením řádků)
 - Stažení a odeslání aktivního souboru e‑mailem (SMTP)
 - Přejmenování/smazání projektových souborů, archivace a založení nového aktivního souboru
 - Textové „hlasové“ příkazy pro záznam času a rychlé statistiky

@@ -19,6 +19,7 @@ class Config:
     EXCEL_BASE_PATH = Path(os.environ.get("HODINY_EXCEL_PATH", BASE_DIR / "excel"))
     EXCEL_TEMPLATE_NAME = "Hodiny_Cap.xlsx"
     SETTINGS_FILE_PATH = DATA_PATH / "settings.json"
+    CONFIG_FILE_PATH = BASE_DIR / "config.json"
 
     SMTP_SERVER = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
     SMTP_PORT = int(os.environ.get("SMTP_PORT", 465))

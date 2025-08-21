@@ -1,0 +1,51 @@
+{
+    "weekly_time": {
+        "employee_name": [
+            {
+                "file": "Hodiny_Cap.xlsx",
+                "sheet": "Týden",
+                "cell": "A9"
+            }
+        ],
+        "date": [
+            {
+                "file": "Hodiny_Cap.xlsx",
+                "sheet": "Týden",
+                "cell": "B80"
+            }
+        ],
+        "start_time": [
+            {
+                "file": "Hodiny_Cap.xlsx",
+                "sheet": "Týden",
+                "cell": "A1"
+            }
+        ],
+        "end_time": [],
+        "lunch_duration": [],
+        "total_hours": []
+    },
+    "advances": {
+        "employee_name": [],
+        "amount_eur": [],
+        "amount_czk": [],
+        "date": [],
+        "option_type": []
+    },
+    "monthly_time": {
+        "employee_name": [],
+        "date": [],
+        "start_time": [],
+        "end_time": [],
+        "lunch_hours": [],
+        "total_hours": [],
+        "overtime": [],
+        "num_employees": [],
+        "total_all_employees": []
+    },
+    "projects": {
+        "project_name": [],
+        "start_date": [],
+        "end_date": []
+    }
+}

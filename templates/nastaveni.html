@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+
+{% block title %}Rozšířené nastavení ukládání do XLSX{% endblock %}
+
+{% block extra_css %}
+<style>
+    .settings-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .setting-item {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+    
+    .setting-header {
+        font-weight: bold;
+        color: #495057;
+        margin-bottom: 15px;
+        font-size: 1.2em;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #dee2e6;
+    }
+    
+    .field-container {
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .setting-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr auto auto;
+        gap: 15px;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 3px;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-group label {
+        font-weight: 500;
+        margin-bottom: 5px;
+        color: #495057;
+        font-size: 0.9em;
+    }
+    
+    .form-group select,
+    .form-group input {
+        padding: 8px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        background-color: white;
+        font-size: 0.9em;
+    }
+    
+    .form-group select:disabled,
+    .form-group input:disabled {
+        background-color: #e9ecef;
+        color: #6c757d;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        font-size: 0.9em;
+        white-space: nowrap;
+    }
+    
+    .btn-sm {
+        padding: 6px 12px;
+        font-size: 0.8em;
+    }
+    
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+    
+    .btn-success {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .btn:hover:not(:disabled) {
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+    
+    .btn:disabled {
+        background-color: #e9ecef;
+        color: #6c757d;
+        cursor: not-allowed;
+    }
+    
+    .current-setting {
+        font-style: italic;
+        color: #6c757d;
+        margin-top: 5px;
+        font-size: 0.9em;
+    }
+    
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+    
+    .modal-content {
+        background-color: #fefefe;
+        margin: 2% auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 95%;
+        max-width: 1200px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    
+    .close:hover {
+        color: black;
+    }
+    
+    .sheet-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 0.8em;
+    }
+    
+    .sheet-table th,
+    .sheet-table td {
+        border: 1px solid #dee2e6;
+        padding: 6px;
+        text-align: center;
+        cursor: pointer;
+        user-select: none;
+        max-width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    .sheet-table th {
+        background-color: #f8f9fa;
+        font-weight: bold;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    
+    .sheet-table td:hover {
+        background-color: #e9ecef;
+    }
+    
+    .sheet-table td.selected {
+        background-color: #007bff;
+        color: white;
+    }
+    
+    .selected-cell-info {
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        border-radius: 4px;
+        color: #155724;
+    }
+    
+    .flash-messages {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 20px;
+    }
+    
+    .flash-message {
+        padding: 10px 15px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+        border: 1px solid transparent;
+    }
+    
+    .flash-message.success {
+        color: #155724;
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+    }
+    
+    .flash-message.error {
+        color: #721c24;
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+    }
+    
+    .flash-message.warning {
+        color: #856404;
+        background-color: #fff3cd;
+        border-color: #ffeeba;
+    }
+    
+    .flash-message.info {
+        color: #0c5460;
+        background-color: #d1ecf1;
+        border-color: #bee5eb;
+    }
+    
+    .save-all-container {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 2px solid #dee2e6;
+    }
+    
+    .category-stats {
+        font-size: 0.9em;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+    
+    .location-counter {
+        display: inline-block;
+        background: #007bff;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        line-height: 20px;
+        text-align: center;
+        font-size: 0.8em;
+        margin-left: 5px;
+    }
+    
+    @media (max-width: 768px) {
+        .setting-row {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        
+        .modal-content {
+            width: 98%;
+            margin: 1% auto;
+        }
+        
+        .sheet-table {
+            font-size: 0.7em;
+        }
+        
+        .sheet-table th,
+        .sheet-table td {
+            padding: 4px;
+            max-width: 60px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+    <h1>Rozšířené nastavení ukládání do XLSX souborů</h1>
+    <p>Zde si můžete pro každý typ dat a každý sledovaný údaj definovat jedno nebo více cílových umístění pro uložení – soubor .xlsx, název listu a buňku. Každé pole může být uloženo do více lokací současně.</p>
+    
+    {# Zobrazení flash zpráv #}
+    {% with messages = get_flashed_messages(with_categories=true) %} 
+        {% if messages %}
+            <ul class="flash-messages" role="alert" aria-live="polite">
+                {% for category, message in messages %}
+                    <li class="flash-message {{ category }}">
+                        {{ message }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+    
+    <div class="info-box" style="background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px; padding: 15px; margin-bottom: 20px;">
+        <h3 style="margin-top: 0; color: #0c5460;">🔧 Nové funkce v rozšířené verzi:</h3>
+        <ul style="margin-bottom: 0; color: #0c5460;">
+            <li><strong>Více kategorií dat:</strong> Týdenní evidence, Zálohy, Měsíční evidence, Projekty</li>
+            <li><strong>Více lokací na pole:</strong> Každý údaj může být uložen do více buněk současně</li>
+            <li><strong>Křížové mapování:</strong> Možnost ukládat do různých listů nebo souborů</li>
+            <li><strong>Rozšířené typy dat:</strong> Všechny typy záznamů zapisovaných do Excel souborů</li>
+        </ul>
+    </div>
+    
+    <div id="settings-container">
+        <!-- Dynamicky naplněno přes JavaScript -->
+    </div>
+    
+    <div class="save-all-container">
+        <button id="save-all-btn" class="btn btn-success" style="font-size: 1.1em; padding: 12px 24px;">
+            💾 Uložit všechna nastavení
+        </button>
+        <div style="margin-top: 10px; font-size: 0.9em; color: #6c757d;">
+            Uloží konfiguraci pro všechny kategorie dat a všechna jejich pole
+        </div>
+    </div>
+</div>
+
+<!-- Modal pro zobrazení obsahu listu -->
+<div id="sheet-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modal-title">Výběr buňky</h2>
+            <span class="close">&times;</span>
+        </div>
+        <div style="margin-bottom: 10px; font-size: 0.9em; color: #6c757d;">
+            Klikněte na libovolnou buňku v tabulce pro její výběr. Buňka bude automaticky nastavena.
+        </div>
+        <div id="modal-body">
+            <!-- Obsah listu bude dynamicky načten -->
+        </div>
+        <div id="selected-cell-info" class="selected-cell-info" style="display: none;">
+            <strong>Vybraná buňka:</strong> <span id="selected-cell-address">-</span>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/nastaveni.js') }}"></script>
+{% endblock %}

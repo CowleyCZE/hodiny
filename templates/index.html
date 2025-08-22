@@ -38,6 +38,31 @@
         <div class="alert alert-warning" role="alert">Soubor Hodiny_Cap.xlsx nebyl nalezen.</div>
     {% endif %}
 
+    {# Sekce pro nahrávání Excel souborů #}
+    <section class="upload-section" aria-labelledby="upload-heading">
+        <h3 id="upload-heading">Nahrání Excel souboru:</h3>
+        <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data" class="upload-form">
+            <div class="file-upload-group">
+                <label for="file-input" class="file-label">
+                    📁 Vyberte Excel soubor (.xlsx):
+                </label>
+                <input type="file" 
+                       id="file-input" 
+                       name="file" 
+                       accept=".xlsx" 
+                       required 
+                       class="file-input">
+                <button type="submit" class="btn btn-primary upload-btn">
+                    📤 Nahrát soubor
+                </button>
+            </div>
+            <p class="help-text">
+                <strong>📝 Nápověda:</strong> Podporovány jsou pouze soubory s příponou .xlsx. 
+                Pokud nahráváte soubor se stejným názvem jako existující, budete vyzváni k potvrzení přepsání.
+            </p>
+        </form>
+    </section>
+
     <section class="voice-control" aria-labelledby="voice-control-heading">
         <h3 id="voice-control-heading">Hlasové ovládání</h3>
         <button id="voice-button" class="voice-control-button">

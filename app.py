@@ -8,12 +8,15 @@ Tento modul:
 """
 import json
 import smtplib
+import os
 from datetime import datetime, timedelta
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from pathlib import Path
 
 from flask import Flask, flash, g, jsonify, redirect, render_template, request, send_file, session, url_for
+from werkzeug.utils import secure_filename
 from openpyxl import load_workbook
 from openpyxl.utils.exceptions import InvalidFileException
 
@@ -80,9 +83,26 @@ def teardown_request(_exception=None):
         g.excel_manager.close_cached_workbooks()
 
 
+def _cleanup_temp_files():
+    """Vyčistí dočasné soubory starší než 1 hodinu."""
+    try:
+        import time
+        current_time = time.time()
+        for temp_file in Config.EXCEL_BASE_PATH.glob("temp_*.xlsx"):
+            # Remove temp files older than 1 hour
+            if current_time - temp_file.stat().st_mtime > 3600:
+                temp_file.unlink()
+                logger.info("Odstraněn starý dočasný soubor: %s", temp_file.name)
+    except Exception as e:
+        logger.error("Chyba při čištění dočasných souborů: %s", e, exc_info=True)
+
+
 @app.route("/")
 def index():
     """Úvodní stránka s rychlými informacemi (aktuální datum + týden)."""
+    # Clean up any temporary upload files
+    _cleanup_temp_files()
+    
     active_filename = Config.EXCEL_TEMPLATE_NAME
     week_num_int = datetime.now().isocalendar().week
     current_date = datetime.now().strftime("%Y-%m-%d")
@@ -143,6 +163,131 @@ def send_email():
     except (ValueError, smtplib.SMTPException, FileNotFoundError) as e:
         logger.error("Chyba při odesílání emailu: %s", e, exc_info=True)
         flash("Chyba při odesílání emailu.", "error")
+    return redirect(url_for("index"))
+
+
+@app.route("/upload", methods=["GET", "POST"])
+def upload_file():
+    """Nahrání Excel souborů s kontrolou přepsání existujících souborů."""
+    if request.method == "POST":
+        # Handle overwrite confirmation
+        if "overwrite" in request.form and "filename" in request.form:
+            filename = request.form["filename"]
+            # This means user confirmed overwrite, but we need the file again
+            # Instead, we'll handle this case differently - store file temporarily
+            flash("Pro dokončení přepsání prosím znovu vyberte soubor.", "info")
+            return redirect(url_for("index"))
+        
+        # Check if file was uploaded
+        if "file" not in request.files:
+            flash("Nebyl vybrán žádný soubor.", "error")
+            return redirect(url_for("index"))
+        
+        file = request.files["file"]
+        if file.filename == "":
+            flash("Nebyl vybrán žádný soubor.", "error")
+            return redirect(url_for("index"))
+        
+        # Validate file extension
+        if not file.filename.lower().endswith(".xlsx"):
+            flash("Lze nahrávat pouze soubory s příponou .xlsx.", "error")
+            return redirect(url_for("index"))
+        
+        # Secure the filename
+        filename = secure_filename(file.filename)
+        if not filename:
+            flash("Neplatný název souboru.", "error")
+            return redirect(url_for("index"))
+        
+        # Check if file already exists and no overwrite confirmation
+        file_path = Config.EXCEL_BASE_PATH / filename
+        force_overwrite = request.form.get("force_overwrite") == "true"
+        
+        if file_path.exists() and not force_overwrite:
+            # Store the file temporarily and show confirmation
+            try:
+                # Validate that it's a valid Excel file by trying to load it
+                file.seek(0)
+                load_workbook(file)
+                file.seek(0)
+                
+                # Store file temporarily for overwrite confirmation
+                temp_path = Config.EXCEL_BASE_PATH / f"temp_{filename}"
+                file.save(str(temp_path))
+                
+                # Pass the temp filename to the confirmation template
+                return render_template("upload_confirm.html", 
+                                     filename=filename, 
+                                     temp_filename=f"temp_{filename}")
+                
+            except InvalidFileException:
+                flash("Soubor není platný Excel soubor (.xlsx).", "error")
+                return redirect(url_for("index"))
+            except Exception as e:
+                logger.error("Chyba při validaci souboru: %s", e, exc_info=True)
+                flash("Chyba při nahrávání souboru.", "error")
+                return redirect(url_for("index"))
+        
+        try:
+            # Validate that it's a valid Excel file by trying to load it
+            file.seek(0)  # Reset file pointer
+            load_workbook(file)
+            file.seek(0)  # Reset again for saving
+            
+            # Save the file
+            file.save(str(file_path))
+            
+            flash(f"Soubor '{filename}' byl úspěšně nahrán.", "success")
+            logger.info("Nahrán soubor: %s", filename)
+            
+        except InvalidFileException:
+            flash("Soubor není platný Excel soubor (.xlsx).", "error")
+        except Exception as e:
+            logger.error("Chyba při nahrávání souboru: %s", e, exc_info=True)
+            flash("Chyba při nahrávání souboru.", "error")
+        
+        return redirect(url_for("index"))
+    
+    # GET request - just redirect to index
+    return redirect(url_for("index"))
+
+
+@app.route("/upload/confirm", methods=["POST"])
+def upload_confirm():
+    """Potvrzení přepsání existujícího souboru."""
+    temp_filename = request.form.get("temp_filename")
+    filename = request.form.get("filename")
+    
+    if not temp_filename or not filename:
+        flash("Chyba při zpracování potvrzení.", "error")
+        return redirect(url_for("index"))
+    
+    try:
+        temp_path = Config.EXCEL_BASE_PATH / temp_filename
+        final_path = Config.EXCEL_BASE_PATH / filename
+        
+        if not temp_path.exists():
+            flash("Dočasný soubor nenalezen. Zkuste nahrání znovu.", "error")
+            return redirect(url_for("index"))
+        
+        # Move temp file to final location
+        temp_path.rename(final_path)
+        
+        flash(f"Soubor '{filename}' byl úspěšně přepsán.", "success")
+        logger.info("Přepsán soubor: %s", filename)
+        
+    except Exception as e:
+        logger.error("Chyba při přepisování souboru: %s", e, exc_info=True)
+        flash("Chyba při přepisování souboru.", "error")
+        
+        # Clean up temp file
+        try:
+            temp_path = Config.EXCEL_BASE_PATH / temp_filename
+            if temp_path.exists():
+                temp_path.unlink()
+        except:
+            pass
+    
     return redirect(url_for("index"))
 
 

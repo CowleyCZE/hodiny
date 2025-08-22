@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Potvrzení přepsání souboru{% endblock %}
+
+{% block content %}
+    <h1>Potvrzení přepsání souboru</h1>
+    
+    <div class="alert alert-warning" role="alert">
+        <strong>⚠️ Varování:</strong> Soubor "<strong>{{ filename }}</strong>" již existuje. 
+        Chcete jej přepsat?
+    </div>
+    
+    <div class="button-group">
+        <form method="POST" action="{{ url_for('upload_confirm') }}" style="display: inline;">
+            <input type="hidden" name="temp_filename" value="{{ temp_filename }}">
+            <input type="hidden" name="filename" value="{{ filename }}">
+            <button type="submit" class="btn btn-danger" onclick="return confirm('Opravdu chcete přepsat existující soubor?');">
+                Ano, přepsat soubor
+            </button>
+        </form>
+        
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">
+            Ne, zrušit nahrávání
+        </a>
+    </div>
+    
+    <p class="help-text">
+        <strong>📝 Nápověda:</strong> Při přepsání souboru budou všechna původní data v souboru ztracena a nahrazena obsahem nového souboru.
+    </p>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/confirmations.js') }}"></script>
+{% endblock %}

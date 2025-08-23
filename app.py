@@ -106,16 +106,41 @@ def index():
     active_filename = Config.EXCEL_TEMPLATE_NAME
     week_num_int = datetime.now().isocalendar().week
     current_date = datetime.now().strftime("%Y-%m-%d")
+    current_date_formatted = datetime.now().strftime("%d.%m.%Y")
+    
     try:
         excel_exists = g.excel_manager.get_active_file_path().exists()
     except FileNotFoundError:
         excel_exists = False
+    
+    # Získání projektových informací
+    project_name = session.get("settings", {}).get("project_info", {}).get("name", "Nepojmenovaný projekt")
+    
+    # Získání aktuálního týdenního listu
+    current_week_data = None
+    try:
+        if excel_exists:
+            current_week_data = g.excel_manager.get_current_week_data()
+    except Exception as e:
+        logger.error("Chyba při načítání dat aktuálního týdne: %s", e, exc_info=True)
+    
+    # Získání výchozích časů pro rychlé zadání
+    start_time = session.get("settings", {}).get("start_time", "07:00")
+    end_time = session.get("settings", {}).get("end_time", "18:00")
+    lunch_duration = session.get("settings", {}).get("lunch_duration", 1.0)
+    
     return render_template(
         "index.html",
         active_filename=active_filename,
         week_number=week_num_int,
         current_date=current_date,
+        current_date_formatted=current_date_formatted,
         excel_exists=excel_exists,
+        project_name=project_name,
+        current_week_data=current_week_data,
+        start_time=start_time,
+        end_time=end_time,
+        lunch_duration=lunch_duration,
     )
 
 
@@ -784,6 +809,59 @@ def rename_file():
         
     except Exception as e:
         logger.error("Chyba při přejmenování souboru: %s", e, exc_info=True)
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/quick_time_entry", methods=["POST"])
+def quick_time_entry():
+    """API endpoint pro rychlé zadání pracovní doby z hlavní stránky."""
+    try:
+        data = request.get_json()
+        date = data.get('date')
+        start_time = data.get('start_time')
+        end_time = data.get('end_time')
+        lunch_duration = data.get('lunch_duration', '1.0')
+        is_free_day = data.get('is_free_day', False)
+        
+        if not date:
+            return jsonify({"success": False, "error": "Chybí datum"}), 400
+            
+        selected_employees = g.employee_manager.get_vybrani_zamestnanci()
+        if not selected_employees:
+            return jsonify({"success": False, "error": "Nejsou vybráni žádní zaměstnanci"}), 400
+        
+        try:
+            # Validace data
+            datetime.strptime(date, "%Y-%m-%d")
+            
+            if is_free_day:
+                # Volný den
+                g.excel_manager.ulozit_pracovni_dobu(
+                    date, "00:00", "00:00", "0", selected_employees
+                )
+                g.hodiny2025_manager.zapis_pracovni_doby(
+                    date, "00:00", "00:00", "0", len(selected_employees)
+                )
+                message = f"Volný den pro {date} byl zaznamenán pro {len(selected_employees)} zaměstnanců"
+            else:
+                if not start_time or not end_time:
+                    return jsonify({"success": False, "error": "Chybí čas začátku nebo konce"}), 400
+                    
+                g.excel_manager.ulozit_pracovni_dobu(
+                    date, start_time, end_time, lunch_duration, selected_employees
+                )
+                g.hodiny2025_manager.zapis_pracovni_doby(
+                    date, start_time, end_time, lunch_duration, len(selected_employees)
+                )
+                message = f"Pracovní doba pro {date} byla zaznamenána pro {len(selected_employees)} zaměstnanců"
+            
+            return jsonify({"success": True, "message": message})
+            
+        except ValueError as e:
+            return jsonify({"success": False, "error": f"Neplatné datum nebo čas: {e}"}), 400
+            
+    except Exception as e:
+        logger.error("Chyba při rychlém zadání času: %s", e, exc_info=True)
         return jsonify({"success": False, "error": str(e)}), 500
 
 

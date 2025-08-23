@@ -410,3 +410,46 @@ class ExcelManager:
     def update_project_info(self, _project_name, _start_date, _end_date):
         """Placeholder pro budoucí implementaci údajů o projektu (aktuálně no-op)."""
         return True
+
+    def get_current_week_data(self):
+        """Získá data z aktuálního týdenního listu pro zobrazení na hlavní stránce."""
+        try:
+            current_week = datetime.now().isocalendar().week
+            sheet_name = f"Týden {current_week}"
+            
+            with self._get_cached_workbook() as wb:
+                # Pokusíme se najít list aktuálního týdne
+                if sheet_name in wb.sheetnames:
+                    sheet = wb[sheet_name]
+                elif "Týden" in wb.sheetnames:
+                    sheet = wb["Týden"]
+                else:
+                    return None
+                
+                # Získáme data z listu (prvních několik řádků a sloupců pro přehled)
+                data = []
+                max_row = min(sheet.max_row, 20)  # Omezíme na prvních 20 řádků
+                max_col = min(sheet.max_column, 10)  # Omezíme na prvních 10 sloupců
+                
+                for row in range(1, max_row + 1):
+                    row_data = []
+                    for col in range(1, max_col + 1):
+                        cell = sheet.cell(row=row, column=col)
+                        value = cell.value
+                        if value is None:
+                            value = ""
+                        elif isinstance(value, (int, float)):
+                            value = str(value)
+                        row_data.append(str(value))
+                    data.append(row_data)
+                
+                return {
+                    "sheet_name": sheet.title,
+                    "data": data,
+                    "rows": len(data),
+                    "cols": len(data[0]) if data else 0
+                }
+                
+        except Exception as e:
+            logger.error("Chyba při načítání dat aktuálního týdne: %s", e, exc_info=True)
+            return None

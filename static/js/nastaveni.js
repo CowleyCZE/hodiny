@@ -150,6 +150,9 @@ async function initializeSettingsPage() {
         // Načte seznam dostupných Excel souborů
         await loadAvailableFiles();
         
+        // Vygeneruje UI pro správu souborů
+        generateFileManagement();
+        
         // Vygeneruje UI pro všechny kategorie
         generateSettingsUI();
         
@@ -707,4 +710,142 @@ function showSuccessMessage(message) {
     console.log(message);
     // Můžeme přidat toast notifikaci nebo podobně
     alert('Úspěch: ' + message);
+}
+
+/**
+ * Načte a zobrazí správu souborů
+ */
+function generateFileManagement() {
+    const container = document.getElementById('file-management-container');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    availableFiles.forEach(filename => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.innerHTML = `
+            <div class="file-info">
+                <span class="file-icon">📄</span>
+                <span class="file-name" id="filename-${filename}">${filename}</span>
+                <input type="text" class="rename-input form-control" id="rename-${filename}" value="${filename.replace('.xlsx', '')}" style="display: none;">
+            </div>
+            <div class="file-actions">
+                <button class="btn btn-primary" onclick="viewFileInExcelViewer('${filename}')">👁️ Zobrazit</button>
+                <button class="btn btn-warning" onclick="startRename('${filename}')">✏️ Přejmenovat</button>
+                <button class="btn btn-success" onclick="confirmRename('${filename}')" id="confirm-${filename}" style="display: none;">✅ Potvrdit</button>
+                <button class="btn btn-secondary" onclick="cancelRename('${filename}')" id="cancel-${filename}" style="display: none;">❌ Zrušit</button>
+            </div>
+        `;
+        container.appendChild(fileItem);
+    });
+}
+
+/**
+ * Otevře Excel viewer s vybraným souborem
+ */
+function viewFileInExcelViewer(filename) {
+    window.open(`/excel_viewer?file=${encodeURIComponent(filename)}`, '_blank');
+}
+
+/**
+ * Spustí režim přejmenování souboru
+ */
+function startRename(filename) {
+    const nameSpan = document.getElementById(`filename-${filename}`);
+    const renameInput = document.getElementById(`rename-${filename}`);
+    const confirmBtn = document.getElementById(`confirm-${filename}`);
+    const cancelBtn = document.getElementById(`cancel-${filename}`);
+    
+    // Skryj název, zobraz input
+    nameSpan.style.display = 'none';
+    renameInput.style.display = 'block';
+    confirmBtn.style.display = 'inline-block';
+    cancelBtn.style.display = 'inline-block';
+    
+    // Focus na input
+    renameInput.focus();
+    renameInput.select();
+}
+
+/**
+ * Zruší přejmenování
+ */
+function cancelRename(filename) {
+    const nameSpan = document.getElementById(`filename-${filename}`);
+    const renameInput = document.getElementById(`rename-${filename}`);
+    const confirmBtn = document.getElementById(`confirm-${filename}`);
+    const cancelBtn = document.getElementById(`cancel-${filename}`);
+    
+    // Zobraz název, skryj input
+    nameSpan.style.display = 'block';
+    renameInput.style.display = 'none';
+    confirmBtn.style.display = 'none';
+    cancelBtn.style.display = 'none';
+    
+    // Resetuj hodnotu
+    renameInput.value = filename.replace('.xlsx', '');
+}
+
+/**
+ * Potvrdí přejmenování souboru
+ */
+async function confirmRename(oldFilename) {
+    const renameInput = document.getElementById(`rename-${oldFilename}`);
+    const newBaseName = renameInput.value.trim();
+    
+    if (!newBaseName) {
+        showErrorMessage('Název souboru nemůže být prázdný');
+        return;
+    }
+    
+    // Přidej .xlsx koncovku pokud chybí
+    const newFilename = newBaseName.endsWith('.xlsx') ? newBaseName : newBaseName + '.xlsx';
+    
+    if (newFilename === oldFilename) {
+        cancelRename(oldFilename);
+        return;
+    }
+    
+    // Zkontroluj, zda soubor s novým názvem již neexistuje
+    if (availableFiles.includes(newFilename)) {
+        showErrorMessage(`Soubor s názvem "${newFilename}" již existuje`);
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/files/rename', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                old_filename: oldFilename,
+                new_filename: newFilename
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showSuccessMessage(`Soubor "${oldFilename}" byl přejmenován na "${newFilename}"`);
+            
+            // Aktualizuj seznam souborů
+            const index = availableFiles.indexOf(oldFilename);
+            if (index !== -1) {
+                availableFiles[index] = newFilename;
+            }
+            
+            // Znovu vygeneruj UI
+            generateFileManagement();
+            generateSettingsUI();
+            
+        } else {
+            throw new Error(result.error || 'Neznámá chyba při přejmenování');
+        }
+        
+    } catch (error) {
+        console.error('Chyba při přejmenování souboru:', error);
+        showErrorMessage('Chyba při přejmenování souboru: ' + error.message);
+    }
 }

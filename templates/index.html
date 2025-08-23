@@ -2,11 +2,115 @@
 
 {% block title %}Evidence pracovní doby{% endblock %}
 
+{% block extra_css %}
+<style>
+    .dashboard-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .info-panel {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+    }
+    
+    .project-info h2 {
+        color: #495057;
+        margin-top: 0;
+        font-size: 1.3em;
+    }
+    
+    .quick-entry-form {
+        background: #e3f2fd;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-group label {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .week-table-container {
+        margin-top: 20px;
+        max-height: 400px;
+        overflow: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+    }
+    
+    .week-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85em;
+    }
+    
+    .week-table th,
+    .week-table td {
+        border: 1px solid #dee2e6;
+        padding: 4px 8px;
+        text-align: left;
+    }
+    
+    .week-table th {
+        background: #f8f9fa;
+        font-weight: bold;
+        position: sticky;
+        top: 0;
+    }
+    
+    .free-day-group {
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #fff3cd;
+        border-radius: 4px;
+        border: 1px solid #ffeaa7;
+    }
+    
+    .free-day-group label {
+        margin-left: 5px;
+        font-weight: bold;
+        color: #856404;
+    }
+    
+    .time-fields.hidden {
+        display: none;
+    }
+    
+    @media (max-width: 768px) {
+        .dashboard-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
     {# Info panel zobrazující aktuální týden a datum #}
     <div class="info-bar" role="region" aria-label="Časové informace">
         <div id="current-week">Týden: {{ week_number }}</div>
-        <div id="current-date">Datum: {{ current_date }}</div>
+        <div id="current-date">Datum: {{ current_date_formatted }}</div>
     </div>
 
     <h1 id="main-heading">Evidence pracovní doby</h1>
@@ -22,10 +126,88 @@
         {% endif %}
     {% endwith %}
 
+    {# Dashboard s projektovými informacemi a rychlým zadáním #}
+    <div class="dashboard-container">
+        <div class="info-panel project-info">
+            <h2>📋 Projekt: {{ project_name or "Nepojmenovaný projekt" }}</h2>
+            <p><strong>Aktuální týden:</strong> {{ week_number }}</p>
+            <p><strong>Datum:</strong> {{ current_date_formatted }}</p>
+            {% if excel_exists %}
+                <p><strong>Status:</strong> ✅ Excel soubor je k dispozici</p>
+            {% else %}
+                <p><strong>Status:</strong> ⚠️ Excel soubor nebyl nalezen</p>
+            {% endif %}
+        </div>
+        
+        <div class="info-panel">
+            <h2>⚡ Rychlé zadání pracovní doby</h2>
+            <div class="quick-entry-form">
+                <form id="quick-entry-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="quick-date">Datum:</label>
+                            <input type="date" id="quick-date" name="date" value="{{ current_date }}" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="quick-lunch">Oběd (hodiny):</label>
+                            <input type="number" id="quick-lunch" name="lunch_duration" value="{{ lunch_duration }}" step="0.25" min="0" max="4" class="form-control">
+                        </div>
+                    </div>
+                    
+                    <div class="time-fields" id="time-fields">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="quick-start">Začátek:</label>
+                                <input type="time" id="quick-start" name="start_time" value="{{ start_time }}" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="quick-end">Konec:</label>
+                                <input type="time" id="quick-end" name="end_time" value="{{ end_time }}" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="free-day-group">
+                        <input type="checkbox" id="quick-free-day" name="is_free_day">
+                        <label for="quick-free-day">Volný den</label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success" style="width: 100%; margin-top: 15px;">
+                        💾 Uložit pracovní dobu
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {# Zobrazení tabulky aktuálního týdne #}
+    {% if current_week_data %}
+    <div class="info-panel">
+        <h2>📊 Přehled aktuálního týdne: {{ current_week_data.sheet_name }}</h2>
+        <div class="week-table-container">
+            <table class="week-table">
+                {% for row in current_week_data.data %}
+                    <tr>
+                        {% if loop.first %}
+                            {% for cell in row %}
+                                <th>{{ cell }}</th>
+                            {% endfor %}
+                        {% else %}
+                            {% for cell in row %}
+                                <td>{{ cell }}</td>
+                            {% endfor %}
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
     {# Sekce pro akce s Excel souborem, zobrazí se, jen pokud soubor existuje #}
     {% if excel_exists %}
         <section class="excel-actions" aria-labelledby="excel-heading">
-            <h3 id="excel-heading">Operace se souborem Hodiny_Cap.xlsx:</h3>
+            <h3 id="excel-heading">Operace se souborem Excel:</h3>
             <div class="button-group">
                 <a href="{{ url_for('download_file') }}" class="btn btn-primary" role="button">Stáhnout soubor</a>
                 {# Formulář pro odeslání emailu, používá nativní potvrzení přes confirmations.js (pokud je navázáno) nebo prohlížečem #}
@@ -35,7 +217,7 @@
             </div>
         </section>
     {% else %}
-        <div class="alert alert-warning" role="alert">Soubor Hodiny_Cap.xlsx nebyl nalezen.</div>
+        <div class="alert alert-warning" role="alert">Excel soubor nebyl nalezen.</div>
     {% endif %}
 
     {# Sekce pro nahrávání Excel souborů #}
@@ -85,6 +267,55 @@
 
             document.getElementById('current-date').textContent = `Datum: ${currentDate}`;
             document.getElementById('current-week').textContent = `Týden: ${weekNumber}`;
+            
+            // Správa formuláře pro rychlé zadání
+            const freeDay = document.getElementById('quick-free-day');
+            const timeFields = document.getElementById('time-fields');
+            
+            freeDay.addEventListener('change', function() {
+                if (this.checked) {
+                    timeFields.classList.add('hidden');
+                } else {
+                    timeFields.classList.remove('hidden');
+                }
+            });
+            
+            // Odeslání formuláře
+            const quickForm = document.getElementById('quick-entry-form');
+            quickForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const data = {
+                    date: formData.get('date'),
+                    start_time: formData.get('start_time'),
+                    end_time: formData.get('end_time'),
+                    lunch_duration: formData.get('lunch_duration'),
+                    is_free_day: formData.get('is_free_day') === 'on'
+                };
+                
+                try {
+                    const response = await fetch('/api/quick_time_entry', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        alert('Úspěch: ' + result.message);
+                        // Refresh stránky pro zobrazení aktualizovaných dat
+                        window.location.reload();
+                    } else {
+                        alert('Chyba: ' + result.error);
+                    }
+                } catch (error) {
+                    alert('Chyba při ukládání: ' + error.message);
+                }
+            });
         });
 
         // Funkce pro výpočet ISO čísla týdne

@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> {# Nastavení pro responzivní zobrazení #}
     <title>{% block title %}Evidence pracovní doby{% endblock %}</title> {# Blok pro titulek stránky, výchozí je "Evidence pracovní doby" #}
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> {# Link na hlavní CSS soubor #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}"> {# Enhanced responsive design #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/themes.css') }}"> {# Dark/Light theme support #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}"> {# Modern animations #}
     {% block extra_css %}{% endblock %} {# Blok pro přidání dalších CSS souborů specifických pro jednotlivé stránky #}
 </head>
 <body>
@@ -38,6 +41,8 @@
 
     {# Blok pro přidání JavaScript souborů specifických pro jednotlivé stránky #}
     {% block scripts %}{% endblock %}
+    {# Modern enhancements - theme switching and lazy loading #}
+    <script src="{{ url_for('static', filename='js/modern-enhancements.js') }}"></script>
     {# Připojení globálního JavaScriptu pro potvrzovací dialogy #}
     <script src="{{ url_for('static', filename='js/confirmations.js') }}"></script>
 </body>

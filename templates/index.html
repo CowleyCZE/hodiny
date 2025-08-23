@@ -127,8 +127,8 @@
     {% endwith %}
 
     {# Dashboard s projektovými informacemi a rychlým zadáním #}
-    <div class="dashboard-container">
-        <div class="info-panel project-info">
+    <div class="dashboard-container stagger-animation">
+        <div class="info-panel project-info animate-fadeInUp">
             <h2>📋 Projekt: {{ project_name or "Nepojmenovaný projekt" }}</h2>
             <p><strong>Aktuální týden:</strong> {{ week_number }}</p>
             <p><strong>Datum:</strong> {{ current_date_formatted }}</p>
@@ -139,10 +139,10 @@
             {% endif %}
         </div>
         
-        <div class="info-panel">
+        <div class="info-panel animate-fadeInUp">
             <h2>⚡ Rychlé zadání pracovní doby</h2>
             <div class="quick-entry-form">
-                <form id="quick-entry-form">
+                <form id="quick-entry-form" class="stagger-animation">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="quick-date">Datum:</label>
@@ -182,9 +182,9 @@
 
     {# Zobrazení tabulky aktuálního týdne #}
     {% if current_week_data %}
-    <div class="info-panel">
+    <div class="info-panel animate-fadeInUp" data-lazy-component="table">
         <h2>📊 Přehled aktuálního týdne: {{ current_week_data.sheet_name }}</h2>
-        <div class="week-table-container">
+        <div class="table-responsive">
             <table class="week-table">
                 {% for row in current_week_data.data %}
                     <tr>

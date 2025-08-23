@@ -1,0 +1,274 @@
+/* Enhanced Responsive Design for hodiny application */
+
+/* Mobile-first approach with enhanced breakpoints */
+:root {
+    --mobile-breakpoint: 480px;
+    --tablet-breakpoint: 768px;
+    --desktop-breakpoint: 1024px;
+    --large-desktop-breakpoint: 1200px;
+}
+
+/* Enhanced mobile responsiveness */
+@media (max-width: 480px) {
+    /* Typography scaling */
+    html {
+        font-size: 14px;
+    }
+    
+    /* Header improvements */
+    header {
+        padding: 8px;
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .logo {
+        height: 35px;
+        margin: 5px 0;
+    }
+    
+    /* Navigation stack properly on mobile */
+    .nav {
+        flex-direction: column;
+        padding: 0;
+        gap: 2px;
+    }
+    
+    .nav a {
+        padding: 12px 16px;
+        margin: 1px 0;
+        text-align: center;
+        font-size: 16px; /* Touch-friendly size */
+        border-radius: 0;
+    }
+    
+    /* Main content adjustments */
+    .main {
+        padding: 8px;
+    }
+    
+    /* Form improvements for mobile */
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        font-size: 16px; /* Prevent zoom on iOS */
+        padding: 12px;
+        min-height: 44px; /* Touch target size */
+    }
+    
+    /* Button improvements */
+    .btn {
+        min-height: 44px;
+        padding: 12px 16px;
+        font-size: 16px;
+        margin: 4px 0;
+    }
+    
+    /* Table improvements */
+    .table-responsive {
+        font-size: 12px;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .table-responsive th,
+    .table-responsive td {
+        padding: 8px 4px;
+        vertical-align: top;
+    }
+    
+    /* Dashboard container - stack on mobile */
+    .dashboard-container {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    /* Info panels */
+    .info-panel {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    /* Quick entry form improvements */
+    .quick-entry-form {
+        padding: 12px;
+        margin-bottom: 15px;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+}
+
+/* Tablet improvements */
+@media (min-width: 481px) and (max-width: 768px) {
+    html {
+        font-size: 15px;
+    }
+    
+    .nav {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 4px;
+    }
+    
+    .nav a {
+        padding: 10px 14px;
+        margin: 2px;
+        border-radius: 4px;
+    }
+    
+    .dashboard-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .main {
+        padding: 15px;
+    }
+    
+    /* Two-column forms on tablets */
+    .form-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+    
+    .button-group {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}
+
+/* Desktop and larger screens */
+@media (min-width: 769px) {
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+    
+    /* Improved navigation layout */
+    .nav {
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .nav a {
+        transition: all 0.2s ease;
+    }
+    
+    .nav a:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Enhanced dashboard layout */
+    .dashboard-container {
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+    }
+    
+    /* Three-column forms on large screens */
+    .form-row-large {
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 20px;
+    }
+}
+
+/* Large desktop optimizations */
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1400px;
+    }
+    
+    .main {
+        padding: 30px;
+    }
+    
+    /* Four-column dashboard for very large screens */
+    .dashboard-container-large {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 30px;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    /* Larger touch targets */
+    .btn,
+    .nav a,
+    input,
+    select,
+    textarea {
+        min-height: 44px;
+    }
+    
+    /* Remove hover effects on touch devices */
+    .nav a:hover {
+        background-color: #555;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .btn:hover {
+        opacity: 1;
+    }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .logo {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+}
+
+/* Landscape orientation on mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 5px 0;
+    }
+    
+    .nav a {
+        padding: 8px 12px;
+        margin: 2px;
+        font-size: 14px;
+    }
+    
+    .main {
+        padding: 10px;
+    }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Focus improvements for keyboard navigation */
+.nav a:focus,
+.btn:focus,
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* Loading states and progressive enhancement */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.loaded {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}

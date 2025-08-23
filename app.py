@@ -26,12 +26,23 @@ from excel_manager import ExcelManager
 from hodiny2025_manager import Hodiny2025Manager
 from utils.logger import setup_logger
 from zalohy_manager import ZalohyManager
+from api_endpoints import api_bp  # Import our new API blueprint
+from performance_optimizations import (
+    perf_monitor, cleanup_old_data, optimize_excel_operations,
+    initialize_performance_optimizations, timing_decorator
+)
 
 logger = setup_logger("app")
 
 app = Flask(__name__)
 app.secret_key = Config.SECRET_KEY
 Config.init_app(app)
+
+# Register API blueprint
+app.register_blueprint(api_bp)
+
+# Initialize performance optimizations
+initialize_performance_optimizations()
 
 
 def save_settings_to_file(settings_data):
@@ -68,6 +79,11 @@ def before_request():
     g.excel_manager = ExcelManager(Config.EXCEL_BASE_PATH)
     g.zalohy_manager = ZalohyManager(Config.EXCEL_BASE_PATH)
     g.hodiny2025_manager = Hodiny2025Manager(Config.EXCEL_BASE_PATH)
+    
+    # Periodic cleanup (every 100th request approximately)
+    import random
+    if random.randint(1, 100) == 1:
+        cleanup_old_data()
 
     # Automatická archivace při přechodu na nový týden
     current_week = datetime.now().isocalendar().week
@@ -98,8 +114,12 @@ def _cleanup_temp_files():
 
 
 @app.route("/")
+@timing_decorator
 def index():
     """Úvodní stránka s rychlými informacemi (aktuální datum + týden)."""
+    import time
+    start_time = time.time()
+    
     # Clean up any temporary upload files
     _cleanup_temp_files()
     
@@ -109,8 +129,8 @@ def index():
     current_date_formatted = datetime.now().strftime("%d.%m.%Y")
     
     try:
-        excel_exists = g.excel_manager.get_active_file_path().exists()
-    except FileNotFoundError:
+        excel_exists = optimize_excel_operations()
+    except:
         excel_exists = False
     
     # Získání projektových informací
@@ -128,6 +148,10 @@ def index():
     start_time = session.get("settings", {}).get("start_time", "07:00")
     end_time = session.get("settings", {}).get("end_time", "18:00")
     lunch_duration = session.get("settings", {}).get("lunch_duration", 1.0)
+    
+    # Record performance
+    request_duration = time.time() - start_time
+    perf_monitor.record_request('index', request_duration)
     
     return render_template(
         "index.html",

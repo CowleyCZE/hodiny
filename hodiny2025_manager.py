@@ -24,8 +24,6 @@ from openpyxl.utils.exceptions import InvalidFileException
 from openpyxl.utils import coordinate_to_tuple
 from openpyxl.worksheet.worksheet import Worksheet
 
-from config import Config
-
 try:
     from utils.logger import setup_logger
 

@@ -27,7 +27,7 @@ class EmployeeManager:
     def load_config(self):
         """Načte konfiguraci (tichý fallback na prázdné seznamy)."""
         if not self.config_file.exists():
-            logger.warning(f"Konfigurační soubor {self.config_file} nenalezen.")
+            logger.warning("Konfigurační soubor %s nenalezen.", self.config_file)
             return
 
         try:
@@ -42,7 +42,7 @@ class EmployeeManager:
 
             self._sort_selected_employees()
         except (json.JSONDecodeError, Exception) as e:
-            logger.error(f"Chyba při načítání konfigurace: {e}", exc_info=True)
+            logger.error("Chyba při načítání konfigurace: %s", e, exc_info=True)
             self.zamestnanci, self.vybrani_zamestnanci = [], []
 
     def _validate_employee_name(self, name):
@@ -66,7 +66,7 @@ class EmployeeManager:
                 )
             return True
         except Exception as e:
-            logger.error(f"Chyba při ukládání konfigurace: {e}", exc_info=True)
+            logger.error("Chyba při ukládání konfigurace: %s", e, exc_info=True)
             return False
 
     def pridat_zamestnance(self, zamestnanec):
@@ -129,3 +129,24 @@ class EmployeeManager:
     def get_vybrani_zamestnanci(self):
         """Seznam aktuálně vybraných zaměstnanců (preferenční řazení)."""
         return sorted(self.vybrani_zamestnanci, key=lambda x: (x != "Čáp Jakub", x))
+
+    def set_vybrani_zamestnanci(self, employees_list):
+        """Nastaví seznam vybraných zaměstnanců."""
+        if not isinstance(employees_list, list):
+            raise ValueError("Seznam zaměstnanců musí být typu list")
+
+        # Validace - všichni zaměstnanci musí být v seznamu dostupných zaměstnanců
+        for employee in employees_list:
+            if employee not in self.zamestnanci:
+                logger.warning("Zaměstnanec '%s' není v seznamu dostupných zaměstnanců", employee)
+
+        # Filtruj pouze platné zaměstnance
+        valid_employees = [emp for emp in employees_list if emp in self.zamestnanci]
+
+        # Zajisti, že "Čáp Jakub" je vždy zahrnut, pokud existuje
+        if "Čáp Jakub" in self.zamestnanci and "Čáp Jakub" not in valid_employees:
+            valid_employees.append("Čáp Jakub")
+
+        self.vybrani_zamestnanci = valid_employees
+        self._sort_selected_employees()
+        return self.save_config()

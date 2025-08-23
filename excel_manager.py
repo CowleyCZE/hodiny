@@ -9,7 +9,6 @@ Zodpovědnosti:
 
 import json
 import logging
-import re
 import shutil
 from contextlib import contextmanager
 from datetime import datetime
@@ -403,10 +402,17 @@ class ExcelManager:
         """Placeholder pro budoucí implementaci údajů o projektu (aktuálně no-op)."""
         return True
 
-    def get_current_week_data(self):
-        """Získá data z aktuálního týdenního listu pro zobrazení na hlavní stránce."""
+    def get_current_week_data(self, week_number=None):
+        """Získá data z týdenního listu pro zobrazení na hlavní stránce.
+
+        Args:
+            week_number (int, optional): Číslo týdne. Pokud None, použije se aktuální týden.
+        """
         try:
-            current_week = datetime.now().isocalendar().week
+            if week_number is None:
+                current_week = datetime.now().isocalendar().week
+            else:
+                current_week = week_number
             sheet_name = f"Týden {current_week}"
 
             with self._get_cached_workbook() as wb:

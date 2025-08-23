@@ -3,10 +3,11 @@ API endpoints for hodiny application
 Provides structured REST API for better data handling and performance
 """
 
-from flask import Blueprint, request, jsonify, g
-from datetime import datetime
 import logging
+from datetime import datetime
 from typing import Dict, Any, Optional, List
+
+from flask import Blueprint, request, jsonify, g, session
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -227,7 +228,8 @@ def get_time_entries():
         # Get query parameters
         start_date = request.args.get("start_date")
         end_date = request.args.get("end_date")
-        employee = request.args.get("employee")
+        # TODO: Implement employee filtering
+        # employee_filter = request.args.get("employee")
         week_number = request.args.get("week")
 
         # Validate date parameters
@@ -288,8 +290,6 @@ def manage_settings():
     if request.method == "GET":
         try:
             # Get current settings from session or defaults
-            from flask import session
-
             settings = session.get(
                 "settings", {"start_time": "07:00", "end_time": "18:00", "lunch_duration": 1.0, "theme": "light"}
             )
@@ -307,8 +307,6 @@ def manage_settings():
                 return APIResponse.error("No data provided", "NO_DATA", 400)
 
             # Validate settings
-            from flask import session
-
             current_settings = session.get("settings", {})
 
             # Update settings

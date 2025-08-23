@@ -5,6 +5,7 @@ Funkce:
  - regulární extrakce entit (start/end, oběd, datum, typ akce, zaměstnanec)
  - validace dat a jednotný výstup vhodný pro další zpracování
 """
+
 import os
 import re
 import time
@@ -14,10 +15,7 @@ from functools import lru_cache
 
 import requests
 from requests_cache import CachedSession
-from tenacity import (
-    retry, retry_if_exception_type, stop_after_attempt,
-    wait_exponential
-)
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 from config import Config
 from employee_management import EmployeeManager
@@ -64,10 +62,10 @@ class VoiceProcessor:
         """Inicializace cache session (idempotentní)."""
         if not isinstance(self.session, CachedSession):
             self.session = CachedSession(
-                'gemini_cache',
+                "gemini_cache",
                 expire_after=getattr(Config, "GEMINI_CACHE_TTL", 300),
-                allowable_methods=['GET', 'POST'],
-                stale_if_error=True
+                allowable_methods=["GET", "POST"],
+                stale_if_error=True,
             )
 
     @lru_cache(maxsize=100)
@@ -82,7 +80,7 @@ class VoiceProcessor:
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=4, max=10),
-        retry=retry_if_exception_type(requests.exceptions.RequestException)
+        retry=retry_if_exception_type(requests.exceptions.RequestException),
     )
     def _call_gemini_api(self, audio_file_path):
         """Volání Gemini API (transkripce) s rate limiting a retry."""
@@ -121,10 +119,13 @@ class VoiceProcessor:
 
         entities = {
             "date": self._extract_date(text),
-            "start_time": None, "end_time": None,
+            "start_time": None,
+            "end_time": None,
             "lunch_duration": self.default_lunch_duration,
-            "action": action, "is_free_day": False,
-            "employee": None, "time_period": None,
+            "action": action,
+            "is_free_day": False,
+            "employee": None,
+            "time_period": None,
         }
 
         if action == "record_free_day":
@@ -191,7 +192,7 @@ class VoiceProcessor:
         return None
 
     def _extract_employee(self, text):
-        employee_names = [emp['name'] for emp in self._load_employees()]
+        employee_names = [emp["name"] for emp in self._load_employees()]
         for name in employee_names:
             if re.search(re.escape(name), text, re.IGNORECASE):
                 logger.info("Nalezen zaměstnanec '%s' pro statistiky.", name)
@@ -237,11 +238,13 @@ class VoiceProcessor:
             if not is_valid:
                 return {"success": False, "errors": errors, "original_text": text}
 
-            entities.update({
-                "success": True,
-                "processed_at": datetime.now().isoformat(),
-                "original_text": text,
-            })
+            entities.update(
+                {
+                    "success": True,
+                    "processed_at": datetime.now().isoformat(),
+                    "original_text": text,
+                }
+            )
             return entities
         except Exception as e:
             logger.error("Kritická chyba při zpracování příkazu: %s", e, exc_info=True)

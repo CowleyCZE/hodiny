@@ -1,4 +1,5 @@
 """Konfigurace a inicializace loggeru pro konzistentní logování napříč aplikací."""
+
 import logging
 import os
 from logging.handlers import RotatingFileHandler

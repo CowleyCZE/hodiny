@@ -6,6 +6,7 @@ Zodpovědnosti:
  - Zápis denních hodin pro vybrané zaměstnance do listu konkrétního týdne
  - Generace měsíčního reportu agregací z týdenních listů
 """
+
 import json
 import logging
 import re
@@ -58,48 +59,53 @@ class ExcelManager:
             logger.error("Chyba při načítání dynamické konfigurace: %s", e, exc_info=True)
             return {}
 
-    def _get_cell_coordinates(self, field_key, sheet_name=None, data_type='weekly_time'):
+    def _get_cell_coordinates(self, field_key, sheet_name=None, data_type="weekly_time"):
         """Vrátí seznam (row, col) souřadnic pro daný field z dynamické konfigurace.
-        
+
         Args:
             field_key: Klíč pole z konfigurace (např. 'start_time', 'date')
             sheet_name: Název listu, pokud chceme ověřit shodu
             data_type: Typ dat ('weekly_time', 'advances', 'monthly_time', 'projects')
-            
+
         Returns:
             list: Seznam (row, col) souřadnic nebo prázdný seznam pokud není nakonfigurováno
         """
         config = self._load_dynamic_config()
         data_config = config.get(data_type, {})
         field_configs = data_config.get(field_key, [])
-        
+
         if not field_configs:
             return []
-            
+
         coordinates = []
         for field_config in field_configs:
             # Ověř, že konfigurace je pro správný soubor a list
-            if field_config.get('file') != self.active_filename:
-                logger.warning("Konfigurace pro %s/%s odkazuje na jiný soubor: %s", 
-                             data_type, field_key, field_config.get('file'))
+            if field_config.get("file") != self.active_filename:
+                logger.warning(
+                    "Konfigurace pro %s/%s odkazuje na jiný soubor: %s", data_type, field_key, field_config.get("file")
+                )
                 continue
-                
-            if sheet_name and field_config.get('sheet') != sheet_name:
-                logger.warning("Konfigurace pro %s/%s odkazuje na jiný list: %s (očekáván %s)", 
-                             data_type, field_key, field_config.get('sheet'), sheet_name)
+
+            if sheet_name and field_config.get("sheet") != sheet_name:
+                logger.warning(
+                    "Konfigurace pro %s/%s odkazuje na jiný list: %s (očekáván %s)",
+                    data_type,
+                    field_key,
+                    field_config.get("sheet"),
+                    sheet_name,
+                )
                 continue
-                
-            cell = field_config.get('cell')
+
+            cell = field_config.get("cell")
             if not cell:
                 continue
-                
+
             try:
                 coordinates.append(coordinate_to_tuple(cell))  # Převede např. "A1" na (1, 1)
             except ValueError as e:
-                logger.error("Neplatná buňka v konfiguraci pro %s/%s: %s - %s", 
-                            data_type, field_key, cell, e)
+                logger.error("Neplatná buňka v konfiguraci pro %s/%s: %s - %s", data_type, field_key, cell, e)
                 continue
-                
+
         return coordinates
 
     @contextmanager
@@ -131,9 +137,7 @@ class ExcelManager:
                     if not read_only:
                         self._workbook_cache[cache_key] = wb
                 except Exception as e:
-                    raise IOError(
-                        f"Chyba při otevírání souboru '{self.active_filename}': {e}"
-                    ) from e
+                    raise IOError(f"Chyba při otevírání souboru '{self.active_filename}': {e}") from e
         try:
             yield wb
         finally:
@@ -168,9 +172,7 @@ class ExcelManager:
             logger.error("Chyba při archivaci souboru: %s", e, exc_info=True)
             return False
 
-    def ulozit_pracovni_dobu(
-        self, date_str, start_time_str, end_time_str, lunch_duration_str, employees
-    ):
+    def ulozit_pracovni_dobu(self, date_str, start_time_str, end_time_str, lunch_duration_str, employees):
         """Zapíše pracovní dobu do listu týdne; vytvoří list z template pokud chybí."""
         try:
             date_obj = datetime.strptime(date_str, "%Y-%m-%d")
@@ -211,31 +213,26 @@ class ExcelManager:
         day_column_index = 2 + 2 * date_obj.weekday()
         start_time = datetime.strptime(start_time_str, "%H:%M")
         end_time = datetime.strptime(end_time_str, "%H:%M")
-        total_hours = round(
-            (end_time - start_time).total_seconds() / 3600 - float(lunch_duration_str), 2
-        )
+        total_hours = round((end_time - start_time).total_seconds() / 3600 - float(lunch_duration_str), 2)
 
         employee_rows = {
-            sheet.cell(row=r, column=1).value: r
-            for r in range(Config.EXCEL_EMPLOYEE_START_ROW, sheet.max_row + 1)
+            sheet.cell(row=r, column=1).value: r for r in range(Config.EXCEL_EMPLOYEE_START_ROW, sheet.max_row + 1)
         }
-        next_empty_row = (
-            max(employee_rows.values() or [Config.EXCEL_EMPLOYEE_START_ROW - 1]) + 1
-        )
+        next_empty_row = max(employee_rows.values() or [Config.EXCEL_EMPLOYEE_START_ROW - 1]) + 1
 
         # Zapíše zaměstnance a jejich hodiny
         for employee in employees:
             row_idx = employee_rows.get(employee)
             if not row_idx:
                 row_idx = next_empty_row
-                
+
                 # Zkus použít dynamickou konfiguraci pro jméno zaměstnance
-                employee_name_coords = self._get_cell_coordinates('employee_name', sheet_name, 'weekly_time')
+                employee_name_coords = self._get_cell_coordinates("employee_name", sheet_name, "weekly_time")
                 if employee_name_coords:
                     emp_row, emp_col = employee_name_coords[0]  # Použij první lokaci
                     # Pokud je nakonfigurovaná buňka pro jméno, přidej zaměstnance na nový řádek od této pozice
                     row_idx = max(next_empty_row, emp_row)
-                
+
                 sheet.cell(row=row_idx, column=1, value=employee)
                 next_empty_row = max(next_empty_row, row_idx) + 1
 
@@ -245,7 +242,7 @@ class ExcelManager:
                 data_cell.number_format = "0.00"
 
         # Zápis času začátku - použij dynamickou konfiguraci nebo fallback
-        start_time_coords = self._get_cell_coordinates('start_time', sheet_name, 'weekly_time')
+        start_time_coords = self._get_cell_coordinates("start_time", sheet_name, "weekly_time")
         if start_time_coords:
             # Zapíše do všech nakonfigurovaných lokací
             for start_row, start_col in start_time_coords:
@@ -253,8 +250,9 @@ class ExcelManager:
                 if not isinstance(start_time_cell, MergedCell):
                     start_time_cell.value = start_time.time()
                     start_time_cell.number_format = "HH:MM"
-                logger.info("Používám dynamickou konfiguraci pro čas začátku: buňka %s", 
-                           f"{chr(64 + start_col)}{start_row}")
+                logger.info(
+                    "Používám dynamickou konfiguraci pro čas začátku: buňka %s", f"{chr(64 + start_col)}{start_row}"
+                )
         else:
             # Fallback na původní logiku
             start_row, start_col = 7, day_column_index
@@ -265,48 +263,48 @@ class ExcelManager:
             logger.info("Používám původní logiku pro čas začátku: řádek 7, sloupec %d", start_col)
 
         # Zápis času konce - použij dynamickou konfiguraci pokud je nastavena
-        end_time_coords = self._get_cell_coordinates('end_time', sheet_name, 'weekly_time')
+        end_time_coords = self._get_cell_coordinates("end_time", sheet_name, "weekly_time")
         if end_time_coords:
             for end_row, end_col in end_time_coords:
                 end_time_cell = sheet.cell(row=end_row, column=end_col)
                 if not isinstance(end_time_cell, MergedCell):
                     end_time_cell.value = end_time.time()
                     end_time_cell.number_format = "HH:MM"
-                logger.info("Používám dynamickou konfiguraci pro čas konce: buňka %s", 
-                           f"{chr(64 + end_col)}{end_row}")
+                logger.info("Používám dynamickou konfiguraci pro čas konce: buňka %s", f"{chr(64 + end_col)}{end_row}")
 
         # Zápis doby oběda - použij dynamickou konfiguraci pokud je nastavena
-        lunch_coords = self._get_cell_coordinates('lunch_duration', sheet_name, 'weekly_time')
+        lunch_coords = self._get_cell_coordinates("lunch_duration", sheet_name, "weekly_time")
         if lunch_coords:
             for lunch_row, lunch_col in lunch_coords:
                 lunch_cell = sheet.cell(row=lunch_row, column=lunch_col)
                 if not isinstance(lunch_cell, MergedCell):
                     lunch_cell.value = float(lunch_duration_str)
                     lunch_cell.number_format = "0.00"
-                logger.info("Používám dynamickou konfiguraci pro dobu oběda: buňka %s", 
-                           f"{chr(64 + lunch_col)}{lunch_row}")
+                logger.info(
+                    "Používám dynamickou konfiguraci pro dobu oběda: buňka %s", f"{chr(64 + lunch_col)}{lunch_row}"
+                )
 
         # Zápis celkových hodin - použij dynamickou konfiguraci pokud je nastavena
-        total_hours_coords = self._get_cell_coordinates('total_hours', sheet_name, 'weekly_time')
+        total_hours_coords = self._get_cell_coordinates("total_hours", sheet_name, "weekly_time")
         if total_hours_coords:
             for total_row, total_col in total_hours_coords:
                 total_cell = sheet.cell(row=total_row, column=total_col)
                 if not isinstance(total_cell, MergedCell):
                     total_cell.value = total_hours
                     total_cell.number_format = "0.00"
-                logger.info("Používám dynamickou konfiguraci pro celkové hodiny: buňka %s", 
-                           f"{chr(64 + total_col)}{total_row}")
+                logger.info(
+                    "Používám dynamickou konfiguraci pro celkové hodiny: buňka %s", f"{chr(64 + total_col)}{total_row}"
+                )
 
         # Zápis data - použij dynamickou konfiguraci nebo fallback
-        date_coords = self._get_cell_coordinates('date', sheet_name, 'weekly_time')
+        date_coords = self._get_cell_coordinates("date", sheet_name, "weekly_time")
         if date_coords:
             for date_row, date_col in date_coords:
                 date_cell = sheet.cell(row=date_row, column=date_col)
                 if not isinstance(date_cell, MergedCell):
                     date_cell.value = date_obj.date()
                     date_cell.number_format = "DD.MM.YYYY"
-                logger.info("Používám dynamickou konfiguraci pro datum: buňka %s", 
-                           f"{chr(64 + date_col)}{date_row}")
+                logger.info("Používám dynamickou konfiguraci pro datum: buňka %s", f"{chr(64 + date_col)}{date_row}")
         else:
             # Fallback na původní logiku
             date_row, date_col = 80, day_column_index
@@ -336,9 +334,7 @@ class ExcelManager:
     def ziskej_cislo_tydne(self, datum):
         """Vrátí ISO kalendář (year, week, weekday) nebo None při chybě."""
         try:
-            datum_obj = (
-                datetime.strptime(datum, "%Y-%m-%d") if isinstance(datum, str) else datum
-            )
+            datum_obj = datetime.strptime(datum, "%Y-%m-%d") if isinstance(datum, str) else datum
             return datum_obj.isocalendar()
         except (ValueError, TypeError) as e:
             logger.error("Chyba při zpracování data '%s': %s", datum, e)
@@ -359,11 +355,7 @@ class ExcelManager:
         except (FileNotFoundError, IOError) as e:
             logger.error("Chyba při generování měsíčního reportu: %s", e, exc_info=True)
             return {}
-        return {
-            emp: data
-            for emp, data in report_data.items()
-            if data["total_hours"] > 0 or data["free_days"] > 0
-        }
+        return {emp: data for emp, data in report_data.items() if data["total_hours"] > 0 or data["free_days"] > 0}
 
     def _get_monthly_sheets(self, workbook, month, year):
         """Generátor pro listy, které spadají do daného měsíce a roku."""
@@ -416,7 +408,7 @@ class ExcelManager:
         try:
             current_week = datetime.now().isocalendar().week
             sheet_name = f"Týden {current_week}"
-            
+
             with self._get_cached_workbook() as wb:
                 # Pokusíme se najít list aktuálního týdne
                 if sheet_name in wb.sheetnames:
@@ -425,12 +417,12 @@ class ExcelManager:
                     sheet = wb["Týden"]
                 else:
                     return None
-                
+
                 # Získáme data z listu (prvních několik řádků a sloupců pro přehled)
                 data = []
                 max_row = min(sheet.max_row, 20)  # Omezíme na prvních 20 řádků
                 max_col = min(sheet.max_column, 10)  # Omezíme na prvních 10 sloupců
-                
+
                 for row in range(1, max_row + 1):
                     row_data = []
                     for col in range(1, max_col + 1):
@@ -442,14 +434,9 @@ class ExcelManager:
                             value = str(value)
                         row_data.append(str(value))
                     data.append(row_data)
-                
-                return {
-                    "sheet_name": sheet.title,
-                    "data": data,
-                    "rows": len(data),
-                    "cols": len(data[0]) if data else 0
-                }
-                
+
+                return {"sheet_name": sheet.title, "data": data, "rows": len(data), "cols": len(data[0]) if data else 0}
+
         except Exception as e:
             logger.error("Chyba při načítání dat aktuálního týdne: %s", e, exc_info=True)
             return None

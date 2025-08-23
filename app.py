@@ -6,14 +6,13 @@ Tento modul:
  - poskytuje web UI (zaměstnanci, záznam času, přehled Excel, zálohy, měsíční report)
  - odesílá aktivní Excel e‑mailem
 """
+
 import json
 import smtplib
-import os
 from datetime import datetime, timedelta
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from pathlib import Path
 
 from flask import Flask, flash, g, jsonify, redirect, render_template, request, send_file, session, url_for
 from werkzeug.utils import secure_filename
@@ -28,8 +27,11 @@ from utils.logger import setup_logger
 from zalohy_manager import ZalohyManager
 from api_endpoints import api_bp  # Import our new API blueprint
 from performance_optimizations import (
-    perf_monitor, cleanup_old_data, optimize_excel_operations,
-    initialize_performance_optimizations, timing_decorator
+    perf_monitor,
+    cleanup_old_data,
+    optimize_excel_operations,
+    initialize_performance_optimizations,
+    timing_decorator,
 )
 
 logger = setup_logger("app")
@@ -79,9 +81,10 @@ def before_request():
     g.excel_manager = ExcelManager(Config.EXCEL_BASE_PATH)
     g.zalohy_manager = ZalohyManager(Config.EXCEL_BASE_PATH)
     g.hodiny2025_manager = Hodiny2025Manager(Config.EXCEL_BASE_PATH)
-    
+
     # Periodic cleanup (every 100th request approximately)
     import random
+
     if random.randint(1, 100) == 1:
         cleanup_old_data()
 
@@ -103,6 +106,7 @@ def _cleanup_temp_files():
     """Vyčistí dočasné soubory starší než 1 hodinu."""
     try:
         import time
+
         current_time = time.time()
         for temp_file in Config.EXCEL_BASE_PATH.glob("temp_*.xlsx"):
             # Remove temp files older than 1 hour
@@ -118,24 +122,25 @@ def _cleanup_temp_files():
 def index():
     """Úvodní stránka s rychlými informacemi (aktuální datum + týden)."""
     import time
-    start_time = time.time()
-    
+
+    request_start_time = time.time()
+
     # Clean up any temporary upload files
     _cleanup_temp_files()
-    
+
     active_filename = Config.EXCEL_TEMPLATE_NAME
     week_num_int = datetime.now().isocalendar().week
     current_date = datetime.now().strftime("%Y-%m-%d")
     current_date_formatted = datetime.now().strftime("%d.%m.%Y")
-    
+
     try:
         excel_exists = optimize_excel_operations()
-    except:
+    except Exception:
         excel_exists = False
-    
+
     # Získání projektových informací
     project_name = session.get("settings", {}).get("project_info", {}).get("name", "Nepojmenovaný projekt")
-    
+
     # Získání aktuálního týdenního listu
     current_week_data = None
     try:
@@ -143,16 +148,16 @@ def index():
             current_week_data = g.excel_manager.get_current_week_data()
     except Exception as e:
         logger.error("Chyba při načítání dat aktuálního týdne: %s", e, exc_info=True)
-    
+
     # Získání výchozích časů pro rychlé zadání
-    start_time = session.get("settings", {}).get("start_time", "07:00")
+    default_start_time = session.get("settings", {}).get("start_time", "07:00")
     end_time = session.get("settings", {}).get("end_time", "18:00")
     lunch_duration = session.get("settings", {}).get("lunch_duration", 1.0)
-    
+
     # Record performance
-    request_duration = time.time() - start_time
-    perf_monitor.record_request('index', request_duration)
-    
+    request_duration = time.time() - request_start_time
+    perf_monitor.record_request("index", request_duration)
+
     return render_template(
         "index.html",
         active_filename=active_filename,
@@ -162,7 +167,7 @@ def index():
         excel_exists=excel_exists,
         project_name=project_name,
         current_week_data=current_week_data,
-        start_time=start_time,
+        start_time=default_start_time,
         end_time=end_time,
         lunch_duration=lunch_duration,
     )
@@ -195,17 +200,11 @@ def send_email():
         msg.attach(MIMEText("V příloze zasílám výkaz práce.", "plain", "utf-8"))
 
         with open(g.excel_manager.get_active_file_path(), "rb") as f:
-            attachment = MIMEApplication(
-                f.read(), _subtype="vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
-            attachment.add_header(
-                "Content-Disposition", "attachment", filename=g.excel_manager.active_filename
-            )
+            attachment = MIMEApplication(f.read(), _subtype="vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            attachment.add_header("Content-Disposition", "attachment", filename=g.excel_manager.active_filename)
             msg.attach(attachment)
 
-        with smtplib.SMTP_SSL(
-            Config.SMTP_SERVER, Config.SMTP_PORT, timeout=Config.SMTP_TIMEOUT
-        ) as smtp:
+        with smtplib.SMTP_SSL(Config.SMTP_SERVER, Config.SMTP_PORT, timeout=Config.SMTP_TIMEOUT) as smtp:
             smtp.login(sender, Config.SMTP_PASSWORD if Config.SMTP_PASSWORD is not None else "")
             smtp.send_message(msg)
         flash("Email byl úspěšně odeslán.", "success")
@@ -226,49 +225,49 @@ def upload_file():
             # Instead, we'll handle this case differently - store file temporarily
             flash("Pro dokončení přepsání prosím znovu vyberte soubor.", "info")
             return redirect(url_for("index"))
-        
+
         # Check if file was uploaded
         if "file" not in request.files:
             flash("Nebyl vybrán žádný soubor.", "error")
             return redirect(url_for("index"))
-        
+
         file = request.files["file"]
         if file.filename == "":
             flash("Nebyl vybrán žádný soubor.", "error")
             return redirect(url_for("index"))
-        
+
         # Validate file extension
-        if not file.filename.lower().endswith(".xlsx"):
+        if not file.filename or not file.filename.lower().endswith(".xlsx"):
             flash("Lze nahrávat pouze soubory s příponou .xlsx.", "error")
             return redirect(url_for("index"))
-        
+
         # Secure the filename
         filename = secure_filename(file.filename)
         if not filename:
             flash("Neplatný název souboru.", "error")
             return redirect(url_for("index"))
-        
+
         # Check if file already exists and no overwrite confirmation
         file_path = Config.EXCEL_BASE_PATH / filename
         force_overwrite = request.form.get("force_overwrite") == "true"
-        
+
         if file_path.exists() and not force_overwrite:
             # Store the file temporarily and show confirmation
             try:
                 # Validate that it's a valid Excel file by trying to load it
                 file.seek(0)
-                load_workbook(file)
+                # Use file stream directly for validation
+                file_stream = file.stream
+                load_workbook(file_stream)
                 file.seek(0)
-                
+
                 # Store file temporarily for overwrite confirmation
                 temp_path = Config.EXCEL_BASE_PATH / f"temp_{filename}"
                 file.save(str(temp_path))
-                
+
                 # Pass the temp filename to the confirmation template
-                return render_template("upload_confirm.html", 
-                                     filename=filename, 
-                                     temp_filename=f"temp_{filename}")
-                
+                return render_template("upload_confirm.html", filename=filename, temp_filename=f"temp_{filename}")
+
             except InvalidFileException:
                 flash("Soubor není platný Excel soubor (.xlsx).", "error")
                 return redirect(url_for("index"))
@@ -276,27 +275,29 @@ def upload_file():
                 logger.error("Chyba při validaci souboru: %s", e, exc_info=True)
                 flash("Chyba při nahrávání souboru.", "error")
                 return redirect(url_for("index"))
-        
+
         try:
             # Validate that it's a valid Excel file by trying to load it
             file.seek(0)  # Reset file pointer
-            load_workbook(file)
+            # Use file stream for validation
+            file_stream = file.stream
+            load_workbook(file_stream)
             file.seek(0)  # Reset again for saving
-            
+
             # Save the file
             file.save(str(file_path))
-            
+
             flash(f"Soubor '{filename}' byl úspěšně nahrán.", "success")
             logger.info("Nahrán soubor: %s", filename)
-            
+
         except InvalidFileException:
             flash("Soubor není platný Excel soubor (.xlsx).", "error")
         except Exception as e:
             logger.error("Chyba při nahrávání souboru: %s", e, exc_info=True)
             flash("Chyba při nahrávání souboru.", "error")
-        
+
         return redirect(url_for("index"))
-    
+
     # GET request - just redirect to index
     return redirect(url_for("index"))
 
@@ -306,37 +307,37 @@ def upload_confirm():
     """Potvrzení přepsání existujícího souboru."""
     temp_filename = request.form.get("temp_filename")
     filename = request.form.get("filename")
-    
+
     if not temp_filename or not filename:
         flash("Chyba při zpracování potvrzení.", "error")
         return redirect(url_for("index"))
-    
+
     try:
         temp_path = Config.EXCEL_BASE_PATH / temp_filename
         final_path = Config.EXCEL_BASE_PATH / filename
-        
+
         if not temp_path.exists():
             flash("Dočasný soubor nenalezen. Zkuste nahrání znovu.", "error")
             return redirect(url_for("index"))
-        
+
         # Move temp file to final location
         temp_path.rename(final_path)
-        
+
         flash(f"Soubor '{filename}' byl úspěšně přepsán.", "success")
         logger.info("Přepsán soubor: %s", filename)
-        
+
     except Exception as e:
         logger.error("Chyba při přepisování souboru: %s", e, exc_info=True)
         flash("Chyba při přepisování souboru.", "error")
-        
+
         # Clean up temp file
         try:
             temp_path = Config.EXCEL_BASE_PATH / temp_filename
             if temp_path.exists():
                 temp_path.unlink()
-        except:
+        except Exception:
             pass
-    
+
     return redirect(url_for("index"))
 
 
@@ -359,9 +360,7 @@ def manage_employees():
                 new_name = request.form.get("new_name", "").strip()
                 g.employee_manager.upravit_zamestnance_podle_jmena(old_name, new_name)
             elif action == "delete":
-                g.employee_manager.smazat_zamestnance_podle_jmena(
-                    request.form.get("employee_name", "")
-                )
+                g.employee_manager.smazat_zamestnance_podle_jmena(request.form.get("employee_name", ""))
         except ValueError as e:
             flash(str(e), "error")
     return render_template("employees.html", employees=g.employee_manager.get_all_employees())
@@ -395,12 +394,8 @@ def record_time():
             date = datetime.strptime(current_date, "%Y-%m-%d").date()
             if is_free_day:
                 # Volný den = explicitně 0 hodin, zachová konzistentní záznam
-                g.excel_manager.ulozit_pracovni_dobu(
-                    current_date, "00:00", "00:00", "0", selected_employees
-                )
-                g.hodiny2025_manager.zapis_pracovni_doby(
-                    current_date, "00:00", "00:00", "0", len(selected_employees)
-                )
+                g.excel_manager.ulozit_pracovni_dobu(current_date, "00:00", "00:00", "0", selected_employees)
+                g.hodiny2025_manager.zapis_pracovni_doby(current_date, "00:00", "00:00", "0", len(selected_employees))
             else:
                 g.excel_manager.ulozit_pracovni_dobu(
                     current_date, start_time, end_time, lunch_duration, selected_employees
@@ -447,9 +442,7 @@ def excel_viewer():
             data=[],
         )
 
-    selected_file = (
-        requested_file if requested_file in excel_files else g.excel_manager.active_filename
-    )
+    selected_file = requested_file if requested_file in excel_files else g.excel_manager.active_filename
     selected_path = base_path / selected_file
     try:
         wb = load_workbook(selected_path, read_only=True, data_only=True)
@@ -464,9 +457,7 @@ def excel_viewer():
                 active_sheet=None,
                 data=[],
             )
-        active_sheet_name = (
-            active_sheet_name if active_sheet_name in sheet_names else sheet_names[0]
-        )
+        active_sheet_name = active_sheet_name if active_sheet_name in sheet_names else sheet_names[0]
         sheet = wb[active_sheet_name]
         for i, row in enumerate(sheet.iter_rows(values_only=True)):
             if i >= Config.MAX_ROWS_TO_DISPLAY_EXCEL_VIEWER:
@@ -495,42 +486,50 @@ def excel_editor():
         try:
             file_name = request.form.get("file")
             sheet_name = request.form.get("sheet")
-            row = int(request.form.get("row"))
-            col = int(request.form.get("col"))
+            row_str = request.form.get("row")
+            col_str = request.form.get("col")
             value = request.form.get("value")
-            
-            if not file_name or not sheet_name:
-                flash("Chybí název souboru nebo listu.", "error")
+
+            if not file_name or not sheet_name or not row_str or not col_str:
+                flash("Chybí název souboru, listu nebo pozice buňky.", "error")
                 return redirect(url_for("excel_editor"))
-            
+
+            # Safely convert row and col to integers
+            try:
+                row = int(row_str)
+                col = int(col_str)
+            except (ValueError, TypeError):
+                flash("Neplatná pozice buňky.", "error")
+                return redirect(url_for("excel_editor"))
+
             base_path = Config.EXCEL_BASE_PATH
             file_path = base_path / file_name
-            
+
             # Load workbook for editing
             wb = load_workbook(file_path)
             sheet = wb[sheet_name]
-            
+
             # Update cell value
             sheet.cell(row=row, column=col, value=value)
-            
+
             # Save the workbook
             wb.save(file_path)
             wb.close()
-            
+
             flash("Buňka byla úspěšně aktualizována.", "success")
             return redirect(url_for("excel_editor", file=file_name, sheet=sheet_name))
-            
+
         except Exception as e:
             flash(f"Chyba při ukládání: {e}", "error")
             return redirect(url_for("excel_editor"))
-    
+
     # GET request - display the editor
     requested_file = request.args.get("file")
     active_sheet_name = request.args.get("sheet")
-    data, sheet_names = [], []
+    sheet_names = []
     base_path = Config.EXCEL_BASE_PATH
     excel_files = sorted([p.name for p in base_path.glob("*.xlsx")])
-    
+
     if not excel_files:
         flash("Nenalezeny žádné Excel soubory.", "warning")
         return render_template(
@@ -542,11 +541,9 @@ def excel_editor():
             data=[],
         )
 
-    selected_file = (
-        requested_file if requested_file in excel_files else g.excel_manager.active_filename
-    )
+    selected_file = requested_file if requested_file in excel_files else g.excel_manager.active_filename
     selected_path = base_path / selected_file
-    
+
     try:
         wb = load_workbook(selected_path, data_only=False)
         sheet_names = wb.sheetnames
@@ -560,12 +557,10 @@ def excel_editor():
                 active_sheet=None,
                 data=[],
             )
-        
-        active_sheet_name = (
-            active_sheet_name if active_sheet_name in sheet_names else sheet_names[0]
-        )
+
+        active_sheet_name = active_sheet_name if active_sheet_name in sheet_names else sheet_names[0]
         sheet = wb[active_sheet_name]
-        
+
         # Prepare data with row/column indices for editing
         data_with_coords = []
         for row_idx, row in enumerate(sheet.iter_rows(values_only=True), 1):
@@ -573,15 +568,13 @@ def excel_editor():
                 break
             row_data = []
             for col_idx, cell_value in enumerate(row, 1):
-                row_data.append({
-                    'value': str(cell_value) if cell_value is not None else "",
-                    'row': row_idx,
-                    'col': col_idx
-                })
+                row_data.append(
+                    {"value": str(cell_value) if cell_value is not None else "", "row": row_idx, "col": col_idx}
+                )
             data_with_coords.append(row_data)
-        
+
         wb.close()
-        
+
     except (FileNotFoundError, InvalidFileException) as e:
         flash(f"Chyba při zobrazení souboru: {e}", "error")
         return redirect(url_for("index"))
@@ -654,9 +647,7 @@ def monthly_report_route():
             month = int(request.form["month"])
             year = int(request.form["year"])
             employees = request.form.getlist("employees") or None
-            report_data = g.excel_manager.generate_monthly_report(
-                month, year, employees
-            )
+            report_data = g.excel_manager.generate_monthly_report(month, year, employees)
             if not report_data:
                 flash("Nebyly nalezeny žádné záznamy.", "info")
         except (ValueError, FileNotFoundError) as e:
@@ -714,10 +705,10 @@ def api_save_settings():
         config_data = request.get_json()
         if not config_data:
             return jsonify({"error": "Žádná data nebyla odeslána"}), 400
-        
+
         if not save_dynamic_config(config_data):
             return jsonify({"error": "Nepodařilo se uložit nastavení"}), 500
-        
+
         return jsonify({"success": True, "message": "Nastavení bylo úspěšně uloženo"})
     except Exception as e:
         logger.error("Chyba při ukládání API nastavení: %s", e, exc_info=True)
@@ -742,11 +733,11 @@ def api_get_sheets(filename):
         file_path = Config.EXCEL_BASE_PATH / filename
         if not file_path.exists():
             return jsonify({"error": "Soubor nenalezen"}), 404
-        
+
         wb = load_workbook(file_path, read_only=True)
         sheet_names = wb.sheetnames
         wb.close()
-        
+
         return jsonify({"sheets": sheet_names})
     except Exception as e:
         logger.error("Chyba při načítání listů ze souboru %s: %s", filename, e, exc_info=True)
@@ -760,34 +751,30 @@ def api_get_sheet_content(filename, sheetname):
         file_path = Config.EXCEL_BASE_PATH / filename
         if not file_path.exists():
             return jsonify({"error": "Soubor nenalezen"}), 404
-        
+
         wb = load_workbook(file_path, read_only=True, data_only=True)
         if sheetname not in wb.sheetnames:
             wb.close()
             return jsonify({"error": "List nenalezen"}), 404
-        
+
         sheet = wb[sheetname]
         data = []
-        
+
         # Omezíme počet řádků pro výkon
         max_rows = min(sheet.max_row, Config.MAX_ROWS_TO_DISPLAY_EXCEL_VIEWER)
         max_cols = min(sheet.max_column, 26)  # Omezení na sloupce A-Z
-        
+
         for row_idx in range(1, max_rows + 1):
             row_data = []
             for col_idx in range(1, max_cols + 1):
                 cell_value = sheet.cell(row=row_idx, column=col_idx).value
                 row_data.append(str(cell_value) if cell_value is not None else "")
             data.append(row_data)
-        
+
         wb.close()
-        
+
         # Vrátíme také informace o rozměrech pro frontend
-        return jsonify({
-            "data": data,
-            "rows": max_rows,
-            "cols": max_cols
-        })
+        return jsonify({"data": data, "rows": max_rows, "cols": max_cols})
     except Exception as e:
         logger.error("Chyba při načítání obsahu listu %s/%s: %s", filename, sheetname, e, exc_info=True)
         return jsonify({"error": "Chyba při načítání obsahu listu"}), 500
@@ -804,33 +791,33 @@ def rename_file():
     """API endpoint pro přejmenování XLSX souborů."""
     try:
         data = request.get_json()
-        old_filename = data.get('old_filename')
-        new_filename = data.get('new_filename')
-        
+        old_filename = data.get("old_filename")
+        new_filename = data.get("new_filename")
+
         if not old_filename or not new_filename:
             return jsonify({"success": False, "error": "Chybí název souboru"}), 400
-            
+
         # Kontrola, že jde o xlsx soubory
-        if not old_filename.endswith('.xlsx') or not new_filename.endswith('.xlsx'):
+        if not old_filename.endswith(".xlsx") or not new_filename.endswith(".xlsx"):
             return jsonify({"success": False, "error": "Pouze .xlsx soubory mohou být přejmenovány"}), 400
-            
+
         old_path = Config.EXCEL_BASE_PATH / old_filename
         new_path = Config.EXCEL_BASE_PATH / new_filename
-        
+
         # Kontrola existence starého souboru
         if not old_path.exists():
             return jsonify({"success": False, "error": f"Soubor {old_filename} neexistuje"}), 404
-            
+
         # Kontrola, že nový soubor neexistuje
         if new_path.exists():
             return jsonify({"success": False, "error": f"Soubor {new_filename} již existuje"}), 409
-            
+
         # Přejmenování souboru
         old_path.rename(new_path)
-        
+
         logger.info("Soubor %s byl přejmenován na %s", old_filename, new_filename)
         return jsonify({"success": True, "message": f"Soubor byl úspěšně přejmenován na {new_filename}"})
-        
+
     except Exception as e:
         logger.error("Chyba při přejmenování souboru: %s", e, exc_info=True)
         return jsonify({"success": False, "error": str(e)}), 500
@@ -841,49 +828,43 @@ def quick_time_entry():
     """API endpoint pro rychlé zadání pracovní doby z hlavní stránky."""
     try:
         data = request.get_json()
-        date = data.get('date')
-        start_time = data.get('start_time')
-        end_time = data.get('end_time')
-        lunch_duration = data.get('lunch_duration', '1.0')
-        is_free_day = data.get('is_free_day', False)
-        
+        date = data.get("date")
+        start_time = data.get("start_time")
+        end_time = data.get("end_time")
+        lunch_duration = data.get("lunch_duration", "1.0")
+        is_free_day = data.get("is_free_day", False)
+
         if not date:
             return jsonify({"success": False, "error": "Chybí datum"}), 400
-            
+
         selected_employees = g.employee_manager.get_vybrani_zamestnanci()
         if not selected_employees:
             return jsonify({"success": False, "error": "Nejsou vybráni žádní zaměstnanci"}), 400
-        
+
         try:
             # Validace data
             datetime.strptime(date, "%Y-%m-%d")
-            
+
             if is_free_day:
                 # Volný den
-                g.excel_manager.ulozit_pracovni_dobu(
-                    date, "00:00", "00:00", "0", selected_employees
-                )
-                g.hodiny2025_manager.zapis_pracovni_doby(
-                    date, "00:00", "00:00", "0", len(selected_employees)
-                )
+                g.excel_manager.ulozit_pracovni_dobu(date, "00:00", "00:00", "0", selected_employees)
+                g.hodiny2025_manager.zapis_pracovni_doby(date, "00:00", "00:00", "0", len(selected_employees))
                 message = f"Volný den pro {date} byl zaznamenán pro {len(selected_employees)} zaměstnanců"
             else:
                 if not start_time or not end_time:
                     return jsonify({"success": False, "error": "Chybí čas začátku nebo konce"}), 400
-                    
-                g.excel_manager.ulozit_pracovni_dobu(
-                    date, start_time, end_time, lunch_duration, selected_employees
-                )
+
+                g.excel_manager.ulozit_pracovni_dobu(date, start_time, end_time, lunch_duration, selected_employees)
                 g.hodiny2025_manager.zapis_pracovni_doby(
                     date, start_time, end_time, lunch_duration, len(selected_employees)
                 )
                 message = f"Pracovní doba pro {date} byla zaznamenána pro {len(selected_employees)} zaměstnanců"
-            
+
             return jsonify({"success": True, "message": message})
-            
+
         except ValueError as e:
             return jsonify({"success": False, "error": f"Neplatné datum nebo čas: {e}"}), 400
-            
+
     except Exception as e:
         logger.error("Chyba při rychlém zadání času: %s", e, exc_info=True)
         return jsonify({"success": False, "error": str(e)}), 500

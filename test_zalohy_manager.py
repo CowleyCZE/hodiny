@@ -65,6 +65,7 @@ class TestZalohyManager(unittest.TestCase):
         else:
             # If it's not a datetime, it might be a date object already
             from datetime import date
+
             if isinstance(cell_value, date):
                 self.assertEqual(cell_value, datetime(2025, 1, 1).date())
 

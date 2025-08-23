@@ -8,7 +8,9 @@ Tento modul:
 """
 
 import json
+import random
 import smtplib
+import time
 from datetime import datetime, timedelta
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
@@ -83,8 +85,6 @@ def before_request():
     g.hodiny2025_manager = Hodiny2025Manager(Config.EXCEL_BASE_PATH)
 
     # Periodic cleanup (every 100th request approximately)
-    import random
-
     if random.randint(1, 100) == 1:
         cleanup_old_data()
 
@@ -105,8 +105,6 @@ def teardown_request(_exception=None):
 def _cleanup_temp_files():
     """Vyčistí dočasné soubory starší než 1 hodinu."""
     try:
-        import time
-
         current_time = time.time()
         for temp_file in Config.EXCEL_BASE_PATH.glob("temp_*.xlsx"):
             # Remove temp files older than 1 hour
@@ -121,8 +119,6 @@ def _cleanup_temp_files():
 @timing_decorator
 def index():
     """Úvodní stránka s rychlými informacemi (aktuální datum + týden)."""
-    import time
-
     request_start_time = time.time()
 
     # Clean up any temporary upload files

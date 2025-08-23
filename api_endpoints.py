@@ -7,7 +7,7 @@ import logging
 from datetime import datetime
 from typing import Dict, Any, Optional, List
 
-from flask import Blueprint, request, jsonify, g
+from flask import Blueprint, request, jsonify, g, session
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -290,8 +290,6 @@ def manage_settings():
     if request.method == "GET":
         try:
             # Get current settings from session or defaults
-            from flask import session
-
             settings = session.get(
                 "settings", {"start_time": "07:00", "end_time": "18:00", "lunch_duration": 1.0, "theme": "light"}
             )
@@ -309,8 +307,6 @@ def manage_settings():
                 return APIResponse.error("No data provided", "NO_DATA", 400)
 
             # Validate settings
-            from flask import session
-
             current_settings = session.get("settings", {})
 
             # Update settings

@@ -750,5 +750,42 @@ def nastaveni_page():
     return render_template("nastaveni.html")
 
 
+@app.route("/api/files/rename", methods=["POST"])
+def rename_file():
+    """API endpoint pro přejmenování XLSX souborů."""
+    try:
+        data = request.get_json()
+        old_filename = data.get('old_filename')
+        new_filename = data.get('new_filename')
+        
+        if not old_filename or not new_filename:
+            return jsonify({"success": False, "error": "Chybí název souboru"}), 400
+            
+        # Kontrola, že jde o xlsx soubory
+        if not old_filename.endswith('.xlsx') or not new_filename.endswith('.xlsx'):
+            return jsonify({"success": False, "error": "Pouze .xlsx soubory mohou být přejmenovány"}), 400
+            
+        old_path = Config.EXCEL_BASE_PATH / old_filename
+        new_path = Config.EXCEL_BASE_PATH / new_filename
+        
+        # Kontrola existence starého souboru
+        if not old_path.exists():
+            return jsonify({"success": False, "error": f"Soubor {old_filename} neexistuje"}), 404
+            
+        # Kontrola, že nový soubor neexistuje
+        if new_path.exists():
+            return jsonify({"success": False, "error": f"Soubor {new_filename} již existuje"}), 409
+            
+        # Přejmenování souboru
+        old_path.rename(new_path)
+        
+        logger.info("Soubor %s byl přejmenován na %s", old_filename, new_filename)
+        return jsonify({"success": True, "message": f"Soubor byl úspěšně přejmenován na {new_filename}"})
+        
+    except Exception as e:
+        logger.error("Chyba při přejmenování souboru: %s", e, exc_info=True)
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)

@@ -296,6 +296,39 @@
             padding: 4px;
             max-width: 60px;
         }
+        
+        .file-item {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .file-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .rename-input {
+            max-width: 200px;
+            display: none;
+        }
+        
+        .file-actions button {
+            padding: 5px 12px;
+            font-size: 0.9em;
+        }
     }
 </style>
 {% endblock %}
@@ -325,7 +358,20 @@
             <li><strong>Více lokací na pole:</strong> Každý údaj může být uložen do více buněk současně</li>
             <li><strong>Křížové mapování:</strong> Možnost ukládat do různých listů nebo souborů</li>
             <li><strong>Rozšířené typy dat:</strong> Všechny typy záznamů zapisovaných do Excel souborů</li>
+            <li><strong>Správa souborů:</strong> Přejmenování a správa XLSX souborů</li>
         </ul>
+    </div>
+    
+    <!-- Sekce pro správu XLSX souborů -->
+    <div class="setting-item">
+        <div class="setting-header">📁 Správa XLSX souborů</div>
+        <div style="margin-bottom: 15px;">
+            <p>Zde můžete spravovat vaše XLSX soubory - přejmenovat je nebo zobrazit jejich obsah.</p>
+        </div>
+        
+        <div id="file-management-container">
+            <!-- Dynamicky naplněno přes JavaScript -->
+        </div>
     </div>
     
     <div id="settings-container">

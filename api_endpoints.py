@@ -3,10 +3,11 @@ API endpoints for hodiny application
 Provides structured REST API for better data handling and performance
 """
 
-from flask import Blueprint, request, jsonify, g
-from datetime import datetime
 import logging
+from datetime import datetime
 from typing import Dict, Any, Optional, List
+
+from flask import Blueprint, request, jsonify, g
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -227,7 +228,8 @@ def get_time_entries():
         # Get query parameters
         start_date = request.args.get("start_date")
         end_date = request.args.get("end_date")
-        employee = request.args.get("employee")
+        # TODO: Implement employee filtering
+        # employee_filter = request.args.get("employee")
         week_number = request.args.get("week")
 
         # Validate date parameters

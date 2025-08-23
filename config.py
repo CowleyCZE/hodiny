@@ -89,7 +89,7 @@ class Config:
                     wb.remove(wb["Sheet"])
                 wb.save(template_path)
             except Exception as e:
-                logging.error(f"Nepodařilo se vytvořit šablonu {template_path}: {e}", exc_info=True)
+                logging.error("Nepodařilo se vytvořit šablonu %s: %s", template_path, e, exc_info=True)
 
         log_dir = cls.BASE_DIR / "logs"
         log_dir.mkdir(exist_ok=True)

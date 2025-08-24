@@ -539,7 +539,11 @@ function generateSheetTable(data, rows, cols) {
         for (let col = 0; col < cols; col++) {
             const cellValue = (data[row] && data[row][col]) || '';
             const cellAddress = String.fromCharCode(65 + col) + (row + 1);
-            tableHTML += `<td onclick="selectCell('${cellAddress}')" data-cell="${cellAddress}">${cellValue}</td>`;
+            // Escapuj HTML znaky pro bezpečnost a přidej tooltip s plným obsahem
+            const escapedValue = cellValue.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+            const truncatedValue = cellValue.length > 20 ? cellValue.substring(0, 17) + '...' : cellValue;
+            const tooltipTitle = cellValue.length > 20 ? ` title="${escapedValue}"` : '';
+            tableHTML += `<td onclick="selectCell('${cellAddress}')" data-cell="${cellAddress}" data-full-content="${escapedValue}"${tooltipTitle}>${truncatedValue}</td>`;
         }
         tableHTML += '</tr>';
     }

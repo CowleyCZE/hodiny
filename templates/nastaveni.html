@@ -182,10 +182,11 @@
         text-align: center;
         cursor: pointer;
         user-select: none;
-        max-width: 100px;
+        max-width: 120px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        position: relative;
     }
     
     .sheet-table th {
@@ -198,11 +199,45 @@
     
     .sheet-table td:hover {
         background-color: #e9ecef;
+        overflow: visible;
+        white-space: normal;
+        z-index: 20;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        border: 2px solid #007bff;
     }
     
     .sheet-table td.selected {
         background-color: #007bff;
         color: white;
+    }
+    
+    /* Tooltip-like behavior for long content */
+    .sheet-table td[title]:hover::after {
+        content: attr(title);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #333;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        white-space: nowrap;
+        z-index: 30;
+        max-width: 300px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    
+    .sheet-table td[title]:hover::before {
+        content: '';
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%) translateY(1px);
+        border: 4px solid transparent;
+        border-top-color: #333;
+        z-index: 31;
     }
     
     .selected-cell-info {
@@ -398,6 +433,7 @@
         </div>
         <div style="margin-bottom: 10px; font-size: 0.9em; color: #6c757d;">
             Klikněte na libovolnou buňku v tabulce pro její výběr. Buňka bude automaticky nastavena.
+            <br><strong>Tip:</strong> Najeďte myší na buňky pro zobrazení úplného obsahu.
         </div>
         <div id="modal-body">
             <!-- Obsah listu bude dynamicky načten -->

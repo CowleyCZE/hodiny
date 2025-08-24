@@ -172,31 +172,35 @@ class ExcelManager:
             return False
 
     def ulozit_pracovni_dobu(self, date_str, start_time_str, end_time_str, lunch_duration_str, employees):
-        """Zapíše pracovní dobu do listu týdne; vytvoří list z template pokud chybí."""
+        """Zapíše pracovní dobu do týdenního souboru; vytvoří soubor a list z template pokud chybí."""
         try:
             date_obj = datetime.strptime(date_str, "%Y-%m-%d")
             week_number = date_obj.isocalendar().week
-            sheet_name = f"{Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME} {week_number}"
+            
+            # Získej nebo vytvoř týdenní soubor
+            weekly_file_path = self._get_or_create_weekly_file(week_number)
+            
+            # Pracuj s týdenním souborem
+            weekly_workbook = self._get_weekly_workbook(weekly_file_path)
+            if not weekly_workbook:
+                raise IOError(f"Týdenní workbook {weekly_file_path} se nepodařilo otevřít.")
 
-            with self._get_workbook() as workbook:
-                if not workbook:
-                    raise IOError("Workbook se nepodařilo otevřít pro uložení.")
+            # Pracuj s listem "Týden" v týdenním souboru
+            sheet_name = Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME
+            if sheet_name not in weekly_workbook.sheetnames:
+                # Vytvoř list zkopírováním z hlavní šablony
+                self._create_week_sheet_from_template(weekly_workbook, sheet_name)
+            
+            sheet = weekly_workbook[sheet_name]
+            self._zapsat_data_do_listu(
+                sheet, sheet_name, date_obj, start_time_str, end_time_str, lunch_duration_str, employees
+            )
 
-                if sheet_name not in workbook.sheetnames:
-                    if Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME in workbook.sheetnames:
-                        template_sheet = workbook[Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME]
-                        sheet = workbook.copy_worksheet(template_sheet)
-                        sheet.title = sheet_name
-                    else:
-                        sheet = workbook.create_sheet(sheet_name)
-                else:
-                    sheet = workbook[sheet_name]
+            # Ulož týdenní soubor
+            weekly_workbook.save(weekly_file_path)
+            weekly_workbook.close()
 
-                self._zapsat_data_do_listu(
-                    sheet, sheet_name, date_obj, start_time_str, end_time_str, lunch_duration_str, employees
-                )
-
-            logger.info("Uložena pracovní doba pro %s do listu %s.", date_str, sheet_name)
+            logger.info("Uložena pracovní doba pro %s do týdenního souboru %s.", date_str, weekly_file_path.name)
             return True
         except (FileNotFoundError, ValueError, IOError) as e:
             logger.error("Chyba při ukládání pracovní doby: %s", e, exc_info=True)
@@ -204,6 +208,78 @@ class ExcelManager:
         except Exception as e:
             logger.error("Neočekávaná chyba při ukládání pracovní doby: %s", e, exc_info=True)
             return False
+
+    def _get_or_create_weekly_file(self, week_number):
+        """Získá cestu k týdennímu souboru, vytvoří ho pokud neexistuje."""
+        weekly_filename = f"Hodiny_Cap_Tyden{week_number}.xlsx"
+        weekly_file_path = self.base_path / weekly_filename
+        
+        if not weekly_file_path.exists():
+            # Najdi předchozí týdenní soubor jako zdroj pro kopírování
+            previous_week_file = self._find_previous_weekly_file(week_number)
+            
+            if previous_week_file and previous_week_file.exists():
+                # Zkopíruj z předchozího týdenního souboru
+                shutil.copy(previous_week_file, weekly_file_path)
+                logger.info("Vytvořen týdenní soubor %s zkopírováním z %s", weekly_filename, previous_week_file.name)
+            else:
+                # Zkopíruj z hlavní šablony jako fallback
+                shutil.copy(self.active_file_path, weekly_file_path)
+                logger.info("Vytvořen týdenní soubor %s zkopírováním ze šablony %s", weekly_filename, self.active_filename)
+        
+        return weekly_file_path
+
+    def _find_previous_weekly_file(self, current_week):
+        """Najde nejnovější týdenní soubor před aktuálním týdnem."""
+        for week in range(current_week - 1, 0, -1):
+            potential_file = self.base_path / f"Hodiny_Cap_Tyden{week}.xlsx"
+            if potential_file.exists():
+                return potential_file
+        return None
+
+    def _get_weekly_workbook(self, weekly_file_path):
+        """Otevře týdenní workbook pro práci."""
+        try:
+            from openpyxl import load_workbook
+            return load_workbook(str(weekly_file_path))
+        except Exception as e:
+            logger.error("Chyba při otevírání týdenního souboru %s: %s", weekly_file_path, e)
+            return None
+
+    def _create_week_sheet_from_template(self, workbook, sheet_name):
+        """Vytvoří list 'Týden' zkopírováním z hlavní šablony."""
+        try:
+            # Otevři hlavní šablonu a zkopíruj z ní list "Týden"
+            with self._get_workbook(read_only=True) as template_wb:
+                if not template_wb:
+                    raise IOError("Šablonu se nepodařilo otevřít.")
+                
+                if Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME in template_wb.sheetnames:
+                    # Zkopíruj list z šablony
+                    template_sheet = template_wb[Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME]
+                    
+                    # Vytvoř nový list v cílovém workbooku
+                    new_sheet = workbook.create_sheet(sheet_name)
+                    
+                    # Zkopíruj obsah buňka po buňce
+                    for row in template_sheet.iter_rows():
+                        for cell in row:
+                            if cell.value is not None:
+                                new_cell = new_sheet.cell(row=cell.row, column=cell.column, value=cell.value)
+                                # Zkopíruj i formátování pokud je to možné
+                                if hasattr(cell, 'number_format'):
+                                    new_cell.number_format = cell.number_format
+                    
+                    logger.info("Vytvořen list %s zkopírováním ze šablony", sheet_name)
+                else:
+                    # Fallback - vytvoř prázdný list
+                    workbook.create_sheet(sheet_name)
+                    logger.warning("Šablona neobsahuje list %s, vytvořen prázdný list", Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME)
+        except Exception as e:
+            logger.error("Chyba při vytváření listu ze šablony: %s", e)
+            # Fallback - vytvoř prázdný list
+            if sheet_name not in workbook.sheetnames:
+                workbook.create_sheet(sheet_name)
 
     def _zapsat_data_do_listu(
         self, sheet, sheet_name, date_obj, start_time_str, end_time_str, lunch_duration_str, employees
@@ -403,7 +479,7 @@ class ExcelManager:
         return True
 
     def get_current_week_data(self, week_number=None):
-        """Získá data z týdenního listu pro zobrazení na hlavní stránce.
+        """Získá data z týdenního souboru pro zobrazení na hlavní stránce.
 
         Args:
             week_number (int, optional): Číslo týdne. Pokud None, použije se aktuální týden.
@@ -413,35 +489,53 @@ class ExcelManager:
                 current_week = datetime.now().isocalendar().week
             else:
                 current_week = week_number
-            sheet_name = f"Týden {current_week}"
+            
+            # Zkus najít týdenní soubor
+            weekly_filename = f"Hodiny_Cap_Tyden{current_week}.xlsx"
+            weekly_file_path = self.base_path / weekly_filename
+            
+            # Pokud týdenní soubor neexistuje, zkus hlavní šablonu
+            if weekly_file_path.exists():
+                wb = self._get_weekly_workbook(weekly_file_path)
+                sheet_name = Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME  # "Týden"
+            else:
+                # Fallback na hlavní šablonu
+                with self._get_workbook(read_only=True) as wb:
+                    if not wb:
+                        return None
+                    sheet_name = Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME
 
-            with self._get_cached_workbook() as wb:
-                # Pokusíme se najít list aktuálního týdne
-                if sheet_name in wb.sheetnames:
-                    sheet = wb[sheet_name]
-                elif "Týden" in wb.sheetnames:
-                    sheet = wb["Týden"]
-                else:
-                    return None
+            if not wb:
+                return None
 
-                # Získáme data z listu (prvních několik řádků a sloupců pro přehled)
-                data = []
-                max_row = min(sheet.max_row, 20)  # Omezíme na prvních 20 řádků
-                max_col = min(sheet.max_column, 10)  # Omezíme na prvních 10 sloupců
+            # Pokusíme se najít list "Týden"
+            if sheet_name in wb.sheetnames:
+                sheet = wb[sheet_name]
+            else:
+                return None
 
-                for row in range(1, max_row + 1):
-                    row_data = []
-                    for col in range(1, max_col + 1):
-                        cell = sheet.cell(row=row, column=col)
-                        value = cell.value
-                        if value is None:
-                            value = ""
-                        elif isinstance(value, (int, float)):
-                            value = str(value)
-                        row_data.append(str(value))
-                    data.append(row_data)
+            # Získáme data z listu (prvních několik řádků a sloupců pro přehled)
+            data = []
+            max_row = min(sheet.max_row, 20)  # Omezíme na prvních 20 řádků
+            max_col = min(sheet.max_column, 10)  # Omezíme na prvních 10 sloupců
 
-                return {"sheet_name": sheet.title, "data": data, "rows": len(data), "cols": len(data[0]) if data else 0}
+            for row in range(1, max_row + 1):
+                row_data = []
+                for col in range(1, max_col + 1):
+                    cell = sheet.cell(row=row, column=col)
+                    value = cell.value
+                    if value is None:
+                        value = ""
+                    elif isinstance(value, (int, float)):
+                        value = str(value)
+                    row_data.append(str(value))
+                data.append(row_data)
+
+            # Zavři workbook pokud je to týdenní soubor
+            if weekly_file_path.exists():
+                wb.close()
+
+            return {"sheet_name": f"{sheet_name} {current_week}", "data": data, "rows": len(data), "cols": len(data[0]) if data else 0}
 
         except Exception as e:
             logger.error("Chyba při načítání dat aktuálního týdne: %s", e, exc_info=True)

@@ -46,7 +46,6 @@ gemini_cache.sqlite
 
 # Excel soubory (kromě šablony)
 excel/*.xlsx
-!excel/Hodiny_Cap.xlsx
 
 # Logy - všechny log soubory
 logs/

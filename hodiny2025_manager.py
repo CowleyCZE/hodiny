@@ -147,7 +147,7 @@ class Hodiny2025Manager:
         logger.info("Vytvořen nový Excel soubor: %s", self.file_path)
 
     def _setup_template_sheet(self, sheet: Worksheet):
-        sheet["A1"] = "Měsíční výkaz práce - [Měsíc] 2025"
+        self._set_cell_value(sheet, 1, 1, "Měsíční výkaz práce - [Měsíc] 2025")
         headers = [
             "Den",
             "Datum",
@@ -164,16 +164,19 @@ class Hodiny2025Manager:
             "Zaměstnanci",
             "Celkem odpracováno",
         ]
+
         for col, header in enumerate(headers, 1):
-            cell = sheet.cell(row=self.HEADER_ROW, column=col)
-            if not isinstance(cell, MergedCell):
-                cell.value = header
-                cell.font = Font(bold=True)
-                cell.alignment = Alignment(horizontal="center")
+            target = self._set_cell_value(sheet, self.HEADER_ROW, col, header)
+            if target:
+                target.font = Font(bold=True)
+                target.alignment = Alignment(horizontal="center")
 
         for day in range(1, 32):
             row = self.DATA_START_ROW + day - 1
-            sheet.cell(row=row, column=self.COL_DAY).value = day
+            # use helper to avoid writing into MergedCell objects
+            self._set_cell_value(sheet, row, self.COL_DAY, day)
+            formula = f'=IF(AND(E{row}<>",G{row}<>""),(G{row}-E{row})*24-F{row},0)'
+            # correct formula: keep the original expected expression (preserve quotes)
             formula = f'=IF(AND(E{row}<>"",G{row}<>""),(G{row}-E{row})*24-F{row},0)'
             self._set_cell_formula(sheet, row, self.COL_TOTAL_HOURS, formula)
             self._set_cell_formula(sheet, row, self.COL_OVERTIME, f"=MAX(0,H{row}-8)")
@@ -186,27 +189,42 @@ class Hodiny2025Manager:
         for col, formula_col in [(self.COL_TOTAL_HOURS, "H"), (self.COL_OVERTIME, "I"), (self.COL_TOTAL_ALL, "N")]:
             formula = f"=SUM({formula_col}{self.DATA_START_ROW}:{formula_col}{self.DATA_END_ROW})"
             self._set_cell_formula(sheet, self.SUMMARY_ROW, col, formula)
-            sheet.cell(row=self.SUMMARY_ROW, column=col).font = Font(bold=True)
-            sheet.cell(row=self.SUMMARY_ROW, column=col).fill = PatternFill("solid", fgColor="CCCCCC")
+            cell = self._get_actual_cell(sheet, self.SUMMARY_ROW, col)
+            cell.font = Font(bold=True)
+            cell.fill = PatternFill("solid", fgColor="CCCCCC")
 
     def _setup_month_sheet(self, sheet: Worksheet, month: int, year: int):
         month_name = self.CZECH_MONTHS[month]
-        sheet.cell(row=1, column=1).value = f"Měsíční výkaz práce - {month_name} {year}"
+        self._set_cell_value(sheet, 1, 1, f"Měsíční výkaz práce - {month_name} {year}")
         days_in_month = calendar.monthrange(year, month)[1]
 
         for day in range(1, days_in_month + 1):
             row = self.DATA_START_ROW + day - 1
             date_obj = datetime(year, month, day)
-            sheet.cell(row=row, column=self.COL_DATE).value = date_obj.strftime("%d.%m.%Y")
-            sheet.cell(row=row, column=self.COL_WEEKDAY).value = self.CZECH_WEEKDAYS[date_obj.weekday()]
+            self._set_cell_value(sheet, row, self.COL_DATE, date_obj.strftime("%d.%m.%Y"))
+            self._set_cell_value(sheet, row, self.COL_WEEKDAY, self.CZECH_WEEKDAYS[date_obj.weekday()])
             if date_obj.weekday() >= 5:
                 for col in range(1, 15):
-                    sheet.cell(row=row, column=col).fill = PatternFill("solid", fgColor="FFE6E6")
+                    cell = self._get_actual_cell(sheet, row, col)
+                    cell.fill = PatternFill("solid", fgColor="FFE6E6")
 
         for day in range(days_in_month + 1, 32):
             row = self.DATA_START_ROW + day - 1
             for col in range(1, 15):
                 self._set_cell_formula(sheet, row, col, "")
+
+    def _get_actual_cell(self, sheet: Worksheet, row: int, col: int):
+        """Return the real (top-left) cell for the given coordinates, handling merged cells.
+
+        If the cell at (row, col) is part of a merged range, return the top-left anchor cell of that range.
+        Otherwise return sheet.cell(row, col).
+        """
+        cell = sheet.cell(row=row, column=col)
+        if isinstance(cell, MergedCell):
+            for merged in sheet.merged_cells.ranges:
+                if merged.min_row <= row <= merged.max_row and merged.min_col <= col <= merged.max_col:
+                    return sheet.cell(row=merged.min_row, column=merged.min_col)
+        return cell
 
     def get_or_create_month_sheet(self, month: int, year: int = 2025) -> tuple[Workbook, Worksheet]:
         sheet_name = f"{month:02d}hod{str(year)[2:]}"
@@ -383,10 +401,18 @@ class Hodiny2025Manager:
 
     def _set_cell_value(self, sheet, row, col, value):
         cell = sheet.cell(row=row, column=col)
-        if not isinstance(cell, MergedCell):
+        if isinstance(cell, MergedCell):
+            # find merged range and set value on the top-left anchor cell
+            for merged in sheet.merged_cells.ranges:
+                if merged.min_row <= row <= merged.max_row and merged.min_col <= col <= merged.max_col:
+                    target = sheet.cell(row=merged.min_row, column=merged.min_col)
+                    target.value = value
+                    return target
+            # fallback: cannot set on a MergedCell that doesn't match a known range
+            return None
+        else:
             cell.value = value
             return cell
-        return None
 
     def _set_cell_formula(self, sheet, row, col, formula):
         return self._set_cell_value(sheet, row, col, formula)

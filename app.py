@@ -11,6 +11,7 @@ import json
 import random
 import smtplib
 import time
+import io
 from datetime import datetime, timedelta
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
@@ -251,15 +252,13 @@ def upload_file():
             # Store the file temporarily and show confirmation
             try:
                 # Validate that it's a valid Excel file by trying to load it
-                file.seek(0)
-                # Use file stream directly for validation
-                file_stream = file.stream
-                load_workbook(file_stream)
-                file.seek(0)
+                # Read bytes into memory to avoid issues with SpooledTemporaryFile
+                file_bytes = file.read()
+                load_workbook(io.BytesIO(file_bytes))
 
                 # Store file temporarily for overwrite confirmation
                 temp_path = Config.EXCEL_BASE_PATH / f"temp_{filename}"
-                file.save(str(temp_path))
+                temp_path.write_bytes(file_bytes)
 
                 # Pass the temp filename to the confirmation template
                 return render_template("upload_confirm.html", filename=filename, temp_filename=f"temp_{filename}")
@@ -273,15 +272,12 @@ def upload_file():
                 return redirect(url_for("index"))
 
         try:
-            # Validate that it's a valid Excel file by trying to load it
-            file.seek(0)  # Reset file pointer
-            # Use file stream for validation
-            file_stream = file.stream
-            load_workbook(file_stream)
-            file.seek(0)  # Reset again for saving
+            # Read uploaded bytes and validate using an in-memory buffer
+            file_bytes = file.read()
+            load_workbook(io.BytesIO(file_bytes))
 
-            # Save the file
-            file.save(str(file_path))
+            # Save the file bytes to disk
+            file_path.write_bytes(file_bytes)
 
             flash(f"Soubor '{filename}' byl úspěšně nahrán.", "success")
             logger.info("Nahrán soubor: %s", filename)

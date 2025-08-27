@@ -4,7 +4,8 @@ import os
 import tempfile
 
 import pytest
-from openpyxl import Workbook
+from openpyxl import Workbook, load_workbook
+from io import BytesIO
 
 from app import app
 from config import Config
@@ -25,6 +26,8 @@ def temp_excel_file():
     with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp:
         wb = Workbook()
         ws = wb.active
+        if ws is None:
+            ws = wb.create_sheet(title="Sheet1")
         ws["A1"] = "Test data"
         ws["B1"] = "for upload"
         wb.save(tmp.name)
@@ -128,6 +131,46 @@ def test_download_functionality(client):
 
     # Should return file or redirect if file not found
     assert response.status_code in [200, 302]
+
+
+def test_upload_in_memory_and_verify_contents(client):
+    """Simulate uploading an in-memory xlsx and verify it was saved with correct contents."""
+    filename = "in_memory_test.xlsx"
+
+    # Create workbook in memory
+    wb = Workbook()
+    ws = wb.active
+    if ws is None:
+        ws = wb.create_sheet(title="Sheet1")
+    ws["A1"] = "in-memory-test"
+    buf = BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+
+    # Post to upload endpoint
+    response = client.post(
+        "/upload",
+        data={"file": (buf, filename)},
+        content_type="multipart/form-data",
+        follow_redirects=False,
+    )
+
+    # Expect redirect to index after successful upload
+    assert response.status_code == 302
+
+    # Verify saved file exists and content matches
+    saved_path = Config.EXCEL_BASE_PATH / filename
+    assert saved_path.exists()
+
+    try:
+        wb_loaded = load_workbook(saved_path, data_only=True)
+        ws_loaded = wb_loaded.active if wb_loaded.active is not None else wb_loaded.worksheets[0]
+        val = ws_loaded["A1"].value
+        wb_loaded.close()
+        assert val == "in-memory-test"
+    finally:
+        if saved_path.exists():
+            saved_path.unlink()
 
 
 if __name__ == "__main__":

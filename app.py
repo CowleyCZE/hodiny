@@ -501,6 +501,10 @@ def excel_editor():
             wb = load_workbook(file_path)
             sheet = wb[sheet_name]
 
+            # Sanitize value to prevent formula injection
+            if value and isinstance(value, str) and value.strip().startswith(("=", "+", "-", "@")):
+                value = "'" + value
+
             # Update cell value
             sheet.cell(row=row, column=col, value=value)
 

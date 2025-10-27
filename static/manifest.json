@@ -1,0 +1,22 @@
+
+{
+  "name": "Evidence pracovní doby",
+  "short_name": "Hodiny",
+  "description": "Aplikace pro evidenci pracovní doby zaměstnanců.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#333333",
+  "icons": [
+    {
+      "src": "/static/images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

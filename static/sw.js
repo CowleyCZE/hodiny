@@ -16,8 +16,9 @@ const STATIC_ASSETS = [
     '/static/js/modern-enhancements.js',
     '/static/js/confirmations.js',
     '/static/js/voice-handler.js',
-    '/static/images/logo.png',
-    '/templates/base.html'
+    '/static/js/employee-management.js',
+    '/static/js/nastaveni.js',
+    '/static/images/logo.png'
 ];
 
 // API endpoints to cache

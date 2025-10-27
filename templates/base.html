@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}"> {# Enhanced responsive design #}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/themes.css') }}"> {# Dark/Light theme support #}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}"> {# Modern animations #}
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}"> {# PWA Manifest #}
     {% block extra_css %}{% endblock %} {# Blok pro přidání dalších CSS souborů specifických pro jednotlivé stránky #}
 </head>
 <body>
@@ -45,5 +46,18 @@
     <script src="{{ url_for('static', filename='js/modern-enhancements.js') }}"></script>
     {# Připojení globálního JavaScriptu pro potvrzovací dialogy #}
     <script src="{{ url_for('static', filename='js/confirmations.js') }}"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register("{{ url_for('static', filename='sw.js') }}")
+                    .then(registration => {
+                        console.log('Service Worker registered with scope:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
 </body>
 </html>

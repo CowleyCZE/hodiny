@@ -2,10 +2,10 @@
 
 import os
 import tempfile
+from io import BytesIO
 
 import pytest
 from openpyxl import Workbook, load_workbook
-from io import BytesIO
 
 from app import app
 from config import Config

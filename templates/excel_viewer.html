@@ -3,22 +3,42 @@
 {% block title %}Prohlížeč Excel souborů{% endblock %}
 
 {% block content %}
-    {# Hlavní nadpis stránky #}
     <h1 id="excel-heading">Prohlížeč Excel souborů</h1>
 
-    {# Formulář pro výběr souboru k zobrazení.
-       Při změně výběru se formulář automaticky odešle.
-    #}
-    <form method="GET" action="{{ url_for('excel_viewer') }}" aria-labelledby="file-selection">
-        <div class="form-group">
-            <label for="file" id="file-selection">Vyberte soubor:</label>
-            <select name="file" id="file" onchange="this.form.submit()" aria-required="true">
+    {# Filtrování podle kategorií #}
+    <div class="category-filters">
+        <span>Filtrovat podle kategorie:</span>
+        <a href="{{ url_for('excel_viewer', category='Vše') }}" class="btn btn-sm {% if not selected_category or selected_category == 'Vše' %}btn-primary{% else %}btn-secondary{% endif %}">Vše</a>
+        {% for category in categories %}
+            <a href="{{ url_for('excel_viewer', category=category) }}" class="btn btn-sm {% if selected_category == category %}btn-primary{% else %}btn-secondary{% endif %}">{{ category }}</a>
+        {% endfor %}
+    </div>
+
+    {# Tabulka se seznamem souborů #}
+    <div class="table-responsive mt-3">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Název souboru</th>
+                    <th scope="col">Kategorie</th>
+                    <th scope="col">Akce</th>
+                </tr>
+            </thead>
+            <tbody>
                 {% for file in excel_files %}
-                    <option value="{{ file }}" {% if file == selected_file %}selected{% endif %}>{{ file }}</option>
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('excel_viewer', file=file, category=selected_category) }}">{{ file }}</a>
+                        </td>
+                        <td>{{ all_metadata.get(file, {}).get('category', 'Ostatní') }}</td>
+                        <td>
+                            <a href="{{ url_for('download_specific_file', filename=file) }}" class="btn btn-sm btn-success" download>Stáhnout</a>
+                        </td>
+                    </tr>
                 {% endfor %}
-            </select>
-        </div>
-    </form>
+            </tbody>
+        </table>
+    </div>
 
     {# Pokud je vybrán soubor, zobrazí se formulář pro výběr listu a tabulka s daty #}
     {% if selected_file %}

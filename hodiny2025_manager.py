@@ -20,8 +20,8 @@ from pathlib import Path
 from openpyxl import Workbook, load_workbook
 from openpyxl.cell import MergedCell
 from openpyxl.styles import Alignment, Font, PatternFill
-from openpyxl.utils.exceptions import InvalidFileException
 from openpyxl.utils import coordinate_to_tuple
+from openpyxl.utils.exceptions import InvalidFileException
 from openpyxl.worksheet.worksheet import Worksheet
 
 try:

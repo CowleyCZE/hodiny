@@ -7,35 +7,47 @@ Tento modul:
  - odesílá aktivní Excel e‑mailem
 """
 
+import io
 import json
 import random
 import smtplib
 import time
-import io
 from datetime import datetime, timedelta
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from flask import Flask, flash, g, jsonify, redirect, render_template, request, send_file, session, url_for
-from werkzeug.utils import secure_filename
+from flask import (
+    Flask,
+    flash,
+    g,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    send_file,
+    send_from_directory,
+    session,
+    url_for,
+)
 from openpyxl import load_workbook
 from openpyxl.utils.exceptions import InvalidFileException
+from werkzeug.utils import secure_filename
 
+from api_endpoints import api_bp  # Import our new API blueprint
 from config import Config
 from employee_management import EmployeeManager
 from excel_manager import ExcelManager
 from hodiny2025_manager import Hodiny2025Manager
-from utils.logger import setup_logger
-from zalohy_manager import ZalohyManager
-from api_endpoints import api_bp  # Import our new API blueprint
 from performance_optimizations import (
-    perf_monitor,
     cleanup_old_data,
-    optimize_excel_operations,
     initialize_performance_optimizations,
+    optimize_excel_operations,
+    perf_monitor,
     timing_decorator,
 )
+from utils.logger import setup_logger
+from zalohy_manager import ZalohyManager
 
 logger = setup_logger("app")
 
@@ -181,6 +193,19 @@ def download_file():
         return redirect(url_for("index"))
 
 
+@app.route("/download/<path:filename>")
+def download_specific_file(filename):
+    """Stáhne specifický soubor z upload složky."""
+    try:
+        return send_from_directory(
+            Config.EXCEL_BASE_PATH, filename, as_attachment=True
+        )
+    except FileNotFoundError:
+        logger.error("Pokus o stažení neexistujícího souboru: %s", filename, exc_info=True)
+        flash("Soubor nenalezen.", "error")
+        return redirect(url_for("excel_viewer"))
+
+
 @app.route("/send_email", methods=["POST"])
 def send_email():
     """Odešle aktivní Excel jako přílohu na konfigurovaný e‑mail (SMTP SSL)."""
@@ -244,6 +269,8 @@ def upload_file():
             flash("Neplatný název souboru.", "error")
             return redirect(url_for("index"))
 
+        category = request.form.get("category", "Ostatní")
+
         # Check if file already exists and no overwrite confirmation
         file_path = Config.EXCEL_BASE_PATH / filename
         force_overwrite = request.form.get("force_overwrite") == "true"
@@ -278,6 +305,7 @@ def upload_file():
 
             # Save the file bytes to disk
             file_path.write_bytes(file_bytes)
+            g.excel_manager.set_category(filename, category)
 
             flash(f"Soubor '{filename}' byl úspěšně nahrán.", "success")
             logger.info("Nahrán soubor: %s", filename)
@@ -420,21 +448,41 @@ def excel_viewer():
     """Read‑only náhled omezeného počtu řádků aktivního Excelu (výkon)."""
     requested_file = request.args.get("file")
     active_sheet_name = request.args.get("sheet")
+    selected_category = request.args.get("category")
+
     data, sheet_names = [], []
     base_path = Config.EXCEL_BASE_PATH
-    excel_files = sorted([p.name for p in base_path.glob("*.xlsx")])
+    all_files = sorted([p.name for p in base_path.glob("*.xlsx")])
+    all_metadata = g.excel_manager.get_all_metadata()
+
+    # Získání všech unikátních kategorií pro filtrovací tlačítka
+    categories = sorted(list(set(m.get("category", "Ostatní") for m in all_metadata.values())))
+
+    # Filtrování souborů podle kategorie
+    if selected_category and selected_category != "Vše":
+        excel_files = [
+            f
+            for f in all_files
+            if all_metadata.get(f, {}).get("category") == selected_category
+        ]
+    else:
+        excel_files = all_files
+
     if not excel_files:
-        flash("Nenalezeny žádné Excel soubory.", "warning")
+        flash("Nenalezeny žádné Excel soubory pro danou kategorii.", "warning")
         return render_template(
             "excel_viewer.html",
-            excel_files=[],
+            excel_files=excel_files,
             selected_file=None,
             sheet_names=[],
             active_sheet=None,
             data=[],
+            all_metadata=all_metadata,
+            categories=categories,
+            selected_category=selected_category,
         )
 
-    selected_file = requested_file if requested_file in excel_files else g.excel_manager.active_filename
+    selected_file = requested_file if requested_file in excel_files else excel_files[0]
     selected_path = base_path / selected_file
     try:
         wb = load_workbook(selected_path, read_only=True, data_only=True)
@@ -448,6 +496,9 @@ def excel_viewer():
                 sheet_names=[],
                 active_sheet=None,
                 data=[],
+                all_metadata=all_metadata,
+                categories=categories,
+                selected_category=selected_category,
             )
         active_sheet_name = active_sheet_name if active_sheet_name in sheet_names else sheet_names[0]
         sheet = wb[active_sheet_name]
@@ -467,6 +518,9 @@ def excel_viewer():
         sheet_names=sheet_names,
         active_sheet=active_sheet_name,
         data=data,
+        all_metadata=all_metadata,
+        categories=categories,
+        selected_category=selected_category,
     )
 
 

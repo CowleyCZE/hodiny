@@ -224,6 +224,15 @@
     <section class="upload-section" aria-labelledby="upload-heading">
         <h3 id="upload-heading">Nahrání Excel souboru:</h3>
         <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data" class="upload-form">
+            <div class="form-group">
+                <label for="category">Kategorie:</label>
+                <select name="category" id="category" class="form-control">
+                    <option value="Výkres">Výkres</option>
+                    <option value="Rozpočet">Rozpočet</option>
+                    <option value="Fotodokumentace">Fotodokumentace</option>
+                    <option value="Ostatní" selected>Ostatní</option>
+                </select>
+            </div>
             <div class="file-upload-group">
                 <label for="file-input" class="file-label">
                     📁 Vyberte Excel soubor (.xlsx):

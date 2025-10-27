@@ -3,13 +3,13 @@ Performance optimizations for hodiny application
 Implements caching, database optimizations, and general performance improvements
 """
 
-import time
 import logging
-from functools import wraps, lru_cache
+import time
 from datetime import datetime, timedelta
+from functools import lru_cache, wraps
 from typing import Any, Dict, Optional
-from flask import session, g
 
+from flask import g, session
 
 logger = logging.getLogger(__name__)
 

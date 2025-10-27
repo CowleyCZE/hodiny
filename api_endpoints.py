@@ -5,9 +5,9 @@ Provides structured REST API for better data handling and performance
 
 import logging
 from datetime import datetime
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, List, Optional
 
-from flask import Blueprint, request, jsonify, g, session
+from flask import Blueprint, g, jsonify, request, session
 
 # Configure logger
 logger = logging.getLogger(__name__)

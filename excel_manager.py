@@ -41,6 +41,7 @@ class ExcelManager:
         self.current_project_name = None
         self._file_lock = Lock()
         self._workbook_cache = {}
+        self._metadata_path = self.base_path / "metadata.json"
         logger.info("ExcelManager inicializován pro: %s", self.active_file_path)
 
     def get_active_file_path(self):
@@ -176,10 +177,10 @@ class ExcelManager:
         try:
             date_obj = datetime.strptime(date_str, "%Y-%m-%d")
             week_number = date_obj.isocalendar().week
-            
+
             # Získej nebo vytvoř týdenní soubor
             weekly_file_path = self._get_or_create_weekly_file(week_number)
-            
+
             # Pracuj s týdenním souborem
             weekly_workbook = self._get_weekly_workbook(weekly_file_path)
             if not weekly_workbook:
@@ -190,7 +191,7 @@ class ExcelManager:
             if sheet_name not in weekly_workbook.sheetnames:
                 # Vytvoř list zkopírováním z hlavní šablony
                 self._create_week_sheet_from_template(weekly_workbook, sheet_name)
-            
+
             sheet = weekly_workbook[sheet_name]
             self._zapsat_data_do_listu(
                 sheet, sheet_name, date_obj, start_time_str, end_time_str, lunch_duration_str, employees
@@ -213,11 +214,11 @@ class ExcelManager:
         """Získá cestu k týdennímu souboru, vytvoří ho pokud neexistuje."""
         weekly_filename = f"Hodiny_Cap_Tyden{week_number}.xlsx"
         weekly_file_path = self.base_path / weekly_filename
-        
+
         if not weekly_file_path.exists():
             # Najdi předchozí týdenní soubor jako zdroj pro kopírování
             previous_week_file = self._find_previous_weekly_file(week_number)
-            
+
             if previous_week_file and previous_week_file.exists():
                 # Zkopíruj z předchozího týdenního souboru
                 shutil.copy(previous_week_file, weekly_file_path)
@@ -225,8 +226,10 @@ class ExcelManager:
             else:
                 # Zkopíruj z hlavní šablony jako fallback
                 shutil.copy(self.active_file_path, weekly_file_path)
-                logger.info("Vytvořen týdenní soubor %s zkopírováním ze šablony %s", weekly_filename, self.active_filename)
-        
+                logger.info(
+                    "Vytvořen týdenní soubor %s zkopírováním ze šablony %s", weekly_filename, self.active_filename
+                )
+
         return weekly_file_path
 
     def _find_previous_weekly_file(self, current_week):
@@ -241,6 +244,7 @@ class ExcelManager:
         """Otevře týdenní workbook pro práci."""
         try:
             from openpyxl import load_workbook
+
             return load_workbook(str(weekly_file_path))
         except Exception as e:
             logger.error("Chyba při otevírání týdenního souboru %s: %s", weekly_file_path, e)
@@ -253,28 +257,30 @@ class ExcelManager:
             with self._get_workbook(read_only=True) as template_wb:
                 if not template_wb:
                     raise IOError("Šablonu se nepodařilo otevřít.")
-                
+
                 if Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME in template_wb.sheetnames:
                     # Zkopíruj list z šablony
                     template_sheet = template_wb[Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME]
-                    
+
                     # Vytvoř nový list v cílovém workbooku
                     new_sheet = workbook.create_sheet(sheet_name)
-                    
+
                     # Zkopíruj obsah buňka po buňce
                     for row in template_sheet.iter_rows():
                         for cell in row:
                             if cell.value is not None:
                                 new_cell = new_sheet.cell(row=cell.row, column=cell.column, value=cell.value)
                                 # Zkopíruj i formátování pokud je to možné
-                                if hasattr(cell, 'number_format'):
+                                if hasattr(cell, "number_format"):
                                     new_cell.number_format = cell.number_format
-                    
+
                     logger.info("Vytvořen list %s zkopírováním ze šablony", sheet_name)
                 else:
                     # Fallback - vytvoř prázdný list
                     workbook.create_sheet(sheet_name)
-                    logger.warning("Šablona neobsahuje list %s, vytvořen prázdný list", Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME)
+                    logger.warning(
+                        "Šablona neobsahuje list %s, vytvořen prázdný list", Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME
+                    )
         except Exception as e:
             logger.error("Chyba při vytváření listu ze šablony: %s", e)
             # Fallback - vytvoř prázdný list
@@ -326,7 +332,8 @@ class ExcelManager:
                     start_time_cell.value = start_time.time()
                     start_time_cell.number_format = "HH:MM"
                 logger.info(
-                    "Používám dynamickou konfiguraci pro čas začátku: buňka %s", f"{chr(64 + start_col)}{start_row}"
+                    "Používám dynamickou konfiguraci pro čas začátku: buňka %s",
+                    f"{chr(64 + start_col)}{start_row}",
                 )
         else:
             # Fallback na původní logiku
@@ -368,7 +375,8 @@ class ExcelManager:
                     total_cell.value = total_hours
                     total_cell.number_format = "0.00"
                 logger.info(
-                    "Používám dynamickou konfiguraci pro celkové hodiny: buňka %s", f"{chr(64 + total_col)}{total_row}"
+                    "Používám dynamickou konfiguraci pro celkové hodiny: buňka %s",
+                    f"{chr(64 + total_col)}{total_row}",
                 )
 
         # Zápis data - použij dynamickou konfiguraci nebo fallback
@@ -437,6 +445,7 @@ class ExcelManager:
         for sheet_name in workbook.sheetnames:
             if not sheet_name.startswith(Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME):
                 continue
+
             # Heuristika pro kontrolu datumu v listu, aby se zbytečně neprocházel
             # každý list. Předpokládáme, že alespoň jedna buňka s datem je vyplněná.
             sheet = workbook[sheet_name]
@@ -489,11 +498,11 @@ class ExcelManager:
                 current_week = datetime.now().isocalendar().week
             else:
                 current_week = week_number
-            
+
             # Zkus najít týdenní soubor
             weekly_filename = f"Hodiny_Cap_Tyden{current_week}.xlsx"
             weekly_file_path = self.base_path / weekly_filename
-            
+
             # Pokud týdenní soubor neexistuje, zkus hlavní šablonu
             if weekly_file_path.exists():
                 wb = self._get_weekly_workbook(weekly_file_path)
@@ -535,8 +544,46 @@ class ExcelManager:
             if weekly_file_path.exists():
                 wb.close()
 
-            return {"sheet_name": f"{sheet_name} {current_week}", "data": data, "rows": len(data), "cols": len(data[0]) if data else 0}
+            return {
+                "sheet_name": f"{sheet_name} {current_week}",
+                "data": data,
+                "rows": len(data),
+                "cols": len(data[0]) if data else 0,
+            }
 
         except Exception as e:
             logger.error("Chyba při načítání dat aktuálního týdne: %s", e, exc_info=True)
             return None
+
+    def _load_metadata(self):
+        """Načte metadata souborů z JSON souboru."""
+        if not self._metadata_path.exists():
+            return {}
+        try:
+            with self._file_lock:
+                with open(self._metadata_path, "r", encoding="utf-8") as f:
+                    return json.load(f)
+        except (IOError, json.JSONDecodeError) as e:
+            logger.error("Chyba při načítání metadat: %s", e)
+            return {}
+
+    def _save_metadata(self, metadata):
+        """Uloží metadata souborů do JSON souboru."""
+        try:
+            with self._file_lock:
+                with open(self._metadata_path, "w", encoding="utf-8") as f:
+                    json.dump(metadata, f, indent=4, ensure_ascii=False)
+        except IOError as e:
+            logger.error("Chyba při ukládání metadat: %s", e)
+
+    def get_all_metadata(self):
+        """Vrátí všechna metadata."""
+        return self._load_metadata()
+
+    def set_category(self, filename, category):
+        """Nastaví kategorii pro daný soubor."""
+        metadata = self._load_metadata()
+        if filename not in metadata:
+            metadata[filename] = {}
+        metadata[filename]["category"] = category
+        self._save_metadata(metadata)

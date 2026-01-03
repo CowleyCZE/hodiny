@@ -14,7 +14,8 @@ Kompletní webová aplikace ve Flasku pro evidenci pracovní doby do Excelu, spr
 - Přejmenování/smazání projektových souborů, archivace a založení nového aktivního souboru
 - Textové „hlasové“ příkazy pro záznam času a rychlé statistiky
 - Pružné logování do souborů s rotací
-- **🆕 Editor Excel souborů – úprava buněk přímo v prohlížeči s automatickým uložením**
+- **🆕 Editor Excel souborů – úprava buněk přímo v prohlížeči s bezpečným souběžným přístupem**
+- **🆕 Automatická synchronizace dat mezi hlavními výkazy a ročními souhrny**
 - **🆕 Responzivní design pro všechny velikosti obrazovek**
 
 ## Architektura a soubory
@@ -100,9 +101,10 @@ Nová funkce **Excel Editor** umožňuje editaci buněk přímo v prohlížeči 
 5. Změny se automaticky uloží a zobrazí se potvrzovací zpráva
 
 ### Technické detaily:
+- **Thread-safe zápis**: Všechny operace zápisu (Editor i Záznam času) využívají centrální souborový zámek v `ExcelManageru`.
 - Bezpečná validace vstupů na backend straně
-- Ochrana proti souběžným úpravám
-- Podpora pro všechny typy dat (text, čísla, formule)
+- Ochrana proti souběžným úpravám a poškození XLSX souborů
+- Podpora pro všechny typy dat (text, čísla, formule s automatickým escapováním)
 - Kompatibilní se stávající Excel infrastrukturou aplikace
 
 ## Požadavky a prostředí

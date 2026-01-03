@@ -1,64 +1,63 @@
-/* Dark/Light Theme System for hodiny application */
+/* Dark/Light Theme System for hodiny application - Refined v2 */
 
-/* CSS Custom Properties for theme variables */
 :root {
-    /* Light theme (default) */
-    --bg-primary: #f4f4f9;
+    /* Light theme (Premium Clean) */
+    --bg-primary: #f8fafc;
     --bg-secondary: #ffffff;
-    --bg-tertiary: #f8f9fa;
-    --bg-accent: #e3f2fd;
-    
-    --text-primary: #333333;
-    --text-secondary: #666666;
-    --text-accent: #004EA3;
-    --text-inverse: #ffffff;
-    
-    --border-color: #dee2e6;
-    --border-color-dark: #555555;
-    
-    --header-bg: #222222;
-    --nav-bg: #444444;
-    --nav-hover: #555555;
-    
-    --button-primary: #004EA3;
-    --button-success: #28a745;
-    --button-danger: #dc3545;
-    --button-warning: #ffc107;
-    
-    --shadow-light: rgba(0, 0, 0, 0.1);
-    --shadow-medium: rgba(0, 0, 0, 0.2);
-    --shadow-heavy: rgba(0, 0, 0, 0.3);
-    
-    --transition-speed: 0.3s;
-}
+    --bg-tertiary: #f1f5f9;
+    --bg-accent: #e0f2fe;
 
-/* Dark theme */
-[data-theme="dark"] {
-    --bg-primary: #1a1a1a;
-    --bg-secondary: #2d2d2d;
-    --bg-tertiary: #404040;
-    --bg-accent: #1e3a8a;
-    
-    --text-primary: #ffffff;
-    --text-secondary: #cccccc;
-    --text-accent: #60a5fa;
-    --text-inverse: #000000;
-    
-    --border-color: #555555;
-    --border-color-dark: #333333;
-    
-    --header-bg: #0f0f0f;
-    --nav-bg: #2d2d2d;
-    --nav-hover: #404040;
-    
-    --button-primary: #3b82f6;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-accent: #0284c7;
+    --text-inverse: #ffffff;
+
+    --border-color: #e2e8f0;
+    --border-color-dark: #cbd5e1;
+
+    --header-bg: #1e293b;
+    --nav-bg: #334155;
+    --nav-hover: #475569;
+
+    --button-primary: #0ea5e9;
     --button-success: #10b981;
     --button-danger: #ef4444;
     --button-warning: #f59e0b;
-    
-    --shadow-light: rgba(0, 0, 0, 0.3);
-    --shadow-medium: rgba(0, 0, 0, 0.5);
-    --shadow-heavy: rgba(0, 0, 0, 0.7);
+
+    --shadow-light: rgba(0, 0, 0, 0.05);
+    --shadow-medium: rgba(0, 0, 0, 0.1);
+    --shadow-heavy: rgba(0, 0, 0, 0.2);
+
+    --transition-speed: 0.3s;
+}
+
+/* Dark theme (Slate Deep) */
+[data-theme="dark"] {
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-tertiary: #334155;
+    --bg-accent: #0c4a6e;
+
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-accent: #38bdf8;
+    --text-inverse: #ffffff;
+
+    --border-color: #334155;
+    --border-color-dark: #0f172a;
+
+    --header-bg: #020617;
+    --nav-bg: #1e293b;
+    --nav-hover: #334155;
+
+    --button-primary: #0284c7;
+    --button-success: #059669;
+    --button-danger: #dc2626;
+    --button-warning: #d97706;
+
+    --shadow-light: rgba(0, 0, 0, 0.4);
+    --shadow-medium: rgba(0, 0, 0, 0.6);
+    --shadow-heavy: rgba(0, 0, 0, 0.8);
 }
 
 /* Apply theme variables to elements */
@@ -87,7 +86,9 @@ header {
     transition: background-color var(--transition-speed);
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
     color: var(--text-accent);
     transition: color var(--transition-speed);
 }
@@ -195,10 +196,8 @@ footer {
 
 /* Theme toggle button */
 .theme-toggle {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
+    position: relative;
+    z-index: 10;
     padding: 10px;
     background-color: var(--bg-secondary);
     border: 2px solid var(--border-color);
@@ -249,24 +248,24 @@ footer {
         --bg-secondary: #2d2d2d;
         --bg-tertiary: #404040;
         --bg-accent: #1e3a8a;
-        
+
         --text-primary: #ffffff;
         --text-secondary: #cccccc;
         --text-accent: #60a5fa;
         --text-inverse: #000000;
-        
+
         --border-color: #555555;
         --border-color-dark: #333333;
-        
+
         --header-bg: #0f0f0f;
         --nav-bg: #2d2d2d;
         --nav-hover: #404040;
-        
+
         --button-primary: #3b82f6;
         --button-success: #10b981;
         --button-danger: #ef4444;
         --button-warning: #f59e0b;
-        
+
         --shadow-light: rgba(0, 0, 0, 0.3);
         --shadow-medium: rgba(0, 0, 0, 0.5);
         --shadow-heavy: rgba(0, 0, 0, 0.7);

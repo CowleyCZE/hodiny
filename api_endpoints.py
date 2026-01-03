@@ -194,13 +194,9 @@ def create_time_entry():
         # Process the time entry
         if is_free_day:
             g.excel_manager.ulozit_pracovni_dobu(date, "00:00", "00:00", "0", selected_employees)
-            g.hodiny2025_manager.zapis_pracovni_doby(date, "00:00", "00:00", "0", len(selected_employees))
             message = f"Free day recorded for {date} ({len(selected_employees)} employees)"
         else:
             g.excel_manager.ulozit_pracovni_dobu(date, start_time, end_time, lunch_duration, selected_employees)
-            g.hodiny2025_manager.zapis_pracovni_doby(
-                date, start_time, end_time, lunch_duration, len(selected_employees)
-            )
             message = f"Work time recorded for {date} ({len(selected_employees)} employees)"
 
         # Prepare response data

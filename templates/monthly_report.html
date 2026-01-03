@@ -1,84 +1,94 @@
 {% extends "base.html" %}
 
-{% block title %}Měsíční Report{% endblock %}
+{% block title %}Měsíční report - Hodiny{% endblock %}
 
 {% block content %}
-{# Kontejner pro obsah stránky s měsíčním reportem #}
-<div class="container mt-4">
-    <h2 class="mb-4">Měsíční Report Odpracovaných Hodin</h2>
+<div class="animate-fadeIn">
+    <div class="section-header">
+        <h1 class="section-title">Měsíční Report</h1>
+        <span class="badge-modern badge-info"
+            style="background: rgba(var(--text-accent-rgb), 0.1); color: var(--text-accent);">
+            Analýza docházky
+        </span>
+    </div>
 
-    {# Zobrazení flash zpráv #}
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="flash-messages" role="alert" aria-live="polite">
-                {% for category, message in messages %}
-                    <div class="flash-message {{ category }}">
-                        {{ message }}
+    <div class="glass-card mb-4 stagger-animation">
+        <h3 class="mb-4">⚙️ Parametry reportu</h3>
+        <form method="POST" action="{{ url_for('monthly_report_route') }}">
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="form-group-modern">
+                        <label for="month" class="form-label-modern">Měsíc</label>
+                        <input type="number" class="form-control-modern" id="month" name="month" min="1" max="12"
+                            value="{{ current_month }}" required>
                     </div>
-                {% endfor %}
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group-modern">
+                        <label for="year" class="form-label-modern">Rok</label>
+                        <input type="number" class="form-control-modern" id="year" name="year" min="2000" max="2100"
+                            value="{{ current_year }}" required>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group-modern">
+                        <label for="employees" class="form-label-modern">Zaměstnanci (volitelné)</label>
+                        <select multiple class="form-control-modern" id="employees" name="employees"
+                            style="height: 100px;">
+                            {% for emp_name in employee_names %}
+                            <option value="{{ emp_name }}" {% if emp_name in (selected_employees_post or [])
+                                %}selected{% endif %}>
+                                {{ emp_name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted mt-1 d-block" style="font-size: 0.75rem;">Pro všechny nechte
+                            prázdné.</small>
+                    </div>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn-modern btn-primary w-100">
+                        <span>📊</span> Generovat
+                    </button>
+                </div>
             </div>
-        {% endif %}
-    {% endwith %}
+        </form>
+    </div>
 
-    {# Formulář pro výběr kritérií pro generování reportu #}
-    <form method="POST" action="{{ url_for('monthly_report_route') }}" class="mb-4 p-4 border rounded shadow-sm">
-        <div class="row g-3"> {# Použití grid systému pro uspořádání prvků formuláře #}
-            <div class="col-md-3">
-                <label for="month" class="form-label">Měsíc:</label>
-                <input type="number" class="form-control" id="month" name="month" min="1" max="12" value="{{ current_month }}" required>
-            </div>
-            <div class="col-md-3">
-                <label for="year" class="form-label">Rok:</label>
-                <input type="number" class="form-control" id="year" name="year" min="2000" max="2100" value="{{ current_year }}" required>
-            </div>
-            <div class="col-md-4">
-                <label for="employees" class="form-label">Zaměstnanci (volitelné):</label>
-                <select multiple class="form-select" id="employees" name="employees" size="5">
-                    {% for emp_name in employee_names %}
-                        <option value="{{ emp_name }}" {% if emp_name in (selected_employees_post or []) %}selected{% endif %}>
-                            {{ emp_name }}
-                        </option>
+    {% if report_data is not none %}
+    <div class="glass-card animate-fadeInUp">
+        <h3 class="mb-4">📋 Výsledky Reportu</h3>
+
+        {% if report_data %}
+        <div class="card-table-wrapper" style="border: 1px solid var(--border-color);">
+            <table class="excel-table">
+                <thead>
+                    <tr>
+                        <th>Zaměstnanec</th>
+                        <th>Celkem Hodin</th>
+                        <th>Volné Dny</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for employee, data in report_data.items() %}
+                    <tr>
+                        <td><strong>{{ employee }}</strong></td>
+                        <td class="text-accent">{{ "%.2f"|format(data.total_hours) }} h</td>
+                        <td>
+                            <span class="badge-modern silver">{{ data.free_days }}</span>
+                        </td>
+                    </tr>
                     {% endfor %}
-                </select>
-                <small class="form-text text-muted">Pro všechny zaměstnance nechte pole prázdné (nevybírejte nic).</small>
-            </div>
-            <div class="col-md-2 align-self-end">
-                <button type="submit" class="btn btn-primary w-100">Generovat Report</button>
-            </div>
+                </tbody>
+            </table>
         </div>
-    </form>
-
-    {# Sekce pro zobrazení výsledků reportu, pokud jsou data k dispozici #}
-    {% if report_data is not none %} {# Kontrola, zda report_data byla vůbec definována (i jako prázdný slovník) #}
-        <h3 class="mt-5">Výsledky Reportu</h3>
-        {% if report_data %} {# Pokud report_data obsahuje nějaké záznamy #}
-            <div class="table-responsive"> {# Kontejner pro responzivní tabulku #}
-                <table class="table table-striped table-hover">
-                    <thead class="table-dark"> {# Hlavička tabulky #}
-                        <tr>
-                            <th>Zaměstnanec</th>
-                            <th>Celkem Hodin</th>
-                            <th>Počet Volných Dnů</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {# Iterace přes výsledky reportu a zobrazení jednotlivých řádků #}
-                        {% for employee, data in report_data.items() %}
-                        <tr>
-                            <td>{{ employee }}</td>
-                            <td>{{ "%.2f"|format(data.total_hours) }}</td> {# Formátování hodin na 2 desetinná místa #}
-                            <td>{{ data.free_days }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% else %} {# Pokud report_data je prázdný (žádné záznamy nenalezeny) #}
-            <div class="alert alert-info" role="alert">
-                Pro zadané kritéria nebyly nalezeny žádné záznamy.
-            </div>
+        {% else %}
+        <div class="alert alert-info py-4 text-center rounded-4" role="alert"
+            style="background: rgba(0, 123, 255, 0.05); border: 1px dashed var(--text-accent);">
+            Pro zadaná kritéria nebyly nalezeny žádné záznamy.
+        </div>
         {% endif %}
+    </div>
     {% endif %}
-
 </div>
 {% endblock %}

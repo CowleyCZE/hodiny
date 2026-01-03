@@ -12,7 +12,7 @@ import json
 import random
 import smtplib
 import time
-from datetime import datetime, timedelta
+import datetime as dt
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -93,16 +93,17 @@ def before_request():
     """
     session["settings"] = load_settings_from_file()
     g.employee_manager = EmployeeManager(Config.DATA_PATH)
-    g.excel_manager = ExcelManager(Config.EXCEL_BASE_PATH)
-    g.zalohy_manager = ZalohyManager(Config.EXCEL_BASE_PATH)
     g.hodiny2025_manager = Hodiny2025Manager(Config.EXCEL_BASE_PATH)
+    # ExcelManager nyní přijímá hodiny2025_manager pro automatickou synchronizaci
+    g.excel_manager = ExcelManager(Config.EXCEL_BASE_PATH, hodiny2025_manager=g.hodiny2025_manager)
+    g.zalohy_manager = ZalohyManager(Config.EXCEL_BASE_PATH)
 
     # Periodic cleanup (every 100th request approximately)
     if random.randint(1, 100) == 1:
         cleanup_old_data()
 
     # Automatická archivace při přechodu na nový týden
-    current_week = datetime.now().isocalendar().week
+    current_week = dt.datetime.now().isocalendar().week
     if g.excel_manager.archive_if_needed(current_week, session["settings"]):
         save_settings_to_file(session["settings"])
         flash(f"Týden {session['settings']['last_archived_week'] - 1} byl archivován.", "info")
@@ -138,9 +139,9 @@ def index():
     _cleanup_temp_files()
 
     active_filename = Config.EXCEL_TEMPLATE_NAME
-    week_num_int = datetime.now().isocalendar().week
-    current_date = datetime.now().strftime("%Y-%m-%d")
-    current_date_formatted = datetime.now().strftime("%d.%m.%Y")
+    week_num_int = dt.datetime.now().isocalendar().week
+    current_date = dt.datetime.now().strftime("%Y-%m-%d")
+    current_date_formatted = dt.datetime.now().strftime("%d.%m.%Y")
 
     try:
         excel_exists = optimize_excel_operations()
@@ -216,7 +217,7 @@ def send_email():
             raise ValueError("SMTP údaje nejsou kompletní.")
 
         msg = MIMEMultipart()
-        msg["Subject"] = f'Výkaz práce - {datetime.now().strftime("%Y-%m-%d")}'
+        msg["Subject"] = f'Výkaz práce - {dt.datetime.now().strftime("%Y-%m-%d")}'
         msg["From"] = sender
         msg["To"] = recipient
         msg.attach(MIMEText("V příloze zasílám výkaz práce.", "plain", "utf-8"))
@@ -397,7 +398,7 @@ def record_time():
         flash("Nejsou vybráni žádní zaměstnanci.", "warning")
         return redirect(url_for("manage_employees"))
 
-    current_date = request.args.get("next_date", datetime.now().strftime("%Y-%m-%d"))
+    current_date = request.args.get("next_date", dt.datetime.now().strftime("%Y-%m-%d"))
     start_time = session["settings"].get("start_time", "07:00")
     end_time = session["settings"].get("end_time", "18:00")
     lunch_duration = str(session["settings"].get("lunch_duration", 1.0))
@@ -411,23 +412,19 @@ def record_time():
         is_free_day = request.form.get("is_free_day") == "on"
 
         try:
-            date = datetime.strptime(current_date, "%Y-%m-%d").date()
+            date = dt.datetime.strptime(current_date, "%Y-%m-%d").date()
             if is_free_day:
                 # Volný den = explicitně 0 hodin, zachová konzistentní záznam
                 g.excel_manager.ulozit_pracovni_dobu(current_date, "00:00", "00:00", "0", selected_employees)
-                g.hodiny2025_manager.zapis_pracovni_doby(current_date, "00:00", "00:00", "0", len(selected_employees))
             else:
                 g.excel_manager.ulozit_pracovni_dobu(
                     current_date, start_time, end_time, lunch_duration, selected_employees
                 )
-                g.hodiny2025_manager.zapis_pracovni_doby(
-                    current_date, start_time, end_time, lunch_duration, len(selected_employees)
-                )
 
             flash("Záznam byl úspěšně uložen.", "success")
-            next_day = date + timedelta(days=1)
+            next_day = date + dt.timedelta(days=1)
             while next_day.weekday() >= 5:
-                next_day += timedelta(days=1)
+                next_day += dt.timedelta(days=1)
             return redirect(url_for("record_time", next_date=next_day.strftime("%Y-%m-%d")))
         except (ValueError, IOError, FileNotFoundError) as e:
             flash(str(e), "error")
@@ -505,7 +502,28 @@ def excel_viewer():
         for i, row in enumerate(sheet.iter_rows(values_only=True)):
             if i >= Config.MAX_ROWS_TO_DISPLAY_EXCEL_VIEWER:
                 break
-            data.append([str(c) if c is not None else "" for c in row])
+            
+            formatted_row = []
+            for c in row:
+                if c is None:
+                    formatted_row.append("")
+                elif isinstance(c, (dt.datetime, dt.date)):
+                    # Pokud je to čas 00:00:00, zobrazíme jen datum
+                    if isinstance(c, dt.datetime) and c.hour == 0 and c.minute == 0 and c.second == 0:
+                        formatted_row.append(c.strftime("%d.%m.%Y"))
+                    else:
+                        formatted_row.append(c.strftime("%d.%m.%Y %H:%M"))
+                elif isinstance(c, dt.time):
+                    formatted_row.append(c.strftime("%H:%M"))
+                elif isinstance(c, float):
+                    # Zaokrouhlení pro hezčí zobrazení čísel
+                    if c.is_integer():
+                        formatted_row.append(str(int(c)))
+                    else:
+                        formatted_row.append(f"{c:.2f}")
+                else:
+                    formatted_row.append(str(c))
+            data.append(formatted_row)
         wb.close()
     except (FileNotFoundError, InvalidFileException) as e:
         flash(f"Chyba při zobrazení souboru: {e}", "error")
@@ -548,28 +566,16 @@ def excel_editor():
                 flash("Neplatná pozice buňky.", "error")
                 return redirect(url_for("excel_editor"))
 
-            base_path = Config.EXCEL_BASE_PATH
-            file_path = base_path / file_name
+            # Použití nového thread-safe mechanismu v ExcelManageru
+            if g.excel_manager.update_cell(file_name, sheet_name, row, col, value):
+                flash("Buňka byla úspěšně aktualizována.", "success")
+            else:
+                flash("Nepodařilo se aktualizovat buňku.", "error")
 
-            # Load workbook for editing
-            wb = load_workbook(file_path)
-            sheet = wb[sheet_name]
-
-            # Sanitize value to prevent formula injection
-            if value and isinstance(value, str) and value.strip().startswith(("=", "+", "-", "@")):
-                value = "'" + value
-
-            # Update cell value
-            sheet.cell(row=row, column=col, value=value)
-
-            # Save the workbook
-            wb.save(file_path)
-            wb.close()
-
-            flash("Buňka byla úspěšně aktualizována.", "success")
             return redirect(url_for("excel_editor", file=file_name, sheet=sheet_name))
 
         except Exception as e:
+            logger.error("Chyba v excel_editor POST: %s", e, exc_info=True)
             flash(f"Chyba při ukládání: {e}", "error")
             return redirect(url_for("excel_editor"))
 
@@ -684,7 +690,7 @@ def zalohy():
         "zalohy.html",
         employees=g.employee_manager.zamestnanci,
         options=g.zalohy_manager.get_option_names(),
-        current_date=datetime.now().strftime("%Y-%m-%d"),
+        current_date=dt.datetime.now().strftime("%Y-%m-%d"),
     )
 
 
@@ -708,8 +714,8 @@ def monthly_report_route():
         "monthly_report.html",
         employee_names=employee_names,
         report_data=report_data,
-        current_month=datetime.now().month,
-        current_year=datetime.now().year,
+        current_month=dt.datetime.now().month,
+        current_year=dt.datetime.now().year,
     )
 
 
@@ -893,7 +899,7 @@ def quick_time_entry():
 
         try:
             # Validace data
-            datetime.strptime(date, "%Y-%m-%d")
+            dt.datetime.strptime(date, "%Y-%m-%d")
 
             if is_free_day:
                 # Volný den

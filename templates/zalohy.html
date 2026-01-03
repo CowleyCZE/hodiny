@@ -3,107 +3,113 @@
 {% block title %}Zálohy{% endblock %}
 
 {% block content %}
-    <h1>Zálohy</h1>
+<div class="animate-fadeIn">
+    <div class="section-header">
+        <h1 class="section-title">Správa záloh</h1>
+        <span class="badge-modern badge-primary" style="background: rgba(0, 78, 163, 0.1); color: var(--text-accent);">
+            Finanční evidence
+        </span>
+    </div>
 
-    <section>
-        <h2 id="add-advance-heading">Přidat zálohu</h2>
-        <form method="POST" action="{{ url_for('zalohy') }}" aria-labelledby="add-advance-heading">
-            <fieldset>
-                <legend>Údaje o záloze</legend>
-                
-                <div class="form-group">
-                    <label for="employee_name">Zaměstnanec:</label>
-                    <select name="employee_name" id="employee_name" required aria-required="true">
+    <div class="dashboard-grid stagger-animation">
+        {# Form Card #}
+        <div class="glass-card animate-fadeInUp">
+            <h3 class="mb-4">💰 Přidat novou zálohu</h3>
+            <form method="POST" action="{{ url_for('zalohy') }}">
+                <div class="form-group-modern">
+                    <label for="employee_name" class="form-label-modern">Zaměstnanec</label>
+                    <select name="employee_name" id="employee_name" required class="form-control-modern">
                         {% for employee in employees %}
-                            <option value="{{ employee }}">{{ employee }}</option>
+                        <option value="{{ employee }}">{{ employee }}</option>
                         {% endfor %}
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label for="amount">Částka:</label>
-                    <input type="number" name="amount" id="amount" step="0.01" required 
-                           aria-required="true" title="Zadejte částku zálohy">
+                <div class="row g-3">
+                    <div class="col-8">
+                        <div class="form-group-modern">
+                            <label for="amount" class="form-label-modern">Částka</label>
+                            <input type="number" name="amount" id="amount" step="0.01" required
+                                class="form-control-modern">
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group-modern">
+                            <label for="currency" class="form-label-modern">Měna</label>
+                            <select name="currency" id="currency" required class="form-control-modern">
+                                <option value="EUR">EUR</option>
+                                <option value="CZK">Kč</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="currency">Měna:</label>
-                    <select name="currency" id="currency" required aria-required="true">
-                        <option value="EUR">EUR</option>
-                        <option value="CZK">Kč</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="option">Možnost:</label>
-                    <select name="option" id="option" required aria-required="true">
+                <div class="form-group-modern">
+                    <label for="option" class="form-label-modern">Možnost (Účel)</label>
+                    <select name="option" id="option" required class="form-control-modern">
                         {% for option in options %}
-                            <option value="{{ option }}">{{ option }}</option>
+                        <option value="{{ option }}">{{ option }}</option>
                         {% endfor %}
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label for="date">Datum:</label>
-                    <input type="date" name="date" id="date" value="{{ current_date }}" required 
-                           aria-required="true" title="Vyberte datum zálohy">
+                <div class="form-group-modern">
+                    <label for="date" class="form-label-modern">Datum</label>
+                    <input type="date" name="date" id="date" value="{{ current_date }}" required
+                        class="form-control-modern">
                 </div>
 
-                <button type="submit" class="btn btn-primary">Potvrdit</button>
-            </fieldset>
-        </form>
-    </section>
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="messages" role="alert" aria-live="polite">
-                <ul class="message-list">{% for category, message in messages %}
-                    <li class="alert alert-{{ category }}">{{ message }}</li>{% endfor %}
-                </ul>
-            </div>
-        {% endif %}
-    {% endwith %}
-
-    <section>
-        {# Sekce pro historii záloh - aktuálně nezobrazuje data z backendu,
-           ale je připravena pro budoucí implementaci.
-           Formulář pro filtrování je přítomen, ale jeho funkčnost závisí na backend logice.
-        #}
-        <h2 id="history-heading">Historie záloh</h2>
-
-        <form method="GET" action="{{ url_for('zalohy') }}" role="search" aria-labelledby="search-heading">
-            <div class="form-group">
-                <label for="filter_employee" id="search-heading">Zaměstnanec:</label>
-                <input type="text" name="filter_employee" id="filter_employee">
-                <button type="submit" class="btn">Filtrovat</button>
-            </div>
-        </form>
-
-        <div class="table-responsive">
-            <table aria-labelledby="history-heading">
-                <thead>
-                    <tr>
-                        <th scope="col">Zaměstnanec</th>
-                        <th scope="col">Částka</th>
-                        <th scope="col">Měna</th>
-                        <th scope="col">Možnost</th>
-                        <th scope="col">Datum</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for advance in advance_history %}
-                        <tr>
-                            <td>{{ advance.employee_name }}</td>
-                            <td>{{ advance.amount }}</td>
-                            <td>{{ advance.currency }}</td>
-                            <td>{{ advance.option }}</td>
-                            <td>{{ advance.date }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                <button type="submit" class="btn-modern btn-primary w-100 mt-2">
+                    <span>✅</span> Potvrdit a uložit do Excelu
+                </button>
+            </form>
         </div>
-    </section>
+
+        {# History Card #}
+        <div class="glass-card animate-fadeInUp">
+            <h3 class="mb-4">📜 Historie a Filtrování</h3>
+
+            <form method="GET" action="{{ url_for('zalohy') }}" class="mb-4">
+                <div class="input-group search-group">
+                    <input type="text" name="filter_employee" id="filter_employee" class="form-control-modern"
+                        placeholder="Jméno zaměstnance..." style="border-radius: 10px 0 0 10px;">
+                    <button type="submit" class="btn-modern btn-primary" style="border-radius: 0 10px 10px 0;">
+                        Filtrovat
+                    </button>
+                </div>
+            </form>
+
+            <div class="card-table-wrapper" style="max-height: 450px;">
+                <table class="excel-table">
+                    <thead>
+                        <tr>
+                            <th>Zaměstnanec</th>
+                            <th>Částka</th>
+                            <th>Měna</th>
+                            <th>Možnost</th>
+                            <th>Datum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for advance in advance_history %}
+                        <tr>
+                            <td><strong>{{ advance.employee_name }}</strong></td>
+                            <td class="text-primary">{{ advance.amount }}</td>
+                            <td><small>{{ advance.currency }}</small></td>
+                            <td>{{ advance.option }}</td>
+                            <td><small>{{ advance.date }}</small></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">Žádná historie nebyla nalezena.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block footer_title %}Zálohy{% endblock %}

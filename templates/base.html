@@ -1,43 +1,65 @@
 <!DOCTYPE html>
 <html lang="cs"> {# Nastavení jazyka stránky na češtinu #}
+
 <head>
     <meta charset="UTF-8"> {# Nastavení kódování znaků #}
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> {# Nastavení pro responzivní zobrazení #}
-    <title>{% block title %}Evidence pracovní doby{% endblock %}</title> {# Blok pro titulek stránky, výchozí je "Evidence pracovní doby" #}
+    <title>{% block title %}Evidence pracovní doby{% endblock %}</title> {# Blok pro titulek stránky, výchozí je
+    "Evidence pracovní doby" #}
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> {# Link na hlavní CSS soubor #}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}"> {# Enhanced responsive design #}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/themes.css') }}"> {# Dark/Light theme support #}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}"> {# Modern animations #}
-    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}"> {# PWA Manifest #}
-    {% block extra_css %}{% endblock %} {# Blok pro přidání dalších CSS souborů specifických pro jednotlivé stránky #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/themes.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global_design.css') }}"> {# Modern UI components #}
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    {% block extra_css %}{% endblock %}
 </head>
-<body>
-    {# Hlavička stránky s logem #}
-    <header>
-        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo aplikace" class="logo"> {# Logo aplikace #}
+
+<body class="theme-transition">
+    {# Hlavička a navigace - sjednoceno do moderního navbaru #}
+    <header class="navbar-modern">
+        <div class="navbar-brand">
+            <a href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+            </a>
+        </div>
+
+        <nav class="nav-links" id="main-nav">
+            <a href="{{ url_for('index') }}" class="nav-link-modern">Přehled</a>
+            <a href="{{ url_for('record_time') }}" class="nav-link-modern">Zápis</a>
+            <a href="{{ url_for('zalohy') }}" class="nav-link-modern">Zálohy</a>
+            <a href="{{ url_for('monthly_report_route') }}" class="nav-link-modern">Reporty</a>
+            <a href="{{ url_for('excel_viewer') }}" class="nav-link-modern">Tabulky</a>
+            <a href="{{ url_for('manage_employees') }}" class="nav-link-modern">Lidé</a>
+            <a href="{{ url_for('settings_page') }}" class="nav-link-modern">⚙️</a>
+        </nav>
+
+        <button class="theme-toggle" id="theme-switcher" aria-label="Přepnout téma">
+            <span class="sun-icon">☀️</span>
+            <span class="moon-icon">🌙</span>
+        </button>
     </header>
 
-    {# Hlavní navigační menu #}
-    <nav class="nav" aria-label="Hlavní navigace">
-        <a href="{{ url_for('index') }}">Hlavní stránka</a>
-        <a href="{{ url_for('manage_employees') }}">Zaměstnanci</a>
-        <a href="{{ url_for('record_time') }}">Záznam pracovní doby</a>
-        <a href="{{ url_for('zalohy') }}">Zálohy</a>
-        <a href="{{ url_for('monthly_report_route') }}">Měsíční Přehled</a>
-        <a href="{{ url_for('excel_viewer') }}">Tabulka</a>
-        <a href="{{ url_for('excel_editor') }}">Editor Tabulek</a>
-        <a href="{{ url_for('settings_page') }}">Nastavení</a>
-        <a href="{{ url_for('nastaveni_page') }}">Mapování XLSX</a>
-    </nav>
+    {# Hlavní obsah stránky #}
+    <main class="main container-fluid mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="notifications-container" style="max-width: 800px; margin: 0 auto 20px;">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} glass-card"
+                style="padding: 15px; margin-bottom: 10px; border-left: 5px solid;">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
 
-    {# Hlavní obsah stránky, který bude nahrazen obsahem z dědících šablon #}
-    <main class="main">
         {% block content %}{% endblock %}
     </main>
 
-    {# Patička stránky #}
     <footer>
-        <p>&copy; 2024 {% block footer_title %}Evidence pracovní doby{% endblock %}</p> {# Copyright a blok pro název v patičce #}
+        <p>&copy; 2024-2025 {% block footer_title %}Evidence pracovní doby{% endblock %}</p>
     </footer>
 
     {# Blok pro přidání JavaScript souborů specifických pro jednotlivé stránky #}
@@ -46,7 +68,31 @@
     <script src="{{ url_for('static', filename='js/modern-enhancements.js') }}"></script>
     {# Připojení globálního JavaScriptu pro potvrzovací dialogy #}
     <script src="{{ url_for('static', filename='js/confirmations.js') }}"></script>
+    {# Toast Notification Container #}
+    <div id="toast-container"></div>
+
     <script>
+        // Globální systém pro Toast notifikace
+        function showToast(message, type = 'success', duration = 4000) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast-modern toast-${type}`;
+
+            const icon = type === 'success' ? '✅' : (type === 'error' ? '❌' : 'ℹ️');
+
+            toast.innerHTML = `
+                <span class="toast-icon">${icon}</span>
+                <span class="toast-message">${message}</span>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('hide');
+                setTimeout(() => toast.remove(), 400);
+            }, duration);
+        }
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register("{{ url_for('static', filename='sw.js') }}")
@@ -60,4 +106,5 @@
         }
     </script>
 </body>
+
 </html>

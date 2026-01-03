@@ -1,0 +1,127 @@
+/* excel_viewer.css - Modern styles for Excel Viewer - Refined v2 */
+
+.excel-viewer-container {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--blur-intensity));
+    -webkit-backdrop-filter: blur(var(--blur-intensity));
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-top: 20px;
+    box-shadow: 0 8px 32px 0 var(--glass-shadow);
+}
+
+.excel-card {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 6px var(--shadow-light);
+    border-left: 4px solid var(--button-primary);
+}
+
+.table-wrapper {
+    max-height: 70vh;
+    overflow: auto;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    position: relative;
+    background: var(--bg-secondary);
+}
+
+/* Custom Scrollbar - Match global theme */
+.table-wrapper::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+    background: var(--bg-tertiary);
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+    background: var(--text-secondary);
+    border-radius: 10px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--text-accent);
+}
+
+/* Modern Table Styles */
+.excel-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.9rem;
+}
+
+.excel-table td {
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    white-space: nowrap;
+    transition: background-color 0.2s;
+}
+
+.excel-table th {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-weight: 600;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-bottom: 2px solid var(--text-accent);
+    text-align: left;
+    white-space: nowrap;
+}
+
+.excel-table tbody tr:hover td {
+    background-color: var(--bg-accent) !important;
+}
+
+/* Search bar styling - Refined */
+.file-search-input {
+    width: 100%;
+    padding: 10px 15px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    padding-left: 40px;
+    transition: all 0.3s ease;
+}
+
+.file-search-input:focus {
+    border-color: var(--text-accent);
+    box-shadow: 0 0 0 4px rgba(var(--text-accent-rgb), 0.1);
+    outline: none;
+}
+
+/* Weekend highlighting */
+.cell-weekend {
+    background-color: rgba(220, 38, 38, 0.08) !important;
+    color: var(--button-danger) !important;
+    font-weight: 500;
+}
+
+.weekend-hint {
+    background-color: rgba(var(--text-accent-rgb), 0.03);
+}
+
+/* Fullscreen mode */
+.fullscreen-table {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 3000;
+    background: var(--bg-primary) !important;
+    padding: 30px;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    overflow: auto;
+}

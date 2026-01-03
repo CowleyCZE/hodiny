@@ -3,125 +3,99 @@
 {% block title %}Nastavení{% endblock %}
 
 {% block extra_css %}
-    {# Link na Flatpickr CSS, pokud ho používáte #}
-    {# <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"> #}
-    <style>
-        /* Styl pro flash zprávy (přesunuto sem pro lepší organizaci) */
-        .flash-messages {
-             list-style: none;
-             padding: 0;
-             margin-bottom: 20px;
-        }
-        .flash-message {
-             padding: 10px 15px;
-             margin-bottom: 10px;
-             border-radius: 4px;
-             border: 1px solid transparent;
-        }
-        .flash-message.success {
-             color: #155724;
-             background-color: #d4edda;
-             border-color: #c3e6cb;
-        }
-        .flash-message.error {
-             color: #721c24;
-             background-color: #f8d7da;
-             border-color: #f5c6cb;
-        }
-        .flash-message.warning {
-             color: #856404;
-             background-color: #fff3cd;
-             border-color: #ffeeba;
-        }
-        .flash-message.info {
-             color: #0c5460;
-             background-color: #d1ecf1;
-             border-color: #bee5eb;
-        }
-    </style>
+{# Link na Flatpickr CSS, pokud ho používáte #}
+{#
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"> #}
 {% endblock %}
 
 {% block content %}
-    <h1 id="settings-heading">Nastavení</h1>
+<div class="animate-fadeIn">
+    <div class="section-header">
+        <h1 class="section-title">Nastavení aplikace</h1>
+        <span class="badge-modern badge-primary"
+            style="background: rgba(var(--text-accent-rgb), 0.1); color: var(--text-accent);">
+            Konfigurace systému
+        </span>
+    </div>
 
-    {# Zobrazení flash zpráv #}
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <ul class="flash-messages" role="alert" aria-live="polite">
-                {% for category, message in messages %}
-                    <li class="flash-message {{ category }}">
-                        {{ message }}
-                    </li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
+    <form method="POST" action="{{ url_for('settings_page') }}">
+        <div class="dashboard-grid stagger-animation">
+            {# Project Info Card #}
+            <div class="glass-card animate-fadeInUp">
+                <h3 class="mb-4">📽️ Informace o projektu</h3>
+                <div class="form-group-modern">
+                    <label for="project_name" class="form-label-modern">Název projektu</label>
+                    <input type="text" name="project_name" id="project_name"
+                        value="{{ request.form['project_name'] if request.form else settings.project_info.name | default('', true) }}"
+                        class="form-control-modern" required placeholder="např. Rezidence Výhledy">
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-group-modern">
+                            <label for="start_date" class="form-label-modern">Začátek</label>
+                            <input type="date" name="start_date" id="start_date"
+                                value="{{ request.form['start_date'] if request.form else settings.project_info.start_date | default('', true) }}"
+                                class="form-control-modern" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group-modern">
+                            <label for="end_date" class="form-label-modern">Předpokládaný konec</label>
+                            <input type="date" name="end_date" id="end_date"
+                                value="{{ request.form['end_date'] if request.form else settings.project_info.end_date | default('', true) }}"
+                                class="form-control-modern">
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    {# Formulář pro běžná nastavení #}
-    <form method="POST" action="{{ url_for('settings_page') }}" aria-labelledby="settings-heading">
-        <fieldset>
-            <legend>Data Projektu</legend>
-            <div class="form-group">
-                <label for="project_name">Název projektu:</label>
-                <input type="text" name="project_name" id="project_name"
-                       value="{{ request.form['project_name'] if request.form else settings.project_info.name | default('', true) }}"
-                       class="form-control" required aria-required="true"
-                       title="Zadejte název projektu">
+            {# Default Times Card #}
+            <div class="glass-card animate-fadeInUp">
+                <h3 class="mb-4">🕗 Přednastavené hodnoty</h3>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-group-modern">
+                            <label for="start_time" class="form-label-modern">Výchozí příchod</label>
+                            <input type="time" id="start_time" name="start_time" class="form-control-modern"
+                                value="{{ request.form['start_time'] if request.form else settings.start_time | default('07:00', true) }}"
+                                required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group-modern">
+                            <label for="end_time" class="form-label-modern">Výchozí odchod</label>
+                            <input type="time" id="end_time" name="end_time" class="form-control-modern"
+                                value="{{ request.form['end_time'] if request.form else settings.end_time | default('18:00', true) }}"
+                                required>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group-modern">
+                    <label for="lunch_duration" class="form-label-modern">Délka pauzy (h)</label>
+                    <input type="number" id="lunch_duration" name="lunch_duration" step="0.25" min="0" max="4"
+                        value="{{ request.form['lunch_duration'] if request.form else settings.lunch_duration | default(1.0, true) }}"
+                        class="form-control-modern" required>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="start_date">Začátek projektu:</label>
-                <input type="date" name="start_date" id="start_date"
-                       value="{{ request.form['start_date'] if request.form else settings.project_info.start_date | default('', true) }}"
-                       class="form-control date-picker" required aria-required="true"
-                       title="Vyberte datum začátku projektu">
-            </div>
-            <div class="form-group">
-                <label for="end_date">Konec projektu:</label>
-                {# Odstraněn atribut 'required' #}
-                <input type="date" name="end_date" id="end_date"
-                       value="{{ request.form['end_date'] if request.form else settings.project_info.end_date | default('', true) }}"
-                       class="form-control date-picker"
-                       title="Vyberte datum konce projektu (povinné pouze před archivací)">
-            </div>
-        </fieldset>
+        </div>
 
-        <fieldset>
-            <legend>Přednastavené časy</legend>
-            <div class="form-group">
-                <label for="start_time">Čas začátku:</label>
-                <input type="time" id="start_time" name="start_time" class="form-control"
-                       value="{{ request.form['start_time'] if request.form else settings.start_time | default('07:00', true) }}"
-                       required aria-required="true">
-            </div>
-            <div class="form-group">
-                <label for="end_time">Čas konce:</label>
-                <input type="time" id="end_time" name="end_time" class="form-control"
-                       value="{{ request.form['end_time'] if request.form else settings.end_time | default('18:00', true) }}"
-                       required aria-required="true">
-            </div>
-            <div class="form-group">
-                <label for="lunch_duration">Délka oběda (v hodinách):</label>
-                <input type="number" id="lunch_duration" name="lunch_duration" step="0.25" min="0" max="4"
-                       value="{{ request.form['lunch_duration'] if request.form else settings.lunch_duration | default(1.0, true) }}"
-                       required aria-required="true">
-            </div>
-        </fieldset>
-
-        <div class="form-group">
-            <button type="submit" class="btn btn-primary">Uložit nastavení</button>
+        <div class="mt-4 animate-fadeInUp" style="animation-delay: 0.3s;">
+            <button type="submit" class="btn-modern btn-primary w-100 py-3" style="font-size: 1.1rem;">
+                <span>💾</span> Uložit všechna nastavení
+            </button>
         </div>
     </form>
-
+</div>
 {% endblock %}
 
 {% block footer_title %}Nastavení{% endblock %}
 
 {% block scripts %}
-    {# Přidáme jednoduchý skript pro případné budoucí vylepšení UX #}
-     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Zde může být kód pro date/time pickery nebo jinou logiku
-            console.log("Settings page loaded.");
-        });
-     </script>
+{# Přidáme jednoduchý skript pro případné budoucí vylepšení UX #}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Zde může být kód pro date/time pickery nebo jinou logiku
+        console.log("Settings page loaded.");
+    });
+</script>
 {% endblock %}

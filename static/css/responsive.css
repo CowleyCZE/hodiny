@@ -10,52 +10,76 @@
 
 /* Enhanced mobile responsiveness */
 @media (max-width: 480px) {
+
     /* Typography scaling */
     html {
         font-size: 14px;
     }
-    
+
     /* Header improvements */
-    header {
-        padding: 8px;
-        flex-direction: column;
-        text-align: center;
+    header.navbar-modern {
+        padding: 10px 15px;
+        flex-direction: row;
+        justify-content: space-between;
     }
-    
+
     .logo {
-        height: 35px;
-        margin: 5px 0;
+        height: 30px;
     }
-    
-    /* Navigation stack properly on mobile */
-    .nav {
+
+    /* Navigation - Floating Bottom bar on mobile for better ergonomics */
+    .nav-links {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--header-bg);
+        display: flex;
+        justify-content: space-around;
+        padding: 10px 5px;
+        z-index: 2000;
+        box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.3);
+        border-top: 1px solid var(--border-color);
+        gap: 0;
+    }
+
+    .nav-link-modern {
+        flex: 1;
+        padding: 8px 2px;
+        font-size: 11px;
+        display: flex;
         flex-direction: column;
-        padding: 0;
+        align-items: center;
+        text-align: center;
         gap: 2px;
     }
-    
-    .nav a {
-        padding: 12px 16px;
-        margin: 1px 0;
-        text-align: center;
-        font-size: 16px; /* Touch-friendly size */
-        border-radius: 0;
+
+    /* Hide text labels on very small screens, use icons if available or keep it clean */
+    .nav-link-modern::before {
+        font-size: 18px;
+        margin-bottom: 2px;
     }
-    
-    /* Main content adjustments */
+
+    /* Extra space for body to not be covered by bottom nav */
+    body {
+        padding-bottom: 70px;
+    }
+
     .main {
-        padding: 8px;
+        padding: 15px 10px;
     }
-    
+
     /* Form improvements for mobile */
     .form-group input,
     .form-group select,
     .form-group textarea {
-        font-size: 16px; /* Prevent zoom on iOS */
+        font-size: 16px;
+        /* Prevent zoom on iOS */
         padding: 12px;
-        min-height: 44px; /* Touch target size */
+        min-height: 44px;
+        /* Touch target size */
     }
-    
+
     /* Button improvements */
     .btn {
         min-height: 44px;
@@ -63,38 +87,38 @@
         font-size: 16px;
         margin: 4px 0;
     }
-    
+
     /* Table improvements */
     .table-responsive {
         font-size: 12px;
         border-radius: 4px;
         overflow: hidden;
     }
-    
+
     .table-responsive th,
     .table-responsive td {
         padding: 8px 4px;
         vertical-align: top;
     }
-    
+
     /* Dashboard container - stack on mobile */
     .dashboard-container {
         grid-template-columns: 1fr;
         gap: 15px;
     }
-    
+
     /* Info panels */
     .info-panel {
         padding: 15px;
         margin-bottom: 15px;
     }
-    
+
     /* Quick entry form improvements */
     .quick-entry-form {
         padding: 12px;
         margin-bottom: 15px;
     }
-    
+
     .form-row {
         grid-template-columns: 1fr;
         gap: 10px;
@@ -106,34 +130,34 @@
     html {
         font-size: 15px;
     }
-    
+
     .nav {
         flex-wrap: wrap;
         justify-content: center;
         gap: 4px;
     }
-    
+
     .nav a {
         padding: 10px 14px;
         margin: 2px;
         border-radius: 4px;
     }
-    
+
     .dashboard-container {
         grid-template-columns: 1fr;
         gap: 20px;
     }
-    
+
     .main {
         padding: 15px;
     }
-    
+
     /* Two-column forms on tablets */
     .form-row {
         grid-template-columns: 1fr 1fr;
         gap: 15px;
     }
-    
+
     .button-group {
         flex-wrap: wrap;
         gap: 8px;
@@ -147,28 +171,28 @@
         margin: 0 auto;
         padding: 0 20px;
     }
-    
+
     /* Improved navigation layout */
     .nav {
         justify-content: center;
         gap: 8px;
     }
-    
+
     .nav a {
         transition: all 0.2s ease;
     }
-    
+
     .nav a:hover {
         transform: translateY(-2px);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
-    
+
     /* Enhanced dashboard layout */
     .dashboard-container {
         grid-template-columns: 1fr 1fr;
         gap: 25px;
     }
-    
+
     /* Three-column forms on large screens */
     .form-row-large {
         grid-template-columns: 1fr 1fr 1fr;
@@ -181,11 +205,11 @@
     .container {
         max-width: 1400px;
     }
-    
+
     .main {
         padding: 30px;
     }
-    
+
     /* Four-column dashboard for very large screens */
     .dashboard-container-large {
         grid-template-columns: repeat(4, 1fr);
@@ -195,6 +219,7 @@
 
 /* Touch device optimizations */
 @media (hover: none) and (pointer: coarse) {
+
     /* Larger touch targets */
     .btn,
     .nav a,
@@ -203,21 +228,22 @@
     textarea {
         min-height: 44px;
     }
-    
+
     /* Remove hover effects on touch devices */
     .nav a:hover {
         background-color: #555;
         transform: none;
         box-shadow: none;
     }
-    
+
     .btn:hover {
         opacity: 1;
     }
 }
 
 /* High DPI displays */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
     .logo {
         image-rendering: -webkit-optimize-contrast;
         image-rendering: crisp-edges;
@@ -231,13 +257,13 @@
         flex-wrap: wrap;
         padding: 5px 0;
     }
-    
+
     .nav a {
         padding: 8px 12px;
         margin: 2px;
         font-size: 14px;
     }
-    
+
     .main {
         padding: 10px;
     }

@@ -10,44 +10,44 @@
         gap: 20px;
         margin-bottom: 30px;
     }
-    
+
     .info-panel {
         background: #f8f9fa;
         border: 1px solid #dee2e6;
         border-radius: 8px;
         padding: 20px;
     }
-    
+
     .project-info h2 {
         color: #495057;
         margin-top: 0;
         font-size: 1.3em;
     }
-    
+
     .quick-entry-form {
         background: #e3f2fd;
         padding: 15px;
         border-radius: 8px;
         margin-bottom: 20px;
     }
-    
+
     .form-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 15px;
         margin-bottom: 15px;
     }
-    
+
     .form-group {
         display: flex;
         flex-direction: column;
     }
-    
+
     .form-group label {
         font-weight: bold;
         margin-bottom: 5px;
     }
-    
+
     .week-table-container {
         margin-top: 20px;
         max-height: 400px;
@@ -55,27 +55,27 @@
         border: 1px solid #dee2e6;
         border-radius: 8px;
     }
-    
+
     .week-table {
         width: 100%;
         border-collapse: collapse;
         font-size: 0.85em;
     }
-    
+
     .week-table th,
     .week-table td {
         border: 1px solid #dee2e6;
         padding: 4px 8px;
         text-align: left;
     }
-    
+
     .week-table th {
         background: #f8f9fa;
         font-weight: bold;
         position: sticky;
         top: 0;
     }
-    
+
     .free-day-group {
         margin-top: 10px;
         padding: 10px;
@@ -83,22 +83,22 @@
         border-radius: 4px;
         border: 1px solid #ffeaa7;
     }
-    
+
     .free-day-group label {
         margin-left: 5px;
         font-weight: bold;
         color: #856404;
     }
-    
+
     .time-fields.hidden {
         display: none;
     }
-    
+
     @media (max-width: 768px) {
         .dashboard-container {
             grid-template-columns: 1fr;
         }
-        
+
         .form-row {
             grid-template-columns: 1fr;
         }
@@ -107,240 +107,253 @@
 {% endblock %}
 
 {% block content %}
-    {# Info panel zobrazující aktuální týden a datum #}
-    <div class="info-bar" role="region" aria-label="Časové informace">
-        <div id="current-week">Týden: {{ week_number }}</div>
-        <div id="current-date">Datum: {{ current_date_formatted }}</div>
-    </div>
-
-    <h1 id="main-heading">Evidence pracovní doby</h1>
-
-    {# Blok pro zobrazení flash zpráv (např. úspěch, chyba) #}
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="messages" role="alert" aria-live="polite">
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% endwith %}
-
-    {# Dashboard s projektovými informacemi a rychlým zadáním #}
-    <div class="dashboard-container stagger-animation">
-        <div class="info-panel project-info animate-fadeInUp">
-            <h2>📋 Projekt: {{ project_name or "Nepojmenovaný projekt" }}</h2>
-            <p><strong>Aktuální týden:</strong> {{ week_number }}</p>
-            <p><strong>Datum:</strong> {{ current_date_formatted }}</p>
-            {% if excel_exists %}
-                <p><strong>Status:</strong> ✅ Excel soubor je k dispozici</p>
-            {% else %}
-                <p><strong>Status:</strong> ⚠️ Excel soubor nebyl nalezen</p>
-            {% endif %}
-        </div>
-        
-        <div class="info-panel animate-fadeInUp">
-            <h2>⚡ Rychlé zadání pracovní doby</h2>
-            <div class="quick-entry-form">
-                <form id="quick-entry-form" class="stagger-animation">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="quick-date">Datum:</label>
-                            <input type="date" id="quick-date" name="date" value="{{ current_date }}" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="quick-lunch">Oběd (hodiny):</label>
-                            <input type="number" id="quick-lunch" name="lunch_duration" value="{{ lunch_duration }}" step="0.25" min="0" max="4" class="form-control">
-                        </div>
-                    </div>
-                    
-                    <div class="time-fields" id="time-fields">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="quick-start">Začátek:</label>
-                                <input type="time" id="quick-start" name="start_time" value="{{ start_time }}" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label for="quick-end">Konec:</label>
-                                <input type="time" id="quick-end" name="end_time" value="{{ end_time }}" class="form-control">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="free-day-group">
-                        <input type="checkbox" id="quick-free-day" name="is_free_day">
-                        <label for="quick-free-day">Volný den</label>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-success" style="width: 100%; margin-top: 15px;">
-                        💾 Uložit pracovní dobu
-                    </button>
-                </form>
-            </div>
+<div class="animate-fadeIn">
+    {# Main Header Section #}
+    <div class="section-header">
+        <h1 class="section-title">Evidence pracovní doby</h1>
+        <div class="d-flex gap-2">
+            <span class="badge-modern {% if excel_exists %}badge-success{% else %}badge-warning{% endif %}">
+                {{ "Excel Aktivní" if excel_exists else "Excel chybí" }}
+            </span>
+            <span class="badge-modern badge-primary"
+                style="background: rgba(0, 78, 163, 0.1); color: var(--text-accent);">
+                Týden {{ week_number }}
+            </span>
         </div>
     </div>
 
-    {# Zobrazení tabulky aktuálního týdne #}
+    {# Dashboard Grid #}
+    <div class="dashboard-grid stagger-animation">
+        {# Project Info Card #}
+        <div class="glass-card animate-fadeInUp">
+            <h3 class="mb-3">📋 Aktuální Projekt</h3>
+            <div class="info-content">
+                <p class="mb-2"><strong>Název:</strong> {{ project_name or "Nepojmenovaný projekt" }}</p>
+                <p class="mb-2"><strong>Dnešní datum:</strong> {{ current_date_formatted }}</p>
+                <p class="mb-0"><strong>Status systému:</strong> Ready to record ⚡</p>
+            </div>
+        </div>
+
+        {# Quick Entry Card #}
+        <div class="glass-card animate-fadeInUp" style="border-top: 4px solid var(--button-success);">
+            <h3 class="mb-3">⚡ Rychlý záznam</h3>
+            <form id="quick-entry-form" class="stagger-animation">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <label for="quick-date" class="form-label-modern">Datum</label>
+                        <input type="date" id="quick-date" name="date" value="{{ current_date }}"
+                            class="form-control-modern" required>
+                    </div>
+                    <div class="col-6">
+                        <label for="quick-lunch" class="form-label-modern">Oběd (h)</label>
+                        <input type="number" id="quick-lunch" name="lunch_duration" value="{{ lunch_duration }}"
+                            step="0.25" min="0" max="4" class="form-control-modern">
+                    </div>
+
+                    <div class="col-12 time-fields" id="time-fields">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label for="quick-start" class="form-label-modern">Začátek</label>
+                                <input type="time" id="quick-start" name="start_time" value="{{ start_time }}"
+                                    class="form-control-modern">
+                            </div>
+                            <div class="col-6">
+                                <label for="quick-end" class="form-label-modern">Konec</label>
+                                <input type="time" id="quick-end" name="end_time" value="{{ end_time }}"
+                                    class="form-control-modern">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="form-check form-switch p-0 d-flex align-items-center gap-3">
+                            <input type="checkbox" id="quick-free-day" name="is_free_day" class="form-check-input m-0"
+                                style="width: 40px; height: 20px;">
+                            <label class="form-label-modern mb-0" for="quick-free-day">Volný den
+                                (svátek/dovolená)</label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-modern btn-success w-100 mt-4"
+                    style="background: var(--button-success);">
+                    <span>💾</span> Uložit záznam
+                </button>
+            </form>
+        </div>
+    </div>
+
+    {# Weekly Overview #}
     {% if current_week_data %}
-    <div class="info-panel animate-fadeInUp" data-lazy-component="table">
-        <h2>📊 Přehled aktuálního týdne: {{ current_week_data.sheet_name }}</h2>
-        <div class="table-responsive">
-            <table class="week-table">
-                {% for row in current_week_data.data %}
+    <div class="glass-card animate-fadeInUp mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="m-0">📊 Aktuální týden: {{ current_week_data.sheet_name }}</h3>
+            <button class="btn btn-sm btn-outline-primary" onclick="toggleFullscreen('weekTableWrapper')">⛶</button>
+        </div>
+        <div class="card-table-wrapper" id="weekTableWrapper">
+            <table class="excel-table">
+                <thead>
                     <tr>
-                        {% if loop.first %}
-                            {% for cell in row %}
-                                <th>{{ cell }}</th>
-                            {% endfor %}
-                        {% else %}
-                            {% for cell in row %}
-                                <td>{{ cell }}</td>
-                            {% endfor %}
-                        {% endif %}
+                        {% for header in current_week_data.data[0] %}
+                        <th>{{ header }}</th>
+                        {% endfor %}
                     </tr>
-                {% endfor %}
+                </thead>
+                <tbody>
+                    {% for row in current_week_data.data[1:] %}
+                    <tr>
+                        {% for cell in row %}
+                        <td>{{ cell }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
         </div>
     </div>
     {% endif %}
 
-    {# Sekce pro akce s Excel souborem, zobrazí se, jen pokud soubor existuje #}
-    {% if excel_exists %}
-        <section class="excel-actions" aria-labelledby="excel-heading">
-            <h3 id="excel-heading">Operace se souborem Excel:</h3>
-            <div class="button-group">
-                <a href="{{ url_for('download_file') }}" class="btn btn-primary" role="button">Stáhnout soubor</a>
-                {# Formulář pro odeslání emailu, používá nativní potvrzení přes confirmations.js (pokud je navázáno) nebo prohlížečem #}
-                <form action="{{ url_for('send_email') }}" method="post" class="inline-form" onsubmit="return confirmSendEmail();">
-                    <button type="submit" class="btn btn-success">Odeslat emailem</button>
+    {# Excel Actions & Upload #}
+    <div class="dashboard-grid mt-4">
+        {# Actions Card #}
+        <div class="glass-card">
+            <h3 class="mb-4">📂 Správa Excelu</h3>
+            {% if excel_exists %}
+            <div class="d-grid gap-3">
+                <a href="{{ url_for('download_file') }}" class="btn-modern btn-primary text-white">
+                    <span>📥</span> Stáhnout aktuální soubor
+                </a>
+                <form action="{{ url_for('send_email') }}" method="post" onsubmit="return confirmSendEmail();">
+                    <button type="submit" class="btn-modern btn-success w-100">
+                        <span>📧</span> Odeslat na email
+                    </button>
                 </form>
             </div>
-        </section>
-    {% else %}
-        <div class="alert alert-warning" role="alert">Excel soubor nebyl nalezen.</div>
-    {% endif %}
+            {% else %}
+            <div class="alert alert-warning m-0">Excel soubor nebyl nalezen.</div>
+            {% endif %}
 
-    {# Sekce pro nahrávání Excel souborů #}
-    <section class="upload-section" aria-labelledby="upload-heading">
-        <h3 id="upload-heading">Nahrání Excel souboru:</h3>
-        <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data" class="upload-form">
-            <div class="form-group">
-                <label for="category">Kategorie:</label>
-                <select name="category" id="category" class="form-control">
-                    <option value="Výkres">Výkres</option>
-                    <option value="Rozpočet">Rozpočet</option>
-                    <option value="Fotodokumentace">Fotodokumentace</option>
-                    <option value="Ostatní" selected>Ostatní</option>
-                </select>
-            </div>
-            <div class="file-upload-group">
-                <label for="file-input" class="file-label">
-                    📁 Vyberte Excel soubor (.xlsx):
-                </label>
-                <input type="file" 
-                       id="file-input" 
-                       name="file" 
-                       accept=".xlsx" 
-                       required 
-                       class="file-input">
-                <button type="submit" class="btn btn-primary upload-btn">
-                    📤 Nahrát soubor
+            <section class="voice-control mt-4">
+                <button id="voice-button" class="btn-modern w-100 btn-outline-primary"
+                    style="border: 1px solid var(--text-accent);">
+                    🎤 Hlasové ovládání
                 </button>
-            </div>
-            <p class="help-text">
-                <strong>📝 Nápověda:</strong> Podporovány jsou pouze soubory s příponou .xlsx. 
-                Pokud nahráváte soubor se stejným názvem jako existující, budete vyzváni k potvrzení přepsání.
-            </p>
-        </form>
-    </section>
-
-    <section class="voice-control" aria-labelledby="voice-control-heading">
-        <h3 id="voice-control-heading">Hlasové ovládání</h3>
-        <button id="voice-button" class="voice-control-button">
-            <i class="fas fa-microphone"></i> Hlasové ovládání
-        </button>
-        <div id="voice-result"></div>
-        <div id="loading-indicator" style="display: none;"> {# Indikátor načítání pro hlasové příkazy #}
-            <i class="fas fa-spinner fa-spin"></i>
+                <div id="voice-result" class="mt-2 small text-center text-muted"></div>
+                <div id="loading-indicator" class="text-center mt-2" style="display: none;">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </div>
+            </section>
         </div>
-    </section>
+
+        {# Upload Card #}
+        <div class="glass-card">
+            <h3 class="mb-4">📤 Nahrát nový soubor</h3>
+            <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
+                <div class="form-group-modern">
+                    <label for="category" class="form-label-modern">Kategorie</label>
+                    <select name="category" id="category" class="form-control-modern">
+                        <option value="Výkres">Výkres</option>
+                        <option value="Rozpočet">Rozpočet</option>
+                        <option value="Fotodokumentace">Fotodokumentace</option>
+                        <option value="Ostatní" selected>Ostatní</option>
+                    </select>
+                </div>
+                <div class="form-group-modern">
+                    <label for="file-input" class="form-label-modern">Zvolte soubor (.xlsx)</label>
+                    <input type="file" id="file-input" name="file" accept=".xlsx" required class="form-control-modern">
+                </div>
+                <button type="submit" class="btn-modern btn-primary w-100 mt-2">
+                    <span>🚀</span> Nahrát a zpracovat
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
-    <script>
-        // JavaScript pro dynamickou aktualizaci data a čísla týdne na stránce
-        document.addEventListener('DOMContentLoaded', function() {
-            const date = new Date();
-            const currentDate = date.toLocaleDateString('cs-CZ'); // Formát data pro ČR
-            const weekNumber = getWeekNumber(date); // Výpočet čísla týdne
+<script>
+    // JavaScript pro dynamickou aktualizaci data a čísla týdne na stránce
+    document.addEventListener('DOMContentLoaded', function () {
+        const date = new Date();
+        const currentDate = date.toLocaleDateString('cs-CZ'); // Formát data pro ČR
+        const weekNumber = getWeekNumber(date); // Výpočet čísla týdne
 
-            document.getElementById('current-date').textContent = `Datum: ${currentDate}`;
-            document.getElementById('current-week').textContent = `Týden: ${weekNumber}`;
-            
-            // Správa formuláře pro rychlé zadání
-            const freeDay = document.getElementById('quick-free-day');
-            const timeFields = document.getElementById('time-fields');
-            
-            freeDay.addEventListener('change', function() {
-                if (this.checked) {
-                    timeFields.classList.add('hidden');
-                } else {
-                    timeFields.classList.remove('hidden');
-                }
-            });
-            
-            // Odeslání formuláře
-            const quickForm = document.getElementById('quick-entry-form');
-            quickForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                const formData = new FormData(this);
-                const data = {
-                    date: formData.get('date'),
-                    start_time: formData.get('start_time'),
-                    end_time: formData.get('end_time'),
-                    lunch_duration: formData.get('lunch_duration'),
-                    is_free_day: formData.get('is_free_day') === 'on'
-                };
-                
-                try {
-                    const response = await fetch('/api/quick_time_entry', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(data)
-                    });
-                    
-                    const result = await response.json();
-                    
-                    if (result.success) {
-                        alert('Úspěch: ' + result.message);
-                        // Refresh stránky pro zobrazení aktualizovaných dat
-                        window.location.reload();
-                    } else {
-                        alert('Chyba: ' + result.error);
-                    }
-                } catch (error) {
-                    alert('Chyba při ukládání: ' + error.message);
-                }
-            });
+        document.getElementById('current-date').textContent = `Datum: ${currentDate}`;
+        document.getElementById('current-week').textContent = `Týden: ${weekNumber}`;
+
+        // Správa formuláře pro rychlé zadání
+        const freeDay = document.getElementById('quick-free-day');
+        const timeFields = document.getElementById('time-fields');
+
+        freeDay.addEventListener('change', function () {
+            if (this.checked) {
+                timeFields.classList.add('hidden');
+            } else {
+                timeFields.classList.remove('hidden');
+            }
         });
 
-        // Funkce pro výpočet ISO čísla týdne
-        function getWeekNumber(date) {
-            const target = new Date(date.valueOf());
-            const dayNr = (date.getDay() + 6) % 7; // Pondělí=0, Neděle=6
-            target.setDate(target.getDate() - dayNr + 3);
-            const firstThursday = target.valueOf();
-            target.setMonth(0, 1);
-            if (target.getDay() !== 4) {
-                target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+        // Odeslání formuláře
+        const quickForm = document.getElementById('quick-entry-form');
+        const submitBtn = quickForm.querySelector('button[type="submit"]');
+
+        quickForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            // Visual feedback - loading state
+            submitBtn.classList.add('btn-loading');
+
+            const formData = new FormData(this);
+            const data = {
+                date: formData.get('date'),
+                start_time: formData.get('start_time'),
+                end_time: formData.get('end_time'),
+                lunch_duration: formData.get('lunch_duration'),
+                is_free_day: formData.get('is_free_day') === 'on'
+            };
+
+            try {
+                const response = await fetch('/api/quick_time_entry', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('Záznam byl úspěšně uložen!', 'success');
+                    // Refresh dat po krátké pauze pro lepší UX
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    showToast('Chyba: ' + (result.error || 'Neznámá chyba'), 'error');
+                    submitBtn.classList.remove('btn-loading');
+                }
+            } catch (error) {
+                showToast('Chyba při komunikaci se serverem', 'error');
+                console.error(error);
+                submitBtn.classList.remove('btn-loading');
             }
-            return 1 + Math.ceil((firstThursday - target) / 604800000); // 604800000 = 7 * 24 * 3600 * 1000
+        });
+    });
+
+    // Funkce pro výpočet ISO čísla týdne
+    function getWeekNumber(date) {
+        const target = new Date(date.valueOf());
+        const dayNr = (date.getDay() + 6) % 7; // Pondělí=0, Neděle=6
+        target.setDate(target.getDate() - dayNr + 3);
+        const firstThursday = target.valueOf();
+        target.setMonth(0, 1);
+        if (target.getDay() !== 4) {
+            target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
         }
-    </script>
-    {# Připojení externích JavaScript souborů #}
-    <script src="{{ url_for('static', filename='js/confirmations.js') }}"></script> {# Skripty pro potvrzovací dialogy #}
-    <script src="{{ url_for('static', filename='js/voice-handler.js') }}"></script> {# Skript pro hlasové ovládání #}
+        return 1 + Math.ceil((firstThursday - target) / 604800000); // 604800000 = 7 * 24 * 3600 * 1000
+    }
+</script>
+{# Připojení externích JavaScript souborů #}
+<script src="{{ url_for('static', filename='js/confirmations.js') }}"></script> {# Skripty pro potvrzovací dialogy #}
+<script src="{{ url_for('static', filename='js/voice-handler.js') }}"></script> {# Skript pro hlasové ovládání #}
 {% endblock %}

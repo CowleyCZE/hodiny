@@ -2,34 +2,52 @@
     "weekly_time": {
         "employee_name": [
             {
-                "file": "Hodiny_Cap.xlsx",
+                "file": "Cap_Hodiny_vzor.xlsx",
                 "sheet": "Týden",
-                "cell": "A9"
+                "cell": "A8"
             }
         ],
         "date": [
             {
-                "file": "Hodiny_Cap.xlsx",
+                "file": "Cap_Hodiny_vzor.xlsx",
                 "sheet": "Týden",
-                "cell": "B80"
+                "cell": "B6"
             }
         ],
         "start_time": [
             {
-                "file": "Hodiny_Cap.xlsx",
+                "file": "Cap_Hodiny_vzor.xlsx",
                 "sheet": "Týden",
-                "cell": "A1"
+                "cell": "B7"
             }
         ],
         "end_time": [],
         "lunch_duration": [],
-        "total_hours": []
+        "total_hours": [
+            {
+                "file": "Cap_Hodiny_vzor.xlsx",
+                "sheet": "Týden",
+                "cell": "B8"
+            }
+        ]
     },
     "advances": {
-        "employee_name": [],
+        "employee_name": [
+            {
+                "file": "Cap_Hodiny_vzor.xlsx",
+                "sheet": "Zálohy",
+                "cell": "A8"
+            }
+        ],
         "amount_eur": [],
         "amount_czk": [],
-        "date": [],
+        "date": [
+            {
+                "file": "Cap_Hodiny_vzor.xlsx",
+                "sheet": "Zálohy",
+                "cell": "Z8"
+            }
+        ],
         "option_type": []
     },
     "monthly_time": {
@@ -44,7 +62,13 @@
         "total_all_employees": []
     },
     "projects": {
-        "project_name": [],
+        "project_name": [
+            {
+                "file": "Cap_Hodiny_vzor.xlsx",
+                "sheet": "Týden",
+                "cell": "I4"
+            }
+        ],
         "start_date": [],
         "end_date": []
     }

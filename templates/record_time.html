@@ -1,101 +1,86 @@
 {% extends "base.html" %}
 
-{% block title %}Záznam pracovní doby{% endblock %}
+{% block title %}Záznam pracovní doby - Hodiny{% endblock %}
 
 {% block extra_css %}
-    <style>
-        /* Styl pro odsazení checkboxu */
-        .free-day-group {
-            margin-top: 15px;
-            margin-bottom: 15px;
-            padding: 10px;
-            background-color: #4a4a4a; /* Lehce odlišené pozadí */
-            border-radius: 4px;
-        }
-        .free-day-group label {
-            margin-left: 5px;
-            font-weight: bold;
-            color: #ffc107; /* Žlutá barva pro zvýraznění */
-        }
-        /* Skryjeme časová pole, pokud je volný den zaškrtnutý (pomocí JS) */
-        .time-fields.hidden {
-            display: none;
-        }
-    </style>
+<style>
+    .time-fields.hidden {
+        display: none;
+    }
+</style>
 {% endblock %}
 
-
 {% block content %}
+<div class="animate-fadeIn" style="max-width: 800px; margin: 0 auto;">
+    <div class="section-header">
+        <h1 class="section-title">Záznam pracovní doby</h1>
+        {% if selected_employees %}
+        <span class="badge-modern badge-primary" style="background: rgba(0, 78, 163, 0.1); color: var(--text-accent);">
+            {{ selected_employees|length }} vybraných
+        </span>
+        {% endif %}
+    </div>
+
     {% if selected_employees %}
-    <section>
-        <h2>Vybraní zaměstnanci:</h2>
-        {# Zobrazíme jako seznam oddělený čárkou pro úsporu místa #}
-        <p aria-label="Seznam vybraných zaměstnanců">
-            {{ selected_employees|join(', ') }}
+    <div class="glass-card mb-4" style="padding: 15px;">
+        <p class="m-0 text-muted">
+            <strong>Zaměstnanci:</strong> {{ selected_employees|join(', ') }}
         </p>
-    </section>
+    </div>
     {% endif %}
 
-    <h1 id="form-heading">Záznam pracovní doby</h1>
-
-    {# Zobrazení flash zpráv #}
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="flash-messages" role="alert" aria-live="polite">
-                {% for category, message in messages %}
-                    <div class="flash-message {{ category }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% endwith %}
-
-    <form id="record-time-form" method="POST" action="{{ url_for('record_time') }}" aria-labelledby="form-heading">
-        <fieldset>
-            <legend>Údaje o pracovní době</legend>
-
-            <div class="form-group">
-                <label for="date">Datum:</label>
-                {# Použijeme hodnotu z current_date předanou z Flasku #}
+    <div class="glass-card">
+        <form id="record-time-form" method="POST" action="{{ url_for('record_time') }}">
+            <div class="form-group-modern">
+                <label for="date" class="form-label-modern">Datum záznamu</label>
                 <input type="date" id="date" name="date" value="{{ current_date }}" required
-                       aria-required="true" title="Vyberte datum záznamu">
+                    class="form-control-modern">
             </div>
 
-            {# Checkbox pro volný den #}
-            <div class="form-group free-day-group">
-                <input type="checkbox" id="is_free_day" name="is_free_day" value="on"
-                       {% if is_free_day %}checked{% endif %}
-                       onchange="toggleTimeFields()"> {# Přidána JS funkce pro skrytí polí #}
-                <label for="is_free_day">Volný den / Dovolená (zaznamená 0 hodin)</label>
+            <div class="glass-card mb-4"
+                style="background: rgba(255, 193, 7, 0.05); border-color: rgba(255, 193, 7, 0.2);">
+                <div class="form-check form-switch p-0 d-flex align-items-center gap-3">
+                    <input type="checkbox" id="is_free_day" name="is_free_day" value="on" class="form-check-input m-0"
+                        {% if is_free_day %}checked{% endif %} onchange="toggleTimeFields()"
+                        style="width: 45px; height: 22px;">
+                    <label class="form-label-modern mb-0" for="is_free_day" style="color: var(--button-warning);">
+                        Volný den / Dovolená (zaznamená 0 hodin)
+                    </label>
+                </div>
             </div>
 
-            {# Kontejner pro časová pole, který budeme skrývat #}
             <div id="time-fields-container" class="time-fields {% if is_free_day %}hidden{% endif %}">
-                <div class="form-group">
-                    <label for="start_time">Začátek práce:</label>
-                    {# Použijeme hodnoty předané z Flasku #}
-                    <input type="time" id="start_time" name="start_time" value="{{ start_time }}"
-                           aria-required="true" title="Zadejte čas začátku práce">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-group-modern">
+                            <label for="start_time" class="form-label-modern">Začátek práce</label>
+                            <input type="time" id="start_time" name="start_time" value="{{ start_time }}"
+                                class="form-control-modern">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group-modern">
+                            <label for="end_time" class="form-label-modern">Konec práce</label>
+                            <input type="time" id="end_time" name="end_time" value="{{ end_time }}"
+                                class="form-control-modern">
+                        </div>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="end_time">Konec práce:</label>
-                    <input type="time" id="end_time" name="end_time" value="{{ end_time }}"
-                           aria-required="true" title="Zadejte čas konce práce">
-                </div>
-
-                <div class="form-group">
-                    <label for="lunch_duration">Délka oběda (v hodinách):</label>
-                    {# Hodnota je předána z Flasku (již formátovaná s tečkou) #}
+                <div class="form-group-modern mt-3">
+                    <label for="lunch_duration" class="form-label-modern">Délka oběda (v hodinách)</label>
                     <input type="number" id="lunch_duration" name="lunch_duration" step="0.25" min="0" max="4"
-                           value="{{ lunch_duration }}" aria-required="true" title="Zadejte délku obědové pauzy">
+                        value="{{ lunch_duration }}" class="form-control-modern">
+                    <small class="text-muted">Povolené hodnoty: 0, 0.25, 0.5, 0.75, 1 atd.</small>
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary">Uložit záznam</button>
-        </fieldset>
-    </form>
+            <button type="submit" class="btn-modern btn-primary w-100 mt-4">
+                <span>💾</span> Uložit záznam do Excelu
+            </button>
+        </form>
+    </div>
+</div>
 {% endblock %}
 
 {% block footer_title %}Záznam pracovní doby{% endblock %}

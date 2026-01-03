@@ -1,34 +1,49 @@
 {% extends "base.html" %}
 
-{% block title %}Potvrzení přepsání souboru{% endblock %}
+{% block title %}Potvrzení nahrání - Hodiny{% endblock %}
 
 {% block content %}
-    <h1>Potvrzení přepsání souboru</h1>
-    
-    <div class="alert alert-warning" role="alert">
-        <strong>⚠️ Varování:</strong> Soubor "<strong>{{ filename }}</strong>" již existuje. 
-        Chcete jej přepsat?
+<div class="animate-fadeIn">
+    <div class="section-header">
+        <h1 class="section-title">Konflikt souborů</h1>
+        <span class="badge-modern badge-danger"
+            style="background: rgba(220, 38, 38, 0.1); color: var(--button-danger);">
+            Potvrzení akce
+        </span>
     </div>
-    
-    <div class="button-group">
-        <form method="POST" action="{{ url_for('upload_confirm') }}" style="display: inline;">
-            <input type="hidden" name="temp_filename" value="{{ temp_filename }}">
-            <input type="hidden" name="filename" value="{{ filename }}">
-            <button type="submit" class="btn btn-danger" onclick="return confirm('Opravdu chcete přepsat existující soubor?');">
-                Ano, přepsat soubor
-            </button>
-        </form>
-        
-        <a href="{{ url_for('index') }}" class="btn btn-secondary">
-            Ne, zrušit nahrávání
-        </a>
+
+    <div class="glass-card text-center py-5 animate-fadeInUp">
+        <div class="mb-4">
+            <span style="font-size: 4rem;">⚠️</span>
+        </div>
+        <h2 class="mb-3">Soubor již existuje</h2>
+        <p class="mb-4 text-muted">Soubor "<strong>{{ filename }}</strong>" již v systému je. Chcete jej nahradit novou
+            verzí?</p>
+
+        <div class="d-flex flex-column gap-3 max-w-md mx-auto" style="max-width: 400px; margin: 0 auto;">
+            <form method="POST" action="{{ url_for('upload_confirm') }}">
+                <input type="hidden" name="temp_filename" value="{{ temp_filename }}">
+                <input type="hidden" name="filename" value="{{ filename }}">
+                <button type="submit" class="btn-modern btn-primary w-100 py-3"
+                    onclick="return confirm('Opravdu chcete přepsat existující soubor? Původní data budou smazána.');">
+                    <span>✅</span> Ano, přepsat starý soubor
+                </button>
+            </form>
+
+            <a href="{{ url_for('index') }}" class="btn-modern silver w-100 py-3 text-center"
+                style="text-decoration: none;">
+                ❌ Ne, zrušit nahrávání
+            </a>
+        </div>
+
+        <div class="mt-5 p-3 rounded-4" style="background: rgba(0,0,0,0.03); font-size: 0.9rem;">
+            <p class="m-0 text-muted"><strong>Poznámka:</strong> Přepsáním dojde k nenávratnému smazání předchozích
+                verzí dat v tomto souboru.</p>
+        </div>
     </div>
-    
-    <p class="help-text">
-        <strong>📝 Nápověda:</strong> Při přepsání souboru budou všechna původní data v souboru ztracena a nahrazena obsahem nového souboru.
-    </p>
+</div>
 {% endblock %}
 
 {% block scripts %}
-    <script src="{{ url_for('static', filename='js/confirmations.js') }}"></script>
+<script src="{{ url_for('static', filename='js/confirmations.js') }}"></script>
 {% endblock %}

@@ -86,7 +86,7 @@ def test_upload_existing_file_shows_confirmation(client, temp_excel_file):
 
         # Should show confirmation page
         assert response.status_code == 200
-        assert "Potvrzení přepsání souboru" in response.get_data(as_text=True)
+        assert "Konflikt souborů" in response.get_data(as_text=True)
         assert filename in response.get_data(as_text=True)
 
     finally:

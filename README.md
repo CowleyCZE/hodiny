@@ -4,7 +4,7 @@ Kompletní webová aplikace ve Flasku pro evidenci pracovní doby do Excelu, spr
 
 ## Hlavní schopnosti
 
-- Aktivní Excel soubor na bázi šablony Hodiny_Cap.xlsx (automaticky vytvořen, pokud chybí)
+- Aktivní Excel soubor `Hodiny_Cap.xlsx` vytvářený z autoritativní šablony `Hodiny_Cap:vzor.xlsx`
 - Záznam pracovní doby/volna pro vybrané zaměstnance po dnech (počítání čistých hodin − pauza)
 - Správa zaměstnanců (přidání, úprava, smazání, výběr pro záznam)
 - Zálohy (příspěvky) se sumací po „možnostech“ a měnách (EUR/CZK)
@@ -48,14 +48,17 @@ Kompletní webová aplikace ve Flasku pro evidenci pracovní doby do Excelu, spr
 
 ## Datový model v Excelu (zjednodušeně)
 
-- Šablona: excel/Hodiny_Cap.xlsx
+- Autoritativní šablona: `excel/Hodiny_Cap:vzor.xlsx`
+- Runtime aktivní soubor: `excel/Hodiny_Cap.xlsx`
 - Týdenní listy: „Týden {cislo}“; pokud chybí, kopíruje se z listu „Týden“ nebo se vytvoří prázdný
-- Jména zaměstnanců: od řádku 9 ve sloupci A
+- Jména zaměstnanců: od řádku 8 ve sloupci A
 - Pro každý pracovní den se zapisují:
-  - začátek/konec do řádku 7, do odpovídajících sloupců dne
+  - začátek/konec do oddělených buněk v řádku 7 (`B/C`, `D/E`, `F/G`, ...)
   - datum do řádku 80 (B80/D80/F80/H80/J80)
-  - čisté hodiny (po odečtení pauzy) k řádku zaměstnance do sloupce daného dne
+  - čisté hodiny (po odečtení pauzy) k řádku zaměstnance do prvního sloupce páru daného dne (`B/D/F/H/J/L/N`)
 - Zálohy: list „Zálohy“, volby v buňkách B80/D80/F80/H80 (popisky možností), hodnoty po zaměstnancích ve sloupcích B..I, datum do sloupce Z
+
+Podrobné mapování a pravidla zápisu jsou v [AUTORITATIVNI_SABLONA_HODINY_CAP.md](/home/cowley/Dokumenty/projekty/hodiny/AUTORITATIVNI_SABLONA_HODINY_CAP.md).
 
 ## Webové rozhraní (routy)
 
@@ -152,7 +155,7 @@ Nová funkce **Excel Editor** umožňuje editaci buněk přímo v prohlížeči 
     gunicorn wsgi:application
     ```
 
-Adresáře data/, excel/ a logs/ se vytvoří automaticky. Při prvním běhu se do excel/ vygeneruje šablona Hodiny_Cap.xlsx, pokud chybí.
+Adresáře data/, excel/ a logs/ se vytvoří automaticky. Při prvním běhu se do `excel/Hodiny_Cap.xlsx` zkopíruje autoritativní šablona `excel/Hodiny_Cap:vzor.xlsx`, pokud aktivní soubor chybí.
 
 ## Konfigurace (proměnné prostředí)
 

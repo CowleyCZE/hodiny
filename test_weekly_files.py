@@ -94,6 +94,44 @@ class TestWeeklyFileFunctionality(unittest.TestCase):
         new_size = original_template.stat().st_size
         self.assertAlmostEqual(original_size, new_size, delta=1000)
 
+    def test_authoritative_template_mapping_writes_start_end_hours_and_date(self):
+        self.excel_manager.current_project_name = "Projekt Atlas"
+
+        result = self.excel_manager.ulozit_pracovni_dobu("2025-01-06", "08:00", "16:30", "0.5", ["Test Employee"])
+
+        self.assertTrue(result)
+        self.excel_manager.close_cached_workbooks()
+
+        from openpyxl import load_workbook
+
+        wb = load_workbook(self.temp_path / Config.EXCEL_TEMPLATE_NAME)
+        ws = wb["Týden 2"]
+
+        self.assertEqual(ws["B4"].value, "NÁZEV PROJEKTU : Projekt Atlas")
+        self.assertEqual(ws["B7"].value, "08:00")
+        self.assertEqual(ws["C7"].value, "16:30")
+        self.assertEqual(ws["B8"].value, 8)
+        self.assertEqual(str(ws["B80"].value.date()), "2025-01-06")
+        self.assertEqual(ws["A8"].value, "Test Employee")
+        wb.close()
+
+    def test_free_day_writes_zero_hours_without_fake_times(self):
+        result = self.excel_manager.ulozit_pracovni_dobu("2025-01-07", "00:00", "00:00", "0", ["Free Day User"])
+
+        self.assertTrue(result)
+        self.excel_manager.close_cached_workbooks()
+
+        from openpyxl import load_workbook
+
+        wb = load_workbook(self.temp_path / Config.EXCEL_TEMPLATE_NAME)
+        ws = wb["Týden 2"]
+
+        self.assertIsNone(ws["D7"].value)
+        self.assertIsNone(ws["E7"].value)
+        self.assertEqual(ws["D8"].value, 0)
+        self.assertEqual(str(ws["D80"].value.date()), "2025-01-07")
+        wb.close()
+
 
 if __name__ == "__main__":
     unittest.main()

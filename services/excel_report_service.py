@@ -25,7 +25,7 @@ def get_monthly_sheets(workbook, month, year):
             continue
 
         sheet = workbook[sheet_name]
-        for column_index in range(2, 12, 2):
+        for column_index in range(2, 15, 2):
             date_value = sheet.cell(row=80, column=column_index).value
             if isinstance(date_value, datetime) and date_value.month == month and date_value.year == year:
                 yield sheet
@@ -42,9 +42,8 @@ def process_sheet_for_report(sheet, employees, report_data, month, year):
         if employee_name not in report_data:
             report_data[employee_name] = {"total_hours": 0.0, "free_days": 0}
 
-        for column_index in range(3, 13, 2):
-            date_column = column_index - 1
-            date_value = sheet.cell(row=80, column=date_column).value
+        for column_index in range(2, 15, 2):
+            date_value = sheet.cell(row=80, column=column_index).value
             if not (isinstance(date_value, datetime) and date_value.month == month and date_value.year == year):
                 continue
 

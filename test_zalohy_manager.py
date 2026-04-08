@@ -55,9 +55,9 @@ class TestZalohyManager(unittest.TestCase):
         self.zalohy_manager.add_or_update_employee_advance(
             "Nový", 100, "EUR", Config.DEFAULT_ADVANCE_OPTION_1, "2025-01-01"
         )
-        self.assertEqual(self._read_cell("A9"), "Nový")
-        self.assertEqual(self._read_cell("B9"), 100)
-        cell_value = self._read_cell("Z9")
+        self.assertEqual(self._read_cell("A8"), "Nový")
+        self.assertEqual(self._read_cell("B8"), 100)
+        cell_value = self._read_cell("Z8")
         self.assertIsNotNone(cell_value)
         # Check if cell_value is a datetime object before calling .date()
         if isinstance(cell_value, datetime):
@@ -76,7 +76,7 @@ class TestZalohyManager(unittest.TestCase):
         self.zalohy_manager.add_or_update_employee_advance(
             "Stávající", 25, "EUR", Config.DEFAULT_ADVANCE_OPTION_1, "2025-01-02"
         )
-        self.assertEqual(self._read_cell("B9"), 75)
+        self.assertEqual(self._read_cell("B8"), 75)
 
     def test_advance_options_and_currencies(self):
         self.zalohy_manager.add_or_update_employee_advance(
@@ -103,14 +103,14 @@ class TestZalohyManager(unittest.TestCase):
         self.zalohy_manager.add_or_update_employee_advance(
             "Test", 8, "CZK", Config.DEFAULT_ADVANCE_OPTION_4, "2025-01-01"
         )
-        self.assertEqual(self._read_cell("B9"), 1)
-        self.assertEqual(self._read_cell("C9"), 2)
-        self.assertEqual(self._read_cell("D9"), 3)
-        self.assertEqual(self._read_cell("E9"), 4)
-        self.assertEqual(self._read_cell("F9"), 5)
-        self.assertEqual(self._read_cell("G9"), 6)
-        self.assertEqual(self._read_cell("H9"), 7)
-        self.assertEqual(self._read_cell("I9"), 8)
+        self.assertEqual(self._read_cell("B8"), 1)
+        self.assertEqual(self._read_cell("C8"), 2)
+        self.assertEqual(self._read_cell("D8"), 3)
+        self.assertEqual(self._read_cell("E8"), 4)
+        self.assertEqual(self._read_cell("F8"), 5)
+        self.assertEqual(self._read_cell("G8"), 6)
+        self.assertEqual(self._read_cell("H8"), 7)
+        self.assertEqual(self._read_cell("I8"), 8)
 
     def test_invalid_inputs(self):
         with self.assertRaises(ValueError):

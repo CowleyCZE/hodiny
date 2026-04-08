@@ -30,7 +30,7 @@ class TestExcelManagerReports(unittest.TestCase):
         else:
             sheet1 = wb.create_sheet("Týden 1")
 
-        sheet1["A9"], sheet1["A10"], sheet1["A11"] = "Pepa Novák", "Jana Modrá", "Karel Bílý"
+        sheet1["A8"], sheet1["A9"], sheet1["A10"] = "Pepa Novák", "Jana Modrá", "Karel Bílý"
         sheet1["B80"], sheet1["D80"], sheet1["F80"], sheet1["H80"], sheet1["J80"] = (
             datetime.date(2023, 1, 2),
             datetime.date(2023, 1, 3),
@@ -38,33 +38,33 @@ class TestExcelManagerReports(unittest.TestCase):
             datetime.date(2023, 1, 5),
             datetime.date(2023, 1, 6),
         )
-        sheet1["C9"], sheet1["E9"], sheet1["G9"], sheet1["I9"] = 8, 7.5, 0, 6
-        sheet1["C10"], sheet1["E10"], sheet1["I10"], sheet1["K10"] = 7, 8, 0, 7.5
-        sheet1["C11"] = 5
+        sheet1["B8"], sheet1["D8"], sheet1["F8"], sheet1["H8"] = 8, 7.5, 0, 6
+        sheet1["B9"], sheet1["D9"], sheet1["H9"], sheet1["J9"] = 7, 8, 0, 7.5
+        sheet1["B10"] = 5
 
         sheet2 = wb.create_sheet("Týden 2")
-        sheet2["A9"], sheet2["A10"] = "Pepa Novák", "Jana Modrá"
+        sheet2["A8"], sheet2["A9"] = "Pepa Novák", "Jana Modrá"
         sheet2["B80"], sheet2["D80"] = datetime.date(2023, 1, 9), datetime.date(2023, 1, 10)
-        sheet2["C9"], sheet2["E9"], sheet2["C10"] = 8.5, 8, 6.5
+        sheet2["B8"], sheet2["D8"], sheet2["B9"] = 8.5, 8, 6.5
 
         sheet3 = wb.create_sheet("Týden 5")
-        sheet3["A9"], sheet3["A10"] = "Pepa Novák", "Karel Bílý"
+        sheet3["A8"], sheet3["A9"] = "Pepa Novák", "Karel Bílý"
         sheet3["B80"], sheet3["D80"] = datetime.date(2023, 2, 6), datetime.date(2023, 2, 7)
-        sheet3["C9"], sheet3["C10"], sheet3["E10"] = 7, 8, 4
+        sheet3["B8"], sheet3["B9"], sheet3["D9"] = 7, 8, 4
 
         sheet4 = wb.create_sheet("Týden 6")
-        sheet4["A9"] = "Pepa Novák"
+        sheet4["A8"] = "Pepa Novák"
         sheet4["B80"], sheet4["D80"] = "neplatne-datum", datetime.date(2023, 1, 17)
-        sheet4["C9"], sheet4["E9"] = 5, 5
+        sheet4["B8"], sheet4["D8"] = 5, 5
 
         sheet_span = wb.create_sheet("Týden Span")
-        sheet_span["A9"] = "Test Span User"
+        sheet_span["A8"] = "Test Span User"
         sheet_span["B80"], sheet_span["D80"], sheet_span["F80"] = (
             datetime.date(2023, 1, 30),
             datetime.date(2023, 1, 31),
             datetime.date(2023, 2, 1),
         )
-        sheet_span["C9"], sheet_span["E9"], sheet_span["G9"] = 8, 7, 6
+        sheet_span["B8"], sheet_span["D8"], sheet_span["F8"] = 8, 7, 6
 
         wb.save(self.mock_excel_path_dir / Config.EXCEL_TEMPLATE_NAME)
 

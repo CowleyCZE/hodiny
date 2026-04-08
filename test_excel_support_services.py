@@ -7,7 +7,7 @@ from services.excel_metadata_service import load_metadata, save_metadata, set_fi
 def test_load_dynamic_excel_config_returns_dict(tmp_path):
     config_path = tmp_path / "config.json"
     config_path.write_text(
-        json.dumps({"weekly_time": {"date": [{"file": "Hodiny_Cap.xlsx", "sheet": "Týden", "cell": "B6"}]}}),
+        json.dumps({"weekly_time": {"date": [{"file": "Hodiny_Cap.xlsx", "sheet": "Týden", "cell": "B80"}]}}),
         encoding="utf-8",
     )
 
@@ -23,8 +23,8 @@ def test_get_configured_cells_filters_by_file_and_sheet(tmp_path):
             {
                 "advances": {
                     "employee_name": [
-                        {"file": "Hodiny_Cap.xlsx", "sheet": "Zálohy", "cell": "A9"},
-                        {"file": "Jiny.xlsx", "sheet": "Zálohy", "cell": "A10"},
+                        {"file": "Hodiny_Cap.xlsx", "sheet": "Zálohy", "cell": "A8"},
+                        {"file": "Jiny.xlsx", "sheet": "Zálohy", "cell": "A9"},
                     ]
                 }
             }
@@ -40,7 +40,33 @@ def test_get_configured_cells_filters_by_file_and_sheet(tmp_path):
         config_path=config_path,
     )
 
-    assert coordinates == [(9, 1)]
+    assert coordinates == [(8, 1)]
+
+
+def test_get_configured_cells_accepts_week_template_for_dynamic_week_sheet(tmp_path):
+    config_path = tmp_path / "config.json"
+    config_path.write_text(
+        json.dumps(
+            {
+                "weekly_time": {
+                    "start_time": [
+                        {"file": "Hodiny_Cap.xlsx", "sheet": "Týden", "cell": "B7"},
+                    ]
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    coordinates = get_configured_cells(
+        "weekly_time",
+        "start_time",
+        "Hodiny_Cap.xlsx",
+        sheet_name="Týden 42",
+        config_path=config_path,
+    )
+
+    assert coordinates == [(7, 2)]
 
 
 def test_metadata_roundtrip_and_category_update(tmp_path):

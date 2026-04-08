@@ -2,6 +2,7 @@
 import logging
 import os
 import secrets
+import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -18,6 +19,7 @@ class Config:
     DATA_PATH = Path(os.environ.get("HODINY_DATA_PATH", BASE_DIR / "data"))
     EXCEL_BASE_PATH = Path(os.environ.get("HODINY_EXCEL_PATH", BASE_DIR / "excel"))
     EXCEL_TEMPLATE_NAME = "Hodiny_Cap.xlsx"
+    EXCEL_AUTHORITATIVE_TEMPLATE_NAME = "Hodiny_Cap:vzor.xlsx"
     SETTINGS_FILE_PATH = DATA_PATH / "settings.json"
     CONFIG_FILE_PATH = BASE_DIR / "config.json"
 
@@ -30,7 +32,7 @@ class Config:
     DEFAULT_APP_NAME = "Evidence pracovní doby"
     SMTP_TIMEOUT = 60
     MAX_ROWS_TO_DISPLAY_EXCEL_VIEWER = 500
-    EXCEL_EMPLOYEE_START_ROW = 9
+    EXCEL_EMPLOYEE_START_ROW = 8
     EXCEL_WEEK_SHEET_TEMPLATE_NAME = "Týden"
     EXCEL_ADVANCES_SHEET_NAME = "Zálohy"
     DEFAULT_ADVANCE_OPTION_1 = "Option 1"
@@ -78,16 +80,20 @@ class Config:
         template_path = cls.EXCEL_BASE_PATH / cls.EXCEL_TEMPLATE_NAME
         if not template_path.exists():
             try:
-                wb = Workbook()
-                wb.create_sheet(cls.EXCEL_WEEK_SHEET_TEMPLATE_NAME)
-                zalohy_sheet = wb.create_sheet(cls.EXCEL_ADVANCES_SHEET_NAME)
-                zalohy_sheet["B80"] = cls.DEFAULT_ADVANCE_OPTION_1
-                zalohy_sheet["D80"] = cls.DEFAULT_ADVANCE_OPTION_2
-                zalohy_sheet["F80"] = cls.DEFAULT_ADVANCE_OPTION_3
-                zalohy_sheet["H80"] = cls.DEFAULT_ADVANCE_OPTION_4
-                if "Sheet" in wb.sheetnames:
-                    wb.remove(wb["Sheet"])
-                wb.save(template_path)
+                authoritative_template_path = cls.EXCEL_BASE_PATH / cls.EXCEL_AUTHORITATIVE_TEMPLATE_NAME
+                if authoritative_template_path.exists():
+                    shutil.copy(authoritative_template_path, template_path)
+                else:
+                    wb = Workbook()
+                    wb.create_sheet(cls.EXCEL_WEEK_SHEET_TEMPLATE_NAME)
+                    zalohy_sheet = wb.create_sheet(cls.EXCEL_ADVANCES_SHEET_NAME)
+                    zalohy_sheet["B80"] = cls.DEFAULT_ADVANCE_OPTION_1
+                    zalohy_sheet["D80"] = cls.DEFAULT_ADVANCE_OPTION_2
+                    zalohy_sheet["F80"] = cls.DEFAULT_ADVANCE_OPTION_3
+                    zalohy_sheet["H80"] = cls.DEFAULT_ADVANCE_OPTION_4
+                    if "Sheet" in wb.sheetnames:
+                        wb.remove(wb["Sheet"])
+                    wb.save(template_path)
             except Exception as e:
                 logging.error("Nepodařilo se vytvořit šablonu %s: %s", template_path, e, exc_info=True)
 

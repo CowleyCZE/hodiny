@@ -81,6 +81,12 @@ class ZalohyManager:
         except ValueError as e:
             raise ValueError("Neplatný formát data.") from e
 
+    @staticmethod
+    def _resolve_option_coordinate(option_coords, option_index):
+        if option_index < len(option_coords):
+            return option_coords[option_index]
+        return None
+
     def add_or_update_employee_advance(self, employee_name, amount, currency, option, date):
         """Přičte zálohu zaměstnanci (vytvoří řádek pokud chybí)."""
         workbook = None
@@ -100,10 +106,10 @@ class ZalohyManager:
             amount_coords = self._get_cell_coordinates(amount_field, self.zalohy_sheet_name)
 
             if amount_coords:
-                # Použij dynamickou konfiguraci
-                for amount_row, amount_col in amount_coords:
-                    # Pokud je specifikován jiný řádek než aktuální, použij ho
-                    actual_row = amount_row if amount_row != row else row
+                target_coordinate = self._resolve_option_coordinate(amount_coords, option_index)
+                if target_coordinate:
+                    amount_row, amount_col = target_coordinate
+                    actual_row = row if amount_row <= self.employee_start_row else amount_row
                     self._update_advance_cell(sheet, actual_row, amount_col, amount)
                     logger.info(
                         "Částka %s %s zapsána do buňky %s%d (dynamická konfigurace)",
@@ -112,6 +118,8 @@ class ZalohyManager:
                         chr(64 + amount_col),
                         actual_row,
                     )
+                else:
+                    raise ValueError(f"Chybí mapping pro volbu zálohy {option} a měnu {currency}.")
             else:
                 # Fallback na původní logiku
                 column_index = 2 + (option_index * 2) + (1 if currency == "CZK" else 0)
@@ -181,15 +189,13 @@ class ZalohyManager:
         date_coords = self._get_cell_coordinates("date", self.zalohy_sheet_name)
 
         if date_coords:
-            # Použij všechny nakonfigurované pozice pro datum
-            for date_row, date_col in date_coords:
-                # Pokud je zadaný konkrétní řádek, použij ho, jinak použij parametr row
-                actual_row = date_row if date_row != row else row
-                date_cell = sheet.cell(row=actual_row, column=date_col)
-                if not isinstance(date_cell, MergedCell):
-                    date_cell.value = datetime.strptime(date_str, "%Y-%m-%d").date()
-                    date_cell.number_format = "DD.MM.YYYY"
-                    logger.info("Datum zapsáno do buňky %s%d (dynamická konfigurace)", chr(64 + date_col), actual_row)
+            date_row, date_col = date_coords[0]
+            actual_row = row if date_row <= self.employee_start_row else date_row
+            date_cell = sheet.cell(row=actual_row, column=date_col)
+            if not isinstance(date_cell, MergedCell):
+                date_cell.value = datetime.strptime(date_str, "%Y-%m-%d").date()
+                date_cell.number_format = "DD.MM.YYYY"
+                logger.info("Datum zapsáno do buňky %s%d (dynamická konfigurace)", chr(64 + date_col), actual_row)
         else:
             # Fallback na původní logiku
             date_cell = sheet.cell(row=row, column=self.date_column_index)
@@ -211,6 +217,17 @@ class ZalohyManager:
             workbook = self._get_active_workbook(read_only=True)
             if self.zalohy_sheet_name in workbook.sheetnames:
                 sheet = workbook[self.zalohy_sheet_name]
+                option_type_coords = self._get_cell_coordinates("option_type", self.zalohy_sheet_name)
+                if option_type_coords:
+                    options = []
+                    for index, default in enumerate(default_options):
+                        option_coordinate = self._resolve_option_coordinate(option_type_coords, index)
+                        if not option_coordinate:
+                            options.append(default)
+                            continue
+                        option_row, option_col = option_coordinate
+                        options.append(str(sheet.cell(row=option_row, column=option_col).value or default).strip())
+                    return tuple(options)
                 return tuple(
                     str(sheet[cell].value or default).strip()
                     for cell, default in zip(["B80", "D80", "F80", "H80"], default_options)

@@ -10,6 +10,20 @@ from utils.logger import setup_logger
 logger = setup_logger("excel_config_service")
 
 
+def _sheet_matches(configured_sheet, requested_sheet):
+    """Vrátí True, pokud konfigurace listu platí i pro dynamickou variantu týdne."""
+    if not configured_sheet or not requested_sheet:
+        return configured_sheet == requested_sheet
+
+    if configured_sheet == requested_sheet:
+        return True
+
+    if configured_sheet == Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME:
+        return requested_sheet == configured_sheet or requested_sheet.startswith(f"{configured_sheet} ")
+
+    return False
+
+
 def load_dynamic_excel_config(config_path=None):
     """Načte dynamickou Excel konfiguraci z JSON souboru."""
     target_path = config_path or Config.CONFIG_FILE_PATH
@@ -41,12 +55,13 @@ def get_configured_cells(config_section, field_key, active_filename, sheet_name=
             )
             continue
 
-        if sheet_name and field_config.get("sheet") != sheet_name:
+        configured_sheet = field_config.get("sheet")
+        if sheet_name and not _sheet_matches(configured_sheet, sheet_name):
             logger.warning(
                 "Konfigurace pro %s/%s odkazuje na jiný list: %s (očekáván %s)",
                 config_section,
                 field_key,
-                field_config.get("sheet"),
+                configured_sheet,
                 sheet_name,
             )
             continue

@@ -5,12 +5,59 @@ from datetime import datetime
 
 from openpyxl import load_workbook
 from openpyxl.cell.cell import MergedCell
-from openpyxl.styles import Alignment
 
 from config import Config
 from utils.logger import setup_logger
 
 logger = setup_logger("excel_week_service")
+
+
+def _resolve_base_coordinate(get_cell_coordinates, field_key, sheet_name, data_type):
+    coordinates = get_cell_coordinates(field_key, sheet_name, data_type)
+    return coordinates[0] if coordinates else None
+
+
+def _resolve_weekday_column(base_coordinate, weekday):
+    if not base_coordinate:
+        return None
+    _, base_column = base_coordinate
+    return base_column + (weekday * 2)
+
+
+def _resolve_employee_anchor(get_cell_coordinates, sheet_name):
+    configured_employee_cell = _resolve_base_coordinate(
+        get_cell_coordinates,
+        "employee_name",
+        sheet_name,
+        "weekly_time",
+    )
+    if configured_employee_cell:
+        return configured_employee_cell
+    return Config.EXCEL_EMPLOYEE_START_ROW, 1
+
+
+def _get_or_create_employee_row(sheet, employee_name, employee_start_row, employee_name_column):
+    for row_index in range(employee_start_row, sheet.max_row + 1):
+        existing_name = sheet.cell(row=row_index, column=employee_name_column).value
+        if existing_name == employee_name:
+            return row_index
+        if existing_name in (None, ""):
+            sheet.cell(row=row_index, column=employee_name_column, value=employee_name)
+            return row_index
+
+    row_index = max(sheet.max_row + 1, employee_start_row)
+    sheet.cell(row=row_index, column=employee_name_column, value=employee_name)
+    return row_index
+
+
+def _write_sheet_cell(sheet, row_index, column_index, value, number_format=None):
+    target_cell = sheet.cell(row=row_index, column=column_index)
+    if isinstance(target_cell, MergedCell):
+        return
+
+    target_cell.value = value
+    if number_format:
+        target_cell.number_format = number_format
 
 
 def archive_active_week_file(active_file_path, workbook, current_week_number, last_archived_week):
@@ -108,63 +155,55 @@ def write_time_entry_to_sheet(
     current_project_name,
 ):
     """Zapíše docházku do konkrétního listu."""
-    day_column_index = 2 + 2 * date_obj.weekday()
+    weekday = date_obj.weekday()
+    total_hours_base = _resolve_base_coordinate(get_cell_coordinates, "total_hours", sheet_name, "weekly_time")
+    start_time_base = _resolve_base_coordinate(get_cell_coordinates, "start_time", sheet_name, "weekly_time")
+    end_time_base = _resolve_base_coordinate(get_cell_coordinates, "end_time", sheet_name, "weekly_time")
+    date_base = _resolve_base_coordinate(get_cell_coordinates, "date", sheet_name, "weekly_time")
+    employee_start_row, employee_name_column = _resolve_employee_anchor(get_cell_coordinates, sheet_name)
+
+    hours_column = _resolve_weekday_column(total_hours_base, weekday)
+    start_column = _resolve_weekday_column(start_time_base, weekday)
+    end_column = _resolve_weekday_column(end_time_base, weekday)
+    date_column = _resolve_weekday_column(date_base, weekday)
+
+    if hours_column is None:
+        hours_column = 2 + (weekday * 2)
+    if start_column is None:
+        start_column = 2 + (weekday * 2)
+    if end_column is None:
+        end_column = 3 + (weekday * 2)
+    if date_column is None:
+        date_column = 2 + (weekday * 2)
+
     start_time = datetime.strptime(start_time_str, "%H:%M")
     end_time = datetime.strptime(end_time_str, "%H:%M")
     total_hours = round((end_time - start_time).total_seconds() / 3600 - float(lunch_duration_str), 2)
-
-    times_display = ""
-    if start_time_str != "00:00" or end_time_str != "00:00":
-        times_display = f"{start_time.hour} - {end_time.hour}"
-
-    employee_rows = {
-        sheet.cell(row=row_index, column=1).value: row_index
-        for row_index in range(Config.EXCEL_EMPLOYEE_START_ROW, sheet.max_row + 1)
-        if sheet.cell(row=row_index, column=1).value
-    }
-    next_empty_row = max(employee_rows.values() or [Config.EXCEL_EMPLOYEE_START_ROW - 1]) + 1
+    write_times = start_time_str != "00:00" or end_time_str != "00:00"
 
     for employee in employees:
-        row_index = employee_rows.get(employee)
-        if not row_index:
-            row_index = next_empty_row
-            sheet.cell(row=row_index, column=1, value=employee)
-            next_empty_row = row_index + 1
+        row_index = _get_or_create_employee_row(sheet, employee, employee_start_row, employee_name_column)
+        _write_sheet_cell(sheet, row_index, hours_column, total_hours, number_format="0.00")
 
-        data_cell = sheet.cell(row=row_index, column=day_column_index)
-        if not isinstance(data_cell, MergedCell):
-            data_cell.value = total_hours
-            data_cell.number_format = "0.00"
-
-    start_time_coords = get_cell_coordinates("start_time", sheet_name, "weekly_time")
-    if start_time_coords:
-        for start_row, _start_base_col in start_time_coords:
-            times_cell = sheet.cell(row=start_row, column=day_column_index)
-            if not isinstance(times_cell, MergedCell):
-                times_cell.value = times_display
-                times_cell.alignment = Alignment(horizontal="center")
+    if start_time_base:
+        _write_sheet_cell(sheet, start_time_base[0], start_column, start_time_str if write_times else None)
     else:
-        sheet.cell(row=7, column=day_column_index, value=times_display)
+        _write_sheet_cell(sheet, 7, start_column, start_time_str if write_times else None)
 
-    date_coords = get_cell_coordinates("date", sheet_name, "weekly_time")
-    if date_coords:
-        for date_row, _date_base_col in date_coords:
-            date_cell = sheet.cell(row=date_row, column=day_column_index)
-            if not isinstance(date_cell, MergedCell):
-                date_cell.value = date_obj.date()
-                date_cell.number_format = "DD.MM.YYYY"
-                date_cell.alignment = Alignment(horizontal="center")
+    if end_time_base:
+        _write_sheet_cell(sheet, end_time_base[0], end_column, end_time_str if write_times else None)
     else:
-        date_cell = sheet.cell(row=6, column=day_column_index)
-        date_cell.value = date_obj.date()
-        date_cell.number_format = "DD.MM.YYYY"
+        _write_sheet_cell(sheet, 7, end_column, end_time_str if write_times else None)
+
+    if date_base:
+        _write_sheet_cell(sheet, date_base[0], date_column, date_obj.date(), number_format="DD.MM.YYYY")
+    else:
+        _write_sheet_cell(sheet, 80, date_column, date_obj.date(), number_format="DD.MM.YYYY")
 
     project_coords = get_cell_coordinates("project_name", sheet_name, "projects")
     if current_project_name and project_coords:
         for project_row, project_col in project_coords:
-            project_cell = sheet.cell(row=project_row, column=project_col)
-            if not isinstance(project_cell, MergedCell):
-                project_cell.value = current_project_name
+            _write_sheet_cell(sheet, project_row, project_col, f"NÁZEV PROJEKTU : {current_project_name}")
 
 
 def get_current_week_preview(workbook, week_number):

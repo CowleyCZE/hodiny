@@ -19,19 +19,19 @@
     {# Hlavička a navigace - sjednoceno do moderního navbaru #}
     <header class="navbar-modern">
         <div class="navbar-brand">
-            <a href="{{ url_for('index') }}">
+            <a href="{{ url_for('main.index') }}">
                 <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
             </a>
         </div>
 
         <nav class="nav-links" id="main-nav">
-            <a href="{{ url_for('index') }}" class="nav-link-modern">Přehled</a>
-            <a href="{{ url_for('record_time') }}" class="nav-link-modern">Zápis</a>
-            <a href="{{ url_for('zalohy') }}" class="nav-link-modern">Zálohy</a>
-            <a href="{{ url_for('monthly_report_route') }}" class="nav-link-modern">Reporty</a>
-            <a href="{{ url_for('excel_viewer') }}" class="nav-link-modern">Tabulky</a>
-            <a href="{{ url_for('manage_employees') }}" class="nav-link-modern">Lidé</a>
-            <a href="{{ url_for('settings_page') }}" class="nav-link-modern">⚙️</a>
+            <a href="{{ url_for('main.index') }}" class="nav-link-modern">Přehled</a>
+            <a href="{{ url_for('main.record_time') }}" class="nav-link-modern">Zápis</a>
+            <a href="{{ url_for('reports.zalohy') }}" class="nav-link-modern">Zálohy</a>
+            <a href="{{ url_for('reports.monthly_report_route') }}" class="nav-link-modern">Reporty</a>
+            <a href="{{ url_for('excel.excel_viewer') }}" class="nav-link-modern">Tabulky</a>
+            <a href="{{ url_for('employees.manage_employees') }}" class="nav-link-modern">Lidé</a>
+            <a href="{{ url_for('settings.settings_page') }}" class="nav-link-modern">⚙️</a>
         </nav>
 
         <button class="theme-toggle" id="theme-switcher" aria-label="Přepnout téma">

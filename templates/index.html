@@ -220,10 +220,10 @@
             <h3 class="mb-4">📂 Správa Excelu</h3>
             {% if excel_exists %}
             <div class="d-grid gap-3">
-                <a href="{{ url_for('download_file') }}" class="btn-modern btn-primary text-white">
+                <a href="{{ url_for('excel.download_file') }}" class="btn-modern btn-primary text-white">
                     <span>📥</span> Stáhnout aktuální soubor
                 </a>
-                <form action="{{ url_for('send_email') }}" method="post" onsubmit="return confirmSendEmail();">
+                <form action="{{ url_for('main.send_email') }}" method="post" onsubmit="return confirmSendEmail();">
                     <button type="submit" class="btn-modern btn-success w-100">
                         <span>📧</span> Odeslat na email
                     </button>
@@ -248,7 +248,7 @@
         {# Upload Card #}
         <div class="glass-card">
             <h3 class="mb-4">📤 Nahrát nový soubor</h3>
-            <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
+            <form action="{{ url_for('excel.upload_file') }}" method="post" enctype="multipart/form-data">
                 <div class="form-group-modern">
                     <label for="category" class="form-label-modern">Kategorie</label>
                     <select name="category" id="category" class="form-control-modern">
@@ -314,7 +314,7 @@
             };
 
             try {
-                const response = await fetch('/api/quick_time_entry', {
+                const response = await fetch('{{ url_for("main.quick_time_entry") }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

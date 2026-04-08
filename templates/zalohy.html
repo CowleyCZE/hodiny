@@ -15,7 +15,7 @@
         {# Form Card #}
         <div class="glass-card animate-fadeInUp">
             <h3 class="mb-4">💰 Přidat novou zálohu</h3>
-            <form method="POST" action="{{ url_for('zalohy') }}">
+            <form method="POST" action="{{ url_for('reports.zalohy') }}">
                 <div class="form-group-modern">
                     <label for="employee_name" class="form-label-modern">Zaměstnanec</label>
                     <select name="employee_name" id="employee_name" required class="form-control-modern">
@@ -69,7 +69,7 @@
         <div class="glass-card animate-fadeInUp">
             <h3 class="mb-4">📜 Historie a Filtrování</h3>
 
-            <form method="GET" action="{{ url_for('zalohy') }}" class="mb-4">
+            <form method="GET" action="{{ url_for('reports.zalohy') }}" class="mb-4">
                 <div class="input-group search-group">
                     <input type="text" name="filter_employee" id="filter_employee" class="form-control-modern"
                         placeholder="Jméno zaměstnance..." style="border-radius: 10px 0 0 10px;">

@@ -18,7 +18,18 @@
         </span>
     </div>
 
-    <form method="POST" action="{{ url_for('settings_page') }}">
+    <div class="glass-card mb-4 animate-fadeInUp" style="border-left: 4px solid var(--text-accent);">
+        <h3 class="mb-3">Rozdělení nastavení</h3>
+        <p class="mb-3">
+            Tato stránka slouží pro běžné provozní nastavení aplikace: výchozí časy a základní údaje projektu.
+            Technické mapování buněk a práci s Excel konfigurací spravujte odděleně.
+        </p>
+        <a href="{{ url_for('configuration.advanced_settings_page') }}" class="btn-modern silver">
+            Otevřít technickou konfiguraci Excelu
+        </a>
+    </div>
+
+    <form method="POST" action="{{ url_for('settings.settings_page') }}">
         <div class="dashboard-grid stagger-animation">
             {# Project Info Card #}
             <div class="glass-card animate-fadeInUp">

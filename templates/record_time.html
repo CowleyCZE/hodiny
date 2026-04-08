@@ -30,7 +30,7 @@
     {% endif %}
 
     <div class="glass-card">
-        <form id="record-time-form" method="POST" action="{{ url_for('record_time') }}">
+        <form id="record-time-form" method="POST" action="{{ url_for('main.record_time') }}">
             <div class="form-group-modern">
                 <label for="date" class="form-label-modern">Datum záznamu</label>
                 <input type="date" id="date" name="date" value="{{ current_date }}" required

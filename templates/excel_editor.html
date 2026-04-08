@@ -23,7 +23,7 @@
         {# File Selection Card #}
         <div class="glass-card">
             <h3 class="mb-3">📂 Výběr souboru</h3>
-            <form method="GET" action="{{ url_for('excel_editor') }}">
+            <form method="GET" action="{{ url_for('excel.excel_editor') }}">
                 <div class="form-group-modern">
                     <label for="file" class="form-label-modern">Soubor XLSX</label>
                     <select name="file" id="file" onchange="this.form.submit()" class="form-control-modern">
@@ -39,7 +39,7 @@
         <div class="glass-card">
             {% if selected_file %}
             <h3 class="mb-3">📄 Výběr listu</h3>
-            <form method="GET" action="{{ url_for('excel_editor') }}">
+            <form method="GET" action="{{ url_for('excel.excel_editor') }}">
                 <input type="hidden" name="file" value="{{ selected_file }}">
                 <div class="form-group-modern">
                     <label for="sheet" class="form-label-modern">List v souboru</label>
@@ -146,7 +146,7 @@
         // Create form and submit
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = '{{ url_for("excel_editor") }}';
+        form.action = '{{ url_for("excel.excel_editor") }}';
 
         const fields = {
             'file': file,
@@ -168,7 +168,7 @@
 
         // Submit the form using fetch to avoid page reload
         const formData = new FormData(form);
-        fetch('{{ url_for("excel_editor") }}', {
+        fetch('{{ url_for("excel.excel_editor") }}', {
             method: 'POST',
             body: formData
         })

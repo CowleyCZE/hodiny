@@ -15,7 +15,7 @@
         {# Add Employee Card #}
         <div class="glass-card animate-fadeInUp">
             <h3 class="mb-4">👤 Přidat nového zaměstnance</h3>
-            <form method="POST" action="{{ url_for('manage_employees') }}">
+            <form method="POST" action="{{ url_for('employees.manage_employees') }}">
                 <input type="hidden" name="action" value="add">
                 <div class="form-group-modern">
                     <label for="name" class="form-label-modern">Jméno a příjmení</label>
@@ -44,7 +44,7 @@
                         <tr>
                             <td><strong>{{ employee.name }}</strong></td>
                             <td class="text-end">
-                                <form method="POST" action="{{ url_for('manage_employees') }}" class="m-0">
+                                <form method="POST" action="{{ url_for('employees.manage_employees') }}" class="m-0">
                                     <input type="hidden" name="action" value="select">
                                     <input type="hidden" name="employee_name" value="{{ employee.name }}">
                                     <button type="submit" class="btn btn-sm btn-success rounded-circle"
@@ -86,7 +86,7 @@
                     </div>
 
                     <div class="d-flex gap-2 justify-content-center flex-nowrap" style="width: 100%;">
-                        <form method="POST" action="{{ url_for('manage_employees') }}" class="m-0"
+                        <form method="POST" action="{{ url_for('employees.manage_employees') }}" class="m-0"
                             style="display: inline-block;">
                             <input type="hidden" name="action" value="select">
                             <input type="hidden" name="employee_name" value="{{ employee.name }}">
@@ -100,7 +100,7 @@
                             title="Upravit" style="padding: 8px 12px; min-width: 44px;">
                             ✎
                         </button>
-                        <form method="POST" action="{{ url_for('manage_employees') }}" class="m-0"
+                        <form method="POST" action="{{ url_for('employees.manage_employees') }}" class="m-0"
                             style="display: inline-block;">
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="employee_name" value="{{ employee.name }}">
@@ -113,7 +113,7 @@
 
                     {# Inline Edit Form for Grid #}
                     <div id="edit-row-{{ employee.name|replace(' ', '_') }}" class="mt-2" style="display:none;">
-                        <form method="POST" action="{{ url_for('manage_employees') }}" class="d-flex flex-column gap-2">
+                        <form method="POST" action="{{ url_for('employees.manage_employees') }}" class="d-flex flex-column gap-2">
                             <input type="hidden" name="action" value="edit">
                             <input type="hidden" name="old_name" value="{{ employee.name }}">
                             <input type="text" name="new_name" value="{{ employee.name }}" required

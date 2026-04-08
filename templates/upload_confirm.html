@@ -21,7 +21,7 @@
             verzí?</p>
 
         <div class="d-flex flex-column gap-3 max-w-md mx-auto" style="max-width: 400px; margin: 0 auto;">
-            <form method="POST" action="{{ url_for('upload_confirm') }}">
+            <form method="POST" action="{{ url_for('excel.upload_confirm') }}">
                 <input type="hidden" name="temp_filename" value="{{ temp_filename }}">
                 <input type="hidden" name="filename" value="{{ filename }}">
                 <button type="submit" class="btn-modern btn-primary w-100 py-3"
@@ -30,7 +30,7 @@
                 </button>
             </form>
 
-            <a href="{{ url_for('index') }}" class="btn-modern silver w-100 py-3 text-center"
+            <a href="{{ url_for('main.index') }}" class="btn-modern silver w-100 py-3 text-center"
                 style="text-decoration: none;">
                 ❌ Ne, zrušit nahrávání
             </a>

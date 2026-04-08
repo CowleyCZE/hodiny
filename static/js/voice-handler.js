@@ -144,12 +144,7 @@ function displayErrorResult(data) {
 function handleVoiceAction(data) {
     switch (data.entities.action) {
         case 'record_time': // Akce pro záznam pracovní doby nebo volného dne
-            prefillWorkTimeForm(data.entities);
-            break;
-            
-        case 'add_advance': // Akce pro přidání zálohy
-            // TODO: Implementovat detekci akce 'add_advance' v VoiceProcessor._extract_entities a otestovat.
-            prefillAdvanceForm(data.entities);
+            prefillQuickEntryForm(data.entities);
             break;
             
         case 'get_stats': // Akce pro zobrazení statistik
@@ -161,100 +156,50 @@ function handleVoiceAction(data) {
     }
 }
 
-// Předvyplnění formuláře pracovní doby na základě rozpoznaných entit
-function prefillWorkTimeForm(entities) {
-    const form = document.getElementById('record-time-form'); // Získání formuláře
-    if (!form) return; // Pokud formulář neexistuje, nic neděláme
-    
+function prefillQuickEntryForm(entities) {
+    const form = document.getElementById('quick-entry-form');
+    if (!form) {
+        return;
+    }
+
     if (entities.date) {
-        const dateInput = form.querySelector('input[name="date"]');
+        const dateInput = document.getElementById('quick-date');
         if (dateInput) {
             dateInput.value = entities.date;
         }
     }
 
-    const freeDayCheckbox = form.querySelector('input[name="is_free_day"]');
+    const freeDayCheckbox = document.getElementById('quick-free-day');
     if (freeDayCheckbox) {
         freeDayCheckbox.checked = entities.is_free_day || false;
-        // Zavolat funkci pro skrytí/zobrazení časových polí
-        if (typeof toggleTimeFields === 'function') {
-            toggleTimeFields();
+        const timeFields = document.getElementById('time-fields');
+        if (timeFields) {
+            timeFields.classList.toggle('hidden', freeDayCheckbox.checked);
         }
     }
     
     if (!entities.is_free_day) {
-        // Pouze pokud to není volný den, nastavíme časy
         if (entities.start_time) {
-            const startTimeInput = form.querySelector('input[name="start_time"]');
+            const startTimeInput = document.getElementById('quick-start');
             if (startTimeInput) {
                 startTimeInput.value = entities.start_time;
             }
         }
         
         if (entities.end_time) {
-            const endTimeInput = form.querySelector('input[name="end_time"]');
+            const endTimeInput = document.getElementById('quick-end');
             if (endTimeInput) {
                 endTimeInput.value = entities.end_time;
             }
         }
 
-        const lunchInput = form.querySelector('input[name="lunch_duration"]');
+        const lunchInput = document.getElementById('quick-lunch');
         if (lunchInput) {
             lunchInput.value = entities.lunch_duration || "1.0";
         }
     }
-    
-    // Automatické přepnutí na sekci formuláře
-    document.getElementById('record-time-section').scrollIntoView({ behavior: 'smooth' });
-}
 
-// Předvyplnění formuláře pro zadání zálohy na základě rozpoznaných entit
-function prefillAdvanceForm(entities) {
-    const form = document.getElementById('advance-form'); // Získání formuláře
-    if (!form) return; // Pokud formulář neexistuje, nic neděláme
-    
-    // Předvyplnění jména zaměstnance, pokud bylo rozpoznáno
-    if (entities.employee) {
-        const employeeSelect = form.querySelector('select[name="employee_name"]'); // Opraven název selektoru
-        if (employeeSelect) {
-            // Pokusíme se najít option, jehož hodnota (jméno zaměstnance) se shoduje
-            let found = false;
-            for (let i = 0; i < employeeSelect.options.length; i++) {
-                if (employeeSelect.options[i].value === entities.employee) {
-                    employeeSelect.selectedIndex = i;
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                console.warn(`Zaměstnanec '${entities.employee}' nenalezen v selectu pro zálohy.`);
-            }
-        }
-    }
-    
-    if (entities.date) {
-        const dateInput = form.querySelector('input[name="date"]');
-        if (dateInput) {
-            dateInput.value = entities.date;
-        }
-    }
-    
-    if (entities.amount) {
-        const amountInput = form.querySelector('input[name="amount"]');
-        if (amountInput) {
-            amountInput.value = entities.amount;
-        }
-    }
-    
-    if (entities.currency) {
-        const currencySelect = form.querySelector('select[name="currency"]');
-        if (currencySelect) {
-            currencySelect.value = entities.currency;
-        }
-    }
-    
-    // Automatické přepnutí na sekci formuláře
-    document.getElementById('advance-section').scrollIntoView({ behavior: 'smooth' });
+    form.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 // Přesměrování na stránku statistik s případnými parametry

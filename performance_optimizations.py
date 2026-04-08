@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from functools import wraps
 from typing import Any, Dict, Optional
 
-from flask import g, session
+from flask import g, has_request_context, session
 
 logger = logging.getLogger(__name__)
 
@@ -131,6 +131,9 @@ def timing_decorator(func):
 @cache_result(ttl=60)  # Cache for 1 minute
 def get_employee_stats():
     """Get cached employee statistics"""
+    if not has_request_context():
+        return {"total_employees": 0, "selected_employees": 0, "selection_percentage": 0}
+
     try:
         all_employees = g.employee_manager.get_all_employees()
         selected_employees = g.employee_manager.get_vybrani_zamestnanci()
@@ -148,6 +151,9 @@ def get_employee_stats():
 @cache_result(ttl=300)  # Cache for 5 minutes
 def get_excel_file_info():
     """Get cached Excel file information"""
+    if not has_request_context():
+        return {"exists": False, "filename": "Unknown", "last_checked": datetime.now().isoformat()}
+
     try:
         return {
             "exists": g.excel_manager.file_exists() if hasattr(g.excel_manager, "file_exists") else False,
@@ -310,10 +316,5 @@ def initialize_performance_optimizations():
     """Initialize performance optimizations on app startup"""
     logger.info("Initializing performance optimizations...")
 
-    # Pre-warm cache with common operations
-    try:
-        get_employee_stats()
-        get_excel_file_info()
-        logger.info("Performance optimizations initialized successfully")
-    except Exception as e:
-        logger.error(f"Error initializing performance optimizations: {e}")
+    app_cache.cleanup_expired()
+    logger.info("Performance optimizations initialized successfully")

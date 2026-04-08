@@ -90,17 +90,21 @@ def save_time_entry(
     is_free_day,
 ):
     """Zapíše pracovní dobu nebo volný den do všech relevantních workbooků."""
+    del hodiny2025_manager
+
     if is_free_day:
-        excel_manager.ulozit_pracovni_dobu(date, "00:00", "00:00", "0", employees)
-        hodiny2025_manager.zapis_pracovni_doby(date, "00:00", "00:00", "0", len(employees))
+        success = excel_manager.ulozit_pracovni_dobu(date, "00:00", "00:00", "0", employees)
+        if not success:
+            raise IOError("Nepodařilo se uložit volný den do Excel souboru.")
         invalidate_excel_status_cache()
         return f"Volný den pro {date} byl zaznamenán pro {len(employees)} zaměstnanců"
 
     if not start_time or not end_time:
         raise ValueError("Chybí čas začátku nebo konce")
 
-    excel_manager.ulozit_pracovni_dobu(date, start_time, end_time, lunch_duration, employees)
-    hodiny2025_manager.zapis_pracovni_doby(date, start_time, end_time, lunch_duration, len(employees))
+    success = excel_manager.ulozit_pracovni_dobu(date, start_time, end_time, lunch_duration, employees)
+    if not success:
+        raise IOError("Nepodařilo se uložit pracovní dobu do Excel souboru.")
     invalidate_excel_status_cache()
     return f"Pracovní doba pro {date} byla zaznamenána pro {len(employees)} zaměstnanců"
 

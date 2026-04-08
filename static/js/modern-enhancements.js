@@ -285,9 +285,9 @@ class PerformanceOptimizer {
     }
 
     optimizeImages() {
-        // Convert images to WebP format when supported
+        // Convert only explicitly opted-in images to WebP to avoid noisy 404 probes.
         if (this.supportsWebP()) {
-            document.querySelectorAll('img').forEach(img => {
+            document.querySelectorAll('img[data-webp="true"]').forEach(img => {
                 if (img.src && !img.src.includes('.webp')) {
                     const webpSrc = img.src.replace(/\.(jpg|jpeg|png)$/i, '.webp');
                     

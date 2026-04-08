@@ -279,12 +279,24 @@
         const currentDate = date.toLocaleDateString('cs-CZ'); // Formát data pro ČR
         const weekNumber = getWeekNumber(date); // Výpočet čísla týdne
 
-        document.getElementById('current-date').textContent = `Datum: ${currentDate}`;
-        document.getElementById('current-week').textContent = `Týden: ${weekNumber}`;
+        const currentDateElement = document.getElementById('current-date');
+        if (currentDateElement) {
+            currentDateElement.textContent = `Datum: ${currentDate}`;
+        }
+
+        const currentWeekElement = document.getElementById('current-week');
+        if (currentWeekElement) {
+            currentWeekElement.textContent = `Týden: ${weekNumber}`;
+        }
 
         // Správa formuláře pro rychlé zadání
         const freeDay = document.getElementById('quick-free-day');
         const timeFields = document.getElementById('time-fields');
+        const quickForm = document.getElementById('quick-entry-form');
+
+        if (!freeDay || !timeFields || !quickForm) {
+            return;
+        }
 
         freeDay.addEventListener('change', function () {
             if (this.checked) {
@@ -295,7 +307,6 @@
         });
 
         // Odeslání formuláře
-        const quickForm = document.getElementById('quick-entry-form');
         const submitBtn = quickForm.querySelector('button[type="submit"]');
 
         quickForm.addEventListener('submit', async function (e) {

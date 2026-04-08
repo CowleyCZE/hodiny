@@ -6,7 +6,7 @@ Implements caching, database optimizations, and general performance improvements
 import logging
 import time
 from datetime import datetime, timedelta
-from functools import lru_cache, wraps
+from functools import wraps
 from typing import Any, Dict, Optional
 
 from flask import g, session
@@ -47,6 +47,14 @@ class SimpleCache:
         if key in self.cache:
             del self.cache[key]
             logger.debug(f"Cache deleted for key: {key}")
+
+    def delete_by_prefix(self, prefix: str) -> None:
+        """Delete all cache entries with given prefix."""
+        matching_keys = [key for key in self.cache if key.startswith(prefix)]
+        for key in matching_keys:
+            del self.cache[key]
+        if matching_keys:
+            logger.debug(f"Deleted {len(matching_keys)} cache keys for prefix: {prefix}")
 
     def clear(self) -> None:
         """Clear all cache"""
@@ -118,16 +126,6 @@ def timing_decorator(func):
         return result
 
     return wrapper
-
-
-@lru_cache(maxsize=100)
-def get_week_number_cached(date_str: str) -> int:
-    """Cached version of week number calculation"""
-    try:
-        date_obj = datetime.strptime(date_str, "%Y-%m-%d")
-        return date_obj.isocalendar()[1]
-    except ValueError:
-        return datetime.now().isocalendar()[1]
 
 
 @cache_result(ttl=60)  # Cache for 1 minute
@@ -237,22 +235,6 @@ def optimize_excel_operations():
         return False
 
 
-def batch_employee_operations(operations: list):
-    """Batch multiple employee operations for better performance"""
-    try:
-        results = []
-        for operation in operations:
-            func, args, kwargs = operation
-            result = func(*args, **kwargs)
-            results.append(result)
-
-        logger.debug(f"Batched {len(operations)} employee operations")
-        return results
-    except Exception as e:
-        logger.error(f"Error in batch employee operations: {e}")
-        return []
-
-
 def cleanup_old_data():
     """Cleanup old data and optimize performance"""
     try:
@@ -306,27 +288,21 @@ def get_system_performance_info() -> Dict[str, Any]:
         }
 
 
-# Helper functions for common optimizations
-def memoize_user_settings(user_id: str = "default"):
-    """Memoize user settings to avoid repeated file reads"""
-    cache_key = f"user_settings:{user_id}"
-
-    settings = app_cache.get(cache_key)
-    if settings is None:
-        # Load settings from file
-        from app import load_settings_from_file
-
-        settings = load_settings_from_file()
-        app_cache.set(cache_key, settings, ttl=600)  # Cache for 10 minutes
-
-    return settings
-
-
 def invalidate_user_settings_cache(user_id: str = "default"):
     """Invalidate user settings cache when settings change"""
     cache_key = f"user_settings:{user_id}"
     app_cache.delete(cache_key)
     logger.debug(f"Invalidated settings cache for user: {user_id}")
+
+
+def invalidate_employee_stats_cache():
+    """Invalidate cached employee statistics."""
+    app_cache.delete_by_prefix("get_employee_stats:")
+
+
+def invalidate_excel_status_cache():
+    """Invalidate cached Excel status."""
+    app_cache.delete_by_prefix("get_excel_file_info:")
 
 
 # Startup optimization

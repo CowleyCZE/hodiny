@@ -54,16 +54,12 @@ try:
     application.config["ENV"] = "production"
     application.config["DEBUG"] = False
 
-    # Inicializace aplikace
-    Config.init_app(application)
+    # Adresáře a šablona už vznikají přes Config.init_app(app) při importu z app.py.
+    Config.DATA_PATH.mkdir(parents=True, exist_ok=True)
+    Config.EXCEL_BASE_PATH.mkdir(parents=True, exist_ok=True)
+    (Config.BASE_DIR / "logs").mkdir(parents=True, exist_ok=True)
+    logger.info("WSGI vrstva ověřila runtime adresáře")
     logger.info("Aplikace úspěšně inicializována")
-
-    # Vytvoření potřebných adresářů
-    base_dir = Path(path)
-    (base_dir / "data").mkdir(parents=True, exist_ok=True)
-    (base_dir / "excel").mkdir(parents=True, exist_ok=True)
-    (base_dir / "logs").mkdir(parents=True, exist_ok=True)
-    logger.info("Vytvořeny potřebné adresáře")
 
 except Exception as e:
     logger.error(f"Chyba při inicializaci aplikace: {e}")

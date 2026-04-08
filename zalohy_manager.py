@@ -5,17 +5,14 @@ Funkce:
  - kumulativní přičítání částek do správného měnového sloupce dle vybrané "option"
  - zápis data poslední transakce do dedikovaného sloupce
 """
-
-import json
 import logging
 from datetime import datetime
 from pathlib import Path
 
 from openpyxl import load_workbook
 from openpyxl.cell.cell import MergedCell
-from openpyxl.utils import coordinate_to_tuple
-
 from config import Config
+from services.excel_config_service import get_configured_cells
 
 try:
     from utils.logger import setup_logger
@@ -42,14 +39,9 @@ class ZalohyManager:
 
     def _load_dynamic_config(self):
         """Načte dynamickou konfiguraci pro ukládání do XLSX souborů."""
-        if not Config.CONFIG_FILE_PATH.exists():
-            return {}
-        try:
-            with open(Config.CONFIG_FILE_PATH, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except (json.JSONDecodeError, IOError) as e:
-            logger.error("Chyba při načítání dynamické konfigurace: %s", e, exc_info=True)
-            return {}
+        from services.excel_config_service import load_dynamic_excel_config
+
+        return load_dynamic_excel_config()
 
     def _get_cell_coordinates(self, field_key, sheet_name=None):
         """Vrátí seznam (row, col) souřadnic pro daný field z dynamické konfigurace.
@@ -61,42 +53,7 @@ class ZalohyManager:
         Returns:
             list: Seznam (row, col) souřadnic nebo prázdný seznam pokud není nakonfigurováno
         """
-        config = self._load_dynamic_config()
-        advances_config = config.get("advances", {})
-        field_configs = advances_config.get(field_key, [])
-
-        if not field_configs:
-            return []
-
-        coordinates = []
-        for field_config in field_configs:
-            # Ověř, že konfigurace je pro správný soubor a list
-            if field_config.get("file") != self.active_filename:
-                logger.warning(
-                    "Konfigurace pro advances/%s odkazuje na jiný soubor: %s", field_key, field_config.get("file")
-                )
-                continue
-
-            if sheet_name and field_config.get("sheet") != sheet_name:
-                logger.warning(
-                    "Konfigurace pro advances/%s odkazuje na jiný list: %s (očekáván %s)",
-                    field_key,
-                    field_config.get("sheet"),
-                    sheet_name,
-                )
-                continue
-
-            cell = field_config.get("cell")
-            if not cell:
-                continue
-
-            try:
-                coordinates.append(coordinate_to_tuple(cell))  # Převede např. "A1" na (1, 1)
-            except ValueError as e:
-                logger.error("Neplatná buňka v konfiguraci pro advances/%s: %s - %s", field_key, cell, e)
-                continue
-
-        return coordinates
+        return get_configured_cells("advances", field_key, self.active_filename, sheet_name=sheet_name)
 
     def _get_active_workbook(self, read_only=False):
         if not self.active_file_path.exists():

@@ -1,0 +1,1 @@
+"""Blueprinty aplikace."""

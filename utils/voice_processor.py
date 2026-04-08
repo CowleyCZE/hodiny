@@ -50,7 +50,7 @@ class VoiceProcessor:
     def __init__(self):
         self.gemini_api_key = getattr(Config, "GEMINI_API_KEY", os.environ.get("GEMINI_API_KEY"))
         self.gemini_api_url = getattr(Config, "GEMINI_API_URL", os.environ.get("GEMINI_API_URL"))
-        self.employee_manager = EmployeeManager(data_path="data")
+        self.employee_manager = EmployeeManager(data_path=Config.DATA_PATH)
         self.default_lunch_duration = 1.0
         self.rate_limiter = RateLimiter(
             getattr(Config, "RATE_LIMIT_REQUESTS", 5),

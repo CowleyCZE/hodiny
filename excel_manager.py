@@ -6,21 +6,26 @@ Zodpovědnosti:
  - Zápis denních hodin pro vybrané zaměstnance do listu konkrétního týdne
  - Generace měsíčního reportu agregací z týdenních listů
 """
-
-import json
 import logging
-import shutil
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
-from threading import Lock
+from threading import RLock
 
 from openpyxl import load_workbook
-from openpyxl.cell.cell import MergedCell
-from openpyxl.styles import Alignment
-from openpyxl.utils import coordinate_to_tuple
-
 from config import Config
+from services.excel_config_service import get_configured_cells
+from services.excel_metadata_service import load_metadata, save_metadata, set_file_category
+from services.excel_report_service import generate_monthly_report_from_workbook
+from services.excel_week_service import (
+    archive_active_week_file,
+    create_week_sheet_from_template,
+    ensure_week_sheet,
+    get_current_week_preview,
+    get_or_create_weekly_file,
+    open_weekly_workbook,
+    write_time_entry_to_sheet,
+)
 
 try:
     from utils.logger import setup_logger
@@ -40,7 +45,7 @@ class ExcelManager:
         self.active_filename = Config.EXCEL_TEMPLATE_NAME
         self.active_file_path = self.base_path / self.active_filename
         self.current_project_name = None
-        self._file_lock = Lock()
+        self._file_lock = RLock()
         self._workbook_cache = {}
         self._metadata_path = self.base_path / "metadata.json"
         self.hodiny2025_manager = hodiny2025_manager
@@ -60,14 +65,9 @@ class ExcelManager:
 
     def _load_dynamic_config(self):
         """Načte dynamickou konfiguraci pro ukládání do XLSX souborů."""
-        if not Config.CONFIG_FILE_PATH.exists():
-            return {}
-        try:
-            with open(Config.CONFIG_FILE_PATH, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except (json.JSONDecodeError, IOError) as e:
-            logger.error("Chyba při načítání dynamické konfigurace: %s", e, exc_info=True)
-            return {}
+        from services.excel_config_service import load_dynamic_excel_config
+
+        return load_dynamic_excel_config()
 
     def _get_cell_coordinates(self, field_key, sheet_name=None, data_type="weekly_time"):
         """Vrátí seznam (row, col) souřadnic pro daný field z dynamické konfigurace.
@@ -80,43 +80,7 @@ class ExcelManager:
         Returns:
             list: Seznam (row, col) souřadnic nebo prázdný seznam pokud není nakonfigurováno
         """
-        config = self._load_dynamic_config()
-        data_config = config.get(data_type, {})
-        field_configs = data_config.get(field_key, [])
-
-        if not field_configs:
-            return []
-
-        coordinates = []
-        for field_config in field_configs:
-            # Ověř, že konfigurace je pro správný soubor a list
-            if field_config.get("file") != self.active_filename:
-                logger.warning(
-                    "Konfigurace pro %s/%s odkazuje na jiný soubor: %s", data_type, field_key, field_config.get("file")
-                )
-                continue
-
-            if sheet_name and field_config.get("sheet") != sheet_name:
-                logger.warning(
-                    "Konfigurace pro %s/%s odkazuje na jiný list: %s (očekáván %s)",
-                    data_type,
-                    field_key,
-                    field_config.get("sheet"),
-                    sheet_name,
-                )
-                continue
-
-            cell = field_config.get("cell")
-            if not cell:
-                continue
-
-            try:
-                coordinates.append(coordinate_to_tuple(cell))  # Převede např. "A1" na (1, 1)
-            except ValueError as e:
-                logger.error("Neplatná buňka v konfiguraci pro %s/%s: %s - %s", data_type, field_key, cell, e)
-                continue
-
-        return coordinates
+        return get_configured_cells(data_type, field_key, self.active_filename, sheet_name=sheet_name)
 
     @contextmanager
     def _get_workbook(self, filename=None, read_only=False):
@@ -173,7 +137,7 @@ class ExcelManager:
                         value = "'" + value
 
                     sheet.cell(row=row, column=col, value=value)
-                    # Workbook zůstává v cache a uloží se při close_cached_workbooks nebo g.excel_manager.close_cached_workbooks()
+                    # Workbook zůstává v cache a uloží se při close_cached_workbooks.
             logger.info("Buňka [%d, %d] v %s/%s aktualizována na: %s", row, col, filename, sheet_name, value)
             return True
         except Exception as e:
@@ -186,21 +150,11 @@ class ExcelManager:
         if current_week_number <= last_archived_week:
             return False
 
-        archive_filename = f"Hodiny_Cap_Tyden_{last_archived_week}.xlsx"
-        archive_path = self.base_path / archive_filename
-
         try:
-            shutil.copy(self.active_file_path, archive_path)
-            logger.info("Archivován soubor: %s", archive_path)
-
             with self._get_workbook() as wb:
                 if not wb:
                     raise IOError("Workbook se nepodařilo otevřít pro archivaci.")
-                for sheet_name in wb.sheetnames:
-                    if sheet_name.startswith(Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME):
-                        wb.remove(wb[sheet_name])
-
-                wb.create_sheet(Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME)
+                archive_active_week_file(self.active_file_path, wb, current_week_number, last_archived_week)
 
             settings["last_archived_week"] = current_week_number
             return True
@@ -208,28 +162,60 @@ class ExcelManager:
             logger.error("Chyba při archivaci souboru: %s", e, exc_info=True)
             return False
 
-            # Pracuj přímo s hlavním souborem (Hodiny_Cap.xlsx)
-            file_path = self.active_file_path
-            
-            # Pracuj s workbookem
-            with self._file_lock:
-                with self._get_workbook(filename=self.active_filename, read_only=False) as workbook:
-                    if not workbook:
-                        raise IOError(f"Workbook {file_path} se nepodařilo otevřít.")
+    def ulozit_pracovni_dobu(self, date_str, start_time_str, end_time_str, lunch_duration_str, employees):
+        """Zapíše pracovní dobu do týdenního souboru i do aktivního workbooku aplikace."""
+        try:
+            date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+            week_number = date_obj.isocalendar().week
 
-                    # Pracuj s dynamickým listem "Týden X"
-                    sheet_name = f"{Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME} {week_number}"
-                    if sheet_name not in workbook.sheetnames:
-                        # Vytvoř list zkopírováním z šablony v rámci téhož souboru
-                        self._create_week_sheet_from_template(workbook, sheet_name)
+            if not employees:
+                raise ValueError("Seznam zaměstnanců nesmí být prázdný.")
 
-                    sheet = workbook[sheet_name]
-                    self._zapsat_data_do_listu(
-                        sheet, sheet_name, date_obj, start_time_str, end_time_str, lunch_duration_str, employees
-                    )
-                    # Workbook se uloží automaticky při close (přes cache systém)
+            # Zachovej historické týdenní soubory kvůli kompatibilitě a testům.
+            weekly_file_path = self._get_or_create_weekly_file(week_number)
+            weekly_workbook = self._get_weekly_workbook(weekly_file_path)
+            if not weekly_workbook:
+                raise IOError(f"Workbook {weekly_file_path} se nepodařilo otevřít.")
 
-            # Synchronizace s Hodiny2025Manager (pokud je dostupný)
+            try:
+                weekly_sheet_name, weekly_sheet = ensure_week_sheet(weekly_workbook, week_number)
+                write_time_entry_to_sheet(
+                    weekly_sheet,
+                    weekly_sheet_name,
+                    date_obj,
+                    start_time_str,
+                    end_time_str,
+                    lunch_duration_str,
+                    employees,
+                    self._get_cell_coordinates,
+                    self.current_project_name,
+                )
+                weekly_workbook.save(weekly_file_path)
+            finally:
+                weekly_workbook.close()
+
+            # Aktivní soubor drží současné UI a reportovací flow.
+            with self._get_workbook(filename=self.active_filename, read_only=False) as workbook:
+                if not workbook:
+                    raise IOError(f"Workbook {self.active_file_path} se nepodařilo otevřít.")
+
+                sheet_name = f"{Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME} {week_number}"
+                if sheet_name not in workbook.sheetnames:
+                    self._create_week_sheet_from_template(workbook, sheet_name)
+
+                sheet = workbook[sheet_name]
+                write_time_entry_to_sheet(
+                    sheet,
+                    sheet_name,
+                    date_obj,
+                    start_time_str,
+                    end_time_str,
+                    lunch_duration_str,
+                    employees,
+                    self._get_cell_coordinates,
+                    self.current_project_name,
+                )
+
             if self.hodiny2025_manager:
                 try:
                     self.hodiny2025_manager.zapis_pracovni_doby(
@@ -239,7 +225,7 @@ class ExcelManager:
                 except Exception as sync_err:
                     logger.error("Chyba při synchronizaci s Hodiny2025Manager: %s", sync_err)
 
-            logger.info("Uložena pracovní doba pro %s do týdenního souboru %s.", date_str, weekly_file_path.name)
+            logger.info("Uložena pracovní doba pro %s do %s.", date_str, weekly_file_path.name)
             return True
         except (FileNotFoundError, ValueError, IOError) as e:
             logger.error("Chyba při ukládání pracovní doby: %s", e, exc_info=True)
@@ -250,144 +236,37 @@ class ExcelManager:
 
     def _get_or_create_weekly_file(self, week_number):
         """Získá cestu k týdennímu souboru, vytvoří ho pokud neexistuje."""
-        weekly_filename = f"{self.active_file_path.stem}_Tyden{week_number}.xlsx"
-        weekly_file_path = self.base_path / weekly_filename
-
-        if not weekly_file_path.exists():
-            # Najdi předchozí týdenní soubor jako zdroj pro kopírování
-            previous_week_file = self._find_previous_weekly_file(week_number)
-
-            if previous_week_file and previous_week_file.exists():
-                # Zkopíruj z předchozího týdenního souboru
-                shutil.copy(previous_week_file, weekly_file_path)
-                logger.info("Vytvořen týdenní soubor %s zkopírováním z %s", weekly_filename, previous_week_file.name)
-            else:
-                # Zkopíruj z hlavní šablony jako fallback
-                shutil.copy(self.active_file_path, weekly_file_path)
-                logger.info(
-                    "Vytvořen týdenní soubor %s zkopírováním ze šablony %s", weekly_filename, self.active_filename
-                )
-
-        return weekly_file_path
+        return get_or_create_weekly_file(self.base_path, self.active_file_path, week_number)
 
     def _find_previous_weekly_file(self, current_week):
         """Najde nejnovější týdenní soubor před aktuálním týdnem."""
-        for week in range(current_week - 1, 0, -1):
-            potential_file = self.base_path / f"Hodiny_Cap_Tyden{week}.xlsx"
-            if potential_file.exists():
-                return potential_file
-        return None
+        from services.excel_week_service import find_previous_weekly_file
+
+        return find_previous_weekly_file(self.base_path, self.active_file_path.stem, current_week)
 
     def _get_weekly_workbook(self, weekly_file_path):
         """Otevře týdenní workbook pro práci."""
-        try:
-            from openpyxl import load_workbook
-
-            return load_workbook(str(weekly_file_path))
-        except Exception as e:
-            logger.error("Chyba při otevírání týdenního souboru %s: %s", weekly_file_path, e)
-            return None
+        return open_weekly_workbook(weekly_file_path)
 
     def _create_week_sheet_from_template(self, workbook, sheet_name):
         """Vytvoří nový list zkopírováním šablony 'Týden' v rámci workbooku."""
-        try:
-            template_name = Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME
-            if template_name in workbook.sheetnames:
-                source = workbook[template_name]
-                target = workbook.copy_worksheet(source)
-                target.title = sheet_name
-                logger.info("Vytvořen list %s zkopírováním šablony %s", sheet_name, template_name)
-            else:
-                workbook.create_sheet(sheet_name)
-                logger.warning("Šablona %s nenalezena, vytvořen prázdný list %s", template_name, sheet_name)
-        except Exception as e:
-            logger.error("Chyba při kopírování listu: %s", e)
-            if sheet_name not in workbook.sheetnames:
-                workbook.create_sheet(sheet_name)
+        create_week_sheet_from_template(workbook, sheet_name)
 
     def _zapsat_data_do_listu(
         self, sheet, sheet_name, date_obj, start_time_str, end_time_str, lunch_duration_str, employees
     ):
         """Pomocná metoda pro zápis dat do konkrétního listu."""
-        # day_column_index: Pondělí=2 (B), Úterý=4 (D), Středa=6 (F), Čtvrtek=8 (H), Pátek=10 (J), Sobota=12 (L), Neděle=14 (N)
-        day_column_index = 2 + 2 * date_obj.weekday()
-        
-        start_time = datetime.strptime(start_time_str, "%H:%M")
-        end_time = datetime.strptime(end_time_str, "%H:%M")
-        total_hours = round((end_time - start_time).total_seconds() / 3600 - float(lunch_duration_str), 2)
-        
-        # Formát "Od - Do" pro novou šablonu (např. "7 - 19")
-        # Pokud jsou oba časy 00:00, nepiš nic (pravděpodobně volno)
-        times_display = ""
-        if start_time_str != "00:00" or end_time_str != "00:00":
-            # Formátujeme bez úvodních nul pro kratší zápis v Excelu, pokud je to žádoucí (např. "7 - 19")
-            s_hour = start_time.hour
-            e_hour = end_time.hour
-            times_display = f"{s_hour} - {e_hour}"
-
-        # Mapa existujících zaměstnanců
-        employee_rows = {
-            sheet.cell(row=r, column=1).value: r for r in range(Config.EXCEL_EMPLOYEE_START_ROW, sheet.max_row + 1)
-            if sheet.cell(row=r, column=1).value
-        }
-        next_empty_row = max(employee_rows.values() or [Config.EXCEL_EMPLOYEE_START_ROW - 1]) + 1
-
-        # Zapíše zaměstnance a jejich hodiny
-        for employee in employees:
-            row_idx = employee_rows.get(employee)
-            if not row_idx:
-                row_idx = next_empty_row
-                sheet.cell(row=row_idx, column=1, value=employee)
-                next_empty_row = row_idx + 1
-
-            # Pro novou šablonu zapisujeme hodiny přímo do sloupce dne
-            data_cell = sheet.cell(row=row_idx, column=day_column_index)
-            if not isinstance(data_cell, MergedCell):
-                data_cell.value = total_hours
-                data_cell.number_format = "0.00"
-
-        # Zápis "Od - Do" (start_time koordinát v config.json slouží jako reference pro pondělí)
-        # B7 (pondělí), D7 (úterý) atd.
-        start_time_coords = self._get_cell_coordinates("start_time", sheet_name, "weekly_time")
-        if start_time_coords:
-            for start_row, start_base_col in start_time_coords:
-                # Upravíme sloupec podle dne v týdnu (start_base_col je pro Pondělí = 2)
-                # target_col = start_base_col + (day_column_index - 2)
-                target_col = day_column_index 
-                times_cell = sheet.cell(row=start_row, column=target_col)
-                if not isinstance(times_cell, MergedCell):
-                    times_cell.value = times_display
-                    times_cell.alignment = Alignment(horizontal="center")
-                logger.info("Zapisuji časy '%s' do buňky %s%d", times_display, chr(64 + target_col), start_row)
-        else:
-            # Fallback na řádek 7
-            times_cell = sheet.cell(row=7, column=day_column_index)
-            times_cell.value = times_display
-
-        # Zápis data (B6Reference)
-        date_coords = self._get_cell_coordinates("date", sheet_name, "weekly_time")
-        if date_coords:
-            for date_row, date_base_col in date_coords:
-                target_col = day_column_index
-                date_cell = sheet.cell(row=date_row, column=target_col)
-                if not isinstance(date_cell, MergedCell):
-                    date_cell.value = date_obj.date()
-                    date_cell.number_format = "DD.MM.YYYY"
-                    date_cell.alignment = Alignment(horizontal="center")
-        else:
-            # Fallback na řádek 6
-            date_cell = sheet.cell(row=6, column=day_column_index)
-            date_cell.value = date_obj.date()
-            date_cell.number_format = "DD.MM.YYYY"
-
-        # Zápis projektu do I4 (pokud je v konfiguraci)
-        project_coords = self._get_cell_coordinates("project_name", sheet_name, "projects")
-        if project_coords:
-            for p_row, p_col in project_coords:
-                # Pro projekt neposouváme sloupec, je to globální pro list
-                project_cell = sheet.cell(row=p_row, column=p_col)
-                if not isinstance(project_cell, MergedCell) and self.current_project_name:
-                    project_cell.value = self.current_project_name
+        write_time_entry_to_sheet(
+            sheet,
+            sheet_name,
+            date_obj,
+            start_time_str,
+            end_time_str,
+            lunch_duration_str,
+            employees,
+            self._get_cell_coordinates,
+            self.current_project_name,
+        )
 
     def close_cached_workbooks(self):
         """Flush + zavření všech workbooků v cache (volat při ukončení requestu)."""
@@ -425,58 +304,27 @@ class ExcelManager:
             with self._get_workbook(read_only=True) as workbook:
                 if not workbook:
                     raise IOError("Workbook se nepodařilo otevřít pro report.")
-                for sheet in self._get_monthly_sheets(workbook, month, year):
-                    self._process_sheet_for_report(sheet, employees, report_data, month, year)
+                report_data = generate_monthly_report_from_workbook(workbook, month, year, employees)
         except (FileNotFoundError, IOError) as e:
             logger.error("Chyba při generování měsíčního reportu: %s", e, exc_info=True)
             return {}
-        return {emp: data for emp, data in report_data.items() if data["total_hours"] > 0 or data["free_days"] > 0}
+        return report_data
 
     def _get_monthly_sheets(self, workbook, month, year):
         """Generátor pro listy, které spadají do daného měsíce a roku."""
-        for sheet_name in workbook.sheetnames:
-            if not sheet_name.startswith(Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME):
-                continue
+        from services.excel_report_service import get_monthly_sheets
 
-            # Heuristika pro kontrolu datumu v listu, aby se zbytečně neprocházel
-            # každý list. Předpokládáme, že alespoň jedna buňka s datem je vyplněná.
-            sheet = workbook[sheet_name]
-            for c_idx in range(2, 12, 2):
-                date_val = sheet.cell(row=80, column=c_idx).value
-                if isinstance(date_val, datetime) and date_val.month == month and date_val.year == year:
-                    yield sheet
-                    break
+        yield from get_monthly_sheets(workbook, month, year)
 
     def _process_sheet_for_report(self, sheet, employees, report_data, month, year):
         """Zpracuje jeden list a agreguje data do report_data."""
-        for r_idx in range(Config.EXCEL_EMPLOYEE_START_ROW, sheet.max_row + 1):
-            employee_name = sheet.cell(row=r_idx, column=1).value
-            if not employee_name or (employees and employee_name not in employees):
-                continue
+        from services.excel_report_service import process_sheet_for_report
 
-            if employee_name not in report_data:
-                report_data[employee_name] = {"total_hours": 0.0, "free_days": 0}
+        process_sheet_for_report(sheet, employees, report_data, month, year)
 
-            for c_idx in range(3, 13, 2):  # Sloupce s hodinami
-                # Zkontroluj odpovídající datum pro tento sloupec
-                date_column = c_idx - 1  # Datum je v předchozím sloupci
-                date_val = sheet.cell(row=80, column=date_column).value
-
-                # Pouze pokud datum odpovídá cílovému měsíci a roku
-                if not (isinstance(date_val, datetime) and date_val.month == month and date_val.year == year):
-                    continue
-
-                hours = sheet.cell(row=r_idx, column=c_idx).value
-                if not isinstance(hours, (int, float)):
-                    continue
-
-                if hours > 0:
-                    report_data[employee_name]["total_hours"] += hours
-                else:
-                    report_data[employee_name]["free_days"] += 1
-
-    def update_project_info(self, _project_name, _start_date, _end_date):
-        """Placeholder pro budoucí implementaci údajů o projektu (aktuálně no-op)."""
+    def update_project_info(self, project_name, _start_date, _end_date):
+        """Aktualizuje runtime informace o projektu pro následný zápis do listů."""
+        self.current_project_name = project_name or None
         return True
 
     def get_current_week_data(self, week_number=None):
@@ -487,45 +335,8 @@ class ExcelManager:
             with self._get_workbook(read_only=True) as wb:
                 if not wb:
                     return None
-                    
-                # Pokusíme se najít list "Týden X" nebo "Týden"
-                sheet_name_dynamic = f"{Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME} {current_week}"
-                if sheet_name_dynamic in wb.sheetnames:
-                    sheet = wb[sheet_name_dynamic]
-                    sheet_display_name = sheet_name_dynamic
-                elif Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME in wb.sheetnames:
-                    sheet = wb[Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME]
-                    sheet_display_name = Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME
-                else:
-                    return None
 
-            # Získáme data z listu (prvních několik řádků a sloupců pro přehled)
-            data = []
-            max_row = min(sheet.max_row, 20)  # Omezíme na prvních 20 řádků
-            max_col = min(sheet.max_column, 10)  # Omezíme na prvních 10 sloupců
-
-            for row in range(1, max_row + 1):
-                row_data = []
-                for col in range(1, max_col + 1):
-                    cell = sheet.cell(row=row, column=col)
-                    value = cell.value
-                    if value is None:
-                        value = ""
-                    elif isinstance(value, (int, float)):
-                        value = str(value)
-                    row_data.append(str(value))
-                data.append(row_data)
-
-            # Zavři workbook pokud je to týdenní soubor
-            if weekly_file_path.exists():
-                wb.close()
-
-            return {
-                "sheet_name": sheet_display_name,
-                "data": data,
-                "rows": len(data),
-                "cols": len(data[0]) if data else 0,
-            }
+                return get_current_week_preview(wb, current_week)
 
         except Exception as e:
             logger.error("Chyba při načítání dat aktuálního týdne: %s", e, exc_info=True)
@@ -533,24 +344,13 @@ class ExcelManager:
 
     def _load_metadata(self):
         """Načte metadata souborů z JSON souboru."""
-        if not self._metadata_path.exists():
-            return {}
-        try:
-            with self._file_lock:
-                with open(self._metadata_path, "r", encoding="utf-8") as f:
-                    return json.load(f)
-        except (IOError, json.JSONDecodeError) as e:
-            logger.error("Chyba při načítání metadat: %s", e)
-            return {}
+        with self._file_lock:
+            return load_metadata(self._metadata_path)
 
     def _save_metadata(self, metadata):
         """Uloží metadata souborů do JSON souboru."""
-        try:
-            with self._file_lock:
-                with open(self._metadata_path, "w", encoding="utf-8") as f:
-                    json.dump(metadata, f, indent=4, ensure_ascii=False)
-        except IOError as e:
-            logger.error("Chyba při ukládání metadat: %s", e)
+        with self._file_lock:
+            save_metadata(self._metadata_path, metadata)
 
     def get_all_metadata(self):
         """Vrátí všechna metadata."""
@@ -558,8 +358,5 @@ class ExcelManager:
 
     def set_category(self, filename, category):
         """Nastaví kategorii pro daný soubor."""
-        metadata = self._load_metadata()
-        if filename not in metadata:
-            metadata[filename] = {}
-        metadata[filename]["category"] = category
-        self._save_metadata(metadata)
+        with self._file_lock:
+            set_file_category(self._metadata_path, filename, category)

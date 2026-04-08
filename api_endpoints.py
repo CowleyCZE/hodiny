@@ -9,6 +9,18 @@ from typing import Any, Dict, List, Optional
 
 from flask import Blueprint, g, jsonify, request, session
 
+from performance_optimizations import invalidate_employee_stats_cache, invalidate_user_settings_cache
+from services.api_service import (
+    create_time_entry as create_time_entry_payload,
+    filter_time_entries_by_employee,
+    get_excel_status as get_excel_status_payload,
+    get_settings,
+    get_time_entries as get_time_entries_payload,
+    serialize_employees,
+    update_selected_employees,
+    update_settings,
+)
+
 # Configure logger
 logger = logging.getLogger(__name__)
 
@@ -96,13 +108,7 @@ def health_check():
 def get_employees():
     """Get all employees"""
     try:
-        employees = g.employee_manager.get_all_employees()
-        selected_employees = g.employee_manager.get_vybrani_zamestnanci()
-
-        employee_data = []
-        for emp in employees:
-            employee_data.append({"name": emp, "selected": emp in selected_employees})
-
+        employee_data = serialize_employees(g.employee_manager)
         return APIResponse.success(employee_data, f"Retrieved {len(employee_data)} employees")
 
     except Exception as e:
@@ -132,10 +138,9 @@ def manage_selected_employees():
             if not isinstance(employees, list):
                 return APIResponse.error("Employees must be a list", "INVALID_DATA_TYPE", 400)
 
-            # Update selected employees
-            g.employee_manager.set_vybrani_zamestnanci(employees)
-
-            return APIResponse.success(employees, f"Updated selected employees: {len(employees)} selected")
+            selected = update_selected_employees(g.employee_manager, employees)
+            invalidate_employee_stats_cache()
+            return APIResponse.success(selected, f"Updated selected employees: {len(selected)} selected")
 
         except Exception as e:
             logger.error("Error updating selected employees: %s", e, exc_info=True)
@@ -162,16 +167,9 @@ def create_time_entry():
         end_time = data.get("end_time")
         lunch_duration = data.get("lunch_duration", "1.0")
         is_free_day = data.get("is_free_day", False)
-        notes = data.get("notes", "")
-
         # Validate date format
         if not validate_date_format(date):
             return APIResponse.error("Invalid date format. Use YYYY-MM-DD", "INVALID_DATE_FORMAT", 400)
-
-        # Get selected employees
-        selected_employees = g.employee_manager.get_vybrani_zamestnanci()
-        if not selected_employees:
-            return APIResponse.error("No employees selected", "NO_EMPLOYEES_SELECTED", 400)
 
         # Validate time fields for work days
         if not is_free_day:
@@ -191,26 +189,13 @@ def create_time_entry():
             except ValueError:
                 return APIResponse.error("Invalid lunch duration format", "INVALID_LUNCH_FORMAT", 400)
 
-        # Process the time entry
-        if is_free_day:
-            g.excel_manager.ulozit_pracovni_dobu(date, "00:00", "00:00", "0", selected_employees)
-            message = f"Free day recorded for {date} ({len(selected_employees)} employees)"
-        else:
-            g.excel_manager.ulozit_pracovni_dobu(date, start_time, end_time, lunch_duration, selected_employees)
-            message = f"Work time recorded for {date} ({len(selected_employees)} employees)"
+        response_data = create_time_entry_payload(data, g.employee_manager, g.excel_manager, g.hodiny2025_manager)
+        return APIResponse.success(response_data, response_data["message"])
 
-        # Prepare response data
-        response_data = {
-            "date": date,
-            "start_time": start_time if not is_free_day else None,
-            "end_time": end_time if not is_free_day else None,
-            "lunch_duration": lunch_duration if not is_free_day else None,
-            "is_free_day": is_free_day,
-            "employees_count": len(selected_employees),
-            "notes": notes,
-        }
-
-        return APIResponse.success(response_data, message)
+    except ValueError as e:
+        if str(e) == "No employees selected":
+            return APIResponse.error("No employees selected", "NO_EMPLOYEES_SELECTED", 400)
+        return APIResponse.error(str(e), "TIME_ENTRY_VALIDATION_ERROR", 400)
 
     except Exception as e:
         logger.error("Error creating time entry: %s", e, exc_info=True)
@@ -224,8 +209,7 @@ def get_time_entries():
         # Get query parameters
         start_date = request.args.get("start_date")
         end_date = request.args.get("end_date")
-        # TODO: Implement employee filtering
-        # employee_filter = request.args.get("employee")
+        employee_filter = request.args.get("employee")
         week_number = request.args.get("week")
 
         # Validate date parameters
@@ -239,8 +223,9 @@ def get_time_entries():
         if week_number:
             try:
                 week_num = int(week_number)
-                week_data = g.excel_manager.get_current_week_data(week_num)
+                week_data = get_time_entries_payload(g.excel_manager, week_num)
                 if week_data:
+                    week_data = filter_time_entries_by_employee(week_data, employee_filter)
                     return APIResponse.success(week_data, f"Retrieved data for week {week_num}")
                 else:
                     return APIResponse.success([], f"No data found for week {week_num}")
@@ -248,7 +233,8 @@ def get_time_entries():
                 return APIResponse.error("Invalid week number", "INVALID_WEEK_NUMBER", 400)
 
         # For now, return current week data as default
-        current_week_data = g.excel_manager.get_current_week_data()
+        current_week_data = get_time_entries_payload(g.excel_manager)
+        current_week_data = filter_time_entries_by_employee(current_week_data, employee_filter)
 
         return APIResponse.success(current_week_data or [], "Retrieved current week time entries")
 
@@ -261,18 +247,7 @@ def get_time_entries():
 def get_excel_status():
     """Get Excel file status and information"""
     try:
-        # Get Excel status information
-        active_filename = (
-            g.excel_manager.get_active_filename() if hasattr(g.excel_manager, "get_active_filename") else "Unknown"
-        )
-        excel_exists = g.excel_manager.file_exists() if hasattr(g.excel_manager, "file_exists") else False
-
-        status_data = {
-            "active_filename": active_filename,
-            "excel_exists": excel_exists,
-            "timestamp": datetime.now().isoformat(),
-        }
-
+        status_data = get_excel_status_payload()
         return APIResponse.success(status_data, "Excel status retrieved")
 
     except Exception as e:
@@ -285,11 +260,8 @@ def manage_settings():
     """Get or update application settings"""
     if request.method == "GET":
         try:
-            # Get current settings from session or defaults
-            settings = session.get(
-                "settings", {"start_time": "07:00", "end_time": "18:00", "lunch_duration": 1.0, "theme": "light"}
-            )
-
+            settings = get_settings()
+            session["settings"] = settings
             return APIResponse.success(settings, "Settings retrieved")
 
         except Exception as e:
@@ -302,18 +274,15 @@ def manage_settings():
             if not data:
                 return APIResponse.error("No data provided", "NO_DATA", 400)
 
-            # Validate settings
             current_settings = session.get("settings", {})
 
-            # Update settings
             for key, value in data.items():
                 if key in ["start_time", "end_time"] and not validate_time_format(value):
                     return APIResponse.error(f"Invalid time format for {key}", "INVALID_TIME_FORMAT", 400)
-                current_settings[key] = value
-
-            session["settings"] = current_settings
-
-            return APIResponse.success(current_settings, "Settings updated successfully")
+            updated_settings = update_settings(current_settings, data)
+            session["settings"] = updated_settings
+            invalidate_user_settings_cache()
+            return APIResponse.success(updated_settings, "Settings updated successfully")
 
         except Exception as e:
             logger.error("Error updating settings: %s", e, exc_info=True)

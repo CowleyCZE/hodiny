@@ -9,7 +9,7 @@ Kompletní webová aplikace ve Flasku pro evidenci pracovní doby do Excelu, spr
 - Správa zaměstnanců (přidání, úprava, smazání, výběr pro záznam)
 - Zálohy (příspěvky) se sumací po „možnostech“ a měnách (EUR/CZK)
 - Měsíční report souhrnů hodin a počtu volných dní
-- Nřáhled obsahu aktivního Excel souboru (read‑only, s omezením řádků)
+- Náhled obsahu aktivního Excel souboru (read‑only, s omezením řádků)
 - Stažení a odeslání aktivního souboru e‑mailem (SMTP)
 - Přejmenování/smazání projektových souborů, archivace a založení nového aktivního souboru
 - Textové „hlasové“ příkazy pro záznam času a rychlé statistiky
@@ -20,7 +20,19 @@ Kompletní webová aplikace ve Flasku pro evidenci pracovní doby do Excelu, spr
 
 ## Architektura a soubory
 
-- app.py – Flask aplikace, routy, práce se session, předzpracování/úklid, integrace Excel/zalohy managerů a hlasových příkazů
+- app.py – bootstrap Flask aplikace, registrace blueprintů, inicializace managerů a lifecycle hooky
+- blueprints/main.py – dashboard, ruční záznam pracovní doby, odeslání Excelu e-mailem a rychlé zadání z homepage
+- blueprints/settings.py – běžné provozní nastavení aplikace
+- blueprints/configuration.py – technická Excel konfigurace a související JSON API
+- blueprints/excel.py – upload, download, prohlížení a editace Excel souborů
+- blueprints/employees.py – správa zaměstnanců a výběru
+- blueprints/reports.py – zálohy a měsíční reporty
+- services/main_service.py – sdílená logika dashboardu, zápisu času a SMTP odeslání
+- services/settings_service.py – perzistence runtime nastavení a technické konfigurace
+- services/excel_config_service.py – sdílené čtení dynamické Excel konfigurace
+- services/excel_metadata_service.py – perzistence metadat Excel souborů
+- services/upload_service.py – validace a zpracování uploadů
+- services/excel_view_service.py – příprava dat pro viewer/editor
 - config.py – konfigurace cest, šablon, validací, SMTP a „Gemini“ voleb; vytváří chybějící šablonu a složky
 - excel_manager.py – zápis/čtení do aktivního Excelu (listy „Týden N“, časy a hodiny, projektové info, měsíční report)
 - employee_management.py – správa zaměstnanců + „vybraných“; trvalé uložení v data/employee_config.json
@@ -51,18 +63,15 @@ Kompletní webová aplikace ve Flasku pro evidenci pracovní doby do Excelu, spr
 - POST /send_email – odešle aktivní Excel e‑mailem (SMTP_SSL)
 - GET+POST /zamestnanci – správa zaměstnanců a výběru
 - GET+POST /zaznam – formulář pro záznam pracovní doby/volna pro vybrané zaměstnance, výběr aktivního souboru
-- POST /set_active_file – přepnutí aktivního souboru
-- POST /rename_project – přejmenování existujícího excel souboru
-- POST /delete_project – smazání excel souboru (neaktivního)
 - GET /excel_viewer – read‑only náhled aktivního souboru (výběr listu)
 - **🆕 GET+POST /excel_editor – interaktivní editor Excel souborů s možností úprav buněk přímo v prohlížeči**
 - GET+POST /settings – uložení časových defaultů a projektových informací, propsání do Excelu
+- GET /nastaveni – technická konfigurace mapování buněk a správa Excel mappingu
 - GET+POST /zalohy – přidání/aktualizace zálohy pro zaměstnance
-- POST /start_new_file – „archivace“: zneaktivnění aktuálního souboru (po nastavení data konce v Nastavení)
 - POST /voice-command – zpracování textového příkazu JSON; provede záznam času nebo vrátí statistiky
 - GET+POST /monthly_report – souhrn hodin a volných dní za měsíc (volitelně filtrováno na vybrané zaměstnance)
 
-Pozn.: Některé akce vyžadují inicializované Excel/Zálohy managery; ochrana je přes dekorátor require_excel_managers.
+Pozn.: Routy jsou nově rozdělené do blueprintů podle domén. `app.py` už řeší jen sestavení aplikace a request lifecycle.
 
 ## Hlasové/textové příkazy
 
@@ -125,6 +134,12 @@ Nová funkce **Excel Editor** umožňuje editaci buněk přímo v prohlížeči 
     pip install -r requirements.txt
     ```
 
+   Volitelné:
+
+    ```bash
+    cp .env.example .env
+    ```
+
 3. Lokální vývojový běh
 
     ```bash
@@ -155,12 +170,26 @@ Adresáře data/, excel/ a logs/ se vytvoří automaticky. Při prvním běhu se
 
 Poznámka: Tajné hodnoty nesdílejte v repozitáři; nastavte je přes prostředí (např. .env / CI / hosting).
 
+## Rozdělení konfigurace
+
+- `/settings` slouží pro běžné provozní nastavení aplikace
+- `/nastaveni` slouží pro technickou konfiguraci mapování dat do Excelu
+- `data/settings.json` drží runtime nastavení aplikace
+- `config.json` drží technickou konfiguraci Excel mappingu
+
+## Stav refaktoru
+
+- hlavní routy jsou rozdělené do blueprintů `main`, `settings`, `configuration`, `excel`, `employees`, `reports`
+- service vrstva drží sdílenou logiku pro nastavení, uploady, dashboard a Excel viewer/editor
+- REST API `/api/v1/*` nově používá sdílenou service vrstvu místo duplicitní business logiky v route handleru
+- frontend hlasového ovládání je znovu sladěný s homepage quick-entry flow
+
 ## Práce s aktivním souborem a projekty
 
-- Aktivní soubor je trackován v data/settings.json (klíč active_excel_file)
-- Při absenci nebo chybě se vytvoří nový soubor z šablony: {Projekt}_{YYYYMMDD_HHMMSS}.xlsx
-- V Nastavení vyplňte název projektu a datum začátku; datum konce je povinné před archivací
-- Archivace (POST /start_new_file) pouze resetuje active_excel_file – soubory zůstávají v excel/
+- Aktivní soubor je interně fixovaný na `Hodiny_Cap.xlsx`
+- Při absenci se automaticky vytvoří ze šablony při startu aplikace
+- Týdenní archivace probíhá automaticky při přechodu na nový týden a vytváří soubory typu `Hodiny_Cap_Tyden_X.xlsx`
+- V `/settings` se ukládá název projektu a datumové údaje, které se používají jako runtime metadata pro zápis do Excelu
 
 ## Logování
 
@@ -187,8 +216,9 @@ Poznámka: Tajné hodnoty nesdílejte v repozitáři; nastavte je přes prostře
 
 ## Rychlá reference rout
 
-- /, /zaznam, /zamestnanci, /zalohy, /excel_viewer, **/excel_editor**, /settings, /monthly_report
-- POST: /send_email, /set_active_file, /rename_project, /delete_project, /start_new_file, /voice-command
+- HTML/UI: /, /zaznam, /zamestnanci, /zalohy, /excel_viewer, **/excel_editor**, /settings, /nastaveni, /monthly_report
+- Action endpoints: POST /send_email, POST /voice-command, POST /api/quick_time_entry, POST /upload, POST /upload/confirm
+- REST API: /api/v1/health, /api/v1/employees, /api/v1/employees/selected, /api/v1/time-entry, /api/v1/time-entries, /api/v1/settings, /api/v1/excel/status
 
 ## Licence a autorství
 

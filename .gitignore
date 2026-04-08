@@ -46,6 +46,8 @@ gemini_cache.sqlite
 
 # Excel soubory (kromě šablony)
 excel/*.xlsx
+excel/metadata.json
+excel/temp_*.xlsx
 
 # Logy - všechny log soubory
 logs/

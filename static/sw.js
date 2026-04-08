@@ -3,8 +3,8 @@
  * Provides offline functionality and performance improvements
  */
 
-const CACHE_NAME = 'hodiny-v1.0.0';
-const API_CACHE_NAME = 'hodiny-api-v1.0.0';
+const CACHE_NAME = 'hodiny-v1.1.0';
+const API_CACHE_NAME = 'hodiny-api-v1.1.0';
 
 // Static assets to cache
 const STATIC_ASSETS = [
@@ -16,7 +16,6 @@ const STATIC_ASSETS = [
     '/static/js/modern-enhancements.js',
     '/static/js/confirmations.js',
     '/static/js/voice-handler.js',
-    '/static/js/employee-management.js',
     '/static/js/nastaveni.js',
     '/static/images/logo.png'
 ];
@@ -25,6 +24,7 @@ const STATIC_ASSETS = [
 const API_ENDPOINTS = [
     '/api/v1/health',
     '/api/v1/employees',
+    '/api/v1/employees/selected',
     '/api/v1/settings',
     '/api/v1/excel/status'
 ];
@@ -43,11 +43,14 @@ const ROUTE_CONFIG = {
     // API endpoints - network first with cache fallback
     '/api/v1/health': NETWORK_FIRST,
     '/api/v1/employees': NETWORK_FIRST,
+    '/api/v1/employees/selected': NETWORK_FIRST,
     '/api/v1/settings': NETWORK_FIRST,
     '/api/v1/excel/status': NETWORK_FIRST,
     
     // Dynamic endpoints - network only
     '/api/v1/time-entry': NETWORK_ONLY,
+    '/api/quick_time_entry': NETWORK_ONLY,
+    '/voice-command': NETWORK_ONLY,
     '/upload': NETWORK_ONLY,
     '/send_email': NETWORK_ONLY
 };

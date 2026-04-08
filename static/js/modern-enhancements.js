@@ -271,7 +271,7 @@ class PerformanceOptimizer {
     preloadNextPages() {
         const commonLinks = [
             '/zamestnanci',
-            '/record_time',
+            '/zaznam',
             '/zalohy',
             '/excel_viewer'
         ];
@@ -326,7 +326,7 @@ class PerformanceOptimizer {
     setupPreloadImportantResources() {
         // Preload critical CSS and JS
         const criticalResources = [
-            '/static/css/style.css',
+            '/static/style.css',
             '/static/js/confirmations.js'
         ];
 
@@ -341,7 +341,7 @@ class PerformanceOptimizer {
 
     setupServiceWorkerCache() {
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js')
+            navigator.serviceWorker.register('/static/sw.js')
                 .then(() => console.log('Service Worker registered'))
                 .catch(() => console.log('Service Worker registration failed'));
         }

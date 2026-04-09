@@ -15,7 +15,7 @@ def _merge_app_settings(raw_settings):
     if not isinstance(raw_settings, dict):
         return merged_settings
 
-    for key in ("start_time", "end_time", "lunch_duration", "last_archived_week"):
+    for key in ("start_time", "end_time", "lunch_duration", "last_archived_week", "preferred_employee_name"):
         if key in raw_settings:
             merged_settings[key] = raw_settings[key]
 

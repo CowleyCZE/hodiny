@@ -35,6 +35,13 @@
             <div class="glass-card animate-fadeInUp">
                 <h3 class="mb-4">📽️ Informace o projektu</h3>
                 <div class="form-group-modern">
+                    <label for="preferred_employee_name" class="form-label-modern">Vaše jméno</label>
+                    <input type="text" name="preferred_employee_name" id="preferred_employee_name"
+                        value="{{ request.form['preferred_employee_name'] if request.form else settings.preferred_employee_name | default('', true) }}"
+                        class="form-control-modern" placeholder="např. Jan Novák">
+                    <small class="text-muted">Pokud toto jméno existuje v seznamu zaměstnanců, bude vždy první v docházce i v zálohách.</small>
+                </div>
+                <div class="form-group-modern">
                     <label for="project_name" class="form-label-modern">Název projektu</label>
                     <input type="text" name="project_name" id="project_name"
                         value="{{ request.form['project_name'] if request.form else settings.project_info.name | default('', true) }}"

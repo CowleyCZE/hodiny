@@ -12,17 +12,33 @@ logger = setup_logger("employee_management")
 
 
 class EmployeeManager:
-    def __init__(self, data_path):
+    def __init__(self, data_path, preferred_employee_name=None):
         self.data_path = Path(data_path)
         self.config_file = self.data_path / "employee_config.json"
         self.zamestnanci = []
         self.vybrani_zamestnanci = []
+        self.preferred_employee_name = (preferred_employee_name or "").strip()
         self.load_config()
         logger.info("EmployeeManager inicializován.")
 
+    def _employee_sort_key(self, name):
+        preferred_name = self.preferred_employee_name
+        return (name != preferred_name, name)
+
+    def _sort_employee_names(self, employee_names):
+        return sorted(employee_names, key=self._employee_sort_key)
+
+    def _sync_preferred_employee_selection(self):
+        if (
+            self.preferred_employee_name in self.zamestnanci
+            and self.preferred_employee_name not in self.vybrani_zamestnanci
+        ):
+            self.vybrani_zamestnanci.append(self.preferred_employee_name)
+
     def _sort_selected_employees(self):
-        """Preferuje pevně 'Čáp Jakub' na začátku (firemní priorita)."""
-        self.vybrani_zamestnanci.sort(key=lambda x: (x != "Čáp Jakub", x))
+        """Preferuje uživatelem zadané jméno na začátku vybraného seznamu."""
+        self._sync_preferred_employee_selection()
+        self.vybrani_zamestnanci = self._sort_employee_names(self.vybrani_zamestnanci)
 
     def load_config(self):
         """Načte konfiguraci (tichý fallback na prázdné seznamy)."""
@@ -34,11 +50,8 @@ class EmployeeManager:
             with open(self.config_file, "r", encoding="utf-8") as f:
                 config = json.load(f)
 
-            self.zamestnanci = sorted(config.get("zamestnanci", []))
+            self.zamestnanci = self._sort_employee_names(config.get("zamestnanci", []))
             self.vybrani_zamestnanci = config.get("vybrani_zamestnanci", [])
-
-            if "Čáp Jakub" in self.zamestnanci and "Čáp Jakub" not in self.vybrani_zamestnanci:
-                self.vybrani_zamestnanci.append("Čáp Jakub")
 
             self._sort_selected_employees()
         except (json.JSONDecodeError, Exception) as e:
@@ -59,7 +72,10 @@ class EmployeeManager:
             self.data_path.mkdir(parents=True, exist_ok=True)
             with open(self.config_file, "w", encoding="utf-8") as f:
                 json.dump(
-                    {"zamestnanci": sorted(self.zamestnanci), "vybrani_zamestnanci": self.vybrani_zamestnanci},
+                    {
+                        "zamestnanci": self._sort_employee_names(self.zamestnanci),
+                        "vybrani_zamestnanci": self.vybrani_zamestnanci,
+                    },
                     f,
                     ensure_ascii=False,
                     indent=4,
@@ -74,7 +90,7 @@ class EmployeeManager:
             zamestnanec = self._validate_employee_name(zamestnanec)
             if zamestnanec not in self.zamestnanci:
                 self.zamestnanci.append(zamestnanec)
-                if zamestnanec == "Čáp Jakub":
+                if zamestnanec == self.preferred_employee_name:
                     self.vybrani_zamestnanci.append(zamestnanec)
                 self.save_config()
                 return True
@@ -90,8 +106,8 @@ class EmployeeManager:
         return False
 
     def odebrat_vybraneho_zamestnance(self, zamestnanec):
-        if zamestnanec == "Čáp Jakub":
-            logger.warning("Nelze odebrat 'Čáp Jakub' z výběru.")
+        if zamestnanec == self.preferred_employee_name:
+            logger.warning("Nelze odebrat preferovaného zaměstnance z výběru.")
             return False
         if zamestnanec in self.vybrani_zamestnanci:
             self.vybrani_zamestnanci.remove(zamestnanec)
@@ -124,11 +140,18 @@ class EmployeeManager:
 
     def get_all_employees(self):
         """Vrací seznam slovníků se stavem výběru (pro UI)."""
-        return [{"name": name, "selected": name in self.vybrani_zamestnanci} for name in sorted(self.zamestnanci)]
+        return [
+            {"name": name, "selected": name in self.vybrani_zamestnanci}
+            for name in self._sort_employee_names(self.zamestnanci)
+        ]
 
     def get_vybrani_zamestnanci(self):
         """Seznam aktuálně vybraných zaměstnanců (preferenční řazení)."""
-        return sorted(self.vybrani_zamestnanci, key=lambda x: (x != "Čáp Jakub", x))
+        return self._sort_employee_names(self.vybrani_zamestnanci)
+
+    def get_employee_names(self):
+        """Vrací jména zaměstnanců v preferovaném pořadí."""
+        return self._sort_employee_names(self.zamestnanci)
 
     def set_vybrani_zamestnanci(self, employees_list):
         """Nastaví seznam vybraných zaměstnanců."""
@@ -142,10 +165,6 @@ class EmployeeManager:
 
         # Filtruj pouze platné zaměstnance
         valid_employees = [emp for emp in employees_list if emp in self.zamestnanci]
-
-        # Zajisti, že "Čáp Jakub" je vždy zahrnut, pokud existuje
-        if "Čáp Jakub" in self.zamestnanci and "Čáp Jakub" not in valid_employees:
-            valid_employees.append("Čáp Jakub")
 
         self.vybrani_zamestnanci = valid_employees
         self._sort_selected_employees()

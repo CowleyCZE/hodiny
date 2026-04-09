@@ -42,7 +42,10 @@ initialize_performance_optimizations()
 def before_request():
     """Před každým requestem připraví managery a synchronizuje runtime nastavení."""
     session["settings"] = load_app_settings()
-    g.employee_manager = EmployeeManager(Config.DATA_PATH)
+    g.employee_manager = EmployeeManager(
+        Config.DATA_PATH,
+        preferred_employee_name=session["settings"].get("preferred_employee_name", ""),
+    )
     g.hodiny2025_manager = Hodiny2025Manager(Config.EXCEL_BASE_PATH)
     g.excel_manager = ExcelManager(Config.EXCEL_BASE_PATH, hodiny2025_manager=g.hodiny2025_manager)
     g.zalohy_manager = ZalohyManager(Config.EXCEL_BASE_PATH)

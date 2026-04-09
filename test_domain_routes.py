@@ -1,3 +1,5 @@
+import json
+
 import pytest
 from openpyxl import Workbook
 
@@ -19,6 +21,19 @@ def route_client(tmp_path, monkeypatch):
     monkeypatch.setattr(Config, "EXCEL_BASE_PATH", excel_path)
     monkeypatch.setattr(Config, "SETTINGS_FILE_PATH", settings_path)
     monkeypatch.setattr(Config, "CONFIG_FILE_PATH", config_path)
+
+    settings = Config.get_default_settings()
+    settings["preferred_employee_name"] = "Jan Test"
+    settings_path.write_text(json.dumps(settings), encoding="utf-8")
+    (data_path / "employee_config.json").write_text(
+        json.dumps(
+            {
+                "zamestnanci": ["Alpha Worker", "Jan Test"],
+                "vybrani_zamestnanci": ["Alpha Worker"],
+            }
+        ),
+        encoding="utf-8",
+    )
 
     template_path = excel_path / Config.EXCEL_TEMPLATE_NAME
     workbook = Workbook()
@@ -62,7 +77,11 @@ def test_advances_route_is_available(route_client):
     response = route_client.get("/zalohy")
 
     assert response.status_code == 200
-    assert "Správa záloh" in response.get_data(as_text=True)
+    body = response.get_data(as_text=True)
+    assert "Správa záloh" in body
+    assert body.index('<option value="Jan Test">Jan Test</option>') < body.index(
+        '<option value="Alpha Worker">Alpha Worker</option>'
+    )
 
 
 def test_monthly_report_route_is_available(route_client):

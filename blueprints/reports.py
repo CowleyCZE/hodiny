@@ -27,7 +27,7 @@ def zalohy():
 
     return render_template(
         "zalohy.html",
-        employees=g.employee_manager.zamestnanci,
+        employees=g.employee_manager.get_employee_names(),
         options=g.zalohy_manager.get_option_names(),
         current_date=dt.datetime.now().strftime("%Y-%m-%d"),
     )

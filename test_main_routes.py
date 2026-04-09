@@ -22,9 +22,16 @@ def main_client(tmp_path, monkeypatch):
     monkeypatch.setattr(Config, "SETTINGS_FILE_PATH", settings_path)
     monkeypatch.setattr(Config, "CONFIG_FILE_PATH", config_path)
 
-    settings_path.write_text(json.dumps(Config.get_default_settings()), encoding="utf-8")
+    settings = Config.get_default_settings()
+    settings["preferred_employee_name"] = "Jan Test"
+    settings_path.write_text(json.dumps(settings), encoding="utf-8")
     (data_path / "employee_config.json").write_text(
-        json.dumps({"zamestnanci": ["Test Zamestnanec"], "vybrani_zamestnanci": ["Test Zamestnanec"]}),
+        json.dumps(
+            {
+                "zamestnanci": ["Alpha Worker", "Jan Test"],
+                "vybrani_zamestnanci": ["Alpha Worker"],
+            }
+        ),
         encoding="utf-8",
     )
 
@@ -57,6 +64,8 @@ def test_record_time_route_is_available(main_client):
 
     assert response.status_code == 200
     assert "Záznam pracovní doby" in response.get_data(as_text=True)
+    body = response.get_data(as_text=True)
+    assert "Jan Test, Alpha Worker" in body
 
 
 def test_quick_time_entry_api_accepts_valid_payload(main_client):

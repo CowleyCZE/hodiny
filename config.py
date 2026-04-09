@@ -64,6 +64,7 @@ class Config:
             "start_time": cls.DEFAULT_TIME_CONFIG.start_time,
             "end_time": cls.DEFAULT_TIME_CONFIG.end_time,
             "lunch_duration": cls.DEFAULT_TIME_CONFIG.lunch_duration,
+            "preferred_employee_name": "",
             "project_info": {
                 "name": cls.DEFAULT_PROJECT_CONFIG.name,
                 "start_date": cls.DEFAULT_PROJECT_CONFIG.start_date,

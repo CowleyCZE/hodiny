@@ -51,6 +51,7 @@ def test_settings_page_persists_runtime_settings(isolated_client):
     response = client.post(
         "/settings",
         data={
+            "preferred_employee_name": "Jan Test",
             "project_name": "Projekt Alfa",
             "start_date": "2026-04-01",
             "end_date": "2026-04-30",
@@ -64,6 +65,7 @@ def test_settings_page_persists_runtime_settings(isolated_client):
     assert response.status_code == 200
     saved_settings = settings_path.read_text(encoding="utf-8")
     assert "Projekt Alfa" in saved_settings
+    assert "Jan Test" in saved_settings
     assert "2026-04-01" in saved_settings
     assert "08:15" in saved_settings
     assert "17:30" in saved_settings

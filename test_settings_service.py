@@ -15,17 +15,22 @@ def test_load_app_settings_returns_defaults_for_missing_file(tmp_path):
 
     assert loaded_settings["start_time"] == "07:00"
     assert loaded_settings["project_info"]["name"] == ""
+    assert loaded_settings["preferred_employee_name"] == ""
     assert loaded_settings["last_archived_week"] == 0
 
 
 def test_load_app_settings_merges_with_defaults(tmp_path):
     settings_path = tmp_path / "settings.json"
-    settings_path.write_text('{"start_time":"08:30","project_info":{"name":"Test projekt"}}', encoding="utf-8")
+    settings_path.write_text(
+        '{"start_time":"08:30","preferred_employee_name":"Jan Test","project_info":{"name":"Test projekt"}}',
+        encoding="utf-8",
+    )
 
     loaded_settings = load_app_settings(settings_path)
 
     assert loaded_settings["start_time"] == "08:30"
     assert loaded_settings["end_time"] == "18:00"
+    assert loaded_settings["preferred_employee_name"] == "Jan Test"
     assert loaded_settings["project_info"]["name"] == "Test projekt"
     assert loaded_settings["project_info"]["start_date"] == ""
 
@@ -33,12 +38,16 @@ def test_load_app_settings_merges_with_defaults(tmp_path):
 def test_save_app_settings_normalizes_structure(tmp_path):
     settings_path = tmp_path / "settings.json"
 
-    saved = save_app_settings({"start_time": "09:00", "project_info": {"name": "Projekt X"}}, settings_path)
+    saved = save_app_settings(
+        {"start_time": "09:00", "preferred_employee_name": "Jan Test", "project_info": {"name": "Projekt X"}},
+        settings_path,
+    )
 
     assert saved is True
     reloaded_settings = load_app_settings(settings_path)
     assert reloaded_settings["start_time"] == "09:00"
     assert reloaded_settings["end_time"] == "18:00"
+    assert reloaded_settings["preferred_employee_name"] == "Jan Test"
     assert reloaded_settings["project_info"]["name"] == "Projekt X"
 
 

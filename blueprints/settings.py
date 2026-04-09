@@ -19,6 +19,7 @@ def settings_page():
                     "start_time": request.form["start_time"],
                     "end_time": request.form["end_time"],
                     "lunch_duration": float(request.form["lunch_duration"].replace(",", ".")),
+                    "preferred_employee_name": request.form.get("preferred_employee_name", "").strip(),
                 }
             )
             settings_to_save["project_info"] = {

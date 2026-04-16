@@ -122,7 +122,7 @@ def test_time_entries_endpoint_supports_employee_filter(api_client):
         },
     )
 
-    response = api_client.get("/api/v1/time-entries?employee=Test%20Zamestnanec")
+    response = api_client.get("/api/v1/time-entries?employee=Test%20Zamestnanec&week=15")
 
     assert response.status_code == 200
     payload = response.get_json()

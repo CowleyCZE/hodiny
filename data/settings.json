@@ -1,12 +1,12 @@
 {
-    "start_time": "07:00",
+    "start_time": "08:00",
     "end_time": "18:00",
     "lunch_duration": 1.0,
+    "preferred_employee_name": "Jakub Čáp",
     "project_info": {
-        "name": "Ardo",
-        "start_date": "2025-06-26",
-        "end_date": ""
+        "name": "Essity",
+        "start_date": "2026-03-30",
+        "end_date": "2026-04-12"
     },
-    "active_excel_file": "Coca_cola_20250502_224202.xlsx",
     "last_archived_week": 35
 }

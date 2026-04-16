@@ -73,6 +73,12 @@
                         value="{{ lunch_duration }}" class="form-control-modern">
                     <small class="text-muted">Povolené hodnoty: 0, 0.25, 0.5, 0.75, 1 atd.</small>
                 </div>
+
+                <div class="form-group">
+                    <label for="work_description">Popis práce:</label>
+                    <textarea id="work_description" name="work_description" rows="3"
+                              placeholder="Podrobný popis vykonané práce pro AI klasifikaci"></textarea>
+                </div>
             </div>
 
             <button type="submit" class="btn-modern btn-primary w-100 mt-4">
@@ -94,6 +100,7 @@
         const startTimeInput = document.getElementById('start_time');
         const endTimeInput = document.getElementById('end_time');
         const lunchInput = document.getElementById('lunch_duration');
+        const workDescriptionInput = document.getElementById('work_description'); // Nové pole
 
         if (isChecked) {
             timeFieldsContainer.classList.add('hidden');
@@ -101,16 +108,20 @@
             startTimeInput.required = false;
             endTimeInput.required = false;
             lunchInput.required = false;
+            workDescriptionInput.required = false; // Nové pole
             // Můžeme i vymazat hodnoty, ale není to nutné, backend je ignoruje
             // startTimeInput.value = '';
             // endTimeInput.value = '';
             // lunchInput.value = '0';
+            // workDescriptionInput.value = ''; // Vymaže popis práce, pokud je volný den
         } else {
             timeFieldsContainer.classList.remove('hidden');
             // Nastavíme pole zpět jako povinná
             startTimeInput.required = true;
             endTimeInput.required = true;
             lunchInput.required = true;
+            // workDescriptionInput nemusí být povinné, pokud není vždy vyžadováno
+            workDescriptionInput.required = false; 
         }
     }
 

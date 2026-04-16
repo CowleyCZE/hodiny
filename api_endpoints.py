@@ -167,6 +167,7 @@ def create_time_entry():
         end_time = data.get("end_time")
         lunch_duration = data.get("lunch_duration", "1.0")
         is_free_day = data.get("is_free_day", False)
+
         # Validate date format
         if not validate_date_format(date):
             return APIResponse.error("Invalid date format. Use YYYY-MM-DD", "INVALID_DATE_FORMAT", 400)

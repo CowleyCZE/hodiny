@@ -153,8 +153,11 @@ def write_time_entry_to_sheet(
     employees,
     get_cell_coordinates,
     current_project_name,
+    work_description="",
+    category="",
 ):
     """Zapíše docházku do konkrétního listu."""
+    logger.info("Zápis docházky: AI Kategorie: %s, Popis práce: %s", category, work_description)
     weekday = date_obj.weekday()
     total_hours_base = _resolve_base_coordinate(get_cell_coordinates, "total_hours", sheet_name, "weekly_time")
     start_time_base = _resolve_base_coordinate(get_cell_coordinates, "start_time", sheet_name, "weekly_time")

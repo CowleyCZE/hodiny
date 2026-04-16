@@ -162,7 +162,7 @@ class ExcelManager:
             logger.error("Chyba při archivaci souboru: %s", e, exc_info=True)
             return False
 
-    def ulozit_pracovni_dobu(self, date_str, start_time_str, end_time_str, lunch_duration_str, employees):
+    def ulozit_pracovni_dobu(self, date_str, start_time_str, end_time_str, lunch_duration_str, employees, work_description="", category=""):
         """Zapíše pracovní dobu do týdenního souboru i do aktivního workbooku aplikace."""
         try:
             date_obj = datetime.strptime(date_str, "%Y-%m-%d")
@@ -189,6 +189,8 @@ class ExcelManager:
                     employees,
                     self._get_cell_coordinates,
                     self.current_project_name,
+                    work_description=work_description,
+                    category=category
                 )
                 weekly_workbook.save(weekly_file_path)
             finally:
@@ -214,6 +216,8 @@ class ExcelManager:
                     employees,
                     self._get_cell_coordinates,
                     self.current_project_name,
+                    work_description=work_description,
+                    category=category
                 )
 
             if self.hodiny2025_manager:
@@ -251,22 +255,6 @@ class ExcelManager:
     def _create_week_sheet_from_template(self, workbook, sheet_name):
         """Vytvoří nový list zkopírováním šablony 'Týden' v rámci workbooku."""
         create_week_sheet_from_template(workbook, sheet_name)
-
-    def _zapsat_data_do_listu(
-        self, sheet, sheet_name, date_obj, start_time_str, end_time_str, lunch_duration_str, employees
-    ):
-        """Pomocná metoda pro zápis dat do konkrétního listu."""
-        write_time_entry_to_sheet(
-            sheet,
-            sheet_name,
-            date_obj,
-            start_time_str,
-            end_time_str,
-            lunch_duration_str,
-            employees,
-            self._get_cell_coordinates,
-            self.current_project_name,
-        )
 
     def close_cached_workbooks(self):
         """Flush + zavření všech workbooků v cache (volat při ukončení requestu)."""

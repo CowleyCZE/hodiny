@@ -270,12 +270,60 @@ class Hodiny2025Manager:
         date_obj = datetime.strptime(date_str, "%Y-%m-%d")
         workbook, sheet = self.get_or_create_cash_sheet(date_obj.month, date_obj.year)
 
-        # Určení cílového sloupce podle kategorie, měny a způsobu platby
-        col = None
         category_lower = category.lower()
         currency_upper = currency.upper()
         method_lower = payment_method.lower()
 
+        # Špeciální logika pro zálohy se jménem zaměstnance
+        if "záloha" in category_lower or "zaloha" in category_lower:
+            emp_name = description.replace("Záloha - ", "").split(" (")[0].strip() if "Záloha - " in description else description
+            
+            # Prohledej sloupce záloh: Q(17), S(19), U(21), W(23), Y(25), AA(27), AC(29)
+            advance_cols = [17, 19, 21, 23, 25, 27, 29]
+            target_col = None
+
+            # 1. Hledáme existující sloupec s tímto jménem v záhlaví (řádek 2 nebo 1)
+            for c in advance_cols:
+                header_val = sheet.cell(row=2, column=c).value or sheet.cell(row=1, column=c).value
+                if header_val and str(header_val).strip() == emp_name:
+                    target_col = c
+                    break
+
+            # 2. Pokud se nenašel, najdeme první sloupec s výchozím/nepříslušným textem a přepíšeme jej jménem
+            if not target_col:
+                for c in advance_cols:
+                    header_val = sheet.cell(row=2, column=c).value or sheet.cell(row=1, column=c).value
+                    # Pokud je buňka prázdná nebo obsahuje výchozí text "SloupecX"
+                    if not header_val or str(header_val).strip().startswith("Sloupec"):
+                        target_col = c
+                        self._set_cell_value(sheet, 2, c, emp_name)
+                        logger.info("Záhlaví sloupce %d v listu %s přepsáno na jméno %s", c, sheet.title, emp_name)
+                        break
+
+            if not target_col:
+                target_col = 17  # Fallback na sloupec Q
+
+            # Najdi první volný řádek v tomto sloupci (pro částku i datum)
+            target_row = None
+            max_r = 14 if target_col >= 25 else 42
+            for r in range(3, max_r + 1):
+                amt_val = sheet.cell(row=r, column=target_col).value
+                date_val = sheet.cell(row=r, column=target_col + 1).value
+                if amt_val is None and date_val is None:
+                    target_row = r
+                    break
+
+            if not target_row:
+                target_row = max_r
+
+            self._set_cell_value(sheet, target_row, target_col, float(amount))
+            self._set_cell_value(sheet, target_row, target_col + 1, date_obj.strftime("%d.%m.%Y"))
+            workbook.save(self.file_path)
+            logger.info("Záloha pro %s (%s %s) zapsána do listu %s na řádek %d, sloupec %d", emp_name, amount, currency, sheet.title, target_row, target_col)
+            return
+
+        # Určení cílového sloupce pro ostatní kategorie
+        col = None
         if "nafta" in category_lower:
             if currency_upper == "CZK":
                 col = 1 if "karta" in method_lower or "kartou" in method_lower else 3
@@ -287,8 +335,6 @@ class Hodiny2025Manager:
             col = 11 if "karta" in method_lower or "kartou" in method_lower else 9
         elif "bankomat" in category_lower or "výběr" in category_lower or "vyber" in category_lower:
             col = 31 if currency_upper == "CZK" else 33
-        elif "záloha" in category_lower or "zaloha" in category_lower:
-            col = 17
         else:
             # Ostatní výdaje (Sloupec L pro CZK, Sloupec N pro EUR)
             col = 12 if currency_upper == "CZK" else 14
@@ -313,7 +359,7 @@ class Hodiny2025Manager:
             self._set_cell_value(sheet, target_row, 13, description)
 
         # Zápis data, pokud sloupec má odpovídající datový sloupec
-        date_col_map = {1: 2, 4: 5, 9: 10, 17: 18, 31: 32, 33: 32}
+        date_col_map = {1: 2, 4: 5, 9: 10, 31: 32, 33: 32}
         if col in date_col_map:
             self._set_cell_value(sheet, target_row, date_col_map[col], date_obj.strftime("%d.%m.%Y"))
 

@@ -278,7 +278,24 @@ class Hodiny2025Manager:
         if "záloha" in category_lower or "zaloha" in category_lower:
             emp_name = description.replace("Záloha - ", "").split(" (")[0].strip() if "Záloha - " in description else description
             
-            # Prohledej sloupce záloh: Q(17), S(19), U(21), W(23), Y(25), AA(27), AC(29)
+            # Speciální pravidlo pro zaměstnance "Čáp" -> sloupce O (15) pro EUR a P (16) pro CZK/CZE od řádku 4 dále
+            if emp_name.lower() in ("čáp", "cap"):
+                target_col = 15 if currency_upper == "EUR" else 16
+                target_row = None
+                for r in range(4, 43):
+                    val = sheet.cell(row=r, column=target_col).value
+                    if val is None:
+                        target_row = r
+                        break
+                if not target_row:
+                    target_row = 42
+
+                self._set_cell_value(sheet, target_row, target_col, float(amount))
+                workbook.save(self.file_path)
+                logger.info("Záloha pro Čáp (%s %s) zapsána do listu %s na řádek %d, sloupec %d (%s)", amount, currency, sheet.title, target_row, target_col, chr(64 + target_col))
+                return
+
+            # Logika pro ostatní zaměstnance -> sloupce Q(17), S(19), U(21), W(23), Y(25), AA(27), AC(29)
             advance_cols = [17, 19, 21, 23, 25, 27, 29]
             target_col = None
 
@@ -293,7 +310,6 @@ class Hodiny2025Manager:
             if not target_col:
                 for c in advance_cols:
                     header_val = sheet.cell(row=2, column=c).value or sheet.cell(row=1, column=c).value
-                    # Pokud je buňka prázdná nebo obsahuje výchozí text "SloupecX"
                     if not header_val or str(header_val).strip().startswith("Sloupec"):
                         target_col = c
                         self._set_cell_value(sheet, 2, c, emp_name)

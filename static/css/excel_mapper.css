@@ -1,0 +1,428 @@
+/* static/css/excel_mapper.css */
+/* Moderní styly pro interaktivní vizuální mapování dat do Excelu */
+
+.mapper-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Horní ovládací lišta */
+.mapper-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+}
+
+.mapper-toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+/* Tabový pruh listů (jako v Excelu) */
+.mapper-sheet-tabs {
+    display: flex;
+    gap: 0.25rem;
+    overflow-x: auto;
+    padding: 0.25rem 0.5rem;
+    background: var(--bg-tertiary);
+    border-bottom: 2px solid var(--border-color);
+    border-radius: 8px 8px 0 0;
+}
+
+.sheet-tab-item {
+    padding: 0.5rem 1rem;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sheet-tab-item:hover {
+    background: var(--bg-card);
+    color: var(--text-primary);
+}
+
+.sheet-tab-item.active {
+    background: var(--card-bg, #ffffff);
+    color: var(--text-accent);
+    font-weight: 700;
+    border-top: 3px solid var(--text-accent);
+}
+
+/* Obal tabulky se scrollováním */
+.mapper-grid-wrapper {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 0 0 12px 12px;
+    overflow: auto;
+    max-height: 620px;
+    position: relative;
+    box-shadow: 0 4px 12px var(--shadow-light);
+}
+
+/* Excel Mřížka */
+.excel-mapper-table {
+    border-collapse: collapse;
+    width: max-content;
+    min-width: 100%;
+    font-size: 0.85rem;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Fixní hlavičky sloupců a řádků */
+.excel-mapper-table th {
+    background-color: var(--bg-tertiary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    padding: 6px 10px;
+    font-weight: 600;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.excel-mapper-table th.row-header {
+    left: 0;
+    z-index: 11;
+    min-width: 45px;
+    background-color: var(--bg-tertiary);
+}
+
+.excel-mapper-table th.corner-header {
+    left: 0;
+    top: 0;
+    z-index: 20;
+    background-color: var(--bg-tertiary);
+}
+
+/* Buňky mřížky */
+.excel-mapper-table td.grid-cell {
+    border: 1px solid var(--border-color);
+    padding: 6px 8px;
+    min-width: 110px;
+    max-width: 220px;
+    height: 38px;
+    vertical-align: middle;
+    position: relative;
+    cursor: pointer;
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    transition: background-color 0.15s ease, outline 0.15s ease;
+    overflow: visible;
+}
+
+.excel-mapper-table td.grid-cell:hover {
+    outline: 2px solid var(--text-accent);
+    outline-offset: -2px;
+    z-index: 5;
+}
+
+.excel-mapper-table td.grid-cell.cell-selected {
+    outline: 2px solid var(--text-accent) !important;
+    background-color: rgba(var(--text-accent-rgb, 14, 165, 233), 0.1) !important;
+}
+
+.excel-mapper-table td.grid-cell.cell-has-mapping {
+    background-color: rgba(var(--text-accent-rgb, 14, 165, 233), 0.04);
+}
+
+.cell-content-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    width: 100%;
+    height: 100%;
+}
+
+.cell-value-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.82rem;
+    color: var(--text-primary);
+}
+
+/* Grafické figurky a značky na buňkách (Badges) */
+.mapper-badges-container {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.mapper-figure-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #ffffff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    gap: 3px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    white-space: nowrap;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Tvary figurek pro jednotlivé kategorie */
+.mapper-figure-badge.shape-circle {
+    border-radius: 12px;
+    border-left: 2px solid rgba(255, 255, 255, 0.6);
+}
+
+.mapper-figure-badge.shape-square {
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.mapper-figure-badge.shape-diamond {
+    border-radius: 2px;
+    border-left: 3px solid rgba(255, 255, 255, 0.8);
+}
+
+.mapper-figure-badge.shape-hexagon {
+    border-radius: 6px;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.25);
+}
+
+/* Index zálohy / priority na figurce */
+.mapper-badge-index {
+    font-size: 0.6rem;
+    background: rgba(0, 0, 0, 0.35);
+    padding: 0 3px;
+    border-radius: 3px;
+    margin-left: 2px;
+}
+
+/* Kontextové menu */
+.mapper-context-menu {
+    position: fixed;
+    z-index: 3500;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+    padding: 10px;
+    min-width: 290px;
+    max-width: 340px;
+    max-height: 80vh;
+    overflow-y: auto;
+    backdrop-filter: blur(12px);
+    display: none;
+    animation: fadeIn 0.15s ease-out;
+}
+
+.menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 6px 8px 6px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 8px;
+}
+
+.menu-cell-badge {
+    background: var(--text-accent);
+    color: #fff;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+.menu-search-input {
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.menu-category-group {
+    margin-bottom: 8px;
+}
+
+.menu-category-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    padding: 4px 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.menu-item-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 8px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.82rem;
+    text-align: left;
+    transition: background 0.15s ease;
+}
+
+.menu-item-btn:hover {
+    background: var(--bg-tertiary);
+}
+
+.menu-item-btn.active-mapping {
+    background: rgba(var(--text-accent-rgb, 14, 165, 233), 0.15);
+    font-weight: 600;
+}
+
+.menu-item-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.menu-item-color-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.menu-actions-divider {
+    height: 1px;
+    background: var(--border-color);
+    margin: 8px 0;
+}
+
+.menu-remove-btn {
+    width: 100%;
+    padding: 8px;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.82rem;
+    transition: background 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.menu-remove-btn:hover {
+    background: #ef4444;
+    color: #ffffff;
+}
+
+/* Legenda a statistiky namapovaných polí */
+.mapper-legend-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.25rem;
+}
+
+.mapper-legend-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.legend-category-box {
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+}
+
+.legend-category-box h4 {
+    margin: 0 0 8px 0;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-primary);
+}
+
+.legend-field-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.legend-field-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    padding: 3px 6px;
+    border-radius: 4px;
+    background: var(--bg-secondary);
+}
+
+.legend-field-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-secondary);
+}
+
+.legend-field-count {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 10px;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.legend-field-count.has-items {
+    background: var(--text-accent);
+    color: #ffffff;
+}
+
+/* Animace */
+@keyframes popIn {
+    0% {
+        transform: scale(0.6);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}

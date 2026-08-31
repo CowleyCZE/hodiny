@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+import pytest
 from datetime import datetime
 from pathlib import Path
 
@@ -7,6 +8,8 @@ from openpyxl import Workbook, load_workbook
 
 from config import Config
 from zalohy_manager import ZalohyManager
+
+pytestmark = pytest.mark.integration
 
 
 class TestZalohyManager(unittest.TestCase):

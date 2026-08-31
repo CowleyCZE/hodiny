@@ -32,6 +32,9 @@ class Config:
     DEFAULT_APP_NAME = "Evidence pracovní doby"
     SMTP_TIMEOUT = 60
     MAX_ROWS_TO_DISPLAY_EXCEL_VIEWER = 500
+    MAX_CONTENT_LENGTH = 25 * 1024 * 1024
+    ADMIN_USERNAME = os.environ.get("HODINY_ADMIN_USERNAME")
+    ADMIN_PASSWORD = os.environ.get("HODINY_ADMIN_PASSWORD")
     EXCEL_EMPLOYEE_START_ROW = 8
     EXCEL_WEEK_SHEET_TEMPLATE_NAME = "Týden"
     EXCEL_ADVANCES_SHEET_NAME = "Zálohy"
@@ -109,5 +112,6 @@ class Config:
             PERMANENT_SESSION_LIFETIME=3600,
             PROPAGATE_EXCEPTIONS=cls.IS_PYTHONANYWHERE,
             PREFERRED_URL_SCHEME="https" if cls.IS_PYTHONANYWHERE else "http",
+            MAX_CONTENT_LENGTH=cls.MAX_CONTENT_LENGTH,
         )
         return app

@@ -49,9 +49,10 @@ def record_time():
         return redirect(url_for("employees.manage_employees"))
 
     current_date = request.args.get("next_date", dt.datetime.now().strftime("%Y-%m-%d"))
-    start_time = session["settings"].get("start_time", "07:00")
-    end_time = session["settings"].get("end_time", "18:00")
-    lunch_duration = str(session["settings"].get("lunch_duration", 1.0))
+    settings = session.get("settings", {})
+    start_time = settings.get("start_time", "07:00")
+    end_time = settings.get("end_time", "18:00")
+    lunch_duration = str(settings.get("lunch_duration", 1.0))
     is_free_day = False
 
     if request.method == "POST":

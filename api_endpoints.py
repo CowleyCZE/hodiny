@@ -74,10 +74,12 @@ def validate_date_format(date_string: str) -> bool:
 
 def validate_time_format(time_string: str) -> bool:
     """Validate time format HH:MM"""
+    if not isinstance(time_string, str):
+        return False
     try:
         datetime.strptime(time_string, "%H:%M")
         return True
-    except ValueError:
+    except (ValueError, TypeError):
         return False
 
 
@@ -187,7 +189,7 @@ def create_time_entry():
                     return APIResponse.error(
                         "Lunch duration must be between 0 and 8 hours", "INVALID_LUNCH_DURATION", 400
                     )
-            except ValueError:
+            except (ValueError, TypeError):
                 return APIResponse.error("Invalid lunch duration format", "INVALID_LUNCH_FORMAT", 400)
 
         response_data = create_time_entry_payload(data, g.employee_manager, g.excel_manager, g.hodiny2025_manager)

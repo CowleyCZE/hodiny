@@ -162,9 +162,9 @@ class ZalohyManager:
         if employee_name_coords:
             # Pokud je nakonfigurováno, použij konfigurovanou pozici
             config_row, config_col = employee_name_coords[0]  # Použij první lokaci
-
-            # Hledej existující zaměstnance od konfigurované pozice
-            for row in range(config_row, sheet.max_row + 2):
+            start_r = config_row
+            max_r = max(config_row, sheet.max_row + 1)
+            for row in range(start_r, max_r + 1):
                 cell = sheet.cell(row=row, column=config_col)
                 if cell.value == employee_name:
                     return row
@@ -174,7 +174,9 @@ class ZalohyManager:
                     return row
         else:
             # Fallback na původní logiku
-            for row in range(self.employee_start_row, sheet.max_row + 2):
+            start_r = self.employee_start_row
+            max_r = max(self.employee_start_row, sheet.max_row + 1)
+            for row in range(start_r, max_r + 1):
                 cell = sheet.cell(row=row, column=1)
                 if cell.value == employee_name:
                     return row
@@ -183,7 +185,7 @@ class ZalohyManager:
                     logger.info("Zaměstnanec %s přidán na řádek %d (původní logika)", employee_name, row)
                     return row
 
-        return sheet.max_row + 1  # Should not be reached in practice
+        return max(self.employee_start_row, sheet.max_row + 1)
 
     def _update_advance_cell(self, sheet, row, column, amount):
         target_cell = sheet.cell(row=row, column=column)

@@ -1,9 +1,9 @@
 """Bootstrap Flask aplikace a request lifecycle pro projekt Hodiny."""
 
 import datetime as dt
-import random
 
-from flask import Flask, flash, g, session
+from flask import Flask, flash, g, session, request, redirect, url_for
+from security import csrf_token, validate_csrf
 
 from api_endpoints import api_bp
 from blueprints.configuration import configuration_bp
@@ -26,6 +26,17 @@ logger = setup_logger("app")
 app = Flask(__name__)
 app.secret_key = Config.SECRET_KEY
 Config.init_app(app)
+app.jinja_env.globals["csrf_token"] = csrf_token
+
+
+@app.before_request
+def security_before_request():
+    validate_csrf()
+    if Config.ADMIN_USERNAME and Config.ADMIN_PASSWORD and request.endpoint != "health_check":
+        if not session.get("authenticated"):
+            auth = request.authorization
+            if not auth or not (auth.username == Config.ADMIN_USERNAME and auth.password == Config.ADMIN_PASSWORD):
+                return ("Přístup odepřen", 401, {"WWW-Authenticate": 'Basic realm="hodiny"'})
 
 app.register_blueprint(api_bp)
 app.register_blueprint(configuration_bp)
@@ -36,6 +47,19 @@ app.register_blueprint(reports_bp)
 app.register_blueprint(settings_bp)
 
 initialize_performance_optimizations()
+
+
+def initialize_archived_state():
+    """Run one archive check at process startup, not once per HTTP request."""
+    settings = load_app_settings()
+    manager = ExcelManager(Config.EXCEL_BASE_PATH, hodiny2025_manager=Hodiny2025Manager(Config.EXCEL_BASE_PATH))
+    current_week = dt.datetime.now().isocalendar().week
+    if manager.archive_if_needed(current_week, settings):
+        save_app_settings(settings)
+    manager.close_cached_workbooks()
+
+
+initialize_archived_state()
 
 
 @app.before_request
@@ -55,13 +79,7 @@ def before_request():
         session["settings"].get("project_info", {}).get("end_date", ""),
     )
 
-    if random.randint(1, 100) == 1:
-        cleanup_old_data()
-
-    current_week = dt.datetime.now().isocalendar().week
-    if g.excel_manager.archive_if_needed(current_week, session["settings"]):
-        save_app_settings(session["settings"])
-        flash(f"Týden {session['settings']['last_archived_week'] - 1} byl archivován.", "info")
+    cleanup_old_data()
 
 
 @app.teardown_request

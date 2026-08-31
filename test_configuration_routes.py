@@ -42,7 +42,7 @@ def test_settings_page_is_available(isolated_client):
     response = client.get("/settings")
 
     assert response.status_code == 200
-    assert "Nastavení aplikace" in response.get_data(as_text=True)
+    assert "Nastavení systému" in response.get_data(as_text=True)
 
 
 def test_settings_page_persists_runtime_settings(isolated_client):
@@ -74,10 +74,37 @@ def test_settings_page_persists_runtime_settings(isolated_client):
 def test_advanced_settings_page_is_available(isolated_client):
     client, _, _, _ = isolated_client
 
-    response = client.get("/nastaveni")
+    response = client.get("/nastaveni", follow_redirects=True)
 
     assert response.status_code == 200
-    assert "Rozšířené nastavení ukládání do XLSX souborů" in response.get_data(as_text=True)
+    assert "excel-mapper-root" in response.get_data(as_text=True)
+
+
+def test_mapping_schema_api(isolated_client):
+    client, _, _, _ = isolated_client
+
+    response = client.get("/api/mapping-schema")
+
+    assert response.status_code == 200
+    data = response.get_json()
+    assert "weekly_time" in data
+    assert "advances" in data
+    assert "monthly_time" in data
+    assert "projects" in data
+    assert data["weekly_time"]["shape"] == "circle"
+    assert "employee_name" in data["weekly_time"]["fields"]
+
+
+def test_settings_defaults_api(isolated_client):
+    client, _, _, _ = isolated_client
+
+    response = client.get("/api/settings/defaults")
+
+    assert response.status_code == 200
+    data = response.get_json()
+    assert "weekly_time" in data
+    assert len(data["weekly_time"]["start_time"]) > 0
+    assert data["weekly_time"]["start_time"][0]["file"] == Config.EXCEL_TEMPLATE_NAME
 
 
 def test_dynamic_config_api_roundtrip(isolated_client):

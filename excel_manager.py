@@ -7,6 +7,7 @@ Zodpovědnosti:
  - Generace měsíčního reportu agregací z týdenních listů
 """
 import logging
+import tempfile
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
@@ -26,6 +27,7 @@ from services.excel_week_service import (
     open_weekly_workbook,
     write_time_entry_to_sheet,
 )
+from security import safe_excel_path
 
 try:
     from utils.logger import setup_logger
@@ -91,18 +93,21 @@ class ExcelManager:
         jinak recykluje instanci pro snížení IO.
         """
         target_filename = filename or self.active_filename
-        target_path = self.base_path / target_filename
+        target_path = safe_excel_path(self.base_path, target_filename)
         cache_key = str(target_path.absolute())
 
         wb = None
+        is_from_cache = False
         with self._file_lock:
             if cache_key in self._workbook_cache:
                 try:
                     wb = self._workbook_cache[cache_key]
                     if wb:
                         _ = wb.sheetnames  # Test if workbook is alive
+                        is_from_cache = True
                 except Exception:
                     wb = None
+                    is_from_cache = False
             if wb is None:
                 if not target_path.exists():
                     raise FileNotFoundError(f"Soubor '{target_filename}' nenalezen.")
@@ -119,12 +124,14 @@ class ExcelManager:
         try:
             yield wb
         finally:
-            if read_only and wb:
+            if read_only and wb and not is_from_cache:
                 wb.close()
 
     def update_cell(self, filename, sheet_name, row, col, value):
         """Bezpečně aktualizuje hodnotu jedné buňky v zadaném souboru a listu."""
         try:
+            if not (1 <= int(row) <= 10000 and 1 <= int(col) <= 256):
+                raise ValueError("Neplatná pozice buňky.")
             with self._file_lock:
                 with self._get_workbook(filename=filename, read_only=False) as wb:
                     if sheet_name not in wb.sheetnames:
@@ -262,7 +269,7 @@ class ExcelManager:
             for path_str, wb in self._workbook_cache.items():
                 try:
                     if wb:
-                        wb.save(path_str)
+                        self._atomic_save(wb, path_str)
                         wb.close()
                 except Exception as e:
                     logger.error(
@@ -272,6 +279,17 @@ class ExcelManager:
                         exc_info=True,
                     )
             self._workbook_cache.clear()
+
+    @staticmethod
+    def _atomic_save(workbook, path_str):
+        target = Path(path_str)
+        with tempfile.NamedTemporaryFile(prefix=f".{target.name}.", suffix=".tmp", dir=target.parent, delete=False) as tmp:
+            temporary_path = Path(tmp.name)
+        try:
+            workbook.save(temporary_path)
+            temporary_path.replace(target)
+        finally:
+            temporary_path.unlink(missing_ok=True)
 
     def ziskej_cislo_tydne(self, datum):
         """Vrátí ISO kalendář (year, week, weekday) nebo None při chybě."""

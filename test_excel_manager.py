@@ -1,12 +1,15 @@
 import datetime
 import tempfile
 import unittest
+import pytest
 from pathlib import Path
 
 from openpyxl import Workbook
 
 from config import Config
 from excel_manager import ExcelManager
+
+pytestmark = pytest.mark.integration
 
 
 class TestExcelManagerReports(unittest.TestCase):

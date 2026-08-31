@@ -176,8 +176,6 @@ class Hodiny2025Manager:
             row = self.DATA_START_ROW + day - 1
             # use helper to avoid writing into MergedCell objects
             self._set_cell_value(sheet, row, self.COL_DAY, day)
-            formula = f'=IF(AND(E{row}<>",G{row}<>""),(G{row}-E{row})*24-F{row},0)'
-            # correct formula: keep the original expected expression (preserve quotes)
             formula = f'=IF(AND(E{row}<>"",G{row}<>""),(G{row}-E{row})*24-F{row},0)'
             self._set_cell_formula(sheet, row, self.COL_TOTAL_HOURS, formula)
             self._set_cell_formula(sheet, row, self.COL_OVERTIME, f"=MAX(0,H{row}-8)")
@@ -465,7 +463,10 @@ class Hodiny2025Manager:
             try:
                 start = datetime.strptime(record["start_time"], "%H:%M")
                 end = datetime.strptime(record["end_time"], "%H:%M")
-                hours = (end - start).total_seconds() / 3600 - record["lunch_hours"]
+                delta_seconds = (end - start).total_seconds()
+                if delta_seconds < 0:
+                    delta_seconds += 24 * 3600
+                hours = delta_seconds / 3600 - record["lunch_hours"]
                 record["total_hours"] = max(0.0, hours)
             except (ValueError, TypeError):
                 pass

@@ -62,8 +62,8 @@ class Hodiny2025Manager:
 
     def __init__(self, excel_path):
         self.excel_path = Path(excel_path)
-        self.workbook_name = "Hodiny2025.xlsx"
-        self.template_sheet_name = "MMhod25"
+        self.workbook_name = "Hodiny2026.xlsx"
+        self.template_sheet_name = "MMhod26"
         self.file_path = self.excel_path / self.workbook_name
         self._ensure_excel_file_exists()
         logger.info("Hodiny2025Manager inicializován pro soubor: %s", self.file_path)

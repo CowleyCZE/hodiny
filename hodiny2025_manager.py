@@ -64,6 +64,7 @@ class Hodiny2025Manager:
         self.excel_path = Path(excel_path)
         self.workbook_name = "Hodiny2026.xlsx"
         self.template_sheet_name = "MMhod26"
+        self.cash_template_sheet_name = "MMcash26"
         self.file_path = self.excel_path / self.workbook_name
         self._ensure_excel_file_exists()
         logger.info("Hodiny2025Manager inicializován pro soubor: %s", self.file_path)
@@ -245,6 +246,82 @@ class Hodiny2025Manager:
             return workbook, new_sheet
 
         return workbook, workbook[sheet_name]
+
+    def get_or_create_cash_sheet(self, month: int, year: int = 2026) -> tuple[Workbook, Worksheet]:
+        """Získá nebo vytvoří měsíční list výdajů ze šablony MMcash26 (např. 01cash26)."""
+        sheet_name = f"{month:02d}cash{str(year)[2:]}"
+        try:
+            workbook = load_workbook(self.file_path)
+        except (FileNotFoundError, InvalidFileException):
+            self._create_new_workbook()
+            workbook = load_workbook(self.file_path)
+
+        if sheet_name not in workbook.sheetnames:
+            if self.cash_template_sheet_name not in workbook.sheetnames:
+                raise ValueError(f"Template list výdajů '{self.cash_template_sheet_name}' nebyl nalezen")
+            template_sheet = workbook[self.cash_template_sheet_name]
+            new_sheet = workbook.copy_worksheet(template_sheet)
+            new_sheet.title = sheet_name
+            logger.info("Vytvořen nový list výdajů: %s", sheet_name)
+            return workbook, new_sheet
+
+        return workbook, workbook[sheet_name]
+
+    def zapis_vydaje(self, category: str, amount: float, currency: str, payment_method: str, date_str: str, description: str = ""):
+        """Zapíše výdaj (nafta, peage, ubytování, ostatní, záloha, bankomat) do odpovídajícího měsíčního listu XXcashXX."""
+        date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+        workbook, sheet = self.get_or_create_cash_sheet(date_obj.month, date_obj.year)
+
+        # Určení cílového sloupce podle kategorie, měny a způsobu platby
+        col = None
+        category_lower = category.lower()
+        currency_upper = currency.upper()
+        method_lower = payment_method.lower()
+
+        if "nafta" in category_lower:
+            if currency_upper == "CZK":
+                col = 1 if "karta" in method_lower or "kartou" in method_lower else 3
+            else:
+                col = 4 if "karta" in method_lower or "kartou" in method_lower else 6
+        elif "peage" in category_lower or "mýto" in category_lower or "myto" in category_lower:
+            col = 8 if "karta" in method_lower or "kartou" in method_lower else 7
+        elif "ubytování" in category_lower or "ubytovani" in category_lower:
+            col = 11 if "karta" in method_lower or "kartou" in method_lower else 9
+        elif "bankomat" in category_lower or "výběr" in category_lower or "vyber" in category_lower:
+            col = 31 if currency_upper == "CZK" else 33
+        elif "záloha" in category_lower or "zaloha" in category_lower:
+            col = 17
+        else:
+            # Ostatní výdaje (Sloupec L pro CZK, Sloupec N pro EUR)
+            col = 12 if currency_upper == "CZK" else 14
+
+        # Najdi první volný řádek pro zápis v rozmezí řádků 3–42
+        target_row = None
+        for r in range(3, 43):
+            cell_val = sheet.cell(row=r, column=col).value
+            if cell_val is None:
+                target_row = r
+                break
+
+        if not target_row:
+            logger.warning("Všechny řádky výdajů v listu %s jsou již zaplněny", sheet.title)
+            target_row = 42
+
+        # Zápis částky
+        self._set_cell_value(sheet, target_row, col, float(amount))
+
+        # Zápis popisu, pokud jde o Ostatní (Sloupec M)
+        if col in (12, 14) and description:
+            self._set_cell_value(sheet, target_row, 13, description)
+
+        # Zápis data, pokud sloupec má odpovídající datový sloupec
+        date_col_map = {1: 2, 4: 5, 9: 10, 17: 18, 31: 32, 33: 32}
+        if col in date_col_map:
+            self._set_cell_value(sheet, target_row, date_col_map[col], date_obj.strftime("%d.%m.%Y"))
+
+        workbook.save(self.file_path)
+        logger.info("Výdaj %s %s (%s) zapsán do listu %s na řádek %d, sloupec %d", amount, currency, category, sheet.title, target_row, col)
+
 
     def zapis_pracovni_doby(self, date_str, start_time_str, end_time_str, lunch_duration_str, num_employees):
         try:

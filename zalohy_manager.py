@@ -131,6 +131,22 @@ class ZalohyManager:
             self._update_date_cell(sheet, row, date)
 
             self._save_workbook(workbook)
+
+            # Synchronizace do souboru Hodiny2026.xlsx (list XXcashXX)
+            try:
+                from hodiny2025_manager import Hodiny2025Manager
+                hodiny_mgr = Hodiny2025Manager(self.base_path)
+                hodiny_mgr.zapis_vydaje(
+                    category="Záloha",
+                    amount=amount,
+                    currency=currency,
+                    payment_method="Hotově",
+                    date_str=date,
+                    description=f"Záloha - {employee_name} ({option})"
+                )
+            except Exception as sync_err:
+                logger.error("Chyba při synchronizaci zálohy do Hodiny2026.xlsx: %s", sync_err)
+
             return True
         except (FileNotFoundError, ValueError, IOError) as e:
             logger.error("Chyba při ukládání zálohy: %s", e, exc_info=True)

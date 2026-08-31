@@ -1,12 +1,12 @@
 {
-    "start_time": "08:00",
+    "start_time": "07:00",
     "end_time": "18:00",
     "lunch_duration": 1.0,
     "preferred_employee_name": "Jakub Čáp",
     "project_info": {
-        "name": "Essity",
-        "start_date": "2026-01-18",
+        "name": "Německo",
+        "start_date": "2026-08-10",
         "end_date": ""
     },
-    "last_archived_week": 35
+    "last_archived_week": 36
 }

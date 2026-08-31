@@ -9,22 +9,66 @@ reports_bp = Blueprint("reports", __name__)
 
 @reports_bp.route("/zalohy", methods=["GET", "POST"])
 def zalohy():
-    """Správa záloh (půjček / plateb) pro zaměstnance."""
+    """Správa záloh, výdajů a výběrů z bankomatu (příjmů)."""
     if request.method == "POST":
         try:
             form = request.form
-            amount_str = form.get("amount", "")
-            if not amount_str:
-                raise ValueError("Částka je povinný údaj.")
-            amount = float(amount_str.replace(",", "."))
-            g.zalohy_manager.add_or_update_employee_advance(
-                form.get("employee_name", ""),
-                amount,
-                form.get("currency", ""),
-                form.get("option", ""),
-                form.get("date", ""),
-            )
-            flash("Záloha byla úspěšně uložena.", "success")
+            form_type = form.get("form_type", "zaloha")
+
+            if form_type == "vydaj":
+                category = form.get("expense_category", "")
+                amount_str = form.get("expense_amount", "")
+                currency = form.get("expense_currency", "EUR")
+                payment_method = form.get("expense_payment_method", "Hotově")
+                date_str = form.get("expense_date", "")
+                description = form.get("expense_description", "")
+
+                if not amount_str:
+                    raise ValueError("Částka je povinný údaj.")
+                amount = float(amount_str.replace(",", "."))
+
+                g.hodiny2025_manager.zapis_vydaje(
+                    category=category,
+                    amount=amount,
+                    currency=currency,
+                    payment_method=payment_method,
+                    date_str=date_str,
+                    description=description,
+                )
+                flash("Výdaj byl úspěšně uložen do Excelu.", "success")
+
+            elif form_type == "bankomat":
+                amount_str = form.get("atm_amount", "")
+                currency = form.get("atm_currency", "EUR")
+                date_str = form.get("atm_date", "")
+
+                if not amount_str:
+                    raise ValueError("Částka je povinný údaj.")
+                amount = float(amount_str.replace(",", "."))
+
+                g.hodiny2025_manager.zapis_vydaje(
+                    category="Bankomat",
+                    amount=amount,
+                    currency=currency,
+                    payment_method="Kartou",
+                    date_str=date_str,
+                    description="Výběr z bankomatu",
+                )
+                flash("Výběr z bankomatu byl úspěšně uložen do Excelu.", "success")
+
+            else:
+                amount_str = form.get("amount", "")
+                if not amount_str:
+                    raise ValueError("Částka je povinný údaj.")
+                amount = float(amount_str.replace(",", "."))
+                g.zalohy_manager.add_or_update_employee_advance(
+                    form.get("employee_name", ""),
+                    amount,
+                    form.get("currency", ""),
+                    form.get("option", ""),
+                    form.get("date", ""),
+                )
+                flash("Záloha byla úspěšně uložena.", "success")
         except (ValueError, KeyError, IOError) as exc:
             flash(str(exc), "error")
 

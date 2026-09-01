@@ -87,13 +87,20 @@ class ZalohyManager:
             return option_coords[option_index]
         return None
 
+    def _get_real_sheet_name(self, workbook, requested_name):
+        for s in workbook.sheetnames:
+            if s.lower() == requested_name.lower():
+                return s
+        return requested_name
+
     def add_or_update_employee_advance(self, employee_name, amount, currency, option, date):
         """Přičte zálohu zaměstnanci (vytvoří řádek pokud chybí)."""
         workbook = None
         try:
             self._validate_inputs(employee_name, amount, currency, date)
             workbook = self._get_active_workbook(read_only=False)
-            sheet = workbook[self.zalohy_sheet_name]
+            real_sheet_name = self._get_real_sheet_name(workbook, self.zalohy_sheet_name)
+            sheet = workbook[real_sheet_name]
             options = self.get_option_names()
             if option not in options:
                 raise ValueError(f"Neplatná volba zálohy: {option}")
@@ -233,8 +240,9 @@ class ZalohyManager:
         workbook = None
         try:
             workbook = self._get_active_workbook(read_only=True)
-            if self.zalohy_sheet_name in workbook.sheetnames:
-                sheet = workbook[self.zalohy_sheet_name]
+            real_sheet_name = self._get_real_sheet_name(workbook, self.zalohy_sheet_name)
+            if real_sheet_name in workbook.sheetnames:
+                sheet = workbook[real_sheet_name]
                 option_type_coords = self._get_cell_coordinates("option_type", self.zalohy_sheet_name)
                 if option_type_coords:
                     options = []

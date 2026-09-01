@@ -44,9 +44,9 @@
                 "sheet": "Zálohy"
             },
             {
+                "cell": "Q3",
                 "file": "Hodiny2026.xlsx",
-                "sheet": "08cash26",
-                "cell": "Q3"
+                "sheet": "08cash26"
             }
         ],
         "date": [
@@ -56,9 +56,9 @@
                 "sheet": "Zálohy"
             },
             {
+                "cell": "R3",
                 "file": "Hodiny2026.xlsx",
-                "sheet": "08cash26",
-                "cell": "R3"
+                "sheet": "08cash26"
             }
         ],
         "employee_name": [
@@ -68,54 +68,54 @@
                 "sheet": "Zálohy"
             },
             {
+                "cell": "Q2",
                 "file": "Hodiny2026.xlsx",
-                "sheet": "08cash26",
-                "cell": "Q2"
+                "sheet": "08cash26"
             },
             {
+                "cell": "S2",
                 "file": "Hodiny2026.xlsx",
-                "sheet": "08cash26",
-                "cell": "S2"
+                "sheet": "08cash26"
             },
             {
+                "cell": "U2",
                 "file": "Hodiny2026.xlsx",
-                "sheet": "08cash26",
-                "cell": "U2"
+                "sheet": "08cash26"
             },
             {
+                "cell": "W2",
                 "file": "Hodiny2026.xlsx",
-                "sheet": "08cash26",
-                "cell": "W2"
+                "sheet": "08cash26"
             },
             {
+                "cell": "Y2",
                 "file": "Hodiny2026.xlsx",
-                "sheet": "08cash26",
-                "cell": "Y2"
+                "sheet": "08cash26"
             },
             {
+                "cell": "AA2",
                 "file": "Hodiny2026.xlsx",
-                "sheet": "08cash26",
-                "cell": "AA2"
+                "sheet": "08cash26"
             },
             {
+                "cell": "AC2",
                 "file": "Hodiny2026.xlsx",
-                "sheet": "08cash26",
-                "cell": "AC2"
+                "sheet": "08cash26"
             },
             {
+                "cell": "Y15",
                 "file": "Hodiny2026.xlsx",
-                "sheet": "08cash26",
-                "cell": "Y15"
+                "sheet": "08cash26"
             },
             {
+                "cell": "AA15",
                 "file": "Hodiny2026.xlsx",
-                "sheet": "08cash26",
-                "cell": "AA15"
+                "sheet": "08cash26"
             },
             {
+                "cell": "AC15",
                 "file": "Hodiny2026.xlsx",
-                "sheet": "08cash26",
-                "cell": "AC15"
+                "sheet": "08cash26"
             }
         ],
         "option_type": [
@@ -146,7 +146,18 @@
         "employee_name": [],
         "end_time": [],
         "lunch_hours": [],
-        "num_employees": [],
+        "num_employees": [
+            {
+                "cell": "N3",
+                "file": "Hodiny2026.xlsx",
+                "sheet": "MMhod26"
+            },
+            {
+                "file": "Hodiny2026.xlsx",
+                "sheet": "09hod26",
+                "cell": "N3"
+            }
+        ],
         "overtime": [],
         "start_time": [],
         "total_all_employees": [],

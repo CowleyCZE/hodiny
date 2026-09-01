@@ -82,6 +82,16 @@ class Hodiny2025Manager:
             logger.error("Chyba při načítání dynamické konfigurace: %s", e, exc_info=True)
             return {}
 
+    def _sheet_matches(self, configured_sheet, requested_sheet):
+        if not configured_sheet or not requested_sheet:
+            return configured_sheet == requested_sheet
+        if configured_sheet == requested_sheet:
+            return True
+        # Zvláštní pravidlo pro měsíční listy: MMhod26 nebo 01hod26 by mělo platit pro jakýkoliv XXhod26
+        if "hod" in configured_sheet and "hod" in requested_sheet:
+            return configured_sheet.split("hod")[-1] == requested_sheet.split("hod")[-1]
+        return False
+
     def _get_cell_coordinates(self, field_key, sheet_name=None):
         """Vrátí seznam (row, col) souřadnic pro daný field z dynamické konfigurace.
 
@@ -108,7 +118,7 @@ class Hodiny2025Manager:
                 )
                 continue
 
-            if sheet_name and field_config.get("sheet") != sheet_name:
+            if sheet_name and not self._sheet_matches(field_config.get("sheet"), sheet_name):
                 logger.warning(
                     "Konfigurace pro monthly_time/%s odkazuje na jiný list: %s (očekáván %s)",
                     field_key,
@@ -403,9 +413,9 @@ class Hodiny2025Manager:
         start_time_coords = self._get_cell_coordinates("start_time", sheet.title)
         if start_time_coords and start_time_str and start_time_str != "00:00":
             for start_row, start_col in start_time_coords:
-                actual_row = start_row if start_row != row else row
-                self._set_cell_value(sheet, actual_row, start_col, datetime.strptime(start_time_str, "%H:%M").time())
-                logger.info("Čas začátku zapsán do buňky %s%d (dynamická konfigurace)", chr(64 + start_col), actual_row)
+                
+                self._set_cell_value(sheet, row, start_col, datetime.strptime(start_time_str, "%H:%M").time())
+                logger.info("Čas začátku zapsán do buňky %s%d (dynamická konfigurace)", chr(64 + start_col), row)
         elif start_time_str and start_time_str != "00:00":
             # Fallback na původní logiku
             self._set_cell_value(sheet, row, self.COL_START, datetime.strptime(start_time_str, "%H:%M").time())
@@ -414,9 +424,9 @@ class Hodiny2025Manager:
         end_time_coords = self._get_cell_coordinates("end_time", sheet.title)
         if end_time_coords and end_time_str and end_time_str != "00:00":
             for end_row, end_col in end_time_coords:
-                actual_row = end_row if end_row != row else row
-                self._set_cell_value(sheet, actual_row, end_col, datetime.strptime(end_time_str, "%H:%M").time())
-                logger.info("Čas konce zapsán do buňky %s%d (dynamická konfigurace)", chr(64 + end_col), actual_row)
+                
+                self._set_cell_value(sheet, row, end_col, datetime.strptime(end_time_str, "%H:%M").time())
+                logger.info("Čas konce zapsán do buňky %s%d (dynamická konfigurace)", chr(64 + end_col), row)
         elif end_time_str and end_time_str != "00:00":
             # Fallback na původní logiku
             self._set_cell_value(sheet, row, self.COL_END, datetime.strptime(end_time_str, "%H:%M").time())
@@ -426,11 +436,11 @@ class Hodiny2025Manager:
         lunch_coords = self._get_cell_coordinates("lunch_hours", sheet.title)
         if lunch_coords:
             for lunch_row, lunch_col in lunch_coords:
-                actual_row = lunch_row if lunch_row != row else row
-                lunch_cell = self._set_cell_value(sheet, actual_row, lunch_col, lunch_hours)
+                
+                lunch_cell = self._set_cell_value(sheet, row, lunch_col, lunch_hours)
                 if lunch_cell:
                     lunch_cell.number_format = "0.0"
-                logger.info("Doba oběda zapsána do buňky %s%d (dynamická konfigurace)", chr(64 + lunch_col), actual_row)
+                logger.info("Doba oběda zapsána do buňky %s%d (dynamická konfigurace)", chr(64 + lunch_col), row)
         else:
             # Fallback na původní logiku
             lunch_cell = self._set_cell_value(sheet, row, self.COL_LUNCH, lunch_hours)
@@ -441,10 +451,10 @@ class Hodiny2025Manager:
         employees_coords = self._get_cell_coordinates("num_employees", sheet.title)
         if employees_coords:
             for emp_row, emp_col in employees_coords:
-                actual_row = emp_row if emp_row != row else row
-                self._set_cell_value(sheet, actual_row, emp_col, num_employees if num_employees > 0 else 0)
+                
+                self._set_cell_value(sheet, row, emp_col, num_employees if num_employees > 0 else 0)
                 logger.info(
-                    "Počet zaměstnanců zapsán do buňky %s%d (dynamická konfigurace)", chr(64 + emp_col), actual_row
+                    "Počet zaměstnanců zapsán do buňky %s%d (dynamická konfigurace)", chr(64 + emp_col), row
                 )
         else:
             # Fallback na původní logiku

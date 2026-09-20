@@ -292,7 +292,8 @@ class ExcelManager:
     @staticmethod
     def _atomic_save(workbook, path_str):
         target = Path(path_str)
-        with tempfile.NamedTemporaryFile(prefix=f".{target.name}.", suffix=".tmp", dir=target.parent, delete=False) as tmp:
+        prefix = f".{target.name}."
+        with tempfile.NamedTemporaryFile(prefix=prefix, suffix=".tmp", dir=target.parent, delete=False) as tmp:
             temporary_path = Path(tmp.name)
         try:
             workbook.save(temporary_path)

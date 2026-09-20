@@ -275,8 +275,10 @@ class Hodiny2025Manager:
 
         return workbook, workbook[sheet_name]
 
-    def zapis_vydaje(self, category: str, amount: float, currency: str, payment_method: str, date_str: str, description: str = ""):
-        """Zapíše výdaj (nafta, peage, ubytování, ostatní, záloha, bankomat) do odpovídajícího měsíčního listu XXcashXX."""
+    def zapis_vydaje(self, category: str, amount: float, currency: str, payment_method: str,
+                     date_str: str, description: str = ""):
+        """Zapíše výdaj (nafta, peage, ubytování, ostatní, záloha, bankomat)
+        do odpovídajícího měsíčního listu XXcashXX."""
         date_obj = datetime.strptime(date_str, "%Y-%m-%d")
         workbook, sheet = self.get_or_create_cash_sheet(date_obj.month, date_obj.year)
 
@@ -286,8 +288,9 @@ class Hodiny2025Manager:
 
         # Špeciální logika pro zálohy se jménem zaměstnance
         if "záloha" in category_lower or "zaloha" in category_lower:
-            emp_name = description.replace("Záloha - ", "").split(" (")[0].strip() if "Záloha - " in description else description
-            
+            emp_name = (description.replace("Záloha - ", "").split(" (")[0].strip()
+                        if "Záloha - " in description else description)
+
             # Speciální pravidlo pro zaměstnance "Čáp" -> sloupce O (15) pro EUR a P (16) pro CZK/CZE od řádku 4 dále
             if emp_name.lower() in ("čáp", "cap"):
                 target_col = 15 if currency_upper == "EUR" else 16
@@ -302,7 +305,8 @@ class Hodiny2025Manager:
 
                 self._set_cell_value(sheet, target_row, target_col, float(amount))
                 workbook.save(self.file_path)
-                logger.info("Záloha pro Čáp (%s %s) zapsána do listu %s na řádek %d, sloupec %d (%s)", amount, currency, sheet.title, target_row, target_col, chr(64 + target_col))
+                logger.info("Záloha pro Čáp (%s %s) zapsána do listu %s na řádek %d, sloupec %d (%s)",
+                            amount, currency, sheet.title, target_row, target_col, chr(64 + target_col))
                 return
 
             # Logika pro ostatní zaměstnance -> sloupce Q(17), S(19), U(21), W(23), Y(25), AA(27), AC(29)
@@ -345,7 +349,8 @@ class Hodiny2025Manager:
             self._set_cell_value(sheet, target_row, target_col, float(amount))
             self._set_cell_value(sheet, target_row, target_col + 1, date_obj.strftime("%d.%m.%Y"))
             workbook.save(self.file_path)
-            logger.info("Záloha pro %s (%s %s) zapsána do listu %s na řádek %d, sloupec %d", emp_name, amount, currency, sheet.title, target_row, target_col)
+            logger.info("Záloha pro %s (%s %s) zapsána do listu %s na řádek %d, sloupec %d",
+                        emp_name, amount, currency, sheet.title, target_row, target_col)
             return
 
         # Určení cílového sloupce pro ostatní kategorie
@@ -390,8 +395,8 @@ class Hodiny2025Manager:
             self._set_cell_value(sheet, target_row, date_col_map[col], date_obj.strftime("%d.%m.%Y"))
 
         workbook.save(self.file_path)
-        logger.info("Výdaj %s %s (%s) zapsán do listu %s na řádek %d, sloupec %d", amount, currency, category, sheet.title, target_row, col)
-
+        logger.info("Výdaj %s %s (%s) zapsán do listu %s na řádek %d, sloupec %d",
+                    amount, currency, category, sheet.title, target_row, col)
 
     def zapis_pracovni_doby(self, date_str, start_time_str, end_time_str, lunch_duration_str, num_employees):
         try:
@@ -413,7 +418,6 @@ class Hodiny2025Manager:
         start_time_coords = self._get_cell_coordinates("start_time", sheet.title)
         if start_time_coords and start_time_str and start_time_str != "00:00":
             for start_row, start_col in start_time_coords:
-                
                 self._set_cell_value(sheet, row, start_col, datetime.strptime(start_time_str, "%H:%M").time())
                 logger.info("Čas začátku zapsán do buňky %s%d (dynamická konfigurace)", chr(64 + start_col), row)
         elif start_time_str and start_time_str != "00:00":
@@ -424,7 +428,6 @@ class Hodiny2025Manager:
         end_time_coords = self._get_cell_coordinates("end_time", sheet.title)
         if end_time_coords and end_time_str and end_time_str != "00:00":
             for end_row, end_col in end_time_coords:
-                
                 self._set_cell_value(sheet, row, end_col, datetime.strptime(end_time_str, "%H:%M").time())
                 logger.info("Čas konce zapsán do buňky %s%d (dynamická konfigurace)", chr(64 + end_col), row)
         elif end_time_str and end_time_str != "00:00":
@@ -436,7 +439,6 @@ class Hodiny2025Manager:
         lunch_coords = self._get_cell_coordinates("lunch_hours", sheet.title)
         if lunch_coords:
             for lunch_row, lunch_col in lunch_coords:
-                
                 lunch_cell = self._set_cell_value(sheet, row, lunch_col, lunch_hours)
                 if lunch_cell:
                     lunch_cell.number_format = "0.0"
@@ -451,7 +453,6 @@ class Hodiny2025Manager:
         employees_coords = self._get_cell_coordinates("num_employees", sheet.title)
         if employees_coords:
             for emp_row, emp_col in employees_coords:
-                
                 self._set_cell_value(sheet, row, emp_col, num_employees if num_employees > 0 else 0)
                 logger.info(
                     "Počet zaměstnanců zapsán do buňky %s%d (dynamická konfigurace)", chr(64 + emp_col), row

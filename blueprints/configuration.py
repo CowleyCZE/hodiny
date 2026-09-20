@@ -1,6 +1,6 @@
 """Routy pro advanced technickou konfiguraci projektu."""
 
-from flask import Blueprint, jsonify, redirect, render_template, request, url_for
+from flask import Blueprint, jsonify, redirect, request, url_for
 
 from services.excel_file_service import (
     get_sheet_content,

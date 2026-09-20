@@ -2,7 +2,7 @@
 
 import datetime as dt
 
-from flask import Flask, flash, g, redirect, request, session, url_for
+from flask import Flask, g, redirect, request, session, url_for
 
 from api_endpoints import api_bp
 from blueprints.auth import auth_bp
@@ -17,8 +17,9 @@ from employee_management import EmployeeManager
 from excel_manager import ExcelManager
 from hodiny2025_manager import Hodiny2025Manager
 from performance_optimizations import cleanup_old_data, initialize_performance_optimizations
-from services.settings_service import load_app_settings, save_app_settings
+from security import csrf_token, validate_csrf
 from services.database import Database
+from services.settings_service import load_app_settings, save_app_settings
 from utils.logger import setup_logger
 from zalohy_manager import ZalohyManager
 
@@ -38,6 +39,7 @@ def security_before_request():
             auth = request.authorization
             if not auth or not (auth.username == Config.ADMIN_USERNAME and auth.password == Config.ADMIN_PASSWORD):
                 return ("Přístup odepřen", 401, {"WWW-Authenticate": 'Basic realm="hodiny"'})
+
 
 app.register_blueprint(api_bp)
 app.register_blueprint(auth_bp)

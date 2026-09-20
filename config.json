@@ -1,144 +1,215 @@
 {
-    "weekly_time": {
-        "employee_name": [
-            {
-                "file": "Hodiny_Cap.xlsx",
-                "sheet": "Týden",
-                "cell": "A8"
-            }
-        ],
-        "date": [
-            {
-                "file": "Hodiny_Cap.xlsx",
-                "sheet": "Týden",
-                "cell": "B80"
-            }
-        ],
-        "start_time": [
-            {
-                "file": "Hodiny_Cap.xlsx",
-                "sheet": "Týden",
-                "cell": "B7"
-            }
-        ],
-        "end_time": [
-            {
-                "file": "Hodiny_Cap.xlsx",
-                "sheet": "Týden",
-                "cell": "C7"
-            }
-        ],
-        "lunch_duration": [],
-        "total_hours": [
-            {
-                "file": "Hodiny_Cap.xlsx",
-                "sheet": "Týden",
-                "cell": "B8"
-            }
-        ]
-    },
     "advances": {
-        "employee_name": [
+        "amount_czk": [
             {
+                "cell": "C8",
                 "file": "Hodiny_Cap.xlsx",
-                "sheet": "Zálohy",
-                "cell": "A8"
+                "sheet": "Zálohy"
+            },
+            {
+                "cell": "E8",
+                "file": "Hodiny_Cap.xlsx",
+                "sheet": "Zálohy"
+            },
+            {
+                "cell": "G8",
+                "file": "Hodiny_Cap.xlsx",
+                "sheet": "Zálohy"
+            },
+            {
+                "cell": "I8",
+                "file": "Hodiny_Cap.xlsx",
+                "sheet": "Zálohy"
             }
         ],
         "amount_eur": [
             {
+                "cell": "B8",
                 "file": "Hodiny_Cap.xlsx",
-                "sheet": "Zálohy",
-                "cell": "B8"
+                "sheet": "Zálohy"
             },
             {
+                "cell": "D8",
                 "file": "Hodiny_Cap.xlsx",
-                "sheet": "Zálohy",
-                "cell": "D8"
+                "sheet": "Zálohy"
             },
             {
+                "cell": "F8",
                 "file": "Hodiny_Cap.xlsx",
-                "sheet": "Zálohy",
-                "cell": "F8"
+                "sheet": "Zálohy"
             },
             {
+                "cell": "H8",
                 "file": "Hodiny_Cap.xlsx",
-                "sheet": "Zálohy",
-                "cell": "H8"
-            }
-        ],
-        "amount_czk": [
-            {
-                "file": "Hodiny_Cap.xlsx",
-                "sheet": "Zálohy",
-                "cell": "C8"
+                "sheet": "Zálohy"
             },
             {
-                "file": "Hodiny_Cap.xlsx",
-                "sheet": "Zálohy",
-                "cell": "E8"
-            },
-            {
-                "file": "Hodiny_Cap.xlsx",
-                "sheet": "Zálohy",
-                "cell": "G8"
-            },
-            {
-                "file": "Hodiny_Cap.xlsx",
-                "sheet": "Zálohy",
-                "cell": "I8"
+                "cell": "Q3",
+                "file": "Hodiny2026.xlsx",
+                "sheet": "08cash26"
             }
         ],
         "date": [
             {
+                "cell": "Z8",
                 "file": "Hodiny_Cap.xlsx",
-                "sheet": "Zálohy",
-                "cell": "Z8"
+                "sheet": "Zálohy"
+            },
+            {
+                "cell": "R3",
+                "file": "Hodiny2026.xlsx",
+                "sheet": "08cash26"
+            }
+        ],
+        "employee_name": [
+            {
+                "cell": "A8",
+                "file": "Hodiny_Cap.xlsx",
+                "sheet": "Zálohy"
+            },
+            {
+                "cell": "Q2",
+                "file": "Hodiny2026.xlsx",
+                "sheet": "08cash26"
+            },
+            {
+                "cell": "S2",
+                "file": "Hodiny2026.xlsx",
+                "sheet": "08cash26"
+            },
+            {
+                "cell": "U2",
+                "file": "Hodiny2026.xlsx",
+                "sheet": "08cash26"
+            },
+            {
+                "cell": "W2",
+                "file": "Hodiny2026.xlsx",
+                "sheet": "08cash26"
+            },
+            {
+                "cell": "Y2",
+                "file": "Hodiny2026.xlsx",
+                "sheet": "08cash26"
+            },
+            {
+                "cell": "AA2",
+                "file": "Hodiny2026.xlsx",
+                "sheet": "08cash26"
+            },
+            {
+                "cell": "AC2",
+                "file": "Hodiny2026.xlsx",
+                "sheet": "08cash26"
+            },
+            {
+                "cell": "Y15",
+                "file": "Hodiny2026.xlsx",
+                "sheet": "08cash26"
+            },
+            {
+                "cell": "AA15",
+                "file": "Hodiny2026.xlsx",
+                "sheet": "08cash26"
+            },
+            {
+                "cell": "AC15",
+                "file": "Hodiny2026.xlsx",
+                "sheet": "08cash26"
             }
         ],
         "option_type": [
             {
+                "cell": "B80",
                 "file": "Hodiny_Cap.xlsx",
-                "sheet": "Zálohy",
-                "cell": "B80"
+                "sheet": "Zálohy"
             },
             {
+                "cell": "D80",
                 "file": "Hodiny_Cap.xlsx",
-                "sheet": "Zálohy",
-                "cell": "D80"
+                "sheet": "Zálohy"
             },
             {
+                "cell": "F80",
                 "file": "Hodiny_Cap.xlsx",
-                "sheet": "Zálohy",
-                "cell": "F80"
+                "sheet": "Zálohy"
             },
             {
+                "cell": "H80",
                 "file": "Hodiny_Cap.xlsx",
-                "sheet": "Zálohy",
-                "cell": "H80"
+                "sheet": "Zálohy"
             }
         ]
     },
     "monthly_time": {
-        "employee_name": [],
         "date": [],
-        "start_time": [],
+        "employee_name": [],
         "end_time": [],
         "lunch_hours": [],
-        "total_hours": [],
-        "overtime": [],
-        "num_employees": [],
-        "total_all_employees": []
-    },
-    "projects": {
-        "project_name": [
+        "num_employees": [
             {
-                "file": "Hodiny_Cap.xlsx",
-                "sheet": "Týden",
-                "cell": "B4"
+                "cell": "N3",
+                "file": "Hodiny2026.xlsx",
+                "sheet": "MMhod26"
+            },
+            {
+                "file": "Hodiny2026.xlsx",
+                "sheet": "09hod26",
+                "cell": "N3"
             }
         ],
-        "start_date": [],
-        "end_date": []
+        "overtime": [],
+        "start_time": [],
+        "total_all_employees": [],
+        "total_hours": []
+    },
+    "projects": {
+        "end_date": [],
+        "project_name": [
+            {
+                "cell": "B4",
+                "file": "Hodiny_Cap.xlsx",
+                "sheet": "Týden"
+            }
+        ],
+        "start_date": []
+    },
+    "weekly_time": {
+        "date": [
+            {
+                "cell": "B80",
+                "file": "Hodiny_Cap.xlsx",
+                "sheet": "Týden"
+            }
+        ],
+        "employee_name": [
+            {
+                "cell": "A8",
+                "file": "Hodiny_Cap.xlsx",
+                "sheet": "Týden"
+            }
+        ],
+        "end_time": [
+            {
+                "cell": "C7",
+                "file": "Hodiny_Cap.xlsx",
+                "sheet": "Týden"
+            }
+        ],
+        "lunch_duration": [],
+        "start_time": [
+            {
+                "cell": "B7",
+                "file": "Hodiny_Cap.xlsx",
+                "sheet": "Týden"
+            }
+        ],
+        "total_hours": [
+            {
+                "cell": "B8",
+                "file": "Hodiny_Cap.xlsx",
+                "sheet": "Týden"
+            }
+        ]
     }
 }

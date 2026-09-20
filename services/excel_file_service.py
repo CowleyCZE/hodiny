@@ -3,6 +3,7 @@
 from openpyxl import load_workbook
 
 from config import Config
+from security import safe_excel_path
 from utils.logger import setup_logger
 
 logger = setup_logger("excel_file_service")
@@ -15,7 +16,7 @@ def list_excel_files():
 
 def get_sheet_names(filename):
     """Vrátí názvy listů v zadaném Excel souboru."""
-    file_path = Config.EXCEL_BASE_PATH / filename
+    file_path = safe_excel_path(Config.EXCEL_BASE_PATH, filename)
     if not file_path.exists():
         raise FileNotFoundError("Soubor nenalezen")
 
@@ -26,9 +27,9 @@ def get_sheet_names(filename):
         workbook.close()
 
 
-def get_sheet_content(filename, sheet_name, max_rows=None, max_cols=26):
+def get_sheet_content(filename, sheet_name, max_rows=None, max_cols=30):
     """Vrátí obsah listu ve formátu vhodném pro frontend."""
-    file_path = Config.EXCEL_BASE_PATH / filename
+    file_path = safe_excel_path(Config.EXCEL_BASE_PATH, filename)
     if not file_path.exists():
         raise FileNotFoundError("Soubor nenalezen")
 
@@ -38,18 +39,24 @@ def get_sheet_content(filename, sheet_name, max_rows=None, max_cols=26):
             raise ValueError("List nenalezen")
 
         sheet = workbook[sheet_name]
-        row_limit = min(sheet.max_row, max_rows or Config.MAX_ROWS_TO_DISPLAY_EXCEL_VIEWER)
-        col_limit = min(sheet.max_column, max_cols)
+        # Omezíme řádky pro zobrazení
+        row_limit = min(max_rows or Config.MAX_ROWS_TO_DISPLAY_EXCEL_VIEWER, max(sheet.max_row or 0, 40), 100)
+        col_limit = min(max_cols, max(sheet.max_column or 0, 16))
 
         data = []
-        for row_idx in range(1, row_limit + 1):
-            row_data = []
-            for col_idx in range(1, col_limit + 1):
-                cell_value = sheet.cell(row=row_idx, column=col_idx).value
-                row_data.append(str(cell_value) if cell_value is not None else "")
+        # iter_rows je v read_only režimu dramaticky rychlejší než cell(row, col)
+        for row in sheet.iter_rows(min_row=1, max_row=row_limit, min_col=1, max_col=col_limit, values_only=True):
+            row_data = [str(val) if val is not None else "" for val in row]
+            # Pokud je řádek kratší než col_limit, doplníme prázdné stringy
+            if len(row_data) < col_limit:
+                row_data.extend([""] * (col_limit - len(row_data)))
             data.append(row_data)
 
-        return {"data": data, "rows": row_limit, "cols": col_limit}
+        # Pokud sešit nevrátil dostatek řádků, doplníme prázdné
+        while len(data) < row_limit:
+            data.append([""] * col_limit)
+
+        return {"data": data, "rows": len(data), "cols": col_limit}
     finally:
         workbook.close()
 
@@ -62,8 +69,8 @@ def rename_excel_file(old_filename, new_filename):
     if not old_filename.endswith(".xlsx") or not new_filename.endswith(".xlsx"):
         raise ValueError("Pouze .xlsx soubory mohou být přejmenovány")
 
-    old_path = Config.EXCEL_BASE_PATH / old_filename
-    new_path = Config.EXCEL_BASE_PATH / new_filename
+    old_path = safe_excel_path(Config.EXCEL_BASE_PATH, old_filename)
+    new_path = safe_excel_path(Config.EXCEL_BASE_PATH, new_filename)
 
     if not old_path.exists():
         raise FileNotFoundError(f"Soubor {old_filename} neexistuje")

@@ -62,8 +62,9 @@ class Hodiny2025Manager:
 
     def __init__(self, excel_path):
         self.excel_path = Path(excel_path)
-        self.workbook_name = "Hodiny2025.xlsx"
-        self.template_sheet_name = "MMhod25"
+        self.workbook_name = "Hodiny2026.xlsx"
+        self.template_sheet_name = "MMhod26"
+        self.cash_template_sheet_name = "MMcash26"
         self.file_path = self.excel_path / self.workbook_name
         self._ensure_excel_file_exists()
         logger.info("Hodiny2025Manager inicializován pro soubor: %s", self.file_path)
@@ -80,6 +81,16 @@ class Hodiny2025Manager:
         except (json.JSONDecodeError, IOError) as e:
             logger.error("Chyba při načítání dynamické konfigurace: %s", e, exc_info=True)
             return {}
+
+    def _sheet_matches(self, configured_sheet, requested_sheet):
+        if not configured_sheet or not requested_sheet:
+            return configured_sheet == requested_sheet
+        if configured_sheet == requested_sheet:
+            return True
+        # Zvláštní pravidlo pro měsíční listy: MMhod26 nebo 01hod26 by mělo platit pro jakýkoliv XXhod26
+        if "hod" in configured_sheet and "hod" in requested_sheet:
+            return configured_sheet.split("hod")[-1] == requested_sheet.split("hod")[-1]
+        return False
 
     def _get_cell_coordinates(self, field_key, sheet_name=None):
         """Vrátí seznam (row, col) souřadnic pro daný field z dynamické konfigurace.
@@ -107,7 +118,7 @@ class Hodiny2025Manager:
                 )
                 continue
 
-            if sheet_name and field_config.get("sheet") != sheet_name:
+            if sheet_name and not self._sheet_matches(field_config.get("sheet"), sheet_name):
                 logger.warning(
                     "Konfigurace pro monthly_time/%s odkazuje na jiný list: %s (očekáván %s)",
                     field_key,
@@ -175,8 +186,6 @@ class Hodiny2025Manager:
             row = self.DATA_START_ROW + day - 1
             # use helper to avoid writing into MergedCell objects
             self._set_cell_value(sheet, row, self.COL_DAY, day)
-            formula = f'=IF(AND(E{row}<>",G{row}<>""),(G{row}-E{row})*24-F{row},0)'
-            # correct formula: keep the original expected expression (preserve quotes)
             formula = f'=IF(AND(E{row}<>"",G{row}<>""),(G{row}-E{row})*24-F{row},0)'
             self._set_cell_formula(sheet, row, self.COL_TOTAL_HOURS, formula)
             self._set_cell_formula(sheet, row, self.COL_OVERTIME, f"=MAX(0,H{row}-8)")
@@ -246,6 +255,144 @@ class Hodiny2025Manager:
 
         return workbook, workbook[sheet_name]
 
+    def get_or_create_cash_sheet(self, month: int, year: int = 2026) -> tuple[Workbook, Worksheet]:
+        """Získá nebo vytvoří měsíční list výdajů ze šablony MMcash26 (např. 01cash26)."""
+        sheet_name = f"{month:02d}cash{str(year)[2:]}"
+        try:
+            workbook = load_workbook(self.file_path)
+        except (FileNotFoundError, InvalidFileException):
+            self._create_new_workbook()
+            workbook = load_workbook(self.file_path)
+
+        if sheet_name not in workbook.sheetnames:
+            if self.cash_template_sheet_name not in workbook.sheetnames:
+                raise ValueError(f"Template list výdajů '{self.cash_template_sheet_name}' nebyl nalezen")
+            template_sheet = workbook[self.cash_template_sheet_name]
+            new_sheet = workbook.copy_worksheet(template_sheet)
+            new_sheet.title = sheet_name
+            logger.info("Vytvořen nový list výdajů: %s", sheet_name)
+            return workbook, new_sheet
+
+        return workbook, workbook[sheet_name]
+
+    def zapis_vydaje(self, category: str, amount: float, currency: str, payment_method: str, date_str: str, description: str = ""):
+        """Zapíše výdaj (nafta, peage, ubytování, ostatní, záloha, bankomat) do odpovídajícího měsíčního listu XXcashXX."""
+        date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+        workbook, sheet = self.get_or_create_cash_sheet(date_obj.month, date_obj.year)
+
+        category_lower = category.lower()
+        currency_upper = currency.upper()
+        method_lower = payment_method.lower()
+
+        # Špeciální logika pro zálohy se jménem zaměstnance
+        if "záloha" in category_lower or "zaloha" in category_lower:
+            emp_name = description.replace("Záloha - ", "").split(" (")[0].strip() if "Záloha - " in description else description
+            
+            # Speciální pravidlo pro zaměstnance "Čáp" -> sloupce O (15) pro EUR a P (16) pro CZK/CZE od řádku 4 dále
+            if emp_name.lower() in ("čáp", "cap"):
+                target_col = 15 if currency_upper == "EUR" else 16
+                target_row = None
+                for r in range(4, 43):
+                    val = sheet.cell(row=r, column=target_col).value
+                    if val is None:
+                        target_row = r
+                        break
+                if not target_row:
+                    target_row = 42
+
+                self._set_cell_value(sheet, target_row, target_col, float(amount))
+                workbook.save(self.file_path)
+                logger.info("Záloha pro Čáp (%s %s) zapsána do listu %s na řádek %d, sloupec %d (%s)", amount, currency, sheet.title, target_row, target_col, chr(64 + target_col))
+                return
+
+            # Logika pro ostatní zaměstnance -> sloupce Q(17), S(19), U(21), W(23), Y(25), AA(27), AC(29)
+            advance_cols = [17, 19, 21, 23, 25, 27, 29]
+            target_col = None
+
+            # 1. Hledáme existující sloupec s tímto jménem v záhlaví (řádek 2 nebo 1)
+            for c in advance_cols:
+                header_val = sheet.cell(row=2, column=c).value or sheet.cell(row=1, column=c).value
+                if header_val and str(header_val).strip() == emp_name:
+                    target_col = c
+                    break
+
+            # 2. Pokud se nenašel, najdeme první sloupec s výchozím/nepříslušným textem a přepíšeme jej jménem
+            if not target_col:
+                for c in advance_cols:
+                    header_val = sheet.cell(row=2, column=c).value or sheet.cell(row=1, column=c).value
+                    if not header_val or str(header_val).strip().startswith("Sloupec"):
+                        target_col = c
+                        self._set_cell_value(sheet, 2, c, emp_name)
+                        logger.info("Záhlaví sloupce %d v listu %s přepsáno na jméno %s", c, sheet.title, emp_name)
+                        break
+
+            if not target_col:
+                target_col = 17  # Fallback na sloupec Q
+
+            # Najdi první volný řádek v tomto sloupci (pro částku i datum)
+            target_row = None
+            max_r = 14 if target_col >= 25 else 42
+            for r in range(3, max_r + 1):
+                amt_val = sheet.cell(row=r, column=target_col).value
+                date_val = sheet.cell(row=r, column=target_col + 1).value
+                if amt_val is None and date_val is None:
+                    target_row = r
+                    break
+
+            if not target_row:
+                target_row = max_r
+
+            self._set_cell_value(sheet, target_row, target_col, float(amount))
+            self._set_cell_value(sheet, target_row, target_col + 1, date_obj.strftime("%d.%m.%Y"))
+            workbook.save(self.file_path)
+            logger.info("Záloha pro %s (%s %s) zapsána do listu %s na řádek %d, sloupec %d", emp_name, amount, currency, sheet.title, target_row, target_col)
+            return
+
+        # Určení cílového sloupce pro ostatní kategorie
+        col = None
+        if "nafta" in category_lower:
+            if currency_upper == "CZK":
+                col = 1 if "karta" in method_lower or "kartou" in method_lower else 3
+            else:
+                col = 4 if "karta" in method_lower or "kartou" in method_lower else 6
+        elif "peage" in category_lower or "mýto" in category_lower or "myto" in category_lower:
+            col = 8 if "karta" in method_lower or "kartou" in method_lower else 7
+        elif "ubytování" in category_lower or "ubytovani" in category_lower:
+            col = 11 if "karta" in method_lower or "kartou" in method_lower else 9
+        elif "bankomat" in category_lower or "výběr" in category_lower or "vyber" in category_lower:
+            col = 31 if currency_upper == "CZK" else 33
+        else:
+            # Ostatní výdaje (Sloupec L pro CZK, Sloupec N pro EUR)
+            col = 12 if currency_upper == "CZK" else 14
+
+        # Najdi první volný řádek pro zápis v rozmezí řádků 3–42
+        target_row = None
+        for r in range(3, 43):
+            cell_val = sheet.cell(row=r, column=col).value
+            if cell_val is None:
+                target_row = r
+                break
+
+        if not target_row:
+            logger.warning("Všechny řádky výdajů v listu %s jsou již zaplněny", sheet.title)
+            target_row = 42
+
+        # Zápis částky
+        self._set_cell_value(sheet, target_row, col, float(amount))
+
+        # Zápis popisu, pokud jde o Ostatní (Sloupec M)
+        if col in (12, 14) and description:
+            self._set_cell_value(sheet, target_row, 13, description)
+
+        # Zápis data, pokud sloupec má odpovídající datový sloupec
+        date_col_map = {1: 2, 4: 5, 9: 10, 31: 32, 33: 32}
+        if col in date_col_map:
+            self._set_cell_value(sheet, target_row, date_col_map[col], date_obj.strftime("%d.%m.%Y"))
+
+        workbook.save(self.file_path)
+        logger.info("Výdaj %s %s (%s) zapsán do listu %s na řádek %d, sloupec %d", amount, currency, category, sheet.title, target_row, col)
+
+
     def zapis_pracovni_doby(self, date_str, start_time_str, end_time_str, lunch_duration_str, num_employees):
         try:
             date_obj = datetime.strptime(date_str, "%Y-%m-%d")
@@ -266,9 +413,9 @@ class Hodiny2025Manager:
         start_time_coords = self._get_cell_coordinates("start_time", sheet.title)
         if start_time_coords and start_time_str and start_time_str != "00:00":
             for start_row, start_col in start_time_coords:
-                actual_row = start_row if start_row != row else row
-                self._set_cell_value(sheet, actual_row, start_col, datetime.strptime(start_time_str, "%H:%M").time())
-                logger.info("Čas začátku zapsán do buňky %s%d (dynamická konfigurace)", chr(64 + start_col), actual_row)
+                
+                self._set_cell_value(sheet, row, start_col, datetime.strptime(start_time_str, "%H:%M").time())
+                logger.info("Čas začátku zapsán do buňky %s%d (dynamická konfigurace)", chr(64 + start_col), row)
         elif start_time_str and start_time_str != "00:00":
             # Fallback na původní logiku
             self._set_cell_value(sheet, row, self.COL_START, datetime.strptime(start_time_str, "%H:%M").time())
@@ -277,9 +424,9 @@ class Hodiny2025Manager:
         end_time_coords = self._get_cell_coordinates("end_time", sheet.title)
         if end_time_coords and end_time_str and end_time_str != "00:00":
             for end_row, end_col in end_time_coords:
-                actual_row = end_row if end_row != row else row
-                self._set_cell_value(sheet, actual_row, end_col, datetime.strptime(end_time_str, "%H:%M").time())
-                logger.info("Čas konce zapsán do buňky %s%d (dynamická konfigurace)", chr(64 + end_col), actual_row)
+                
+                self._set_cell_value(sheet, row, end_col, datetime.strptime(end_time_str, "%H:%M").time())
+                logger.info("Čas konce zapsán do buňky %s%d (dynamická konfigurace)", chr(64 + end_col), row)
         elif end_time_str and end_time_str != "00:00":
             # Fallback na původní logiku
             self._set_cell_value(sheet, row, self.COL_END, datetime.strptime(end_time_str, "%H:%M").time())
@@ -289,11 +436,11 @@ class Hodiny2025Manager:
         lunch_coords = self._get_cell_coordinates("lunch_hours", sheet.title)
         if lunch_coords:
             for lunch_row, lunch_col in lunch_coords:
-                actual_row = lunch_row if lunch_row != row else row
-                lunch_cell = self._set_cell_value(sheet, actual_row, lunch_col, lunch_hours)
+                
+                lunch_cell = self._set_cell_value(sheet, row, lunch_col, lunch_hours)
                 if lunch_cell:
                     lunch_cell.number_format = "0.0"
-                logger.info("Doba oběda zapsána do buňky %s%d (dynamická konfigurace)", chr(64 + lunch_col), actual_row)
+                logger.info("Doba oběda zapsána do buňky %s%d (dynamická konfigurace)", chr(64 + lunch_col), row)
         else:
             # Fallback na původní logiku
             lunch_cell = self._set_cell_value(sheet, row, self.COL_LUNCH, lunch_hours)
@@ -304,10 +451,10 @@ class Hodiny2025Manager:
         employees_coords = self._get_cell_coordinates("num_employees", sheet.title)
         if employees_coords:
             for emp_row, emp_col in employees_coords:
-                actual_row = emp_row if emp_row != row else row
-                self._set_cell_value(sheet, actual_row, emp_col, num_employees if num_employees > 0 else 0)
+                
+                self._set_cell_value(sheet, row, emp_col, num_employees if num_employees > 0 else 0)
                 logger.info(
-                    "Počet zaměstnanců zapsán do buňky %s%d (dynamická konfigurace)", chr(64 + emp_col), actual_row
+                    "Počet zaměstnanců zapsán do buňky %s%d (dynamická konfigurace)", chr(64 + emp_col), row
                 )
         else:
             # Fallback na původní logiku
@@ -388,7 +535,10 @@ class Hodiny2025Manager:
             try:
                 start = datetime.strptime(record["start_time"], "%H:%M")
                 end = datetime.strptime(record["end_time"], "%H:%M")
-                hours = (end - start).total_seconds() / 3600 - record["lunch_hours"]
+                delta_seconds = (end - start).total_seconds()
+                if delta_seconds < 0:
+                    delta_seconds += 24 * 3600
+                hours = delta_seconds / 3600 - record["lunch_hours"]
                 record["total_hours"] = max(0.0, hours)
             except (ValueError, TypeError):
                 pass

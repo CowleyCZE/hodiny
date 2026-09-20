@@ -1,6 +1,6 @@
 """Routy pro advanced technickou konfiguraci projektu."""
 
-from flask import Blueprint, jsonify, render_template, request
+from flask import Blueprint, jsonify, redirect, render_template, request, url_for
 
 from services.excel_file_service import (
     get_sheet_content,
@@ -8,12 +8,37 @@ from services.excel_file_service import (
     list_excel_files,
     rename_excel_file,
 )
-from services.settings_service import load_dynamic_config, save_dynamic_config
+from services.settings_service import (
+    get_default_dynamic_config,
+    get_mapping_schema,
+    load_dynamic_config,
+    save_dynamic_config,
+)
 from utils.logger import setup_logger
 
 logger = setup_logger("configuration_routes")
 
 configuration_bp = Blueprint("configuration", __name__)
+
+
+@configuration_bp.route("/api/mapping-schema", methods=["GET"])
+def api_get_mapping_schema():
+    """Vrací schéma kategorií a datových polí pro vizuální mapování včetně barev a tvarů figurek."""
+    try:
+        return jsonify(get_mapping_schema())
+    except Exception as exc:
+        logger.error("Chyba při načítání schématu mapování: %s", exc, exc_info=True)
+        return jsonify({"error": "Chyba při načítání schématu mapování"}), 500
+
+
+@configuration_bp.route("/api/settings/defaults", methods=["GET"])
+def api_get_default_settings():
+    """Vrací výchozí dynamické nastavení mapování pro standardní šablony."""
+    try:
+        return jsonify(get_default_dynamic_config())
+    except Exception as exc:
+        logger.error("Chyba při načítání výchozích nastavení: %s", exc, exc_info=True)
+        return jsonify({"error": "Chyba při načítání výchozích nastavení"}), 500
 
 
 @configuration_bp.route("/api/settings", methods=["GET"])
@@ -81,8 +106,8 @@ def api_get_sheet_content(filename, sheetname):
 
 @configuration_bp.route("/nastaveni")
 def advanced_settings_page():
-    """Stránka pro dynamické technické nastavení ukládání do XLSX."""
-    return render_template("nastaveni.html")
+    """Přesměrování na sjednocenou stránku nastavení."""
+    return redirect(url_for("settings.settings_page", tab="technicke"))
 
 
 @configuration_bp.route("/api/files/rename", methods=["POST"])

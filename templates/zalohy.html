@@ -12,10 +12,11 @@
     </div>
 
     <div class="dashboard-grid stagger-animation">
-        {# Form Card #}
+        {# Form Card: Zálohy #}
         <div class="glass-card animate-fadeInUp">
             <h3 class="mb-4">💰 Přidat novou zálohu</h3>
             <form method="POST" action="{{ url_for('reports.zalohy') }}">
+                <input type="hidden" name="form_type" value="zaloha">
                 <div class="form-group-modern">
                     <label for="employee_name" class="form-label-modern">Zaměstnanec</label>
                     <select name="employee_name" id="employee_name" required class="form-control-modern">
@@ -37,8 +38,8 @@
                         <div class="form-group-modern">
                             <label for="currency" class="form-label-modern">Měna</label>
                             <select name="currency" id="currency" required class="form-control-modern">
-                                <option value="EUR">EUR</option>
-                                <option value="CZK">Kč</option>
+                                <option value="EUR">EUR (€)</option>
+                                <option value="CZK">CZK (Kč)</option>
                             </select>
                         </div>
                     </div>
@@ -60,7 +61,100 @@
                 </div>
 
                 <button type="submit" class="btn-modern btn-primary w-100 mt-2">
-                    <span>✅</span> Potvrdit a uložit do Excelu
+                    <span>✅</span> Uložit zálohu do Excelu
+                </button>
+            </form>
+        </div>
+
+        {# Form Card: Výdaj #}
+        <div class="glass-card animate-fadeInUp">
+            <h3 class="mb-4">🧾 Zadání výdaje (Nafta, Mýto, Ubytování, Ostatní)</h3>
+            <form method="POST" action="{{ url_for('reports.zalohy') }}">
+                <input type="hidden" name="form_type" value="vydaj">
+                
+                <div class="form-group-modern">
+                    <label for="expense_category" class="form-label-modern">Kategorie výdaje</label>
+                    <select name="expense_category" id="expense_category" required class="form-control-modern">
+                        <option value="Nafta">Nafta</option>
+                        <option value="Peage">Peage (Mýto)</option>
+                        <option value="Ubytování">Ubytování</option>
+                        <option value="Ostatní">Ostatní výdaje</option>
+                    </select>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="form-group-modern">
+                            <label for="expense_amount" class="form-label-modern">Částka</label>
+                            <input type="number" name="expense_amount" id="expense_amount" step="0.01" required class="form-control-modern">
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group-modern">
+                            <label for="expense_currency" class="form-label-modern">Měna</label>
+                            <select name="expense_currency" id="expense_currency" required class="form-control-modern">
+                                <option value="EUR">EUR (€)</option>
+                                <option value="CZK">CZK (Kč)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group-modern">
+                    <label for="expense_payment_method" class="form-label-modern">Způsob platby</label>
+                    <select name="expense_payment_method" id="expense_payment_method" required class="form-control-modern">
+                        <option value="Kartou">Kartou</option>
+                        <option value="Hotově">Hotově</option>
+                    </select>
+                </div>
+
+                <div class="form-group-modern">
+                    <label for="expense_description" class="form-label-modern">Popis výdaje (nepovinné)</label>
+                    <input type="text" name="expense_description" id="expense_description" placeholder="Např. Tankování DE, Poplatek tunel..." class="form-control-modern">
+                </div>
+
+                <div class="form-group-modern">
+                    <label for="expense_date" class="form-label-modern">Datum</label>
+                    <input type="date" name="expense_date" id="expense_date" value="{{ current_date }}" required class="form-control-modern">
+                </div>
+
+                <button type="submit" class="btn-modern btn-primary w-100 mt-2">
+                    <span>🧾</span> Uložit výdaj do MMcash26
+                </button>
+            </form>
+        </div>
+
+        {# Form Card: Výběr z bankomatu #}
+        <div class="glass-card animate-fadeInUp">
+            <h3 class="mb-4">🏧 Příjem peněz (Výběr z bankomatu)</h3>
+            <form method="POST" action="{{ url_for('reports.zalohy') }}">
+                <input type="hidden" name="form_type" value="bankomat">
+
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="form-group-modern">
+                            <label for="atm_amount" class="form-label-modern">Vybraná částka</label>
+                            <input type="number" name="atm_amount" id="atm_amount" step="0.01" required class="form-control-modern">
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group-modern">
+                            <label for="atm_currency" class="form-label-modern">Měna</label>
+                            <select name="atm_currency" id="atm_currency" required class="form-control-modern">
+                                <option value="EUR">EUR (€) -> do AG</option>
+                                <option value="CZK">CZK (Kč) -> do AE</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group-modern">
+                    <label for="atm_date" class="form-label-modern">Datum výběru</label>
+                    <input type="date" name="atm_date" id="atm_date" value="{{ current_date }}" required class="form-control-modern">
+                </div>
+
+                <button type="submit" class="btn-modern btn-primary w-100 mt-2">
+                    <span>🏧</span> Uložit výběr z bankomatu
                 </button>
             </form>
         </div>

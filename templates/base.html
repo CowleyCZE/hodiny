@@ -82,6 +82,19 @@
     <div id="toast-container"></div>
 
     <script>
+        // CSRF protection for all browser forms (JSON APIs use authenticated requests).
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('form[method="post"], form[method="POST"]').forEach(form => {
+                if (!form.querySelector('input[name="csrf_token"]')) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'csrf_token';
+                    input.value = '{{ csrf_token() }}';
+                    form.appendChild(input);
+                }
+            });
+        });
+
         // Globální systém pro Toast notifikace
         function showToast(message, type = 'success', duration = 4000) {
             const container = document.getElementById('toast-container');

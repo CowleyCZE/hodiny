@@ -38,7 +38,7 @@ CZECH_MONTHS = (
 
 @reports_bp.route("/zalohy", methods=["GET", "POST"])
 def zalohy():
-    """Správa záloh (půjček / plateb) pro zaměstnance."""
+    """Správa záloh, výdajů a výběrů z bankomatu (příjmů)."""
     if request.method == "POST":
         try:
             form = request.form
@@ -71,7 +71,7 @@ def monthly_report_route():
             report_data = g.excel_manager.generate_monthly_report(month, year, selected_employees_post or None)
             if not report_data:
                 flash("Nebyly nalezeny žádné záznamy.", "info")
-        except (ValueError, FileNotFoundError) as exc:
+        except (ValueError, KeyError, FileNotFoundError) as exc:
             flash(str(exc), "error")
 
     employee_names = [employee["name"] for employee in g.employee_manager.get_all_employees()]

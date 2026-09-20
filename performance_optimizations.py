@@ -4,6 +4,7 @@ Implements caching, database optimizations, and general performance improvements
 """
 
 import logging
+import threading
 import time
 from datetime import datetime, timedelta
 from functools import wraps
@@ -20,54 +21,60 @@ class SimpleCache:
     def __init__(self, default_ttl: int = 300):  # 5 minutes default
         self.cache = {}
         self.default_ttl = default_ttl
+        self._lock = threading.Lock()
 
     def get(self, key: str) -> Optional[Any]:
         """Get value from cache if not expired"""
-        if key in self.cache:
-            value, expiry = self.cache[key]
-            if datetime.now() < expiry:
-                logger.debug(f"Cache hit for key: {key}")
-                return value
-            else:
-                logger.debug(f"Cache expired for key: {key}")
-                del self.cache[key]
+        with self._lock:
+            if key in self.cache:
+                value, expiry = self.cache[key]
+                if datetime.now() < expiry:
+                    logger.debug(f"Cache hit for key: {key}")
+                    return value
+                else:
+                    logger.debug(f"Cache expired for key: {key}")
+                    del self.cache[key]
 
-        logger.debug(f"Cache miss for key: {key}")
-        return None
+            logger.debug(f"Cache miss for key: {key}")
+            return None
 
     def set(self, key: str, value: Any, ttl: Optional[int] = None) -> None:
         """Set value in cache with TTL"""
         ttl = ttl or self.default_ttl
         expiry = datetime.now() + timedelta(seconds=ttl)
-        self.cache[key] = (value, expiry)
+        with self._lock:
+            self.cache[key] = (value, expiry)
         logger.debug(f"Cache set for key: {key}, TTL: {ttl}s")
 
     def delete(self, key: str) -> None:
         """Delete key from cache"""
-        if key in self.cache:
-            del self.cache[key]
-            logger.debug(f"Cache deleted for key: {key}")
+        with self._lock:
+            if key in self.cache:
+                del self.cache[key]
+                logger.debug(f"Cache deleted for key: {key}")
 
     def delete_by_prefix(self, prefix: str) -> None:
         """Delete all cache entries with given prefix."""
-        matching_keys = [key for key in self.cache if key.startswith(prefix)]
-        for key in matching_keys:
-            del self.cache[key]
+        with self._lock:
+            matching_keys = [key for key in self.cache if key.startswith(prefix)]
+            for key in matching_keys:
+                del self.cache[key]
         if matching_keys:
             logger.debug(f"Deleted {len(matching_keys)} cache keys for prefix: {prefix}")
 
     def clear(self) -> None:
         """Clear all cache"""
-        self.cache.clear()
+        with self._lock:
+            self.cache.clear()
         logger.debug("Cache cleared")
 
     def cleanup_expired(self) -> None:
         """Remove expired entries"""
         now = datetime.now()
-        expired_keys = [key for key, (_, expiry) in self.cache.items() if now >= expiry]
-
-        for key in expired_keys:
-            del self.cache[key]
+        with self._lock:
+            expired_keys = [key for key, (_, expiry) in self.cache.items() if now >= expiry]
+            for key in expired_keys:
+                del self.cache[key]
 
         if expired_keys:
             logger.debug(f"Cleaned up {len(expired_keys)} expired cache entries")

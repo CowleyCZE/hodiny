@@ -56,7 +56,18 @@ class EmployeeManager:
             self.neaktivni_zamestnanci = set(config.get("neaktivni_zamestnanci", []))
 
             self._sort_selected_employees()
-        except (json.JSONDecodeError, Exception) as e:
+        except json.JSONDecodeError as e:
+            logger.error("Chyba při načítání konfigurace (poškozený JSON): %s", e, exc_info=True)
+            if self.config_file.exists():
+                backup_path = self.config_file.with_suffix(".json.bak")
+                try:
+                    import shutil
+                    shutil.copy2(self.config_file, backup_path)
+                    logger.warning("Poškozený konfigurační soubor byl zálohován do %s", backup_path)
+                except Exception as backup_err:
+                    logger.error("Nepodařilo se vytvořit zálohu: %s", backup_err)
+            self.zamestnanci, self.vybrani_zamestnanci = [], []
+        except Exception as e:
             logger.error("Chyba při načítání konfigurace: %s", e, exc_info=True)
             self.zamestnanci, self.vybrani_zamestnanci, self.neaktivni_zamestnanci = [], [], set()
 
@@ -127,6 +138,8 @@ class EmployeeManager:
                 self.zamestnanci[self.zamestnanci.index(old_name)] = validated_new_name
                 if old_name in self.vybrani_zamestnanci:
                     self.vybrani_zamestnanci[self.vybrani_zamestnanci.index(old_name)] = validated_new_name
+                if old_name == self.preferred_employee_name:
+                    self.preferred_employee_name = validated_new_name
                 return self.save_config()
             return False
         except ValueError as e:

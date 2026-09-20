@@ -21,8 +21,11 @@ def cleanup_temp_files(base_path):
     """Odstraní dočasné upload soubory starší než jednu hodinu."""
     current_time = time.time()
     for temp_file in base_path.glob("temp_*.xlsx"):
-        if current_time - temp_file.stat().st_mtime > 3600:
-            temp_file.unlink()
+        try:
+            if current_time - temp_file.stat().st_mtime > 3600:
+                temp_file.unlink()
+        except OSError:
+            pass
 
 
 def build_dashboard_context(excel_manager, settings, employees=None):

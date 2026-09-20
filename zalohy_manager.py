@@ -87,13 +87,20 @@ class ZalohyManager:
             return option_coords[option_index]
         return None
 
+    def _get_real_sheet_name(self, workbook, requested_name):
+        for s in workbook.sheetnames:
+            if s.lower() == requested_name.lower():
+                return s
+        return requested_name
+
     def add_or_update_employee_advance(self, employee_name, amount, currency, option, date):
         """Přičte zálohu zaměstnanci (vytvoří řádek pokud chybí)."""
         workbook = None
         try:
             self._validate_inputs(employee_name, amount, currency, date)
             workbook = self._get_active_workbook(read_only=False)
-            sheet = workbook[self.zalohy_sheet_name]
+            real_sheet_name = self._get_real_sheet_name(workbook, self.zalohy_sheet_name)
+            sheet = workbook[real_sheet_name]
             options = self.get_option_names()
             if option not in options:
                 raise ValueError(f"Neplatná volba zálohy: {option}")
@@ -131,6 +138,22 @@ class ZalohyManager:
             self._update_date_cell(sheet, row, date)
 
             self._save_workbook(workbook)
+
+            # Synchronizace do souboru Hodiny2026.xlsx (list XXcashXX)
+            try:
+                from hodiny2025_manager import Hodiny2025Manager
+                hodiny_mgr = Hodiny2025Manager(self.base_path)
+                hodiny_mgr.zapis_vydaje(
+                    category="Záloha",
+                    amount=amount,
+                    currency=currency,
+                    payment_method="Hotově",
+                    date_str=date,
+                    description=f"Záloha - {employee_name} ({option})"
+                )
+            except Exception as sync_err:
+                logger.error("Chyba při synchronizaci zálohy do Hodiny2026.xlsx: %s", sync_err)
+
             return True
         except (FileNotFoundError, ValueError, IOError) as e:
             logger.error("Chyba při ukládání zálohy: %s", e, exc_info=True)
@@ -146,9 +169,9 @@ class ZalohyManager:
         if employee_name_coords:
             # Pokud je nakonfigurováno, použij konfigurovanou pozici
             config_row, config_col = employee_name_coords[0]  # Použij první lokaci
-
-            # Hledej existující zaměstnance od konfigurované pozice
-            for row in range(config_row, sheet.max_row + 2):
+            start_r = config_row
+            max_r = max(config_row, sheet.max_row + 1)
+            for row in range(start_r, max_r + 1):
                 cell = sheet.cell(row=row, column=config_col)
                 if cell.value == employee_name:
                     return row
@@ -158,7 +181,9 @@ class ZalohyManager:
                     return row
         else:
             # Fallback na původní logiku
-            for row in range(self.employee_start_row, sheet.max_row + 2):
+            start_r = self.employee_start_row
+            max_r = max(self.employee_start_row, sheet.max_row + 1)
+            for row in range(start_r, max_r + 1):
                 cell = sheet.cell(row=row, column=1)
                 if cell.value == employee_name:
                     return row
@@ -167,7 +192,7 @@ class ZalohyManager:
                     logger.info("Zaměstnanec %s přidán na řádek %d (původní logika)", employee_name, row)
                     return row
 
-        return sheet.max_row + 1  # Should not be reached in practice
+        return max(self.employee_start_row, sheet.max_row + 1)
 
     def _update_advance_cell(self, sheet, row, column, amount):
         target_cell = sheet.cell(row=row, column=column)
@@ -215,8 +240,9 @@ class ZalohyManager:
         workbook = None
         try:
             workbook = self._get_active_workbook(read_only=True)
-            if self.zalohy_sheet_name in workbook.sheetnames:
-                sheet = workbook[self.zalohy_sheet_name]
+            real_sheet_name = self._get_real_sheet_name(workbook, self.zalohy_sheet_name)
+            if real_sheet_name in workbook.sheetnames:
+                sheet = workbook[real_sheet_name]
                 option_type_coords = self._get_cell_coordinates("option_type", self.zalohy_sheet_name)
                 if option_type_coords:
                     options = []

@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}Kontrola záznamů - Hodiny{% endblock %}
+{% block content %}
+<div class="animate-fadeIn"><div class="section-header"><h1 class="section-title">Vyžaduje pozornost</h1><span class="badge-modern badge-warning">{{ issues|length }} položek</span></div>
+<div class="glass-card"><p class="text-muted">Kontrola aktuálního měsíce {{ '%02d'|format(month) }}/{{ year }}.</p><div class="card-table-wrapper"><table class="excel-table"><thead><tr><th>Závažnost</th><th>Datum</th><th>Popis</th><th>Akce</th></tr></thead><tbody>{% for issue in issues %}<tr><td><span class="badge-modern {% if issue.severity == 'error' %}badge-danger{% else %}badge-warning{% endif %}">{{ issue.severity }}</span></td><td>{{ issue.date }}</td><td>{{ issue.message }}</td><td><a class="btn-modern btn-primary" href="{{ url_for('main.record_time', next_date=issue.date) }}">Opravit</a></td></tr>{% else %}<tr><td colspan="4">Žádné problémy nebyly nalezeny.</td></tr>{% endfor %}</tbody></table></div></div></div>
+{% endblock %}

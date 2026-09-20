@@ -3,6 +3,8 @@
 from flask import Blueprint, flash, g, render_template, request
 
 from performance_optimizations import invalidate_employee_stats_cache
+from config import Config
+from services.phase2_services import write_audit
 
 employees_bp = Blueprint("employees", __name__)
 
@@ -27,6 +29,14 @@ def manage_employees():
                 g.employee_manager.upravit_zamestnance_podle_jmena(old_name, new_name)
             elif action == "delete":
                 g.employee_manager.smazat_zamestnance_podle_jmena(request.form.get("employee_name", ""))
+            elif action == "deactivate":
+                name = request.form.get("employee_name", "")
+                g.employee_manager.deactivate_employee(name)
+                write_audit(Config.AUDIT_LOG_PATH, "EMPLOYEE_DEACTIVATED", {"employee": name})
+            elif action == "activate":
+                name = request.form.get("employee_name", "")
+                g.employee_manager.activate_employee(name)
+                write_audit(Config.AUDIT_LOG_PATH, "EMPLOYEE_ACTIVATED", {"employee": name})
             invalidate_employee_stats_cache()
         except ValueError as exc:
             flash(str(exc), "error")

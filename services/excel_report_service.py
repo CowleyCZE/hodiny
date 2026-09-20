@@ -55,3 +55,35 @@ def process_sheet_for_report(sheet, employees, report_data, month, year):
                 report_data[employee_name]["total_hours"] += hours
             else:
                 report_data[employee_name]["free_days"] += 1
+
+
+def generate_calendar_data(workbook, month, year, employees=None):
+    """Vrátí denní souhrny vhodné pro kalendářní pohled."""
+    daily = {}
+    employee_filter = set(employees or [])
+
+    for sheet in get_monthly_sheets(workbook, month, year):
+        for column_index in range(2, 15, 2):
+            date_value = sheet.cell(row=80, column=column_index).value
+            if not (isinstance(date_value, datetime) and date_value.month == month and date_value.year == year):
+                continue
+
+            date_key = date_value.date().isoformat()
+            day = daily.setdefault(date_key, {"hours": 0.0, "free_days": 0, "employees": 0})
+            for row_index in range(Config.EXCEL_EMPLOYEE_START_ROW, sheet.max_row + 1):
+                employee_name = sheet.cell(row=row_index, column=1).value
+                if not employee_name or (employee_filter and employee_name not in employee_filter):
+                    continue
+                value = sheet.cell(row=row_index, column=column_index).value
+                if not isinstance(value, (int, float)):
+                    continue
+                day["employees"] += 1
+                if value > 0:
+                    day["hours"] += float(value)
+                else:
+                    day["free_days"] += 1
+
+    for day in daily.values():
+        day["hours"] = round(day["hours"], 2)
+        day["has_entry"] = day["employees"] > 0
+    return daily

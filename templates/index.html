@@ -11,6 +11,13 @@
         margin-bottom: 30px;
     }
 
+    .summary-cards { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:12px; margin:0 0 20px; }
+    .summary-card { display:flex; flex-direction:column; gap:4px; padding:16px; border-radius:12px; background:var(--card-bg, #fff); border:1px solid var(--border-color, #dee2e6); }
+    .summary-card strong { font-size:1.45rem; color:var(--text-accent, #004ea3); }
+    .summary-label, .summary-card small { color:var(--text-muted, #6c757d); }
+    .punch-actions { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; margin-top:12px; }
+    .quick-duration { min-height:24px; margin-top:8px; text-align:center; font-weight:600; color:var(--text-accent, #004ea3); }
+
     .info-panel {
         background: #f8f9fa;
         border: 1px solid #dee2e6;
@@ -102,7 +109,9 @@
         .form-row {
             grid-template-columns: 1fr;
         }
+        .summary-cards { grid-template-columns:repeat(2, minmax(0, 1fr)); }
     }
+    @media (max-width: 420px) { .summary-cards, .punch-actions { grid-template-columns:1fr; } }
 </style>
 {% endblock %}
 
@@ -119,6 +128,26 @@
                 style="background: rgba(0, 78, 163, 0.1); color: var(--text-accent);">
                 Týden {{ week_number }}
             </span>
+        </div>
+    </div>
+
+    <div class="summary-cards stagger-animation" aria-label="Souhrn odpracovaných hodin">
+        <div class="summary-card"><span class="summary-label">Dnes</span><strong>{{ '%.2f'|format(period_summary.today_hours) }} h</strong>{% if period_summary.today_free %}<small>volný den</small>{% endif %}</div>
+        <div class="summary-card"><span class="summary-label">Tento týden</span><strong>{{ '%.2f'|format(period_summary.week_hours) }} h</strong></div>
+        <div class="summary-card"><span class="summary-label">Tento měsíc</span><strong>{{ '%.2f'|format(period_summary.month_hours) }} h</strong></div>
+        <div class="summary-card"><span class="summary-label">Vybraní lidé</span><strong>{{ selected_employees|length }}</strong></div>
+    </div>
+    <div class="glass-card mb-4" style="border-left:5px solid {% if data_issues %}var(--button-warning){% else %}var(--button-success){% endif %};">
+        <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
+            <strong>{% if data_issues %}Vyžaduje pozornost: {{ data_issues|length }}{% else %}Kontrola záznamů je v pořádku{% endif %}</strong>
+            <a class="btn-modern btn-outline-primary" href="{{ url_for('reports.issues') }}">Otevřít kontroly</a>
+        </div>
+    </div>
+    <div class="glass-card mb-4">
+        <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
+            <strong>Synchronizace: {{ sync_status.status }}</strong>
+            <small class="text-muted">{{ sync_status.state.last_sync.value if sync_status.state.last_sync else 'Dosud neproběhla' }}</small>
+            <a class="btn-modern btn-outline-primary" href="{{ url_for('reports.audit') }}">Historie</a>
         </div>
     </div>
 
@@ -179,6 +208,13 @@
                     style="background: var(--button-success);">
                     <span>💾</span> Uložit záznam
                 </button>
+                <div class="punch-actions" aria-label="Rychlé časové akce">
+                    <button type="button" class="btn-modern btn-outline-primary" data-punch="arrival">Příchod nyní</button>
+                    <button type="button" class="btn-modern btn-outline-primary" data-punch="departure">Odchod nyní</button>
+                    <button type="button" class="btn-modern btn-outline-primary" data-punch="break_start">Začátek přestávky</button>
+                    <button type="button" class="btn-modern btn-outline-primary" data-punch="break_end">Konec přestávky</button>
+                </div>
+                <div id="quick-duration" class="quick-duration" aria-live="polite"></div>
             </form>
         </div>
     </div>
@@ -304,7 +340,63 @@
             } else {
                 timeFields.classList.remove('hidden');
             }
+            updateDuration();
         });
+
+        const durationOutput = document.getElementById('quick-duration');
+        const updateDuration = () => {
+            if (freeDay.checked) { durationOutput.textContent = 'Volný den: 0 hodin'; return; }
+            const start = document.getElementById('quick-start').value;
+            const end = document.getElementById('quick-end').value;
+            const lunch = Number(document.getElementById('quick-lunch').value || 0);
+            if (!start || !end) { durationOutput.textContent = ''; return; }
+            const [sh, sm] = start.split(':').map(Number);
+            const [eh, em] = end.split(':').map(Number);
+            const hours = ((eh * 60 + em) - (sh * 60 + sm)) / 60 - lunch;
+            durationOutput.textContent = hours >= 0 ? `Čistá pracovní doba: ${hours.toFixed(2)} h` : 'Čas odchodu musí být později než příchod';
+        };
+        ['quick-start', 'quick-end', 'quick-lunch'].forEach(id => document.getElementById(id).addEventListener('input', updateDuration));
+        updateDuration();
+
+        document.querySelectorAll('[data-punch]').forEach(button => {
+            button.addEventListener('click', async () => {
+                try {
+                    const response = await fetch('{{ url_for("main.punch") }}', {
+                        method: 'POST', headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({action: button.dataset.punch})
+                    });
+                    const result = await response.json();
+                    if (!result.success) throw new Error(result.error);
+                    if (result.action === 'arrival') document.getElementById('quick-start').value = result.time;
+                    if (result.action === 'departure') document.getElementById('quick-end').value = result.time;
+                    if (result.action === 'break_start') localStorage.setItem('hodiny_break_start', result.time);
+                    if (result.action === 'break_end') {
+                        const breakStart = localStorage.getItem('hodiny_break_start');
+                        if (breakStart) {
+                            const [sh, sm] = breakStart.split(':').map(Number);
+                            const [eh, em] = result.time.split(':').map(Number);
+                            const duration = Math.max(0, ((eh * 60 + em) - (sh * 60 + sm)) / 60);
+                            document.getElementById('quick-lunch').value = Math.min(4, duration).toFixed(2);
+                            localStorage.removeItem('hodiny_break_start');
+                        }
+                    }
+                    document.getElementById('quick-date').value = result.date;
+                    updateDuration();
+                    showToast(result.message, 'success');
+                } catch (error) { showToast(error.message || 'Rychlá akce selhala', 'error'); }
+            });
+        });
+
+        const draftKey = 'hodiny_quick_entry_draft';
+        const saveDraft = () => localStorage.setItem(draftKey, JSON.stringify(Object.fromEntries(new FormData(quickForm))));
+        quickForm.querySelectorAll('input').forEach(input => input.addEventListener('input', saveDraft));
+        try {
+            const draft = JSON.parse(localStorage.getItem(draftKey) || 'null');
+            if (draft && draft.date === document.getElementById('quick-date').value) {
+                ['start_time', 'end_time', 'lunch_duration'].forEach(name => { if (draft[name]) quickForm.elements[name].value = draft[name]; });
+                updateDuration();
+            }
+        } catch (_) { localStorage.removeItem(draftKey); }
 
         // Odeslání formuláře
         const submitBtn = quickForm.querySelector('button[type="submit"]');
@@ -336,6 +428,7 @@
                 const result = await response.json();
 
                 if (result.success) {
+                    localStorage.removeItem('hodiny_quick_entry_draft');
                     showToast('Záznam byl úspěšně uložen!', 'success');
                     // Refresh dat po krátké pauze pro lepší UX
                     setTimeout(() => window.location.reload(), 1000);

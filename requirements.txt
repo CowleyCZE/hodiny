@@ -21,6 +21,8 @@ pytest
 # Retry a cache mechanismy
 tenacity==8.2.3
 requests-cache==1.1.1
+psutil>=5.9.0
+reportlab>=4.0.0
 
 # Vývojářské nástroje
 pylint==3.0.3

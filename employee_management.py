@@ -17,6 +17,7 @@ class EmployeeManager:
         self.config_file = self.data_path / "employee_config.json"
         self.zamestnanci = []
         self.vybrani_zamestnanci = []
+        self.neaktivni_zamestnanci = set()
         self.preferred_employee_name = (preferred_employee_name or "").strip()
         self.load_config()
         logger.info("EmployeeManager inicializován.")
@@ -52,11 +53,12 @@ class EmployeeManager:
 
             self.zamestnanci = self._sort_employee_names(config.get("zamestnanci", []))
             self.vybrani_zamestnanci = config.get("vybrani_zamestnanci", [])
+            self.neaktivni_zamestnanci = set(config.get("neaktivni_zamestnanci", []))
 
             self._sort_selected_employees()
         except (json.JSONDecodeError, Exception) as e:
             logger.error("Chyba při načítání konfigurace: %s", e, exc_info=True)
-            self.zamestnanci, self.vybrani_zamestnanci = [], []
+            self.zamestnanci, self.vybrani_zamestnanci, self.neaktivni_zamestnanci = [], [], set()
 
     def _validate_employee_name(self, name):
         """Trim + základní validace délky a absence číslic."""
@@ -75,6 +77,7 @@ class EmployeeManager:
                     {
                         "zamestnanci": self._sort_employee_names(self.zamestnanci),
                         "vybrani_zamestnanci": self.vybrani_zamestnanci,
+                        "neaktivni_zamestnanci": sorted(self.neaktivni_zamestnanci),
                     },
                     f,
                     ensure_ascii=False,
@@ -141,7 +144,11 @@ class EmployeeManager:
     def get_all_employees(self):
         """Vrací seznam slovníků se stavem výběru (pro UI)."""
         return [
-            {"name": name, "selected": name in self.vybrani_zamestnanci}
+            {
+                "name": name,
+                "selected": name in self.vybrani_zamestnanci,
+                "active": name not in self.neaktivni_zamestnanci,
+            }
             for name in self._sort_employee_names(self.zamestnanci)
         ]
 
@@ -152,6 +159,28 @@ class EmployeeManager:
     def get_employee_names(self):
         """Vrací jména zaměstnanců v preferovaném pořadí."""
         return self._sort_employee_names(self.zamestnanci)
+
+    def get_active_employee_names(self):
+        """Vrací pouze aktivní zaměstnance pro nové záznamy."""
+        return self._sort_employee_names(
+            [name for name in self.zamestnanci if name not in self.neaktivni_zamestnanci]
+        )
+
+    def deactivate_employee(self, name):
+        """Deaktivuje zaměstnance bez odstranění historického jména."""
+        if name not in self.zamestnanci:
+            return False
+        self.neaktivni_zamestnanci.add(name)
+        if name in self.vybrani_zamestnanci:
+            self.vybrani_zamestnanci.remove(name)
+        return self.save_config()
+
+    def activate_employee(self, name):
+        """Znovu aktivuje dříve deaktivovaného zaměstnance."""
+        if name not in self.zamestnanci:
+            return False
+        self.neaktivni_zamestnanci.discard(name)
+        return self.save_config()
 
     def set_vybrani_zamestnanci(self, employees_list):
         """Nastaví seznam vybraných zaměstnanců."""

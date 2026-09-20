@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Kalendář hodin - Hodiny{% endblock %}
+
+{% block extra_css %}
+<style>
+    .calendar-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
+    .calendar-grid { display:grid; grid-template-columns:repeat(7, minmax(0, 1fr)); gap:8px; }
+    .calendar-heading { text-align:center; font-weight:700; color:var(--text-accent); padding:8px; }
+    .calendar-day { min-height:110px; padding:10px; border:1px solid var(--border-color, #dee2e6); border-radius:10px; background:var(--card-bg, #fff); text-decoration:none; color:inherit; transition:transform .15s, box-shadow .15s; }
+    .calendar-day:hover { transform:translateY(-2px); box-shadow:0 5px 15px rgba(0,0,0,.12); }
+    .calendar-day.empty { opacity:.35; background:transparent; }
+    .calendar-day.today { outline:3px solid var(--text-accent, #004ea3); }
+    .calendar-day.has-entry { border-left:5px solid var(--button-success, #28a745); }
+    .calendar-day.free-day { border-left-color:var(--button-warning, #ffc107); }
+    .calendar-day.missing { border-left:5px solid #dc3545; }
+    .day-number { font-weight:700; }
+    .day-hours { display:block; margin-top:16px; font-size:1.25rem; font-weight:700; }
+    .day-note { display:block; font-size:.8rem; color:var(--text-muted, #6c757d); margin-top:4px; }
+    @media (max-width: 700px) { .calendar-grid { gap:4px; } .calendar-day { min-height:82px; padding:6px; } .day-hours { margin-top:8px; font-size:1rem; } .day-note { font-size:.7rem; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="animate-fadeIn">
+    <div class="section-header">
+        <h1 class="section-title">Kalendář hodin</h1>
+        <a class="btn-modern btn-primary" href="{{ url_for('main.record_time') }}">+ Nový záznam</a>
+    </div>
+
+    <div class="glass-card">
+        <div class="calendar-toolbar">
+            <a class="btn-modern btn-outline-primary" href="{{ url_for('reports.calendar_view', month=previous_month.month, year=previous_month.year) }}">← Předchozí</a>
+            <h2 class="m-0">{{ month_name }} {{ year }}</h2>
+            <a class="btn-modern btn-outline-primary" href="{{ url_for('reports.calendar_view', month=next_month.month, year=next_month.year) }}">Další →</a>
+        </div>
+        <div class="calendar-grid" aria-label="Kalendář">
+            {% for name in ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne'] %}<div class="calendar-heading">{{ name }}</div>{% endfor %}
+            {% for week in weeks %}
+                {% for day in week %}
+                    {% if day == 0 %}
+                        <div class="calendar-day empty"></div>
+                    {% else %}
+                        {% set key = '%04d-%02d-%02d'|format(year, month, day) %}
+                        {% set item = daily_data.get(key, {}) %}
+                        {% set is_weekend = loop.index0 >= 5 %}
+                        <a class="calendar-day {% if key == today %}today{% endif %} {% if item.get('has_entry') %}has-entry{% elif not is_weekend %}missing{% endif %} {% if item.get('free_days') %}free-day{% endif %}" href="{{ url_for('main.record_time', next_date=key) }}">
+                            <span class="day-number">{{ day }}</span>
+                            {% if item.get('has_entry') %}
+                                <span class="day-hours">{{ '%.2f'|format(item.get('hours', 0)) }} h</span>
+                                <span class="day-note">{% if item.get('free_days') %}volný den{% else %}zapsáno{% endif %}</span>
+                            {% elif is_weekend %}
+                                <span class="day-note">víkend</span>
+                            {% else %}
+                                <span class="day-note">chybí záznam</span>
+                            {% endif %}
+                        </a>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer_title %}Kalendář hodin{% endblock %}

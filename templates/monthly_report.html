@@ -53,6 +53,12 @@
                 </div>
             </div>
         </form>
+        <div class="d-flex gap-2 flex-wrap mt-3">
+            <a class="btn-modern btn-outline-primary" href="{{ url_for('reports.export_csv', month=current_month, year=current_year) }}">Export CSV</a>
+            <a class="btn-modern btn-outline-primary" href="{{ url_for('reports.export_pdf', month=current_month, year=current_year) }}">Export PDF</a>
+            <a class="btn-modern btn-outline-primary" href="{{ url_for('reports.statistics', month=current_month, year=current_year) }}">Statistiky</a>
+            <a class="btn-modern btn-outline-primary" href="{{ url_for('reports.issues') }}">Kontrola záznamů</a>
+        </div>
     </div>
 
     {% if report_data is not none %}

@@ -22,6 +22,10 @@ class Config:
     EXCEL_AUTHORITATIVE_TEMPLATE_NAME = "Hodiny_Cap:vzor.xlsx"
     SETTINGS_FILE_PATH = DATA_PATH / "settings.json"
     CONFIG_FILE_PATH = BASE_DIR / "config.json"
+    BACKUP_PATH = Path(os.environ.get("HODINY_BACKUP_PATH", BASE_DIR / "backups"))
+    AUDIT_LOG_PATH = Path(os.environ.get("HODINY_AUDIT_LOG_PATH", BASE_DIR / "logs" / "audit.jsonl"))
+    DATABASE_PATH = Path(os.environ.get("HODINY_DATABASE_PATH", DATA_PATH / "hodiny.sqlite3"))
+    AUTH_REQUIRED = os.environ.get("HODINY_AUTH_REQUIRED", "0").lower() in {"1", "true", "yes"}
 
     SMTP_SERVER = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
     SMTP_PORT = int(os.environ.get("SMTP_PORT", 465))
@@ -77,6 +81,8 @@ class Config:
     def init_app(cls, app):
         cls.DATA_PATH.mkdir(parents=True, exist_ok=True)
         cls.EXCEL_BASE_PATH.mkdir(parents=True, exist_ok=True)
+        cls.BACKUP_PATH.mkdir(parents=True, exist_ok=True)
+        cls.DATABASE_PATH.parent.mkdir(parents=True, exist_ok=True)
 
         template_path = cls.EXCEL_BASE_PATH / cls.EXCEL_TEMPLATE_NAME
         if not template_path.exists():
@@ -106,6 +112,7 @@ class Config:
             UPLOAD_FOLDER=str(cls.EXCEL_BASE_PATH),
             SESSION_COOKIE_SECURE=not app.debug,
             SESSION_COOKIE_HTTPONLY=True,
+            SESSION_COOKIE_SAMESITE="Lax",
             PERMANENT_SESSION_LIFETIME=3600,
             PROPAGATE_EXCEPTIONS=cls.IS_PYTHONANYWHERE,
             PREFERRED_URL_SCHEME="https" if cls.IS_PYTHONANYWHERE else "http",

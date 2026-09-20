@@ -7,6 +7,8 @@
     .time-fields.hidden {
         display: none;
     }
+    .time-presets { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }
+    .duration-preview { min-height:24px; padding:10px; border-radius:8px; background:rgba(0,78,163,.08); color:var(--text-accent); font-weight:600; }
 </style>
 {% endblock %}
 
@@ -66,6 +68,12 @@
                         </div>
                     </div>
                 </div>
+                <div class="time-presets" aria-label="Předvolby pracovní doby">
+                    <button type="button" class="btn-modern btn-outline-primary time-preset" data-start="07:00" data-end="15:30">7:00–15:30</button>
+                    <button type="button" class="btn-modern btn-outline-primary time-preset" data-start="08:00" data-end="16:30">8:00–16:30</button>
+                    <button type="button" class="btn-modern btn-outline-primary time-preset" data-start="09:00" data-end="17:30">9:00–17:30</button>
+                </div>
+                <div id="duration-preview" class="duration-preview" aria-live="polite"></div>
 
                 <div class="form-group-modern mt-3">
                     <label for="lunch_duration" class="form-label-modern">Délka oběda (v hodinách)</label>
@@ -127,5 +135,31 @@
 
     // Zavoláme funkci při načtení stránky pro případ, že checkbox je již zaškrtnutý (např. po chybě formuláře)
     document.addEventListener('DOMContentLoaded', toggleTimeFields);
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('record-time-form');
+        const start = document.getElementById('start_time');
+        const end = document.getElementById('end_time');
+        const lunch = document.getElementById('lunch_duration');
+        const preview = document.getElementById('duration-preview');
+        const draftKey = 'hodiny_record_time_draft';
+        const updatePreview = () => {
+            if (document.getElementById('is_free_day').checked) { preview.textContent = 'Volný den: 0 hodin'; return; }
+            if (!start.value || !end.value) { preview.textContent = 'Doplňte začátek a konec práce.'; return; }
+            const [sh, sm] = start.value.split(':').map(Number);
+            const [eh, em] = end.value.split(':').map(Number);
+            const hours = ((eh * 60 + em) - (sh * 60 + sm)) / 60 - Number(lunch.value || 0);
+            preview.textContent = hours >= 0 ? `Čistá pracovní doba: ${hours.toFixed(2)} h` : 'Konec musí být později než začátek.';
+        };
+        [start, end, lunch].forEach(input => input.addEventListener('input', () => {
+            localStorage.setItem(draftKey, JSON.stringify({start: start.value, end: end.value, lunch: lunch.value}));
+            updatePreview();
+        }));
+        document.querySelectorAll('.time-preset').forEach(button => button.addEventListener('click', () => {
+            start.value = button.dataset.start; end.value = button.dataset.end; updatePreview();
+        }));
+        form.addEventListener('submit', () => localStorage.removeItem(draftKey));
+        updatePreview();
+    });
 </script>
 {% endblock %}

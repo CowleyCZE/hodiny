@@ -94,3 +94,27 @@ def test_voice_command_route_processes_record_time_command(main_client):
     assert data["success"] is True
     assert data["entities"]["action"] == "record_time"
     assert "operation_result" in data
+
+
+def test_punch_endpoint_returns_server_time(main_client):
+    response = main_client.post("/api/punch", json={"action": "arrival"})
+
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data["success"] is True
+    assert data["time"]
+    assert data["date"]
+
+
+def test_punch_endpoint_rejects_unknown_action(main_client):
+    response = main_client.post("/api/punch", json={"action": "unknown"})
+
+    assert response.status_code == 400
+    assert response.get_json()["success"] is False
+
+
+def test_calendar_route_is_available(main_client):
+    response = main_client.get("/calendar?month=4&year=2026")
+
+    assert response.status_code == 200
+    assert "Kalendář hodin" in response.get_data(as_text=True)

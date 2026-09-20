@@ -13,6 +13,7 @@ from services.main_service import (
     send_active_excel_email,
 )
 from services.voice_service import process_voice_command
+from services.sync_service import sync_status
 from utils.logger import setup_logger
 
 logger = setup_logger("main_routes")
@@ -24,7 +25,9 @@ main_bp = Blueprint("main", __name__)
 @timing_decorator
 def index():
     """Úvodní stránka s rychlými informacemi a rychlým zadáním času."""
-    context = build_dashboard_context(g.excel_manager, session.get("settings", {}))
+    selected_employees = g.employee_manager.get_vybrani_zamestnanci()
+    context = build_dashboard_context(g.excel_manager, session.get("settings", {}), selected_employees)
+    context["sync_status"] = sync_status(g.database)
     return render_template("index.html", **context)
 
 
@@ -126,6 +129,30 @@ def quick_time_entry():
     except Exception as exc:
         logger.error("Chyba při rychlém zadání času: %s", exc, exc_info=True)
         return jsonify({"success": False, "error": str(exc)}), 500
+
+
+@main_bp.route("/api/punch", methods=["POST"])
+def punch():
+    """Vrátí aktuální čas pro rychlé tlačítko příchodu/odchodu/přestávky."""
+    data = request.get_json(silent=True) or {}
+    action = data.get("action")
+    if action not in {"arrival", "departure", "break_start", "break_end"}:
+        return jsonify({"success": False, "error": "Neplatná rychlá akce."}), 400
+    now = dt.datetime.now().replace(second=0, microsecond=0)
+    return jsonify(
+        {
+            "success": True,
+            "action": action,
+            "time": now.strftime("%H:%M"),
+            "date": now.strftime("%Y-%m-%d"),
+            "message": {
+                "arrival": "Příchod zaznamenán do formuláře.",
+                "departure": "Odchod zaznamenán do formuláře.",
+                "break_start": "Začátek přestávky zaznamenán.",
+                "break_end": "Konec přestávky zaznamenán.",
+            }[action],
+        }
+    )
 
 
 @main_bp.route("/voice-command", methods=["POST"])

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Statistiky - Hodiny{% endblock %}
+{% block extra_css %}<style>.daily-chart{display:flex;flex-direction:column;gap:8px}.daily-row{display:grid;grid-template-columns:90px 1fr 60px;align-items:center;gap:8px}.daily-bar{height:18px;border-radius:9px;background:linear-gradient(90deg,var(--text-accent),var(--button-success));min-width:2px}.daily-row small{color:var(--text-muted)}@media(max-width:480px){.daily-row{grid-template-columns:70px 1fr 50px;font-size:.85rem}}</style>{% endblock %}
+{% block content %}
+<div class="animate-fadeIn">
+  <div class="section-header"><h1 class="section-title">Statistiky {{ '%02d'|format(month) }}/{{ year }}</h1><a class="btn-modern btn-primary" href="{{ url_for('reports.monthly_report_route') }}">Reporty</a></div>
+  <div class="summary-cards">
+    <div class="summary-card"><span>Celkem hodin</span><strong>{{ '%.2f'|format(statistics.total_hours) }} h</strong></div>
+    <div class="summary-card"><span>Pracovní dny</span><strong>{{ statistics.working_days }}</strong></div>
+    <div class="summary-card"><span>Volné dny</span><strong>{{ statistics.free_days }}</strong></div>
+    <div class="summary-card"><span>Průměr / den</span><strong>{{ '%.2f'|format(statistics.average_hours_per_day) }} h</strong></div>
+  </div>
+  <div class="glass-card"><h3>Souhrn podle zaměstnanců</h3><div class="card-table-wrapper"><table class="excel-table"><thead><tr><th>Zaměstnanec</th><th>Hodiny</th><th>Volné dny</th></tr></thead><tbody>{% for name, data in statistics.employees.items() %}<tr><td>{{ name }}</td><td>{{ '%.2f'|format(data.total_hours) }} h</td><td>{{ data.free_days }}</td></tr>{% else %}<tr><td colspan="3">Žádná data.</td></tr>{% endfor %}</tbody></table></div></div>
+  <div class="glass-card mt-4"><h3>Hodiny podle dnů</h3><div class="daily-chart">{% for day, item in statistics.daily|dictsort %}<div class="daily-row"><small>{{ day }}</small><div class="daily-bar" style="width:{{ [((item.hours / 12) * 100), 100]|min|round(0) }}%;" title="{{ item.hours }} hodin"></div><strong>{{ '%.2f'|format(item.hours) }} h</strong></div>{% else %}<p class="text-muted">Žádná denní data.</p>{% endfor %}</div></div>
+</div>
+{% endblock %}

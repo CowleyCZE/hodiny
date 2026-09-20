@@ -20,6 +20,9 @@ from services.api_service import (
     update_selected_employees,
     update_settings,
 )
+from services.phase2_services import build_statistics, find_data_issues
+from services.auth_service import role_required
+from services.sync_service import sync_excel_state, sync_status
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -94,6 +97,8 @@ def health_check():
                 "database": "operational",  # Could be expanded to check actual DB
                 "excel_manager": "operational",
                 "employee_manager": "operational",
+                "sqlite": "operational" if getattr(g, "database", None) else "unavailable",
+                "authentication": "required" if getattr(g, "current_user", None) else "optional_or_anonymous",
             },
         }
 
@@ -179,13 +184,15 @@ def create_time_entry():
 
             if not validate_time_format(start_time) or not validate_time_format(end_time):
                 return APIResponse.error("Invalid time format. Use HH:MM", "INVALID_TIME_FORMAT", 400)
+            if datetime.strptime(end_time, "%H:%M") <= datetime.strptime(start_time, "%H:%M"):
+                return APIResponse.error("End time must be later than start time", "INVALID_TIME_ORDER", 400)
 
             # Validate lunch duration
             try:
                 lunch_float = float(lunch_duration)
-                if lunch_float < 0 or lunch_float > 8:
+                if lunch_float < 0 or lunch_float > 4:
                     return APIResponse.error(
-                        "Lunch duration must be between 0 and 8 hours", "INVALID_LUNCH_DURATION", 400
+                        "Lunch duration must be between 0 and 4 hours", "INVALID_LUNCH_DURATION", 400
                     )
             except ValueError:
                 return APIResponse.error("Invalid lunch duration format", "INVALID_LUNCH_FORMAT", 400)
@@ -254,6 +261,44 @@ def get_excel_status():
     except Exception as e:
         logger.error("Error getting Excel status: %s", e, exc_info=True)
         return APIResponse.error("Failed to get Excel status", "EXCEL_STATUS_ERROR", 500)
+
+
+@api_bp.route("/statistics/monthly", methods=["GET"])
+def monthly_statistics():
+    """Vrátí statistiky hodin pro zvolený měsíc."""
+    try:
+        today = datetime.now()
+        month = int(request.args.get("month", today.month))
+        year = int(request.args.get("year", today.year))
+        employees = request.args.getlist("employee") or None
+        report = g.excel_manager.generate_monthly_report(month, year, employees)
+        daily = g.excel_manager.generate_calendar_data(month, year, employees)
+        return APIResponse.success(build_statistics(daily, report, month, year), "Statistics retrieved")
+    except (TypeError, ValueError) as error:
+        return APIResponse.error(str(error), "STATISTICS_VALIDATION_ERROR", 400)
+
+
+@api_bp.route("/issues", methods=["GET"])
+def data_issues():
+    """Vrátí kontrolní upozornění za aktuální měsíc."""
+    today = datetime.now().date()
+    employees = g.employee_manager.get_vybrani_zamestnanci()
+    daily = g.excel_manager.generate_calendar_data(today.month, today.year, employees)
+    issues = find_data_issues(daily, employees, today.replace(day=1), today)
+    return APIResponse.success(issues, "Data issues retrieved")
+
+
+@api_bp.route("/sync/status", methods=["GET"])
+@role_required("admin", "manager", "viewer")
+def synchronization_status():
+    return APIResponse.success(sync_status(g.database), "Synchronization status retrieved")
+
+
+@api_bp.route("/sync/run", methods=["POST"])
+@role_required("admin", "manager")
+def run_synchronization():
+    result = sync_excel_state(g.database, g.excel_manager, g.employee_manager.get_vybrani_zamestnanci())
+    return APIResponse.success(result, "Synchronization completed")
 
 
 @api_bp.route("/settings", methods=["GET", "POST"])

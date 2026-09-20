@@ -16,7 +16,7 @@ from openpyxl import load_workbook
 from config import Config
 from services.excel_config_service import get_configured_cells
 from services.excel_metadata_service import load_metadata, save_metadata, set_file_category
-from services.excel_report_service import generate_monthly_report_from_workbook
+from services.excel_report_service import generate_calendar_data, generate_monthly_report_from_workbook
 from services.excel_week_service import (
     archive_active_week_file,
     create_week_sheet_from_template,
@@ -162,7 +162,16 @@ class ExcelManager:
             logger.error("Chyba při archivaci souboru: %s", e, exc_info=True)
             return False
 
-    def ulozit_pracovni_dobu(self, date_str, start_time_str, end_time_str, lunch_duration_str, employees, work_description="", category=""):
+    def ulozit_pracovni_dobu(
+        self,
+        date_str,
+        start_time_str,
+        end_time_str,
+        lunch_duration_str,
+        employees,
+        work_description="",
+        category="",
+    ):
         """Zapíše pracovní dobu do týdenního souboru i do aktivního workbooku aplikace."""
         try:
             date_obj = datetime.strptime(date_str, "%Y-%m-%d")
@@ -297,6 +306,17 @@ class ExcelManager:
             logger.error("Chyba při generování měsíčního reportu: %s", e, exc_info=True)
             return {}
         return report_data
+
+    def generate_calendar_data(self, month, year, employees=None):
+        """Vrátí denní souhrny pro kalendářní pohled."""
+        if not (1 <= month <= 12 and 2000 <= year <= 2100):
+            raise ValueError("Neplatný měsíc nebo rok.")
+        try:
+            with self._get_workbook(read_only=True) as workbook:
+                return generate_calendar_data(workbook, month, year, employees)
+        except (FileNotFoundError, IOError) as error:
+            logger.error("Chyba při generování kalendáře: %s", error, exc_info=True)
+            return {}
 
     def _get_monthly_sheets(self, workbook, month, year):
         """Generátor pro listy, které spadají do daného měsíce a roku."""

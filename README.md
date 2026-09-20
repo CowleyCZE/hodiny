@@ -223,6 +223,36 @@ Poznámka: Tajné hodnoty nesdílejte v repozitáři; nastavte je přes prostře
 - Action endpoints: POST /send_email, POST /voice-command, POST /api/quick_time_entry, POST /upload, POST /upload/confirm
 - REST API: /api/v1/health, /api/v1/employees, /api/v1/employees/selected, /api/v1/time-entry, /api/v1/time-entries, /api/v1/settings, /api/v1/excel/status
 
+## Fáze 1 – uživatelská vylepšení
+
+- Dashboard zobrazuje součet hodin za dnešek, aktuální týden a měsíc.
+- Rychlá tlačítka **Příchod nyní**, **Odchod nyní**, **Začátek přestávky** a **Konec přestávky** doplňují časy do rychlého formuláře.
+- Formulář průběžně počítá čistou pracovní dobu po odečtení přestávky.
+- Formulář nabízí běžné časové předvolby a ukládá rozpracovaný koncept v prohlížeči.
+- Backend ověřuje formát času, pořadí začátku a konce, délku přestávky a extrémně dlouhé směny.
+- Nová stránka `/calendar` nabízí měsíční kalendář s hodinami, volnými dny a upozorněním na chybějící záznamy. Kliknutí na den otevře formulář pro jeho doplnění.
+- Mobilní navigace využívá existující spodní dotykovou lištu a nové ovládací prvky mají větší dotykovou plochu.
+
+## Fáze 2 – exporty, statistiky a pokročilá správa
+
+- CSV export měsíčních reportů s UTF-8 BOM a českou kompatibilitou pro Excel.
+- PDF export měsíčních reportů s českou diakritikou.
+- Statistiky podle měsíce, zaměstnanců a jednotlivých dnů; dostupné také přes REST API.
+- Centrum kontrol `/issues` pro chybějící záznamy a neobvykle dlouhé součty.
+- Aktivní/neaktivní stav zaměstnanců bez odstranění historických jmen.
+- Automatická záloha před zápisem docházky, ruční zálohy a bezpečná obnova na `/backups`.
+- Auditní historie důležitých operací na `/audit` v JSONL formátu.
+- Nové API endpointy `/api/v1/statistics/monthly` a `/api/v1/issues`.
+
+## Fáze 3 – bezpečnost, SQLite a synchronizace
+
+- SQLite databáze `data/hodiny.sqlite3` uchovává uživatele, role, audit, zrcadlené zápisy a stav synchronizace.
+- První administrátor se vytvoří na `/auth/setup`; běžné přihlášení je na `/auth/login`.
+- Role jsou `admin`, `manager` a `viewer`; administrátor spravuje uživatele na `/auth/users`.
+- Pro vynucení přihlášení nastavte `HODINY_AUTH_REQUIRED=1`. Ve výchozím režimu zůstává aplikace kompatibilní s lokálním anonymním používáním.
+- Excel zůstává kompatibilním výkazem; úspěšné zápisy se zrcadlí do SQLite a stav lze ověřit přes `/api/v1/sync/status` nebo spustit přes `/api/v1/sync/run`.
+- Přidány jsou bezpečnostní hlavičky, `HttpOnly`/`SameSite=Lax` session cookies a ochrana citlivých synchronizačních endpointů podle role.
+
 ## Licence a autorství
 
 Tento repozitář je určen pro interní použití. Ujistěte se, že neukládáte citlivé údaje (hesla/API klíče) do verzovacího systému.

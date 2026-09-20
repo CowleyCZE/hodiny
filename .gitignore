@@ -53,6 +53,7 @@ excel/temp_*.xlsx
 logs/
 *.log
 *.log.*
+backups/
 
 # Data soubory (pokud obsahují citlivé údaje)
 data/settings.json

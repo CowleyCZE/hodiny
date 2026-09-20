@@ -1,0 +1,3 @@
+{% extends "base.html" %}
+{% block title %}Historie změn - Hodiny{% endblock %}
+{% block content %}<div class="animate-fadeIn"><div class="section-header"><h1 class="section-title">Historie změn</h1></div><div class="glass-card"><div class="card-table-wrapper"><table class="excel-table"><thead><tr><th>Čas</th><th>Akce</th><th>Uživatel</th><th>Detaily</th></tr></thead><tbody>{% for event in events %}<tr><td>{{ event.timestamp }}</td><td>{{ event.action }}</td><td>{{ event.actor }}</td><td><code>{{ event.details }}</code></td></tr>{% else %}<tr><td colspan="4">Historie je zatím prázdná.</td></tr>{% endfor %}</tbody></table></div></div></div>{% endblock %}

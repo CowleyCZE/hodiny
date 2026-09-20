@@ -28,11 +28,20 @@
         <nav class="nav-links" id="main-nav">
             <a href="{{ url_for('main.index') }}" class="nav-link-modern">Přehled</a>
             <a href="{{ url_for('main.record_time') }}" class="nav-link-modern">Zápis</a>
-            <a href="{{ url_for('reports.zalohy') }}" class="nav-link-modern">Zálohy</a>
+            <a href="{{ url_for('reports.calendar_view') }}" class="nav-link-modern">Kalendář</a>
+            <a href="{{ url_for('reports.zalohy') }}" class="nav-link-modern">Půjčky</a>
             <a href="{{ url_for('reports.monthly_report_route') }}" class="nav-link-modern">Reporty</a>
+            <a href="{{ url_for('reports.statistics') }}" class="nav-link-modern">Statistiky</a>
+            <a href="{{ url_for('reports.issues') }}" class="nav-link-modern">Kontroly</a>
+            <a href="{{ url_for('reports.backups') }}" class="nav-link-modern">Zálohy souboru</a>
             <a href="{{ url_for('excel.excel_viewer') }}" class="nav-link-modern">Tabulky</a>
             <a href="{{ url_for('employees.manage_employees') }}" class="nav-link-modern">Lidé</a>
             <a href="{{ url_for('settings.settings_page') }}" class="nav-link-modern">⚙️</a>
+            {% if g.current_user %}
+            <span class="nav-link-modern" title="Role: {{ g.current_user.role }}">{{ g.current_user.username }}</span>
+            {% if g.current_user.role == 'admin' %}<a href="{{ url_for('auth.users') }}" class="nav-link-modern">Uživatelé</a>{% endif %}
+            <form method="post" action="{{ url_for('auth.logout') }}" style="display:inline"><button class="nav-link-modern" type="submit">Odhlásit</button></form>
+            {% else %}<a href="{{ url_for('auth.login') }}" class="nav-link-modern">Přihlásit</a>{% endif %}
         </nav>
 
         <button class="theme-toggle" id="theme-switcher" aria-label="Přepnout téma">

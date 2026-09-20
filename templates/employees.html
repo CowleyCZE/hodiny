@@ -83,6 +83,9 @@
                         <span class="emp-name" style="font-weight: 700; font-size: 1.1rem; color: var(--text-primary);">
                             {{ employee.name }}
                         </span>
+                        <span class="badge-modern {% if employee.active %}badge-success{% else %}silver{% endif %}">
+                            {{ "Aktivní" if employee.active else "Neaktivní" }}
+                        </span>
                     </div>
 
                     <div class="d-flex gap-2 justify-content-center flex-nowrap" style="width: 100%;">
@@ -107,6 +110,13 @@
                             <button type="submit" class="btn-modern btn-danger btn-sm" data-confirm="delete"
                                 title="Smazat" style="padding: 8px 12px; min-width: 44px;">
                                 🗑
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ url_for('employees.manage_employees') }}" class="m-0">
+                            <input type="hidden" name="action" value="{{ 'deactivate' if employee.active else 'activate' }}">
+                            <input type="hidden" name="employee_name" value="{{ employee.name }}">
+                            <button type="submit" class="btn-modern btn-sm" title="{{ 'Deaktivovat' if employee.active else 'Aktivovat' }}" style="padding: 8px 12px; min-width: 44px;">
+                                {{ "⏸" if employee.active else "▶" }}
                             </button>
                         </form>
                     </div>

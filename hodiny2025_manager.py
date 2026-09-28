@@ -275,6 +275,18 @@ class Hodiny2025Manager:
 
         return workbook, workbook[sheet_name]
 
+    def _get_project_start_date(self):
+        """Načte datum začátku projektu ze settings.json. Vrátí datetime nebo None."""
+        try:
+            from services.settings_service import load_settings
+            settings = load_settings()
+            start_str = settings.get("project_info", {}).get("start_date")
+            if start_str:
+                return datetime.strptime(start_str, "%Y-%m-%d")
+        except Exception:
+            pass
+        return None
+
     def _find_free_row(self, sheet, col: int, row_start: int = 3, row_end: int = 42) -> int:
         """Najde první volný (None) řádek v daném sloupci v rozsahu row_start..row_end."""
         for r in range(row_start, row_end + 1):
@@ -314,6 +326,16 @@ class Hodiny2025Manager:
         Záloha zaměstnance: speciální logika níže.
         """
         date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+
+        # Pouze záznamy od začátku projektu (start_date ze settings)
+        project_start_date = self._get_project_start_date()
+        if project_start_date and date_obj < project_start_date:
+            logger.info(
+                "Zápis výdaje %s přeskočen: datum %s je před začátkem projektu %s",
+                category, date_str, project_start_date.strftime("%Y-%m-%d"),
+            )
+            return
+
         workbook, sheet = self.get_or_create_cash_sheet(date_obj.month, date_obj.year)
         date_formatted = date_obj.strftime("%d.%m.%Y")
 

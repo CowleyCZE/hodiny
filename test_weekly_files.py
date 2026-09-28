@@ -40,14 +40,14 @@ class TestWeeklyFileFunctionality(unittest.TestCase):
         self.assertTrue(result)
 
         # Check that weekly file was created
-        weekly_file = self.temp_path / "Hodiny_Cap_Tyden2.xlsx"
+        weekly_file = self.temp_path / "Hodiny_Cap_Tyden_2.xlsx"
         self.assertTrue(weekly_file.exists())
 
-        # Verify file contains "Týden" sheet
+        # Verify file contains "Týden 2" sheet
         from openpyxl import load_workbook
 
         wb = load_workbook(weekly_file)
-        self.assertIn(Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME, wb.sheetnames)
+        self.assertIn("Týden 2", wb.sheetnames)
         wb.close()
 
     def test_weekly_file_creation_from_previous_week(self):
@@ -61,8 +61,8 @@ class TestWeeklyFileFunctionality(unittest.TestCase):
         self.assertTrue(result)
 
         # Check both files exist
-        week1_file = self.temp_path / "Hodiny_Cap_Tyden2.xlsx"
-        week2_file = self.temp_path / "Hodiny_Cap_Tyden3.xlsx"
+        week1_file = self.temp_path / "Hodiny_Cap_Tyden_2.xlsx"
+        week2_file = self.temp_path / "Hodiny_Cap_Tyden_3.xlsx"
 
         self.assertTrue(week1_file.exists())
         self.assertTrue(week2_file.exists())
@@ -71,9 +71,9 @@ class TestWeeklyFileFunctionality(unittest.TestCase):
         """Test that weekly files follow correct naming format."""
         # Test different weeks
         test_dates = [
-            ("2025-01-06", "Hodiny_Cap_Tyden2.xlsx"),  # Week 2
-            ("2025-06-16", "Hodiny_Cap_Tyden25.xlsx"),  # Week 25
-            ("2025-12-29", "Hodiny_Cap_Tyden1.xlsx"),  # Week 1 (end of year)
+            ("2025-01-06", "Hodiny_Cap_Tyden_2.xlsx"),  # Week 2
+            ("2025-06-16", "Hodiny_Cap_Tyden_25.xlsx"),  # Week 25
+            ("2025-12-29", "Hodiny_Cap_Tyden_1.xlsx"),  # Week 1 (end of year)
         ]
 
         for date_str, expected_filename in test_dates:

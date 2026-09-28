@@ -74,28 +74,105 @@ def archive_active_week_file(active_file_path, workbook, current_week_number, la
     workbook.create_sheet(Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME)
 
 
-def get_or_create_weekly_file(base_path, active_file_path, week_number):
-    """Vrátí cestu k týdennímu souboru, vždy vytvořenému ze čisté šablony Hodiny_Cap.xlsx."""
-    weekly_filename = f"{active_file_path.stem}_Tyden{week_number}.xlsx"
+def get_or_create_weekly_file(base_path, active_file_path, week_number, project_start_date=None):
+    """Vrátí cestu k týdennímu souboru. Pokud neexistuje, vytvoří ho ze šablony
+    a do něj přidá listy ze všech předchozích týdnů od začátku projektu."""
+    weekly_filename = f"{active_file_path.stem}_Tyden_{week_number}.xlsx"
     weekly_file_path = base_path / weekly_filename
 
     if weekly_file_path.exists():
         return weekly_file_path
 
-    # Vždy kopíruj ze šablony (active_file_path = Hodiny_Cap.xlsx), nikdy z předchozího
-    # týdenního souboru – ten může obsahovat stará data a nechtěné listy.
+    # Vždy kopíruj ze šablony (active_file_path = Hodiny_Cap.xlsx)
     shutil.copy(active_file_path, weekly_file_path)
     logger.info("Vytvořen týdenní soubor %s zkopírováním ze šablony %s", weekly_filename, active_file_path.name)
 
+    # Přidej do nového souboru listy z předchozích týdnů od začátku projektu
+    _merge_previous_week_sheets(base_path, active_file_path.stem, weekly_file_path, week_number, project_start_date)
+
     return weekly_file_path
+
+
+def _merge_previous_week_sheets(base_path, active_stem, target_file_path, current_week, project_start_date=None):
+    """Do cílového souboru zkopíruje listy z předchozích týdenních souborů (od start_date projektu)."""
+    from openpyxl.utils.exceptions import InvalidFileException
+
+    # Zjisti první týden projektu (pokud je nastaven start_date)
+    first_week = 1
+    if project_start_date:
+        try:
+            if isinstance(project_start_date, str):
+                project_start_date = datetime.strptime(project_start_date, "%Y-%m-%d")
+            first_week = project_start_date.isocalendar().week
+        except (ValueError, AttributeError):
+            pass
+
+    # Sesbírej předchozí týdny od first_week do current_week-1
+    week_files = []
+    for week in range(first_week, current_week):
+        candidate = base_path / f"{active_stem}_Tyden_{week}.xlsx"
+        if candidate.exists():
+            week_files.append((week, candidate))
+
+    if not week_files:
+        return
+
+    try:
+        target_wb = load_workbook(str(target_file_path))
+    except (FileNotFoundError, InvalidFileException) as exc:
+        logger.error("Nelze otevřít cílový soubor %s: %s", target_file_path, exc)
+        return
+
+    from config import Config
+    template_name = Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME
+
+    for week, src_path in week_files:
+        sheet_name = f"{template_name} {week}"
+        if sheet_name in target_wb.sheetnames:
+            continue  # list již existuje
+        try:
+            src_wb = load_workbook(str(src_path))
+        except Exception as exc:
+            logger.warning("Nelze otevřít zdrojový soubor %s: %s", src_path, exc)
+            continue
+
+        # Najdi list daného týdne ve zdrojovém souboru
+        src_sheet = None
+        for candidate_name in [sheet_name, template_name, f"{template_name} {week}"]:
+            if candidate_name in src_wb.sheetnames:
+                src_sheet = src_wb[candidate_name]
+                break
+
+        if src_sheet is None:
+            src_wb.close()
+            continue
+
+        # Ruční zkopírování hodnot (openpyxl copy_worksheet nefunguje napříč sešity)
+        new_sheet = target_wb.create_sheet(title=sheet_name)
+        for row in src_sheet.iter_rows():
+            for cell in row:
+                new_cell = new_sheet.cell(row=cell.row, column=cell.column, value=cell.value)
+                if cell.has_style:
+                    new_cell.font = cell.font.copy()
+                    new_cell.border = cell.border.copy()
+                    new_cell.fill = cell.fill.copy()
+                    new_cell.number_format = cell.number_format
+                    new_cell.alignment = cell.alignment.copy()
+        src_wb.close()
+        logger.info("Přidán list %s z předchozího týdne do %s", sheet_name, target_file_path.name)
+
+    target_wb.save(str(target_file_path))
+    target_wb.close()
 
 
 def find_previous_weekly_file(base_path, active_stem, current_week):
     """Najde nejbližší předchozí týdenní soubor."""
     for week in range(current_week - 1, 0, -1):
-        potential_file = base_path / f"{active_stem}_Tyden{week}.xlsx"
-        if potential_file.exists():
-            return potential_file
+        # Hledej nový formát s podtržítkem (Tyden_N), potom starý (TydenN)
+        for filename in [f"{active_stem}_Tyden_{week}.xlsx", f"{active_stem}_Tyden{week}.xlsx"]:
+            potential_file = base_path / filename
+            if potential_file.exists():
+                return potential_file
     return None
 
 
@@ -109,17 +186,25 @@ def open_weekly_workbook(weekly_file_path):
 
 
 def ensure_week_sheet(workbook, week_number):
-    """Vrátí existující týdenní list nebo ho vytvoří ze šablony."""
-    week_sheet_name = (
-        Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME
-        if Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME in workbook.sheetnames
-        else f"{Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME} {week_number}"
-    )
+    """Vrátí existující týdenní list 'Týden N' nebo ho vytvoří ze šablony.
 
-    if week_sheet_name not in workbook.sheetnames:
-        create_week_sheet_from_template(workbook, week_sheet_name)
+    Pokud existuje list se jménem šablony ("Týden") bez čísla, přejmenuje ho na
+    "Týden N", takže šablona v novém souboru slouží jako základ pro první týden.
+    """
+    template_name = Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME      # "Týden"
+    target_name = f"{template_name} {week_number}"             # "Týden 40"
 
-    return week_sheet_name, workbook[week_sheet_name]
+    if target_name in workbook.sheetnames:
+        return target_name, workbook[target_name]
+
+    if template_name in workbook.sheetnames:
+        # Přejmenuj šablonový list místo kopírování
+        workbook[template_name].title = target_name
+        logger.info("Šablona '%s' přejmenována na '%s'", template_name, target_name)
+        return target_name, workbook[target_name]
+
+    create_week_sheet_from_template(workbook, target_name)
+    return target_name, workbook[target_name]
 
 
 def create_week_sheet_from_template(workbook, sheet_name):
@@ -152,6 +237,7 @@ def write_time_entry_to_sheet(
     current_project_name,
     work_description="",
     category="",
+    week_number=None,
 ):
     """Zapíše docházku do konkrétního listu."""
     logger.info("Zápis docházky: AI Kategorie: %s, Popis práce: %s", category, work_description)
@@ -180,6 +266,10 @@ def write_time_entry_to_sheet(
     end_time = datetime.strptime(end_time_str, "%H:%M")
     total_hours = round((end_time - start_time).total_seconds() / 3600 - float(lunch_duration_str), 2)
     write_times = start_time_str != "00:00" or end_time_str != "00:00"
+
+    # Číslo týdne do C3 (sloupec 3, řádek 3) dle specifikace šablony Týden
+    if week_number is not None:
+        _write_sheet_cell(sheet, 3, 3, week_number)
 
     for employee in employees:
         row_index = _get_or_create_employee_row(sheet, employee, employee_start_row, employee_name_column)

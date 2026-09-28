@@ -206,7 +206,8 @@ class ExcelManager:
                     self._get_cell_coordinates,
                     self.current_project_name,
                     work_description=work_description,
-                    category=category
+                    category=category,
+                    week_number=week_number,
                 )
                 weekly_workbook.save(weekly_file_path)
             finally:
@@ -233,7 +234,8 @@ class ExcelManager:
                     self._get_cell_coordinates,
                     self.current_project_name,
                     work_description=work_description,
-                    category=category
+                    category=category,
+                    week_number=week_number,
                 )
 
             if self.hodiny2025_manager:
@@ -256,7 +258,19 @@ class ExcelManager:
 
     def _get_or_create_weekly_file(self, week_number):
         """Získá cestu k týdennímu souboru, vytvoří ho pokud neexistuje."""
-        return get_or_create_weekly_file(self.base_path, self.active_file_path, week_number)
+        project_start_date = self._get_project_start_date()
+        return get_or_create_weekly_file(
+            self.base_path, self.active_file_path, week_number, project_start_date=project_start_date
+        )
+
+    def _get_project_start_date(self):
+        """Načte datum začátku projektu ze settings.json."""
+        try:
+            from services.settings_service import load_settings
+            settings = load_settings()
+            return settings.get("project_info", {}).get("start_date") or None
+        except Exception:
+            return None
 
     def _find_previous_weekly_file(self, current_week):
         """Najde nejnovější týdenní soubor před aktuálním týdnem."""

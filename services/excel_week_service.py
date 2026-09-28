@@ -75,20 +75,17 @@ def archive_active_week_file(active_file_path, workbook, current_week_number, la
 
 
 def get_or_create_weekly_file(base_path, active_file_path, week_number):
-    """Vrátí cestu k týdennímu souboru a případně ho vytvoří."""
+    """Vrátí cestu k týdennímu souboru, vždy vytvořenému ze čisté šablony Hodiny_Cap.xlsx."""
     weekly_filename = f"{active_file_path.stem}_Tyden{week_number}.xlsx"
     weekly_file_path = base_path / weekly_filename
 
     if weekly_file_path.exists():
         return weekly_file_path
 
-    previous_week_file = find_previous_weekly_file(base_path, active_file_path.stem, week_number)
-    if previous_week_file and previous_week_file.exists():
-        shutil.copy(previous_week_file, weekly_file_path)
-        logger.info("Vytvořen týdenní soubor %s zkopírováním z %s", weekly_filename, previous_week_file.name)
-    else:
-        shutil.copy(active_file_path, weekly_file_path)
-        logger.info("Vytvořen týdenní soubor %s zkopírováním ze šablony %s", weekly_filename, active_file_path.name)
+    # Vždy kopíruj ze šablony (active_file_path = Hodiny_Cap.xlsx), nikdy z předchozího
+    # týdenního souboru – ten může obsahovat stará data a nechtěné listy.
+    shutil.copy(active_file_path, weekly_file_path)
+    logger.info("Vytvořen týdenní soubor %s zkopírováním ze šablony %s", weekly_filename, active_file_path.name)
 
     return weekly_file_path
 

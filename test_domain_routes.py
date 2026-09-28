@@ -84,8 +84,26 @@ def test_advances_route_is_available(route_client):
     )
 
 
+def test_advances_post_vydaj(route_client):
+    response = route_client.post(
+        "/zalohy",
+        data={
+            "form_type": "vydaj",
+            "expense_category": "Nafta",
+            "expense_amount": "200.00",
+            "expense_currency": "EUR",
+            "expense_payment_method": "Hotově",
+            "expense_description": "Tankování DE",
+            "expense_date": "2026-09-28",
+        },
+        follow_redirects=True,
+    )
+    assert response.status_code == 200
+
+
 def test_monthly_report_route_is_available(route_client):
     response = route_client.get("/monthly_report")
 
     assert response.status_code == 200
     assert "Měsíční Report" in response.get_data(as_text=True)
+

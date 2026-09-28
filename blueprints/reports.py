@@ -42,12 +42,52 @@ def zalohy():
     if request.method == "POST":
         try:
             form = request.form
-            amount = float(form["amount"].replace(",", "."))
-            g.zalohy_manager.add_or_update_employee_advance(
-                form["employee_name"], amount, form["currency"], form["option"], form["date"]
-            )
-            flash("Záloha byla úspěšně uložena.", "success")
-        except (ValueError, IOError) as exc:
+            form_type = form.get("form_type", "zaloha")
+
+            if form_type == "vydaj":
+                category = form["expense_category"]
+                amount = float(form["expense_amount"].replace(",", "."))
+                currency = form["expense_currency"]
+                payment_method = form["expense_payment_method"]
+                description = form.get("expense_description", "")
+                date_str = form["expense_date"]
+
+                from hodiny2025_manager import Hodiny2025Manager
+                hodiny_mgr = Hodiny2025Manager(g.zalohy_manager.base_path)
+                hodiny_mgr.zapis_vydaje(
+                    category=category,
+                    amount=amount,
+                    currency=currency,
+                    payment_method=payment_method,
+                    date_str=date_str,
+                    description=description,
+                )
+                flash("Výdaj byl úspěšně uložen.", "success")
+
+            elif form_type == "bankomat":
+                amount = float(form["atm_amount"].replace(",", "."))
+                currency = form["atm_currency"]
+                date_str = form["atm_date"]
+
+                from hodiny2025_manager import Hodiny2025Manager
+                hodiny_mgr = Hodiny2025Manager(g.zalohy_manager.base_path)
+                hodiny_mgr.zapis_vydaje(
+                    category="Bankomat",
+                    amount=amount,
+                    currency=currency,
+                    payment_method="Hotově",
+                    date_str=date_str,
+                    description="Výběr z bankomatu",
+                )
+                flash("Výběr z bankomatu byl úspěšně uložen.", "success")
+
+            else:
+                amount = float(form["amount"].replace(",", "."))
+                g.zalohy_manager.add_or_update_employee_advance(
+                    form["employee_name"], amount, form["currency"], form["option"], form["date"]
+                )
+                flash("Záloha byla úspěšně uložena.", "success")
+        except (ValueError, IOError, KeyError) as exc:
             flash(str(exc), "error")
 
     return render_template(

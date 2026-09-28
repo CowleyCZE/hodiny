@@ -275,128 +275,167 @@ class Hodiny2025Manager:
 
         return workbook, workbook[sheet_name]
 
+    def _find_free_row(self, sheet, col: int, row_start: int = 3, row_end: int = 42) -> int:
+        """Najde první volný (None) řádek v daném sloupci v rozsahu row_start..row_end."""
+        for r in range(row_start, row_end + 1):
+            if sheet.cell(row=r, column=col).value is None:
+                return r
+        logger.warning("Sloupec %d: všechny řádky %d–%d jsou obsazeny.", col, row_start, row_end)
+        return row_end
+
     def zapis_vydaje(self, category: str, amount: float, currency: str, payment_method: str,
                      date_str: str, description: str = ""):
-        """Zapíše výdaj (nafta, peage, ubytování, ostatní, záloha, bankomat)
-        do odpovídajícího měsíčního listu XXcashXX."""
+        """Zapíše výdaj do odpovídajícího měsíčního listu XXcashXX.
+
+        Mapování sloupců dle šablony MMcash26 (Hodiny2026):
+
+        Tankování / Nafta:
+          A(1)  = CZK karta,   datum B(2)
+          C(3)  = CZK hotově
+          D(4)  = EUR karta,   datum E(5)
+          F(6)  = EUR hotově
+
+        Peage / Mýto:
+          G(7)  = hotově
+          H(8)  = kartou
+          datum R(18)
+
+        Ubytování:
+          S(19) = částka,   datum T(20)
+
+        Ostatní výdaje:
+          L(12) = CZK souhrn,  M(13) = popis,  datum AF(32)
+          N(14) = EUR souhrn,  datum AF(32)
+
+        Bankomat (výběr hotovosti – příjem):
+          AJ(36) = CZK placeno
+          AK(37) = EUR placeno
+
+        Záloha zaměstnance: speciální logika níže.
+        """
         date_obj = datetime.strptime(date_str, "%Y-%m-%d")
         workbook, sheet = self.get_or_create_cash_sheet(date_obj.month, date_obj.year)
+        date_formatted = date_obj.strftime("%d.%m.%Y")
 
         category_lower = category.lower()
         currency_upper = currency.upper()
         method_lower = payment_method.lower()
+        is_card = "karta" in method_lower or "kartou" in method_lower
 
-        # Špeciální logika pro zálohy se jménem zaměstnance
+        # ── Záloha zaměstnance ─────────────────────────────────────────────
         if "záloha" in category_lower or "zaloha" in category_lower:
             emp_name = (description.replace("Záloha - ", "").split(" (")[0].strip()
                         if "Záloha - " in description else description)
 
-            # Speciální pravidlo pro zaměstnance "Čáp" -> sloupce O (15) pro EUR a P (16) pro CZK/CZE od řádku 4 dále
+            # Speciální pravidlo pro Čáp: O(15) = EUR, P(16) = CZK
             if emp_name.lower() in ("čáp", "cap"):
                 target_col = 15 if currency_upper == "EUR" else 16
-                target_row = None
-                for r in range(4, 43):
-                    val = sheet.cell(row=r, column=target_col).value
-                    if val is None:
-                        target_row = r
-                        break
-                if not target_row:
-                    target_row = 42
-
+                target_row = self._find_free_row(sheet, target_col, 4, 42)
                 self._set_cell_value(sheet, target_row, target_col, float(amount))
                 workbook.save(self.file_path)
-                logger.info("Záloha pro Čáp (%s %s) zapsána do listu %s na řádek %d, sloupec %d (%s)",
-                            amount, currency, sheet.title, target_row, target_col, chr(64 + target_col))
+                logger.info("Záloha pro Čáp (%s %s) → list %s, buňka %s%d",
+                            amount, currency, sheet.title, chr(64 + target_col), target_row)
                 return
 
-            # Logika pro ostatní zaměstnance -> sloupce Q(17), S(19), U(21), W(23), Y(25), AA(27), AC(29)
+            # Ostatní zaměstnanci → sloupce Q(17), S(19), U(21), W(23), Y(25), AA(27), AC(29)
             advance_cols = [17, 19, 21, 23, 25, 27, 29]
             target_col = None
-
-            # 1. Hledáme existující sloupec s tímto jménem v záhlaví (řádek 2 nebo 1)
             for c in advance_cols:
                 header_val = sheet.cell(row=2, column=c).value or sheet.cell(row=1, column=c).value
                 if header_val and str(header_val).strip() == emp_name:
                     target_col = c
                     break
-
-            # 2. Pokud se nenašel, najdeme první sloupec s výchozím/nepříslušným textem a přepíšeme jej jménem
             if not target_col:
                 for c in advance_cols:
                     header_val = sheet.cell(row=2, column=c).value or sheet.cell(row=1, column=c).value
                     if not header_val or str(header_val).strip().startswith("Sloupec"):
                         target_col = c
                         self._set_cell_value(sheet, 2, c, emp_name)
-                        logger.info("Záhlaví sloupce %d v listu %s přepsáno na jméno %s", c, sheet.title, emp_name)
+                        logger.info("Záhlaví sloupce %d přepsáno na jméno %s", c, emp_name)
                         break
+            target_col = target_col or 17
 
-            if not target_col:
-                target_col = 17  # Fallback na sloupec Q
-
-            # Najdi první volný řádek v tomto sloupci (pro částku i datum)
-            target_row = None
             max_r = 14 if target_col >= 25 else 42
+            target_row = None
             for r in range(3, max_r + 1):
-                amt_val = sheet.cell(row=r, column=target_col).value
-                date_val = sheet.cell(row=r, column=target_col + 1).value
-                if amt_val is None and date_val is None:
+                if (sheet.cell(row=r, column=target_col).value is None and
+                        sheet.cell(row=r, column=target_col + 1).value is None):
                     target_row = r
                     break
-
-            if not target_row:
-                target_row = max_r
+            target_row = target_row or max_r
 
             self._set_cell_value(sheet, target_row, target_col, float(amount))
-            self._set_cell_value(sheet, target_row, target_col + 1, date_obj.strftime("%d.%m.%Y"))
+            self._set_cell_value(sheet, target_row, target_col + 1, date_formatted)
             workbook.save(self.file_path)
-            logger.info("Záloha pro %s (%s %s) zapsána do listu %s na řádek %d, sloupec %d",
+            logger.info("Záloha pro %s (%s %s) → list %s, řádek %d, sloupec %d",
                         emp_name, amount, currency, sheet.title, target_row, target_col)
             return
 
-        # Určení cílového sloupce pro ostatní kategorie
-        col = None
-        if "nafta" in category_lower:
+        # ── Tankování / Nafta ──────────────────────────────────────────────
+        # A(1)=CZK karta + datum B(2), C(3)=CZK hotově
+        # D(4)=EUR karta + datum E(5), F(6)=EUR hotově
+        if "nafta" in category_lower or "tankování" in category_lower or "tankovani" in category_lower:
             if currency_upper == "CZK":
-                col = 1 if "karta" in method_lower or "kartou" in method_lower else 3
+                col = 1 if is_card else 3   # A nebo C
+                date_col = 2 if is_card else None   # B jen pro kartu
             else:
-                col = 4 if "karta" in method_lower or "kartou" in method_lower else 6
-        elif "peage" in category_lower or "mýto" in category_lower or "myto" in category_lower:
-            col = 8 if "karta" in method_lower or "kartou" in method_lower else 7
-        elif "ubytování" in category_lower or "ubytovani" in category_lower:
-            col = 11 if "karta" in method_lower or "kartou" in method_lower else 9
-        elif "bankomat" in category_lower or "výběr" in category_lower or "vyber" in category_lower:
-            col = 31 if currency_upper == "CZK" else 33
-        else:
-            # Ostatní výdaje (Sloupec L pro CZK, Sloupec N pro EUR)
-            col = 12 if currency_upper == "CZK" else 14
+                col = 4 if is_card else 6   # D nebo F
+                date_col = 5 if is_card else None   # E jen pro kartu
+            target_row = self._find_free_row(sheet, col, 3, 42)
+            self._set_cell_value(sheet, target_row, col, float(amount))
+            if date_col:
+                self._set_cell_value(sheet, target_row, date_col, date_formatted)
+            workbook.save(self.file_path)
+            logger.info("Nafta %s %s (%s) → list %s, buňka %s%d",
+                        amount, currency, "karta" if is_card else "hotově",
+                        sheet.title, chr(64 + col), target_row)
+            return
 
-        # Najdi první volný řádek pro zápis v rozmezí řádků 3–42
-        target_row = None
-        for r in range(3, 43):
-            cell_val = sheet.cell(row=r, column=col).value
-            if cell_val is None:
-                target_row = r
-                break
+        # ── Peage / Mýto ──────────────────────────────────────────────────
+        # G(7)=hotově, H(8)=kartou, datum R(18)
+        if "peage" in category_lower or "mýto" in category_lower or "myto" in category_lower:
+            col = 8 if is_card else 7
+            target_row = self._find_free_row(sheet, col, 3, 42)
+            self._set_cell_value(sheet, target_row, col, float(amount))
+            self._set_cell_value(sheet, target_row, 18, date_formatted)   # R
+            workbook.save(self.file_path)
+            logger.info("Peage %s (%s) → list %s, buňka %s%d",
+                        amount, "karta" if is_card else "hotově", sheet.title, chr(64 + col), target_row)
+            return
 
-        if not target_row:
-            logger.warning("Všechny řádky výdajů v listu %s jsou již zaplněny", sheet.title)
-            target_row = 42
+        # ── Ubytování ─────────────────────────────────────────────────────
+        # S(19)=částka, datum T(20)
+        if "ubytování" in category_lower or "ubytovani" in category_lower:
+            target_row = self._find_free_row(sheet, 19, 3, 42)
+            self._set_cell_value(sheet, target_row, 19, float(amount))   # S
+            self._set_cell_value(sheet, target_row, 20, date_formatted)  # T
+            workbook.save(self.file_path)
+            logger.info("Ubytování %s → list %s, buňka S%d", amount, sheet.title, target_row)
+            return
 
-        # Zápis částky
+        # ── Bankomat (výběr hotovosti) ────────────────────────────────────
+        # AJ(36)=CZK placeno, AK(37)=EUR placeno
+        if "bankomat" in category_lower or "výběr" in category_lower or "vyber" in category_lower:
+            col = 36 if currency_upper == "CZK" else 37   # AJ nebo AK
+            target_row = self._find_free_row(sheet, col, 3, 42)
+            self._set_cell_value(sheet, target_row, col, float(amount))
+            workbook.save(self.file_path)
+            logger.info("Bankomat výběr %s %s → list %s, buňka %s%d",
+                        amount, currency, sheet.title, ("AJ" if col == 36 else "AK"), target_row)
+            return
+
+        # ── Ostatní výdaje ────────────────────────────────────────────────
+        # L(12)=CZK souhrn, M(13)=popis, N(14)=EUR souhrn, datum AF(32)
+        col = 12 if currency_upper == "CZK" else 14
+        target_row = self._find_free_row(sheet, col, 3, 42)
         self._set_cell_value(sheet, target_row, col, float(amount))
-
-        # Zápis popisu, pokud jde o Ostatní (Sloupec M)
-        if col in (12, 14) and description:
-            self._set_cell_value(sheet, target_row, 13, description)
-
-        # Zápis data, pokud sloupec má odpovídající datový sloupec
-        date_col_map = {1: 2, 4: 5, 9: 10, 31: 32, 33: 32}
-        if col in date_col_map:
-            self._set_cell_value(sheet, target_row, date_col_map[col], date_obj.strftime("%d.%m.%Y"))
-
+        self._set_cell_value(sheet, target_row, 32, date_formatted)   # AF
+        if description:
+            self._set_cell_value(sheet, target_row, 13, description)  # M = popis
         workbook.save(self.file_path)
-        logger.info("Výdaj %s %s (%s) zapsán do listu %s na řádek %d, sloupec %d",
-                    amount, currency, category, sheet.title, target_row, col)
+        logger.info("Ostatní výdaj %s %s (%s) → list %s, buňka %s%d",
+                    amount, currency, description or category,
+                    sheet.title, ("L" if col == 12 else "N"), target_row)
 
     def zapis_pracovni_doby(self, date_str, start_time_str, end_time_str, lunch_duration_str, num_employees):
         try:

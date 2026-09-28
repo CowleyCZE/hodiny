@@ -39,3 +39,26 @@ Aplikace **Hodiny** je Flask webová aplikace určená k evidenci docházky, odp
 - **Struktura adresářů:** Ověřena a kompletní.
 - **Git stav:** Všechny soubory jsou sledovány a sync s `origin/main`.
 - **Testovací sada:** Spuštěna testovací sada `pytest`.
+
+---
+
+## 5. Mapování sloupců MMcash26 (`zapis_vydaje`)
+
+Opraveno dle `Popis_sablon_Hodiny2026_kompletni.md` – metoda `Hodiny2025Manager.zapis_vydaje()` v [hodiny2025_manager.py](file:///data/data/com.termux/files/home/projects/hodiny/hodiny2025_manager.py):
+
+| Kategorie | Platba | Měna | Sloupec částka | Sloupec datum |
+|---|---|---|---|---|
+| Nafta / Tankování | Karta | CZK | **A** (1) | **B** (2) |
+| Nafta / Tankování | Hotově | CZK | **C** (3) | — |
+| Nafta / Tankování | Karta | EUR | **D** (4) | **E** (5) |
+| Nafta / Tankování | Hotově | EUR | **F** (6) | — |
+| Peage / Mýto | Hotově | — | **G** (7) | **R** (18) |
+| Peage / Mýto | Kartou | — | **H** (8) | **R** (18) |
+| Ubytování | — | — | **S** (19) | **T** (20) |
+| Ostatní výdaje | — | CZK | **L** (12) + popis M (13) | **AF** (32) |
+| Ostatní výdaje | — | EUR | **N** (14) + popis M (13) | **AF** (32) |
+| Bankomat (výběr) | — | CZK | **AJ** (36) | — |
+| Bankomat (výběr) | — | EUR | **AK** (37) | — |
+| Záloha Čáp | — | EUR | **O** (15) | — |
+| Záloha Čáp | — | CZK | **P** (16) | — |
+| Záloha ostatní | — | — | Q/S/U/W/Y/AA/AC | sloupec+1 |

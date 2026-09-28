@@ -256,13 +256,24 @@ class Hodiny2025Manager:
         return workbook, workbook[sheet_name]
 
     def get_or_create_cash_sheet(self, month: int, year: int = 2026) -> tuple[Workbook, Worksheet]:
-        """Získá nebo vytvoří měsíční list výdajů ze šablony MMcash26 (např. 01cash26)."""
-        sheet_name = f"{month:02d}cash{str(year)[2:]}"
+        """Získá nebo vytvoří list výdajů ze šablony MMcash26. Vytváří se formát CAcashRR od CA=05."""
+        year_suffix = str(year)[2:]
         try:
             workbook = load_workbook(self.file_path)
         except (FileNotFoundError, InvalidFileException):
             self._create_new_workbook()
             workbook = load_workbook(self.file_path)
+
+        import re
+        current_ca = 5
+        for name in workbook.sheetnames:
+            match = re.match(r"^(\d+)cash" + year_suffix + r"$", name)
+            if match:
+                ca = int(match.group(1))
+                if ca > current_ca:
+                    current_ca = ca
+
+        sheet_name = f"{current_ca:02d}cash{year_suffix}"
 
         if sheet_name not in workbook.sheetnames:
             if self.cash_template_sheet_name not in workbook.sheetnames:

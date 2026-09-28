@@ -114,7 +114,10 @@ class TestWeeklyFileFunctionality(unittest.TestCase):
         self.assertEqual(ws["B7"].value, "08:00")
         self.assertEqual(ws["C7"].value, "16:30")
         self.assertEqual(ws["B8"].value, 8)
-        self.assertEqual(str(ws["B80"].value.date()), "2025-01-06")
+        b6_val = ws["B6"].value
+        if hasattr(b6_val, "date"):
+            b6_val = b6_val.date()
+        self.assertEqual(str(b6_val), "2025-01-06")
         self.assertEqual(ws["A8"].value, "Test Employee")
         wb.close()
 
@@ -132,7 +135,10 @@ class TestWeeklyFileFunctionality(unittest.TestCase):
         self.assertIsNone(ws["D7"].value)
         self.assertIsNone(ws["E7"].value)
         self.assertEqual(ws["D8"].value, 0)
-        self.assertEqual(str(ws["D80"].value.date()), "2025-01-07")
+        d6_val = ws["D6"].value
+        if hasattr(d6_val, "date"):
+            d6_val = d6_val.date()
+        self.assertEqual(str(d6_val), "2025-01-07")
         wb.close()
 
 

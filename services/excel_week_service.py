@@ -201,7 +201,7 @@ def write_time_entry_to_sheet(
     if date_base:
         _write_sheet_cell(sheet, date_base[0], date_column, date_obj.date(), number_format="DD.MM.YYYY")
     else:
-        _write_sheet_cell(sheet, 80, date_column, date_obj.date(), number_format="DD.MM.YYYY")
+        _write_sheet_cell(sheet, 6, date_column, date_obj.date(), number_format="DD.MM.YYYY")
 
     project_coords = get_cell_coordinates("project_name", sheet_name, "projects")
     if current_project_name and project_coords:

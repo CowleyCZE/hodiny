@@ -177,7 +177,7 @@
     "weekly_time": {
         "date": [
             {
-                "cell": "B80",
+                "cell": "B6",
                 "file": "Hodiny_Cap.xlsx",
                 "sheet": "Týden"
             }

@@ -44,8 +44,8 @@ instance/
 *.sqlite3
 gemini_cache.sqlite
 
-# Excel soubory (kromě šablony)
-excel/*.xlsx
+# Excel soubory
+*.xlsx
 excel/metadata.json
 excel/temp_*.xlsx
 

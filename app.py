@@ -116,6 +116,45 @@ def teardown_request(_exception=None):
     if hasattr(g, "excel_manager") and g.excel_manager:
         g.excel_manager.close_cached_workbooks()
 
+@app.route("/webhook/github", methods=["POST"])
+def github_webhook():
+    """GitHub webhook pro automatický deployment"""
+    import subprocess
+    import os
+    from flask import request
+    
+    # Základní bezpečnost - ověř GitHub secret (pokud chceš)
+    # signature = request.headers.get('X-Hub-Signature-256', '')
+    # Zatím bez ověření pro jednoduchost
+    
+    event = request.headers.get('X-GitHub-Event')
+    
+    if event == 'push':
+        try:
+            # Spusť git pull v adresáři aplikace
+            repo_path = "/home/Cowley/hodiny"
+            
+            result = subprocess.run(
+                ["git", "-C", repo_path, "fetch", "origin"],
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            
+            result = subprocess.run(
+                ["git", "-C", repo_path, "reset", "--hard", "origin/main"],
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            
+            return {"status": "success", "message": "Deployment completed"}, 200
+        
+        except Exception as e:
+            print(f"Webhook error: {e}")
+            return {"status": "error", "message": str(e)}, 500
+    
+    return {"status": "ignored"}, 200
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)

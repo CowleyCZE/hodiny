@@ -239,19 +239,19 @@ class Hodiny2025Manager:
 
         self._set_summary_formulas(sheet)
 
-    def _set_summary_formulas(self, sheet: Worksheet):
+    def _set_summary_formulas(self, sheet: Worksheet, days_in_month: int = 365):
         """Nastaví souhrnné vzorce v panelu T4:T8 dle MMhod26_v2."""
         dr_start = self.DATA_START_ROW
-        dr_end   = self.DATA_END_ROW  # 367
-        # T4 = SUM(F3:F367)*24  – odpracováno hodin
+        dr_end   = self.DATA_START_ROW + days_in_month - 1
+        # T4 = SUM(F3:Fxx)*24  – odpracováno hodin
         self._set_cell_formula(sheet, 4, 20, f"=SUM(F{dr_start}:F{dr_end})*24")
-        # T5 = SUM(H3:H367)  – celkem práce Kč
+        # T5 = SUM(H3:Hxx)  – celkem práce Kč
         self._set_cell_formula(sheet, 5, 20, f"=SUM(H{dr_start}:H{dr_end})")
-        # T6 = SUM(J3:J367)  – přesčas Kč
+        # T6 = SUM(J3:Jxx)  – přesčas Kč
         self._set_cell_formula(sheet, 6, 20, f"=SUM(J{dr_start}:J{dr_end})")
-        # T7 = COUNTIFS(C3:C367,"<>",E3:E367,"<>")  – počet pracovních dní
+        # T7 = COUNTIFS(C3:Cxx,"<>",E3:Exx,"<>")  – počet pracovních dní
         self._set_cell_formula(sheet, 7, 20, f'=COUNTIFS(C{dr_start}:C{dr_end},"<>",E{dr_start}:E{dr_end},"<>")')
-        # T8 = SUM(O3:O367)  – mrazák hodin
+        # T8 = SUM(O3:Oxx)  – mrazák hodin
         self._set_cell_formula(sheet, 8, 20, f"=SUM(O{dr_start}:O{dr_end})")
 
     def _setup_month_sheet(self, sheet: Worksheet, month: int, year: int):
@@ -273,6 +273,8 @@ class Hodiny2025Manager:
             row = self.DATA_START_ROW + day - 1
             for col in range(1, 15):
                 self._set_cell_formula(sheet, row, col, "")
+
+        self._set_summary_formulas(sheet, days_in_month)
 
     def _get_actual_cell(self, sheet: Worksheet, row: int, col: int):
         """Return the real (top-left) cell for the given coordinates, handling merged cells.
@@ -311,9 +313,26 @@ class Hodiny2025Manager:
 
         return workbook, workbook[sheet_name]
 
-    def get_or_create_month_sheet(self, month: int, year: int = 2025):
-        # Backward compatibility, redirect to year sheet
-        return self.get_or_create_year_sheet(year)
+    def get_or_create_month_sheet(self, month: int, year: int = 2026) -> tuple[Workbook, Worksheet]:
+        sheet_name = self.CZECH_MONTHS.get(month, f"{month:02d}hod")
+        try:
+            workbook = load_workbook(self.file_path)
+        except (FileNotFoundError, InvalidFileException):
+            self._create_new_workbook()
+            workbook = load_workbook(self.file_path)
+
+        if sheet_name not in workbook.sheetnames:
+            if self.template_sheet_name not in workbook.sheetnames:
+                raise ValueError(f"Template list '{self.template_sheet_name}' nebyl nalezen")
+            template_sheet = workbook[self.template_sheet_name]
+            new_sheet = workbook.copy_worksheet(template_sheet)
+            new_sheet.title = sheet_name
+            self._setup_month_sheet(new_sheet, month, year)
+            workbook.save(self.file_path)
+            logger.info("Vytvořen nový měsíční list: %s", sheet_name)
+            return workbook, new_sheet
+
+        return workbook, workbook[sheet_name]
 
     def get_or_create_cash_sheet(self, month: int, year: int = 2026) -> tuple[Workbook, Worksheet]:
         """Vrátí aktuálně otevřenou (neuzavřenou) akci z cash listů nebo vytvoří novou.
@@ -445,10 +464,9 @@ class Hodiny2025Manager:
 
     def zapis_pracovni_doby(self, date_str, start_time_str, end_time_str, lunch_duration_str, num_employees,
                              firma: str = "", mesto: str = "", auto: str = "", mrazak_h: float = 0.0, poznamka: str = ""):
-        """Zapíše pracovní dobu do listu MMhod26. Volitelně zapíše firmu, město, auto, mrazák a poznámku."""
+        """Zapíše pracovní dobu do měsíčního listu (dle měsíce datumu) i do ročního listu (MMhod26 / 2026hod)."""
         try:
             date_obj = datetime.strptime(date_str, "%Y-%m-%d")
-            workbook, sheet = self.get_or_create_year_sheet(date_obj.year)
             
             # Pokud nejsou firma/mesto explicitně zadány, načti je z nastavení
             if not firma or not mesto:
@@ -461,26 +479,35 @@ class Hodiny2025Manager:
                         mesto = settings.get("project_info", {}).get("mesto", "")
                 except Exception:
                     pass
-            
-            # Najdi řádek podle data ve sloupci A
-            date_formatted = date_obj.strftime("%d.%m.%Y")
-            row = 3
-            for r in range(3, 369):
-                cell_val = sheet.cell(row=r, column=1).value
-                if cell_val and str(cell_val).strip() == date_formatted:
-                    row = r
-                    break
-                if not cell_val:
-                    row = r
-                    sheet.cell(row=row, column=1).value = date_formatted
-                    break
 
-            self._update_day_record(sheet, row, start_time_str, end_time_str, lunch_duration_str,
+            date_formatted = date_obj.strftime("%d.%m.%Y")
+
+            # 1. Zápis do měsíčního listu (Leden..Prosinec)
+            workbook, month_sheet = self.get_or_create_month_sheet(date_obj.month, date_obj.year)
+            row = self.DATA_START_ROW + date_obj.day - 1
+            month_sheet.cell(row=row, column=1).value = date_formatted
+            self._update_day_record(month_sheet, row, start_time_str, end_time_str, lunch_duration_str,
                                     num_employees, firma, mesto, auto, mrazak_h, poznamka)
 
+            # 2. Zápis do ročního listu (MMhod26 nebo 2026hod), pokud existuje
+            year_sheet_name = f"{date_obj.year}hod"
+            for alt_name in [year_sheet_name, self.template_sheet_name]:
+                if alt_name in workbook.sheetnames and alt_name != month_sheet.title:
+                    ysheet = workbook[alt_name]
+                    y_row = None
+                    for r in range(self.DATA_START_ROW, self.DATA_START_ROW + 366):
+                        cval = ysheet.cell(row=r, column=1).value
+                        if cval and str(cval).strip() == date_formatted:
+                            y_row = r
+                            break
+                    if y_row:
+                        self._update_day_record(ysheet, y_row, start_time_str, end_time_str, lunch_duration_str,
+                                                num_employees, firma, mesto, auto, mrazak_h, poznamka)
+
             workbook.save(self.file_path)
-            logger.info("Pracovní doba pro %s byla zapsána do listu %s (firma=%s, město=%s)",
-                        date_str, sheet.title, firma, mesto)
+            workbook.close()
+            logger.info("Pracovní doba pro %s byla zapsána do měsíčního listu %s v %s",
+                        date_str, month_sheet.title, self.file_path.name)
         except (ValueError, IOError, FileNotFoundError) as e:
             logger.error("Chyba při zápisu pracovní doby pro %s: %s", date_str, e, exc_info=True)
             raise

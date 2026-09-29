@@ -93,53 +93,85 @@ class ZalohyManager:
                 return s
         return requested_name
 
+    def _write_advance_to_sheet(self, workbook, employee_name, amount, currency, option, date):
+        real_sheet_name = self._get_real_sheet_name(workbook, self.zalohy_sheet_name)
+        if real_sheet_name not in workbook.sheetnames:
+            return False
+        sheet = workbook[real_sheet_name]
+        options = self.get_option_names()
+        if option not in options:
+            raise ValueError(f"Neplatná volba zálohy: {option}")
+
+        row = self._get_or_create_employee_row(sheet, employee_name)
+        option_index = options.index(option)
+
+        # Zkus použít dynamickou konfiguraci pro částky
+        amount_field = f"amount_{currency.lower()}"
+        amount_coords = self._get_cell_coordinates(amount_field, self.zalohy_sheet_name)
+
+        if amount_coords:
+            target_coordinate = self._resolve_option_coordinate(amount_coords, option_index)
+            if target_coordinate:
+                amount_row, amount_col = target_coordinate
+                actual_row = row if amount_row <= self.employee_start_row else amount_row
+                self._update_advance_cell(sheet, actual_row, amount_col, amount)
+                logger.info(
+                    "Částka %s %s zapsána do buňky %s%d (dynamická konfigurace)",
+                    amount,
+                    currency,
+                    chr(64 + amount_col),
+                    actual_row,
+                )
+            else:
+                raise ValueError(f"Chybí mapping pro volbu zálohy {option} a měnu {currency}.")
+        else:
+            # Fallback na původní logiku
+            column_index = 2 + (option_index * 2) + (1 if currency == "CZK" else 0)
+            self._update_advance_cell(sheet, row, column_index, amount)
+            logger.info(
+                "Částka %s %s zapsána na řádek %d, sloupec %d (původní logika)", amount, currency, row, column_index
+            )
+
+        self._update_date_cell(sheet, row, date)
+        return True
+
     def add_or_update_employee_advance(self, employee_name, amount, currency, option, date):
         """Přičte zálohu zaměstnanci (vytvoří řádek pokud chybí)."""
         workbook = None
         try:
             self._validate_inputs(employee_name, amount, currency, date)
+            
+            # 1. Zápis do hlavního souboru (Hodiny_Cap.xlsx)
             workbook = self._get_active_workbook(read_only=False)
-            real_sheet_name = self._get_real_sheet_name(workbook, self.zalohy_sheet_name)
-            sheet = workbook[real_sheet_name]
-            options = self.get_option_names()
-            if option not in options:
-                raise ValueError(f"Neplatná volba zálohy: {option}")
-
-            row = self._get_or_create_employee_row(sheet, employee_name)
-            option_index = options.index(option)
-
-            # Zkus použít dynamickou konfiguraci pro částky
-            amount_field = f"amount_{currency.lower()}"
-            amount_coords = self._get_cell_coordinates(amount_field, self.zalohy_sheet_name)
-
-            if amount_coords:
-                target_coordinate = self._resolve_option_coordinate(amount_coords, option_index)
-                if target_coordinate:
-                    amount_row, amount_col = target_coordinate
-                    actual_row = row if amount_row <= self.employee_start_row else amount_row
-                    self._update_advance_cell(sheet, actual_row, amount_col, amount)
-                    logger.info(
-                        "Částka %s %s zapsána do buňky %s%d (dynamická konfigurace)",
-                        amount,
-                        currency,
-                        chr(64 + amount_col),
-                        actual_row,
-                    )
-                else:
-                    raise ValueError(f"Chybí mapping pro volbu zálohy {option} a měnu {currency}.")
-            else:
-                # Fallback na původní logiku
-                column_index = 2 + (option_index * 2) + (1 if currency == "CZK" else 0)
-                self._update_advance_cell(sheet, row, column_index, amount)
-                logger.info(
-                    "Částka %s %s zapsána na řádek %d, sloupec %d (původní logika)", amount, currency, row, column_index
-                )
-
-            self._update_date_cell(sheet, row, date)
-
+            self._write_advance_to_sheet(workbook, employee_name, amount, currency, option, date)
             self._save_workbook(workbook)
+            workbook.close()
+            workbook = None
 
-            # Synchronizace do souboru Hodiny2026.xlsx (list XXcashXX)
+            # 2. Zápis do týdenního souboru (Hodiny_Cap_Tyden_{week_number}.xlsx nebo Hodiny_Cap_Tyden_ČT.xlsx)
+            try:
+                date_obj = datetime.strptime(date, "%Y-%m-%d")
+                week_number = date_obj.isocalendar().week
+                
+                possible_weekly_files = [
+                    self.base_path / f"Hodiny_Cap_Tyden_{week_number}.xlsx",
+                    self.base_path / f"Hodiny_Cap_Tyden{week_number}.xlsx",
+                    self.base_path / "Hodiny_Cap_Tyden_ČT.xlsx",
+                ]
+                for w_file in possible_weekly_files:
+                    if w_file.exists():
+                        try:
+                            wb_w = load_workbook(filename=w_file, read_only=False)
+                            if self._write_advance_to_sheet(wb_w, employee_name, amount, currency, option, date):
+                                wb_w.save(w_file)
+                                logger.info("Záloha zapsána i do týdenního souboru %s", w_file.name)
+                            wb_w.close()
+                        except Exception as w_err:
+                            logger.error("Chyba při zápisu zálohy do týdenního souboru %s: %s", w_file.name, w_err)
+            except Exception as week_err:
+                logger.error("Chyba při zpracování týdenního souboru záloh: %s", week_err)
+
+            # 3. Synchronizace do souboru Hodiny2026.xlsx (list XXcash26)
             try:
                 from hodiny2025_manager import Hodiny2025Manager
                 hodiny_mgr = Hodiny2025Manager(self.base_path)

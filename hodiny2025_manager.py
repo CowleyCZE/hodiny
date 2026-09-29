@@ -264,7 +264,12 @@ class Hodiny2025Manager:
         return self.get_or_create_year_sheet(year)
 
     def get_or_create_cash_sheet(self, month: int, year: int = 2026) -> tuple[Workbook, Worksheet]:
-        """Získá nebo vytvoří list výdajů ze šablony MMcash26. Vytváří se formát CAcashRR od CA=05."""
+        """Získá nebo vytvoří list výdajů ze šablony MMcash26. Vytváří se formát CAcashRR od CA=05.
+        
+        Nový list se pojmenuje ČAcash26, přičemž ČA je číslo akce začínající od 05.
+        Při vytvoření listu zapíše datum začátku projektu do Q2.
+        """
+        import re
         year_suffix = str(year)[2:]
         try:
             workbook = load_workbook(self.file_path)
@@ -272,7 +277,7 @@ class Hodiny2025Manager:
             self._create_new_workbook()
             workbook = load_workbook(self.file_path)
 
-        import re
+        # Najdi nejvyšší číslo akce z existujících listů
         current_ca = 5
         for name in workbook.sheetnames:
             match = re.match(r"^(\d+)cash" + year_suffix + r"$", name)
@@ -289,7 +294,11 @@ class Hodiny2025Manager:
             template_sheet = workbook[self.cash_template_sheet_name]
             new_sheet = workbook.copy_worksheet(template_sheet)
             new_sheet.title = sheet_name
-            logger.info("Vytvořen nový list výdajů: %s", sheet_name)
+            # Zapsat datum začátku projektu do Q2 (dle MMcash26_v2 specifikace)
+            project_start = self._get_project_start_date()
+            if project_start:
+                self._set_cell_value(new_sheet, 2, 17, project_start.strftime("%d.%m.%Y"))  # Q2
+            logger.info("Vytvořen nový list výdajů: %s, start_date Q2 nastaven", sheet_name)
             return workbook, new_sheet
 
         return workbook, workbook[sheet_name]
@@ -352,28 +361,43 @@ class Hodiny2025Manager:
 
         uhrada = "KARTOU" if "KART" in payment_method.upper() else "HOTOVĚ"
         
+        # Dle MMcash26_v2: A=Datum, B=Kategorie, C=Popis, D=Měna, E=Částka, F=Úhrada, G=Zaměstnanec, H=Typ pohybu, I=Poznámka
+        # Sloupce J:N (10-14) jsou VÝPOČTOVÉ – aplikace je nesmí přepisovat
         target_row = self._find_free_row(sheet, 1, 3, 302)
         
-        self._set_cell_value(sheet, target_row, 1, date_formatted)
-        self._set_cell_value(sheet, target_row, 2, kategorie)
-        self._set_cell_value(sheet, target_row, 3, description if description else kategorie)
-        self._set_cell_value(sheet, target_row, 4, currency.upper())
-        self._set_cell_value(sheet, target_row, 5, float(amount))
-        self._set_cell_value(sheet, target_row, 6, uhrada)
-        self._set_cell_value(sheet, target_row, 7, zamesnanec)
-        self._set_cell_value(sheet, target_row, 8, typ_pohybu)
-        self._set_cell_value(sheet, target_row, 9, "")
-        self._set_cell_value(sheet, target_row, 10, "API")
+        self._set_cell_value(sheet, target_row, 1, date_formatted)              # A: Datum
+        self._set_cell_value(sheet, target_row, 2, kategorie)                   # B: Kategorie
+        self._set_cell_value(sheet, target_row, 3, description if description else kategorie)  # C: Popis
+        self._set_cell_value(sheet, target_row, 4, currency.upper())            # D: Měna
+        self._set_cell_value(sheet, target_row, 5, float(amount))               # E: Částka
+        self._set_cell_value(sheet, target_row, 6, uhrada)                      # F: Úhrada
+        self._set_cell_value(sheet, target_row, 7, zamesnanec)                  # G: Zaměstnanec
+        self._set_cell_value(sheet, target_row, 8, typ_pohybu)                  # H: Typ pohybu
+        # I (9): Poznámka – ponecháme prázdnou; J:N jsou výpočtové vzorce z šablony
         
         workbook.save(self.file_path)
         logger.info(f"Zapsán pohyb do {sheet.title}: {kategorie} {amount} {currency} na řádek {target_row}")
 
-    def zapis_pracovni_doby(self, date_str, start_time_str, end_time_str, lunch_duration_str, num_employees):
+    def zapis_pracovni_doby(self, date_str, start_time_str, end_time_str, lunch_duration_str, num_employees,
+                             firma: str = "", mesto: str = "", auto: str = "", mrazak_h: float = 0.0, poznamka: str = ""):
+        """Zapíše pracovní dobu do listu MMhod26. Volitelně zapíše firmu, město, auto, mrazák a poznámku."""
         try:
             date_obj = datetime.strptime(date_str, "%Y-%m-%d")
             workbook, sheet = self.get_or_create_year_sheet(date_obj.year)
             
-            # Find row by date in column A
+            # Pokud nejsou firma/mesto explicitně zadány, načti je z nastavení
+            if not firma or not mesto:
+                try:
+                    from services.settings_service import load_app_settings
+                    settings = load_app_settings()
+                    if not firma:
+                        firma = settings.get("project_info", {}).get("firma", "")
+                    if not mesto:
+                        mesto = settings.get("project_info", {}).get("mesto", "")
+                except Exception:
+                    pass
+            
+            # Najdi řádek podle data ve sloupci A
             date_formatted = date_obj.strftime("%d.%m.%Y")
             row = 3
             for r in range(3, 369):
@@ -381,34 +405,53 @@ class Hodiny2025Manager:
                 if cell_val and str(cell_val).strip() == date_formatted:
                     row = r
                     break
-                # If we encounter empty date, we can use this row
                 if not cell_val:
                     row = r
                     sheet.cell(row=row, column=1).value = date_formatted
                     break
 
-            self._update_day_record(sheet, row, start_time_str, end_time_str, lunch_duration_str, num_employees)
+            self._update_day_record(sheet, row, start_time_str, end_time_str, lunch_duration_str,
+                                    num_employees, firma, mesto, auto, mrazak_h, poznamka)
 
             workbook.save(self.file_path)
-            logger.info("Pracovní doba pro %s byla zapsána do listu %s", date_str, sheet.title)
+            logger.info("Pracovní doba pro %s byla zapsána do listu %s (firma=%s, město=%s)",
+                        date_str, sheet.title, firma, mesto)
         except (ValueError, IOError, FileNotFoundError) as e:
             logger.error("Chyba při zápisu pracovní doby pro %s: %s", date_str, e, exc_info=True)
             raise
 
-    def _update_day_record(self, sheet, row, start_time_str, end_time_str, lunch_duration_str, num_employees):
-        # C (3): Začátek práce
+    def _update_day_record(self, sheet, row, start_time_str, end_time_str, lunch_duration_str, num_employees,
+                           firma: str = "", mesto: str = "", auto: str = "", mrazak_h: float = 0.0, poznamka: str = ""):
+        """Zapíše denní záznam do listu dle MMhod26_v2 specifikace."""
+        # C (3): Od – Začátek práce
         if start_time_str and start_time_str != "00:00":
             self._set_cell_value(sheet, row, 3, datetime.strptime(start_time_str, "%H:%M").time())
-        # D (4): Pauza
+        # D (4): Pauza (h)
         lunch_hours = float(lunch_duration_str) if lunch_duration_str else 0.0
         lunch_cell = self._set_cell_value(sheet, row, 4, lunch_hours)
         if lunch_cell:
             lunch_cell.number_format = "0.0"
-        # E (5): Konec práce
+        # E (5): Do – Konec práce
         if end_time_str and end_time_str != "00:00":
             self._set_cell_value(sheet, row, 5, datetime.strptime(end_time_str, "%H:%M").time())
+        # Sloupce F,G,H,I,J,Q jsou VÝPOČTOVÉ – nepřepisujeme
+        # K (11): Město
+        if mesto:
+            self._set_cell_value(sheet, row, 11, mesto)
+        # L (12): Firma
+        if firma:
+            self._set_cell_value(sheet, row, 12, firma)
+        # M (13): Auto
+        if auto:
+            self._set_cell_value(sheet, row, 13, auto)
         # N (14): Počet osob
-        self._set_cell_value(sheet, row, 14, num_employees if num_employees > 0 else 0)
+        self._set_cell_value(sheet, row, 14, num_employees if num_employees > 0 else 1)
+        # O (15): Mrazák (h)
+        if mrazak_h:
+            self._set_cell_value(sheet, row, 15, mrazak_h)
+        # P (16): Poznámka
+        if poznamka:
+            self._set_cell_value(sheet, row, 16, poznamka)
 
     def _ensure_formulas_are_set(self, sheet, row):
         formulas = {

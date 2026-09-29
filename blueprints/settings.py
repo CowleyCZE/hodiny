@@ -26,6 +26,8 @@ def settings_page():
                 "name": request.form.get("project_name", "").strip(),
                 "start_date": request.form.get("start_date", "").strip(),
                 "end_date": request.form.get("end_date", "").strip(),
+                "firma": request.form.get("firma", "").strip(),
+                "mesto": request.form.get("mesto", "").strip(),
             }
             if not save_app_settings(settings_to_save):
                 raise IOError("Nepodařilo se uložit nastavení.")

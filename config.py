@@ -62,6 +62,8 @@ class Config:
         name: str = ""
         start_date: str = ""
         end_date: str = ""
+        firma: str = ""
+        mesto: str = ""
 
     DEFAULT_PROJECT_CONFIG = ProjectConfig()
 
@@ -76,8 +78,10 @@ class Config:
                 "name": cls.DEFAULT_PROJECT_CONFIG.name,
                 "start_date": cls.DEFAULT_PROJECT_CONFIG.start_date,
                 "end_date": cls.DEFAULT_PROJECT_CONFIG.end_date,
+                "firma": cls.DEFAULT_PROJECT_CONFIG.firma,
+                "mesto": cls.DEFAULT_PROJECT_CONFIG.mesto,
             },
-            "last_archived_week": 0,  # Sledování posledního archivovaného týdne
+            "last_archived_week": 0,
         }
 
     @classmethod

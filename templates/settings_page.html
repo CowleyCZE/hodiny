@@ -242,6 +242,26 @@
                             </div>
                         </div>
                     </div>
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            <div class="form-group-modern">
+                                <label for="firma" class="form-label-modern">Firma / zákazník</label>
+                                <input type="text" name="firma" id="firma"
+                                    value="{{ request.form['firma'] if request.form else settings.project_info.firma | default('', true) }}"
+                                    class="form-control-modern" placeholder="např. ABC s.r.o.">
+                                <small class="text-muted">Zapisuje se do sloupce L (Firma) v evidenci hodin.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group-modern">
+                                <label for="mesto" class="form-label-modern">Město / místo práce</label>
+                                <input type="text" name="mesto" id="mesto"
+                                    value="{{ request.form['mesto'] if request.form else settings.project_info.mesto | default('', true) }}"
+                                    class="form-control-modern" placeholder="např. Praha">
+                                <small class="text-muted">Zapisuje se do sloupce K (Město) v evidenci hodin.</small>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {# Default Times Card #}

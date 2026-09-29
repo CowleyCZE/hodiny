@@ -21,13 +21,9 @@ def _merge_app_settings(raw_settings):
 
     raw_project_info = raw_settings.get("project_info", {})
     if isinstance(raw_project_info, dict):
-        merged_settings["project_info"].update(
-            {
-                key: value
-                for key, value in raw_project_info.items()
-                if key in merged_settings["project_info"]
-            }
-        )
+        for key in ("name", "start_date", "end_date", "firma", "mesto"):
+            if key in raw_project_info:
+                merged_settings["project_info"][key] = raw_project_info[key]
 
     return merged_settings
 

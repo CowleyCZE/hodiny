@@ -1,8 +1,8 @@
 """Bootstrap Flask aplikace a request lifecycle pro projekt Hodiny."""
 
 import datetime as dt
-
-from flask import Flask, g, redirect, request, session, url_for
+import subprocess
+from flask import Flask, g, jsonify, redirect, request, session, url_for
 
 from api_endpoints import api_bp
 from blueprints.auth import auth_bp
@@ -33,6 +33,11 @@ app.jinja_env.globals["csrf_token"] = csrf_token
 
 @app.before_request
 def security_before_request():
+    """Kontrola bezpečnosti a autentizace - webhook neměří kontrolu."""
+    # Webhook musí projít bez autentizace
+    if request.path.startswith("/webhook/"):
+        return None
+
     validate_csrf()
     if Config.ADMIN_USERNAME and Config.ADMIN_PASSWORD and request.endpoint != "health_check":
         if not session.get("authenticated"):
@@ -80,6 +85,10 @@ initialize_archived_state()
 @app.before_request
 def before_request():
     """Před každým requestem připraví managery a synchronizuje runtime nastavení."""
+    # Webhook nepoužívá session, takže ho přeskočíme
+    if request.path.startswith("/webhook/"):
+        return None
+
     g.database = database
     g.current_user = database.get_user(session["user_id"]) if session.get("user_id") else None
     if Config.AUTH_REQUIRED and request.endpoint != "static" and not request.path.startswith("/auth/"):
@@ -116,45 +125,86 @@ def teardown_request(_exception=None):
     if hasattr(g, "excel_manager") and g.excel_manager:
         g.excel_manager.close_cached_workbooks()
 
+
+# ============================================================================
+# GitHub Webhook Endpoint
+# ============================================================================
+
 @app.route("/webhook/github", methods=["POST"])
 def github_webhook():
-    """GitHub webhook pro automatický deployment"""
-    import subprocess
-    import os
-    from flask import request
+    """
+    GitHub webhook pro automatický deployment
     
-    # Základní bezpečnost - ověř GitHub secret (pokud chceš)
-    # signature = request.headers.get('X-Hub-Signature-256', '')
-    # Zatím bez ověření pro jednoduchost
+    Tento endpoint se spouští automaticky, když se pushne do main branche.
+    Provede git fetch a reset na nejnovější verzi kódu z GitHub.
+    """
+    event = request.headers.get("X-GitHub-Event")
     
-    event = request.headers.get('X-GitHub-Event')
+    logger.info(f"GitHub webhook received: event={event}")
     
-    if event == 'push':
-        try:
-            # Spusť git pull v adresáři aplikace
-            repo_path = "/home/Cowley/hodiny"
-            
-            result = subprocess.run(
-                ["git", "-C", repo_path, "fetch", "origin"],
-                capture_output=True,
-                text=True,
-                timeout=30
-            )
-            
-            result = subprocess.run(
-                ["git", "-C", repo_path, "reset", "--hard", "origin/main"],
-                capture_output=True,
-                text=True,
-                timeout=30
-            )
-            
-            return {"status": "success", "message": "Deployment completed"}, 200
+    # Pokud to není push event, ignoruj
+    if event != "push":
+        logger.info("Webhook ignored - not a push event")
+        return jsonify({"status": "ignored", "message": "Not a push event"}), 200
+    
+    try:
+        repo_path = "/home/Cowley/hodiny"
         
-        except Exception as e:
-            print(f"Webhook error: {e}")
-            return {"status": "error", "message": str(e)}, 500
+        logger.info(f"Starting deployment from {repo_path}")
+        
+        # 1. Fetch z GitHub
+        logger.info("Running: git fetch origin main")
+        fetch_result = subprocess.run(
+            ["git", "-C", repo_path, "fetch", "origin", "main"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=True
+        )
+        logger.info(f"Fetch result: {fetch_result.stdout}")
+        
+        # 2. Reset na nejnovější verzi z GitHub
+        logger.info("Running: git reset --hard origin/main")
+        reset_result = subprocess.run(
+            ["git", "-C", repo_path, "reset", "--hard", "origin/main"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=True
+        )
+        logger.info(f"Reset result: {reset_result.stdout}")
+        
+        # 3. Reload WSGI aplikace (pro PythonAnywhere)
+        logger.info("Reloading WSGI application")
+        subprocess.run(
+            ["touch", "/var/www/Cowley_pythonanywhere_com_wsgi.py"],
+            timeout=10
+        )
+        
+        response = {
+            "status": "success",
+            "message": "Deployment completed successfully",
+            "fetch_output": fetch_result.stdout,
+            "reset_output": reset_result.stdout
+        }
+        logger.info(f"Deployment successful: {response}")
+        return jsonify(response), 200
     
-    return {"status": "ignored"}, 200
+    except subprocess.CalledProcessError as e:
+        error_msg = f"Git command failed: {e.stderr or e.stdout}"
+        logger.error(error_msg)
+        return jsonify({"status": "error", "message": error_msg}), 500
+    
+    except subprocess.TimeoutExpired as e:
+        error_msg = f"Deployment timeout: {str(e)}"
+        logger.error(error_msg)
+        return jsonify({"status": "error", "message": error_msg}), 504
+    
+    except Exception as e:
+        error_msg = f"Deployment error: {str(e)}"
+        logger.error(error_msg, exc_info=True)
+        return jsonify({"status": "error", "message": error_msg}), 500
+
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)

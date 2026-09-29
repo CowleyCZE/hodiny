@@ -1,0 +1,21 @@
+name: Deploy to PythonAnywhere
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PA_HOST }}
+          username: ${{ secrets.PA_USERNAME }}
+          key: ${{ secrets.PA_SSH_KEY }}
+          script: |
+            cd /home/Cowley/hodiny
+            git pull origin main
+            touch /var/www/Cowley_pythonanywhere_com_wsgi.py

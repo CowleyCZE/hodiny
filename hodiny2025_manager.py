@@ -38,11 +38,29 @@ class Hodiny2025Manager:
     Manager pro správu Excel souboru s evidencí pracovních hodin pro rok 2025.
     """
 
-    HEADER_ROW, DATA_START_ROW, DATA_END_ROW, SUMMARY_ROW = 2, 3, 33, 34
-    COL_DAY, COL_DATE, COL_WEEKDAY, COL_HOLIDAY = 1, 2, 3, 4
-    COL_START, COL_LUNCH, COL_END = 5, 6, 7
-    COL_TOTAL_HOURS, COL_OVERTIME, COL_NIGHT, COL_WEEKEND = 8, 9, 10, 11
-    COL_HOLIDAY_HOURS, COL_EMPLOYEES, COL_TOTAL_ALL = 12, 13, 14
+    # MMhod26_v2: data rows 3..367 (365 dní), shrnutí v T4:T8
+    HEADER_ROW, DATA_START_ROW, DATA_END_ROW, SUMMARY_ROW = 2, 3, 367, 368
+    # Sloupce dle MMhod26_v2
+    COL_DATE    = 1   # A: Datum
+    COL_WEEKDAY = 2   # B: Den v týdnu (VÝČET)
+    COL_START   = 3   # C: Od (vstup)
+    COL_LUNCH   = 4   # D: Pauza (h) (vstup)
+    COL_END     = 5   # E: Do (vstup)
+    COL_TOTAL_HOURS = 6   # F: Čisté hodiny (VÝČET)
+    COL_HOURLY_RATE = 7   # G: Hodinová mzda (VÝČET, přebírá T2)
+    COL_TOTAL_CZK   = 8   # H: Celkem Kč (VÝČET)
+    COL_OVERTIME    = 9   # I: Přesčas h (VÝČET)
+    COL_OVERTIME_CZK = 10  # J: Přesčas Kč (VÝČET)
+    COL_CITY        = 11  # K: Město (vstup)
+    COL_COMPANY     = 12  # L: Firma (vstup)
+    COL_VEHICLE     = 13  # M: Auto (vstup)
+    COL_EMPLOYEES   = 14  # N: Počet osob (vstup)
+    COL_FREEZER     = 15  # O: Mrazák (h) (vstup)
+    COL_NOTE        = 16  # P: Poznámka (vstup)
+    COL_STATUS      = 17  # Q: Status (VÝČET)
+    # Zpětná kompatibilita (nepřepísát význam)
+    COL_DAY         = 1   # A (zpětná kompatibilita)
+    COL_TOTAL_ALL   = 8   # H = Celkem Kč (zpětná kompatibilita)
 
     CZECH_MONTHS = {
         1: "Leden",
@@ -158,22 +176,26 @@ class Hodiny2025Manager:
         logger.info("Vytvořen nový Excel soubor: %s", self.file_path)
 
     def _setup_template_sheet(self, sheet: Worksheet):
-        self._set_cell_value(sheet, 1, 1, "Měsíční výkaz práce - [Měsíc] 2025")
+        # Dle MMhod26_v2: sloupce A-Q jsou datové, S-T je panel nastavení
+        self._set_cell_value(sheet, 1, 1, "Měsíční výkaz práce - [Měsíc] 2026")
         headers = [
-            "Den",
-            "Datum",
-            "Den v týdnu",
-            "Svátek",
-            "Začátek",
-            "Oběd (h)",
-            "Konec",
-            "Celkem hodin",
-            "Přesčasy",
-            "Noční práce",
-            "Víkend",
-            "Svátky",
-            "Zaměstnanci",
-            "Celkem odpracováno",
+            "Datum",          # A
+            "Den",            # B
+            "Od",             # C
+            "Pauza (h)",      # D
+            "Do",             # E
+            "Čisté hodiny",   # F (VÝČET)
+            "Hodinová mzda (Kč/h)",  # G (VÝČET, přebírá T2)
+            "Celkem Kč",      # H (VÝČET)
+            "Přesčas h",      # I (VÝČET)
+            "Přesčas Kč",    # J (VÝČET)
+            "Město",          # K
+            "Firma",          # L
+            "Auto",           # M
+            "Počet osob",     # N
+            "Mrazák (h)",    # O
+            "Poznámka",      # P
+            "Status",         # Q (VÝČET)
         ]
 
         for col, header in enumerate(headers, 1):
@@ -182,25 +204,55 @@ class Hodiny2025Manager:
                 target.font = Font(bold=True)
                 target.alignment = Alignment(horizontal="center")
 
-        for day in range(1, 32):
-            row = self.DATA_START_ROW + day - 1
-            # use helper to avoid writing into MergedCell objects
-            self._set_cell_value(sheet, row, self.COL_DAY, day)
-            formula = f'=IF(AND(E{row}<>"",G{row}<>""),(G{row}-E{row})*24-F{row},0)'
-            self._set_cell_formula(sheet, row, self.COL_TOTAL_HOURS, formula)
-            self._set_cell_formula(sheet, row, self.COL_OVERTIME, f"=MAX(0,H{row}-8)")
-            self._set_cell_formula(sheet, row, self.COL_TOTAL_ALL, f"=H{row}*M{row}")
+        # Panel nastavení S-T (dle MMhod26_v2 sekce 2)
+        self._set_cell_value(sheet, 2, 19, "Hodinová mzda (Kč/h)")  # S2
+        self._set_cell_value(sheet, 2, 20, 0)                          # T2 vstup
+        self._set_cell_value(sheet, 3, 19, "Kurz Eura (Kč/EUR)")      # S3
+        self._set_cell_value(sheet, 3, 20, 25)                         # T3 vstup
+        self._set_cell_value(sheet, 4, 19, "Odpracováno hodin")       # S4
+        self._set_cell_value(sheet, 5, 19, "Celkem práce Kč")        # S5
+        self._set_cell_value(sheet, 6, 19, "Přesčas Kč")             # S6
+        self._set_cell_value(sheet, 7, 19, "Počet pracovních dní")   # S7
+        self._set_cell_value(sheet, 8, 19, "Mrazák hodin")            # S8
+        self._set_cell_value(sheet, 9, 19, "Rok")                      # S9
+        self._set_cell_value(sheet, 9, 20, 2026)                       # T9 konstanta
+        self._set_cell_value(sheet, 10, 19, "Poznámka")               # S10
+        self._set_cell_value(sheet, 10, 20, "Žluté = vstup; zelené = výpočet")  # T10
+
+        # Data rows: vzorce pro sloupce F, G, H, I, J, Q
+        last_row = self.DATA_START_ROW + 364  # 365 dní
+        for i in range(365):
+            row = self.DATA_START_ROW + i
+            # F: Čisté hodiny
+            self._set_cell_formula(sheet, row, 6,  f'=IF(OR(C{row}="",E{row}=""),"",(E{row}-C{row})-D{row}/24)')
+            # G: Hodinová mzda (přebírá T2)
+            self._set_cell_formula(sheet, row, 7,  f'=IF(A{row}="","",$T$2)')
+            # H: Celkem Kč
+            self._set_cell_formula(sheet, row, 8,  f'=IF(F{row}="","",F{row}*G{row}*24*IF(N{row}="",1,N{row}))')
+            # I: Přesčas h
+            self._set_cell_formula(sheet, row, 9,  f'=IF(F{row}="","",MAX(0,F{row}*24-8))')
+            # J: Přesčas Kč
+            self._set_cell_formula(sheet, row, 10, f'=IF(I{row}="","",I{row}*G{row}*IF(N{row}="",1,N{row}))')
+            # Q: Status
+            self._set_cell_formula(sheet, row, 17,
+                f'=IF(A{row}="","",IF(AND(C{row}="",E{row}=""),"VOLNO",IF(OR(C{row}="",E{row}=""),"NEKOMPLETNÍ","OK")))')
 
         self._set_summary_formulas(sheet)
 
     def _set_summary_formulas(self, sheet: Worksheet):
-        self._set_cell_formula(sheet, self.SUMMARY_ROW, 1, "SOUHRN:")
-        for col, formula_col in [(self.COL_TOTAL_HOURS, "H"), (self.COL_OVERTIME, "I"), (self.COL_TOTAL_ALL, "N")]:
-            formula = f"=SUM({formula_col}{self.DATA_START_ROW}:{formula_col}{self.DATA_END_ROW})"
-            self._set_cell_formula(sheet, self.SUMMARY_ROW, col, formula)
-            cell = self._get_actual_cell(sheet, self.SUMMARY_ROW, col)
-            cell.font = Font(bold=True)
-            cell.fill = PatternFill("solid", fgColor="CCCCCC")
+        """Nastaví souhrnné vzorce v panelu T4:T8 dle MMhod26_v2."""
+        dr_start = self.DATA_START_ROW
+        dr_end   = self.DATA_END_ROW  # 367
+        # T4 = SUM(F3:F367)*24  – odpracováno hodin
+        self._set_cell_formula(sheet, 4, 20, f"=SUM(F{dr_start}:F{dr_end})*24")
+        # T5 = SUM(H3:H367)  – celkem práce Kč
+        self._set_cell_formula(sheet, 5, 20, f"=SUM(H{dr_start}:H{dr_end})")
+        # T6 = SUM(J3:J367)  – přesčas Kč
+        self._set_cell_formula(sheet, 6, 20, f"=SUM(J{dr_start}:J{dr_end})")
+        # T7 = COUNTIFS(C3:C367,"<>",E3:E367,"<>")  – počet pracovních dní
+        self._set_cell_formula(sheet, 7, 20, f'=COUNTIFS(C{dr_start}:C{dr_end},"<>",E{dr_start}:E{dr_end},"<>")')
+        # T8 = SUM(O3:O367)  – mrazák hodin
+        self._set_cell_formula(sheet, 8, 20, f"=SUM(O{dr_start}:O{dr_end})")
 
     def _setup_month_sheet(self, sheet: Worksheet, month: int, year: int):
         month_name = self.CZECH_MONTHS[month]
@@ -264,10 +316,12 @@ class Hodiny2025Manager:
         return self.get_or_create_year_sheet(year)
 
     def get_or_create_cash_sheet(self, month: int, year: int = 2026) -> tuple[Workbook, Worksheet]:
-        """Získá nebo vytvoří list výdajů ze šablony MMcash26. Vytváří se formát CAcashRR od CA=05.
-        
-        Nový list se pojmenuje ČAcash26, přičemž ČA je číslo akce začínající od 05.
-        Při vytvoření listu zapíše datum začátku projektu do Q2.
+        """Vrátí aktuálně otevřenou (neuzavřenou) akci z cash listů nebo vytvoří novou.
+
+        Dle MMcash26_v2:
+        - List se jmenuje ČAcash26 (ČA = číslo akce, od 05).
+        - Nová akce = nová kopie MMcash26; existující otevřená akce = list kde Q3 je prázdné.
+        - Q2 = datum začátku, Q3 = datum konce (uzavření). Vyplněné Q3 = uzavřeno.
         """
         import re
         year_suffix = str(year)[2:]
@@ -277,31 +331,42 @@ class Hodiny2025Manager:
             self._create_new_workbook()
             workbook = load_workbook(self.file_path)
 
-        # Najdi nejvyšší číslo akce z existujících listů
-        current_ca = 5
+        pattern = re.compile(r"^(\d+)cash" + re.escape(year_suffix) + r"$")
+
+        # Seřaď existující listy akcí vzestupně dle čísla akce
+        action_sheets = []
         for name in workbook.sheetnames:
-            match = re.match(r"^(\d+)cash" + year_suffix + r"$", name)
-            if match:
-                ca = int(match.group(1))
-                if ca > current_ca:
-                    current_ca = ca
+            m = pattern.match(name)
+            if m:
+                action_sheets.append((int(m.group(1)), name))
+        action_sheets.sort()
 
-        sheet_name = f"{current_ca:02d}cash{year_suffix}"
+        # Hledej první neuzavřený list (Q3 je prázdné)
+        for ca_num, sheet_name in action_sheets:
+            ws = workbook[sheet_name]
+            q3_val = ws.cell(row=3, column=17).value  # Q3
+            if not q3_val:  # prázdné Q3 = otevřená akce
+                logger.info("Nalezena otevřená akce: %s", sheet_name)
+                return workbook, ws
 
-        if sheet_name not in workbook.sheetnames:
-            if self.cash_template_sheet_name not in workbook.sheetnames:
-                raise ValueError(f"Template list výdajů '{self.cash_template_sheet_name}' nebyl nalezen")
-            template_sheet = workbook[self.cash_template_sheet_name]
-            new_sheet = workbook.copy_worksheet(template_sheet)
-            new_sheet.title = sheet_name
-            # Zapsat datum začátku projektu do Q2 (dle MMcash26_v2 specifikace)
-            project_start = self._get_project_start_date()
-            if project_start:
-                self._set_cell_value(new_sheet, 2, 17, project_start.strftime("%d.%m.%Y"))  # Q2
-            logger.info("Vytvořen nový list výdajů: %s, start_date Q2 nastaven", sheet_name)
-            return workbook, new_sheet
+        # Všechny existující listy jsou uzavřeny nebo žádné nejsou – vytvoř nový
+        next_ca = action_sheets[-1][0] + 1 if action_sheets else 5
+        new_sheet_name = f"{next_ca:02d}cash{year_suffix}"
 
-        return workbook, workbook[sheet_name]
+        if self.cash_template_sheet_name not in workbook.sheetnames:
+            raise ValueError(f"Template list výdajů '{self.cash_template_sheet_name}' nebyl nalezen")
+
+        template_sheet = workbook[self.cash_template_sheet_name]
+        new_sheet = workbook.copy_worksheet(template_sheet)
+        new_sheet.title = new_sheet_name
+
+        # Zapsat datum začátku projektu do Q2 (dle MMcash26_v2)
+        project_start = self._get_project_start_date()
+        if project_start:
+            self._set_cell_value(new_sheet, 2, 17, project_start.strftime("%d.%m.%Y"))  # Q2
+
+        logger.info("Vytvořen nový list výdajů: %s, start_date Q2 nastaven", new_sheet_name)
+        return workbook, new_sheet
 
     def _get_project_start_date(self):
         """Načte datum začátku projektu ze settings.json. Vrátí datetime nebo None."""
@@ -454,10 +519,15 @@ class Hodiny2025Manager:
             self._set_cell_value(sheet, row, 16, poznamka)
 
     def _ensure_formulas_are_set(self, sheet, row):
+        # MMhod26_v2: C=Od(3), D=Pauza(4), E=Do(5), F=ČistéHod(6), G=HodMzda(7), H=CelkemKč(8),
+        # I=PřesčasH(9), J=PřesčasKč(10), Q=Status(17)
         formulas = {
-            self.COL_TOTAL_HOURS: f'=IF(AND(E{row}<>"",G{row}<>""),(G{row}-E{row})*24-F{row},0)',
-            self.COL_OVERTIME: f"=MAX(0,H{row}-8)",
-            self.COL_TOTAL_ALL: f"=H{row}*M{row}",
+            6:  f'=IF(OR(C{row}="",E{row}=""),"",(E{row}-C{row})-D{row}/24)',           # F: Čisté hodiny
+            7:  f'=IF(A{row}="","",$T$2)',                                                   # G: Hodinová mzda
+            8:  f'=IF(F{row}="","",F{row}*G{row}*24*IF(N{row}="",1,N{row}))',            # H: Celkem Kč
+            9:  f'=IF(F{row}="","",MAX(0,F{row}*24-8))',                                   # I: Přesčas h
+            10: f'=IF(I{row}="","",I{row}*G{row}*IF(N{row}="",1,N{row}))',               # J: Přesčas Kč
+            17: f'=IF(A{row}="","",IF(AND(C{row}="",E{row}=""),"VOLNO",IF(OR(C{row}="",E{row}=""),"NEKOMPLETNÍ","OK")))',  # Q: Status
         }
         for col, formula in formulas.items():
             cell = sheet.cell(row=row, column=col)

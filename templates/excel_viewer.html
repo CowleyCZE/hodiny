@@ -85,13 +85,16 @@
                     </form>
                 </div>
 
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="badge-modern badge-info"
-                        style="font-size: 0.75rem; background: rgba(0, 123, 255, 0.1);">
-                        Zobrazeno {{ data|length }} řádků
-                    </span>
-                    <button class="btn btn-sm btn-outline-primary" style="border-radius: 8px;"
-                        onclick="toggleFullscreen()">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge-modern badge-info"
+                            style="font-size: 0.75rem; background: rgba(0, 123, 255, 0.1);">
+                            Zobrazeno {{ data|length }} řádků
+                        </span>
+                        <span class="text-muted small" title="Barevně označené buňky obsahují Excel vzorec.">
+                            Výpočty jsou zobrazené z uložených výsledků
+                        </span>
+                        <button class="btn btn-sm btn-outline-primary" style="border-radius: 8px;"
+                            onclick="toggleFullscreen()">
                         ⛶ Fullscreen
                     </button>
                 </div>
@@ -102,7 +105,7 @@
                         <thead>
                             <tr>
                                 {% for header in data[0] %}
-                                <th scope="col">{{ header }}</th>
+                                <th scope="col">{{ header.value }}</th>
                                 {% endfor %}
                             </tr>
                         </thead>
@@ -111,8 +114,10 @@
                             <tr>
                                 {% for cell in row %}
                                 <td
-                                    class="{% if 'dn' in active_sheet.lower() or 'týden' in active_sheet.lower() %}{% if loop.index0 % 2 == 1 and loop.index0 > 0 and loop.index0 < 15 %}weekend-hint{% endif %}{% endif %}">
-                                    {{ cell }}
+                                    class="{% if cell.is_formula %}formula-cell{% endif %} {% if 'dn' in active_sheet.lower() or 'týden' in active_sheet.lower() %}{% if loop.index0 % 2 == 1 and loop.index0 > 0 and loop.index0 < 15 %}weekend-hint{% endif %}{% endif %}"
+                                    {% if cell.formula %}title="Vzorec: {{ cell.formula }}"{% endif %}>
+                                    <span class="formula-value">{{ cell.value }}</span>
+                                    {% if cell.formula %}<span class="formula-hint">ƒx {{ cell.formula }}</span>{% endif %}
                                 </td>
                                 {% endfor %}
                             </tr>

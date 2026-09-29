@@ -29,6 +29,25 @@
     background: var(--bg-secondary);
 }
 
+.formula-cell {
+    background: rgba(0, 123, 255, 0.06);
+    border-left: 3px solid var(--text-accent) !important;
+}
+
+.formula-value {
+    display: block;
+    font-weight: 600;
+}
+
+.formula-hint {
+    display: block;
+    margin-top: 3px;
+    color: var(--text-secondary);
+    font-size: 0.72rem;
+    white-space: normal;
+    max-width: 24rem;
+}
+
 /* Custom Scrollbar - Match global theme */
 .table-wrapper::-webkit-scrollbar {
     width: 6px;
@@ -124,4 +143,32 @@
     margin: 0 !important;
     border-radius: 0 !important;
     overflow: auto;
+}
+
+@media (max-width: 768px) {
+    .excel-viewer-container {
+        padding: 12px;
+        border-radius: 12px;
+    }
+
+    .table-wrapper,
+    .card-table-wrapper {
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .excel-table {
+        min-width: 720px;
+        font-size: 0.8rem;
+    }
+
+    .excel-table th,
+    .excel-table td {
+        padding: 9px 10px;
+    }
+
+    .formula-hint {
+        max-width: 16rem;
+    }
 }

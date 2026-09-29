@@ -15,7 +15,19 @@ jobs:
           host: ${{ secrets.PA_HOST }}
           username: ${{ secrets.PA_USERNAME }}
           key: ${{ secrets.PA_SSH_KEY }}
+          port: 22
+          script_stop: true
           script: |
-            cd /home/Cowley/hodiny
-            git pull origin main
+            set -euo pipefail
+
+            mkdir -p /home/Cowley/hodiny/logs
+            if [ ! -d /home/Cowley/hodiny/.git ]; then
+              echo "Repo not found on server: /home/Cowley/hodiny"
+              exit 1
+            fi
+
+            git -C /home/Cowley/hodiny fetch origin
+            git -C /home/Cowley/hodiny checkout main
+            git -C /home/Cowley/hodiny reset --hard origin/main
+
             touch /var/www/Cowley_pythonanywhere_com_wsgi.py

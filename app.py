@@ -2,7 +2,7 @@
 
 import datetime as dt
 import subprocess
-from flask import Flask, g, jsonify, redirect, request, session, url_for
+from importlib import import_module
 
 from api_endpoints import api_bp
 from blueprints.auth import auth_bp
@@ -23,6 +23,16 @@ from services.settings_service import load_app_settings, save_app_settings
 from utils.logger import setup_logger
 from zalohy_manager import ZalohyManager
 
+# Načtení Flasku dynamicky umožní analyzátoru pracovat i bez jeho stubů v IDE.
+_flask = import_module("flask")
+Flask = _flask.Flask
+g = _flask.g
+jsonify = _flask.jsonify
+redirect = _flask.redirect
+request = _flask.request
+session = _flask.session
+url_for = _flask.url_for
+
 logger = setup_logger("app")
 
 app = Flask(__name__)
@@ -32,18 +42,49 @@ app.jinja_env.globals["csrf_token"] = csrf_token
 
 
 @app.before_request
-def security_before_request():
-    """Kontrola bezpečnosti a autentizace - webhook neměří kontrolu."""
-    # Webhook musí projít bez autentizace
+def before_request_handler():
+    """Jeden handler pro všechno - autentizace, webhook, middleware."""
+    # ===== KROK 1: Webhook musí projít bez autentizace =====
     if request.path.startswith("/webhook/"):
         return None
 
+    # ===== KROK 2: Bezpečnost a CSRF =====
     validate_csrf()
     if Config.ADMIN_USERNAME and Config.ADMIN_PASSWORD and request.endpoint != "health_check":
         if not session.get("authenticated"):
             auth = request.authorization
             if not auth or not (auth.username == Config.ADMIN_USERNAME and auth.password == Config.ADMIN_PASSWORD):
                 return ("Přístup odepřen", 401, {"WWW-Authenticate": 'Basic realm="hodiny"'})
+
+    # ===== KROK 3: Setup pro ostatní requesty =====
+    g.database = database
+    g.current_user = database.get_user(session["user_id"]) if session.get("user_id") else None
+    if Config.AUTH_REQUIRED and request.endpoint != "static" and not request.path.startswith("/auth/"):
+        if request.path == "/api/v1/health":
+            return None
+        if database.user_count() == 0:
+            return redirect(url_for("auth.setup"))
+        if g.current_user is None:
+            return (
+                redirect(url_for("auth.login", next=request.path))
+                if not request.path.startswith("/api/")
+                else ({"success": False, "error": "Přihlášení je vyžadováno."}, 401)
+            )
+    session["settings"] = load_app_settings()
+    g.employee_manager = EmployeeManager(
+        Config.DATA_PATH,
+        preferred_employee_name=session["settings"].get("preferred_employee_name", ""),
+    )
+    g.hodiny2025_manager = Hodiny2025Manager(Config.EXCEL_BASE_PATH)
+    g.excel_manager = ExcelManager(Config.EXCEL_BASE_PATH, hodiny2025_manager=g.hodiny2025_manager)
+    g.zalohy_manager = ZalohyManager(Config.EXCEL_BASE_PATH)
+    g.excel_manager.update_project_info(
+        session["settings"].get("project_info", {}).get("name", ""),
+        session["settings"].get("project_info", {}).get("start_date", ""),
+        session["settings"].get("project_info", {}).get("end_date", ""),
+    )
+
+    cleanup_old_data()
 
 
 app.register_blueprint(api_bp)
@@ -82,43 +123,6 @@ def initialize_archived_state():
 initialize_archived_state()
 
 
-@app.before_request
-def before_request():
-    """Před každým requestem připraví managery a synchronizuje runtime nastavení."""
-    # Webhook nepoužívá session, takže ho přeskočíme
-    if request.path.startswith("/webhook/"):
-        return None
-
-    g.database = database
-    g.current_user = database.get_user(session["user_id"]) if session.get("user_id") else None
-    if Config.AUTH_REQUIRED and request.endpoint != "static" and not request.path.startswith("/auth/"):
-        if request.path == "/api/v1/health":
-            return None
-        if database.user_count() == 0:
-            return redirect(url_for("auth.setup"))
-        if g.current_user is None:
-            return (
-                redirect(url_for("auth.login", next=request.path))
-                if not request.path.startswith("/api/")
-                else ({"success": False, "error": "Přihlášení je vyžadováno."}, 401)
-            )
-    session["settings"] = load_app_settings()
-    g.employee_manager = EmployeeManager(
-        Config.DATA_PATH,
-        preferred_employee_name=session["settings"].get("preferred_employee_name", ""),
-    )
-    g.hodiny2025_manager = Hodiny2025Manager(Config.EXCEL_BASE_PATH)
-    g.excel_manager = ExcelManager(Config.EXCEL_BASE_PATH, hodiny2025_manager=g.hodiny2025_manager)
-    g.zalohy_manager = ZalohyManager(Config.EXCEL_BASE_PATH)
-    g.excel_manager.update_project_info(
-        session["settings"].get("project_info", {}).get("name", ""),
-        session["settings"].get("project_info", {}).get("start_date", ""),
-        session["settings"].get("project_info", {}).get("end_date", ""),
-    )
-
-    cleanup_old_data()
-
-
 @app.teardown_request
 def teardown_request(_exception=None):
     """Uzavře případné otevřené workbooky po dokončení requestu."""
@@ -134,24 +138,24 @@ def teardown_request(_exception=None):
 def github_webhook():
     """
     GitHub webhook pro automatický deployment
-    
+
     Tento endpoint se spouští automaticky, když se pushne do main branche.
     Provede git fetch a reset na nejnovější verzi kódu z GitHub.
     """
     event = request.headers.get("X-GitHub-Event")
-    
+
     logger.info(f"GitHub webhook received: event={event}")
-    
+
     # Pokud to není push event, ignoruj
     if event != "push":
         logger.info("Webhook ignored - not a push event")
         return jsonify({"status": "ignored", "message": "Not a push event"}), 200
-    
+
     try:
         repo_path = "/home/Cowley/hodiny"
-        
+
         logger.info(f"Starting deployment from {repo_path}")
-        
+
         # 1. Fetch z GitHub
         logger.info("Running: git fetch origin main")
         fetch_result = subprocess.run(
@@ -162,7 +166,7 @@ def github_webhook():
             check=True
         )
         logger.info(f"Fetch result: {fetch_result.stdout}")
-        
+
         # 2. Reset na nejnovější verzi z GitHub
         logger.info("Running: git reset --hard origin/main")
         reset_result = subprocess.run(
@@ -173,14 +177,14 @@ def github_webhook():
             check=True
         )
         logger.info(f"Reset result: {reset_result.stdout}")
-        
+
         # 3. Reload WSGI aplikace (pro PythonAnywhere)
         logger.info("Reloading WSGI application")
         subprocess.run(
             ["touch", "/var/www/Cowley_pythonanywhere_com_wsgi.py"],
             timeout=10
         )
-        
+
         response = {
             "status": "success",
             "message": "Deployment completed successfully",
@@ -189,17 +193,17 @@ def github_webhook():
         }
         logger.info(f"Deployment successful: {response}")
         return jsonify(response), 200
-    
+
     except subprocess.CalledProcessError as e:
         error_msg = f"Git command failed: {e.stderr or e.stdout}"
         logger.error(error_msg)
         return jsonify({"status": "error", "message": error_msg}), 500
-    
+
     except subprocess.TimeoutExpired as e:
         error_msg = f"Deployment timeout: {str(e)}"
         logger.error(error_msg)
         return jsonify({"status": "error", "message": error_msg}), 504
-    
+
     except Exception as e:
         error_msg = f"Deployment error: {str(e)}"
         logger.error(error_msg, exc_info=True)

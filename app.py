@@ -2,7 +2,7 @@
 
 import datetime as dt
 import subprocess
-from flask import Flask, g, jsonify, redirect, request, session, url_for
+from importlib import import_module
 
 from api_endpoints import api_bp
 from blueprints.auth import auth_bp
@@ -22,6 +22,16 @@ from services.database import Database
 from services.settings_service import load_app_settings, save_app_settings
 from utils.logger import setup_logger
 from zalohy_manager import ZalohyManager
+
+# Načtení Flasku dynamicky umožní analyzátoru pracovat i bez jeho stubů v IDE.
+_flask = import_module("flask")
+Flask = _flask.Flask
+g = _flask.g
+jsonify = _flask.jsonify
+redirect = _flask.redirect
+request = _flask.request
+session = _flask.session
+url_for = _flask.url_for
 
 logger = setup_logger("app")
 

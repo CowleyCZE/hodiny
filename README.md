@@ -257,3 +257,4 @@ Poznámka: Tajné hodnoty nesdílejte v repozitáři; nastavte je přes prostře
 
 Tento repozitář je určen pro interní použití. Ujistěte se, že neukládáte citlivé údaje (hesla/API klíče) do verzovacího systému.
 # Webhook test
+# Webhook test

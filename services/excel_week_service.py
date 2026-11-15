@@ -1,5 +1,6 @@
 """Helpery pro týdenní Excel soubory a zápis docházky."""
 
+import copy
 import shutil
 from datetime import datetime
 
@@ -93,6 +94,63 @@ def get_or_create_weekly_file(base_path, active_file_path, week_number, project_
     return weekly_file_path
 
 
+def copy_worksheet_deep(source_sheet, target_sheet):
+    """Provede hloubkové zkopírování listu včetně stylů, rozměrů, sloučení a zobrazení."""
+    # 1. Buňky (hodnoty, datové typy a kompletní styly)
+    for row in source_sheet.iter_rows():
+        for cell in row:
+            target_cell = target_sheet.cell(row=cell.row, column=cell.column, value=cell.value)
+            if cell.has_style:
+                target_cell.font = copy.copy(cell.font)
+                target_cell.border = copy.copy(cell.border)
+                target_cell.fill = copy.copy(cell.fill)
+                target_cell.number_format = cell.number_format
+                target_cell.protection = copy.copy(cell.protection)
+                target_cell.alignment = copy.copy(cell.alignment)
+            if cell.comment:
+                target_cell.comment = copy.copy(cell.comment)
+
+    # 2. Sloučené buňky
+    for merge_range in source_sheet.merged_cells.ranges:
+        target_sheet.merge_cells(str(merge_range))
+
+    # 3. Rozměry sloupců (šířka, skrytí, seskupení)
+    for col_letter, col_dim in source_sheet.column_dimensions.items():
+        target_dim = target_sheet.column_dimensions[col_letter]
+        if col_dim.width is not None:
+            target_dim.width = col_dim.width
+        target_dim.hidden = col_dim.hidden
+        target_dim.outline_level = col_dim.outline_level
+        target_dim.collapsed = col_dim.collapsed
+        if col_dim.auto_size:
+            target_dim.auto_size = col_dim.auto_size
+
+    # 4. Rozměry řádků (výška, skrytí, seskupení)
+    for row_idx, row_dim in source_sheet.row_dimensions.items():
+        target_dim = target_sheet.row_dimensions[row_idx]
+        if row_dim.height is not None:
+            target_dim.height = row_dim.height
+        target_dim.hidden = row_dim.hidden
+        target_dim.outline_level = row_dim.outline_level
+        target_dim.collapsed = row_dim.collapsed
+
+    # 5. Ukotvení příček (freeze panes)
+    if source_sheet.freeze_panes:
+        target_sheet.freeze_panes = source_sheet.freeze_panes
+
+    # 6. Zobrazení listu (mřížka, záhlaví)
+    if getattr(source_sheet, "sheet_view", None) and getattr(target_sheet, "sheet_view", None):
+        if source_sheet.sheet_view.showGridLines is not None:
+            target_sheet.sheet_view.showGridLines = source_sheet.sheet_view.showGridLines
+        if source_sheet.sheet_view.showRowColHeaders is not None:
+            target_sheet.sheet_view.showRowColHeaders = source_sheet.sheet_view.showRowColHeaders
+
+    # 7. Vlastnosti listu (barva záložky apod.)
+    if getattr(source_sheet, "sheet_properties", None) and getattr(target_sheet, "sheet_properties", None):
+        if source_sheet.sheet_properties.tabColor is not None:
+            target_sheet.sheet_properties.tabColor = copy.copy(source_sheet.sheet_properties.tabColor)
+
+
 def _merge_previous_week_sheets(base_path, active_stem, target_file_path, current_week, project_start_date=None):
     """Do cílového souboru zkopíruje listy z předchozích týdenních souborů (od start_date projektu)."""
     from openpyxl.utils.exceptions import InvalidFileException
@@ -147,17 +205,9 @@ def _merge_previous_week_sheets(base_path, active_stem, target_file_path, curren
             src_wb.close()
             continue
 
-        # Ruční zkopírování hodnot (openpyxl copy_worksheet nefunguje napříč sešity)
+        # Hloubkové zkopírování listu (hodnoty, styly, rozměry, sloučení)
         new_sheet = target_wb.create_sheet(title=sheet_name)
-        for row in src_sheet.iter_rows():
-            for cell in row:
-                new_cell = new_sheet.cell(row=cell.row, column=cell.column, value=cell.value)
-                if cell.has_style:
-                    new_cell.font = cell.font.copy()
-                    new_cell.border = cell.border.copy()
-                    new_cell.fill = cell.fill.copy()
-                    new_cell.number_format = cell.number_format
-                    new_cell.alignment = cell.alignment.copy()
+        copy_worksheet_deep(src_sheet, new_sheet)
         src_wb.close()
         logger.info("Přidán list %s z předchozího týdne do %s", sheet_name, target_file_path.name)
 
@@ -208,13 +258,23 @@ def ensure_week_sheet(workbook, week_number):
 
 
 def create_week_sheet_from_template(workbook, sheet_name):
-    """Vytvoří nový list zkopírováním šablony `Týden` v rámci workbooku."""
+    """Vytvoří nový list zkopírováním šablony `Týden` v rámci workbooku se zachováním formátování."""
     try:
         template_name = Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME
         if template_name in workbook.sheetnames:
             source = workbook[template_name]
             target = workbook.copy_worksheet(source)
             target.title = sheet_name
+
+            # copy_worksheet v openpyxl nepřenáší freeze panes a sheet_view vlastnosti
+            if source.freeze_panes:
+                target.freeze_panes = source.freeze_panes
+            if getattr(source, "sheet_view", None) and getattr(target, "sheet_view", None):
+                if source.sheet_view.showGridLines is not None:
+                    target.sheet_view.showGridLines = source.sheet_view.showGridLines
+                if source.sheet_view.showRowColHeaders is not None:
+                    target.sheet_view.showRowColHeaders = source.sheet_view.showRowColHeaders
+
             logger.info("Vytvořen list %s zkopírováním šablony %s", sheet_name, template_name)
         else:
             workbook.create_sheet(sheet_name)
@@ -267,9 +327,12 @@ def write_time_entry_to_sheet(
     total_hours = round((end_time - start_time).total_seconds() / 3600 - float(lunch_duration_str), 2)
     write_times = start_time_str != "00:00" or end_time_str != "00:00"
 
-    # Číslo týdne do C3 (sloupec 3, řádek 3) dle specifikace šablony Týden
+    # Číslo týdne do B3 nebo C3 dle rozložení šablony Týden
     if week_number is not None:
-        _write_sheet_cell(sheet, 3, 3, week_number)
+        if isinstance(sheet.cell(3, 3), MergedCell):
+            _write_sheet_cell(sheet, 3, 2, f"{Config.EXCEL_WEEK_SHEET_TEMPLATE_NAME} {week_number}")
+        else:
+            _write_sheet_cell(sheet, 3, 3, week_number)
 
     for employee in employees:
         row_index = _get_or_create_employee_row(sheet, employee, employee_start_row, employee_name_column)
@@ -293,7 +356,12 @@ def write_time_entry_to_sheet(
     project_coords = get_cell_coordinates("project_name", sheet_name, "projects")
     if current_project_name and project_coords:
         for project_row, project_col in project_coords:
-            _write_sheet_cell(sheet, project_row, project_col, f"NÁZEV PROJEKTU : {current_project_name}")
+            # Pokud je cílová buňka I4 nebo vedlejší hodnota, zapíšeme čistý název projektu,
+            # jinak pro B4 formátovaný popisek.
+            if (project_row, project_col) == (4, 9) or project_col > 2:
+                _write_sheet_cell(sheet, project_row, project_col, current_project_name)
+            else:
+                _write_sheet_cell(sheet, project_row, project_col, f"NÁZEV PROJEKTU : {current_project_name}")
 
 
 def get_current_week_preview(workbook, week_number):

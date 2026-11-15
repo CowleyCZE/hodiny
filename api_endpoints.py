@@ -23,6 +23,12 @@ from services.api_service import (
 from services.phase2_services import build_statistics, find_data_issues
 from services.auth_service import role_required
 from services.sync_service import sync_excel_state, sync_status
+from services.turnus_service import (
+    close_turnus as close_turnus_service,
+    create_turnus as create_turnus_service,
+    get_active_turnus,
+    get_all_turnusy,
+)
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -335,6 +341,55 @@ def manage_settings():
         except Exception as e:
             logger.error("Error updating settings: %s", e, exc_info=True)
             return APIResponse.error("Failed to update settings", "SETTINGS_UPDATE_ERROR", 500)
+
+
+@api_bp.route("/turnus", methods=["GET"])
+def api_get_turnus_status():
+    """Vrátí stav aktivního turnusu a seznam všech turnusů."""
+    try:
+        active = get_active_turnus()
+        all_t = get_all_turnusy()
+        return APIResponse.success({"active_turnus": active, "turnusy": all_t}, "Turnus data retrieved")
+    except Exception as exc:
+        logger.error("Error retrieving turnus data: %s", exc, exc_info=True)
+        return APIResponse.error(str(exc), "TURNUS_ERROR", 500)
+
+
+@api_bp.route("/turnus/start", methods=["POST"])
+def api_start_turnus():
+    """Založí nový aktivní turnus."""
+    try:
+        data = request.get_json() or {}
+        name = data.get("name")
+        start_date = data.get("start_date")
+        end_date = data.get("end_date")
+        firma = data.get("firma", "")
+        mesto = data.get("mesto", "")
+
+        new_turnus = create_turnus_service(name, start_date, end_date=end_date, firma=firma, mesto=mesto)
+        return APIResponse.success(new_turnus, f"Turnus '{new_turnus['name']}' started successfully")
+    except ValueError as exc:
+        return APIResponse.error(str(exc), "TURNUS_VALIDATION_ERROR", 400)
+    except Exception as exc:
+        logger.error("Error starting turnus: %s", exc, exc_info=True)
+        return APIResponse.error(str(exc), "TURNUS_START_ERROR", 500)
+
+
+@api_bp.route("/turnus/close", methods=["POST"])
+def api_close_turnus():
+    """Ukončí běžící turnus."""
+    try:
+        data = request.get_json() or {}
+        turnus_id = data.get("turnus_id")
+        end_date = data.get("end_date")
+
+        closed = close_turnus_service(turnus_id=turnus_id, end_date=end_date)
+        return APIResponse.success(closed, f"Turnus '{closed['name']}' closed successfully")
+    except ValueError as exc:
+        return APIResponse.error(str(exc), "TURNUS_VALIDATION_ERROR", 400)
+    except Exception as exc:
+        logger.error("Error closing turnus: %s", exc, exc_info=True)
+        return APIResponse.error(str(exc), "TURNUS_CLOSE_ERROR", 500)
 
 
 # Error handlers for the API blueprint

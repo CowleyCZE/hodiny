@@ -13,6 +13,7 @@ from config import Config
 from performance_optimizations import invalidate_excel_status_cache, optimize_excel_operations, perf_monitor
 from services.phase2_services import create_backup, find_data_issues, write_audit
 from services.sync_service import sync_excel_state
+from services.turnus_service import get_active_turnus, validate_date_for_entry
 
 logger = logging.getLogger(__name__)
 
@@ -67,13 +68,17 @@ def build_dashboard_context(excel_manager, settings, employees=None):
     except Exception:
         excel_exists = False
 
+    active_turnus = get_active_turnus()
+    turnus_project_name = active_turnus["name"] if active_turnus else settings.get("project_info", {}).get("name", "Nepojmenovaný projekt")
+
     context = {
         "active_filename": Config.EXCEL_TEMPLATE_NAME,
         "week_number": current_datetime.isocalendar().week,
         "current_date": current_datetime.strftime("%Y-%m-%d"),
         "current_date_formatted": current_datetime.strftime("%d.%m.%Y"),
         "excel_exists": excel_exists,
-        "project_name": settings.get("project_info", {}).get("name", "Nepojmenovaný projekt"),
+        "project_name": turnus_project_name,
+        "active_turnus": active_turnus,
         "current_week_data": current_week_data,
         "start_time": settings.get("start_time", "07:00"),
         "end_time": settings.get("end_time", "18:00"),
@@ -123,9 +128,16 @@ def save_time_entry(
     lunch_duration,
     employees,
     is_free_day,
+    validate_turnus=True,
 ):
     """Zapíše pracovní dobu nebo volný den do všech relevantních workbooků."""
     del hodiny2025_manager
+
+    if validate_turnus:
+        is_valid, validation_error, _ = validate_date_for_entry(date)
+        if not is_valid:
+            logger.warning("Zápis docházky zamítnut pro datum %s: %s", date, validation_error)
+            raise ValueError(validation_error)
 
     active_path = excel_manager.get_active_file_path()
     if isinstance(active_path, (str, Path)):

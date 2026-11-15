@@ -12,6 +12,7 @@ from blueprints.excel import excel_bp
 from blueprints.main import main_bp
 from blueprints.reports import reports_bp
 from blueprints.settings import settings_bp
+from blueprints.turnus import turnus_bp
 from config import Config
 from employee_management import EmployeeManager
 from excel_manager import ExcelManager
@@ -20,6 +21,7 @@ from performance_optimizations import cleanup_old_data, initialize_performance_o
 from security import csrf_token, validate_csrf
 from services.database import Database
 from services.settings_service import load_app_settings, save_app_settings
+from services.turnus_service import get_active_turnus
 from utils.logger import setup_logger
 from zalohy_manager import ZalohyManager
 
@@ -78,11 +80,19 @@ def before_request_handler():
     g.hodiny2025_manager = Hodiny2025Manager(Config.EXCEL_BASE_PATH)
     g.excel_manager = ExcelManager(Config.EXCEL_BASE_PATH, hodiny2025_manager=g.hodiny2025_manager)
     g.zalohy_manager = ZalohyManager(Config.EXCEL_BASE_PATH)
-    g.excel_manager.update_project_info(
-        session["settings"].get("project_info", {}).get("name", ""),
-        session["settings"].get("project_info", {}).get("start_date", ""),
-        session["settings"].get("project_info", {}).get("end_date", ""),
-    )
+    active_turnus = get_active_turnus()
+    if active_turnus:
+        g.excel_manager.update_project_info(
+            active_turnus.get("name", ""),
+            active_turnus.get("start_date", ""),
+            active_turnus.get("end_date", "") or "",
+        )
+    else:
+        g.excel_manager.update_project_info(
+            session["settings"].get("project_info", {}).get("name", ""),
+            session["settings"].get("project_info", {}).get("start_date", ""),
+            session["settings"].get("project_info", {}).get("end_date", ""),
+        )
 
     cleanup_old_data()
 
@@ -95,6 +105,7 @@ app.register_blueprint(excel_bp)
 app.register_blueprint(main_bp)
 app.register_blueprint(reports_bp)
 app.register_blueprint(settings_bp)
+app.register_blueprint(turnus_bp)
 
 initialize_performance_optimizations()
 database = Database(Config.DATABASE_PATH)

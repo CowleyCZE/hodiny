@@ -36,6 +36,7 @@
             <a href="{{ url_for('reports.backups') }}" class="nav-link-modern">Zálohy souboru</a>
             <a href="{{ url_for('excel.excel_viewer') }}" class="nav-link-modern">Tabulky</a>
             <a href="{{ url_for('employees.manage_employees') }}" class="nav-link-modern">Lidé</a>
+            <a href="{{ url_for('turnus.turnusy_view') }}" class="nav-link-modern">Turnus</a>
             <a href="{{ url_for('settings.settings_page') }}" class="nav-link-modern">⚙️</a>
             {% if g.current_user %}
             <span class="nav-link-modern" title="Role: {{ g.current_user.role }}">{{ g.current_user.username }}</span>

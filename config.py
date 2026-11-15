@@ -21,6 +21,7 @@ class Config:
     EXCEL_TEMPLATE_NAME = "Hodiny_Cap.xlsx"
     EXCEL_AUTHORITATIVE_TEMPLATE_NAME = "Hodiny_Cap:vzor.xlsx"
     SETTINGS_FILE_PATH = DATA_PATH / "settings.json"
+    TURNUSY_FILE_PATH = DATA_PATH / "turnusy.json"
     CONFIG_FILE_PATH = BASE_DIR / "config.json"
     BACKUP_PATH = Path(os.environ.get("HODINY_BACKUP_PATH", BASE_DIR / "backups"))
     AUDIT_LOG_PATH = Path(os.environ.get("HODINY_AUDIT_LOG_PATH", BASE_DIR / "logs" / "audit.jsonl"))

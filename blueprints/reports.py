@@ -8,6 +8,7 @@ from flask import Blueprint, flash, g, redirect, render_template, request, send_
 
 from config import Config
 from services.export_service import build_csv, build_pdf
+from services.turnus_service import validate_date_for_entry
 from services.phase2_services import (
     build_statistics,
     create_backup,
@@ -45,6 +46,18 @@ def zalohy():
         try:
             form = request.form
             form_type = form.get("form_type", "zaloha")
+
+            target_date = (
+                form.get("expense_date")
+                if form_type == "vydaj"
+                else form.get("atm_date")
+                if form_type == "bankomat"
+                else form.get("date")
+            )
+            if target_date:
+                is_valid, error_msg, _ = validate_date_for_entry(target_date)
+                if not is_valid:
+                    raise ValueError(error_msg)
 
             if form_type == "vydaj":
                 category = form["expense_category"]

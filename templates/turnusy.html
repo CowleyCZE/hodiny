@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}Turnusy - Evidence pracovní doby{% endblock %}
+
+{% block content %}
+<div class="animate-fadeIn">
+    {# Header #}
+    <div class="section-header">
+        <h1 class="section-title">Pracovní turnusy a výjezdy</h1>
+        <div class="d-flex gap-2">
+            {% if active_turnus %}
+            <span class="badge-modern badge-success">
+                🟢 Aktivní turnus: {{ active_turnus.name }}
+            </span>
+            {% else %}
+            <span class="badge-modern badge-warning">
+                ⚪ Mezi turnusy (Zápis uzamčen)
+            </span>
+            {% endif %}
+        </div>
+    </div>
+
+    {# Top Status Cards #}
+    <div class="row g-4 mb-4">
+        {# Active Turnus Card #}
+        <div class="col-lg-6">
+            <div class="glass-card h-100 animate-fadeInUp"
+                style="border-top: 5px solid {% if active_turnus %}var(--button-success, #28a745){% else %}#6c757d{% endif %};">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="m-0">📍 Aktuální stav</h3>
+                    {% if active_turnus %}
+                    <span class="badge bg-success">BĚŽÍ</span>
+                    {% else %}
+                    <span class="badge bg-secondary">UZAVŘENO</span>
+                    {% endif %}
+                </div>
+
+                {% if active_turnus %}
+                <div class="info-content mb-4">
+                    <div class="mb-2"><strong>Název:</strong> <span class="fs-5">{{ active_turnus.name }}</span></div>
+                    {% if active_turnus.firma %}
+                    <div class="mb-2"><strong>Firma / zákazník:</strong> {{ active_turnus.firma }}</div>
+                    {% endif %}
+                    {% if active_turnus.mesto %}
+                    <div class="mb-2"><strong>Místo / lokalita:</strong> {{ active_turnus.mesto }}</div>
+                    {% endif %}
+                    <div class="mb-2"><strong>Datum začátku:</strong> {{ active_turnus.start_date }}</div>
+                    <div class="mb-3">
+                        <strong>Datum ukončení:</strong>
+                        {{ active_turnus.end_date if active_turnus.end_date else 'Otevřený (dosud neukončen)' }}
+                    </div>
+                    <div class="alert alert-info py-2 px-3 small">
+                        ℹ️ Do tohoto turnusu se zapisují odpracované hodiny i zálohy. Týdenní listy se vytvářejí v aktivním sešitu.
+                    </div>
+                </div>
+
+                {# Close Turnus Box #}
+                <div class="p-3 rounded" style="background: rgba(220, 53, 69, 0.08); border: 1px solid rgba(220, 53, 69, 0.25);">
+                    <h5 class="text-danger mb-2">🛑 Ukončení turnusu</h5>
+                    <p class="small text-muted mb-3">
+                        Při ukončení se vytvoří zmrazená archivní kopie Excelu. Po zvoleném datu ukončení již nebude možné zapisovat žádné nové údaje.
+                    </p>
+                    <form method="POST" action="{{ url_for('turnus.ukoncit_turnus') }}"
+                        onsubmit="return confirm('Opravdu si přejete turnus ukončit? Po datu ukončení do něj nebude možné vkládat nové dny.');">
+                        <input type="hidden" name="turnus_id" value="{{ active_turnus.id }}">
+                        <div class="row g-2 align-items-end">
+                            <div class="col-sm-7">
+                                <label for="end_date" class="form-label-modern small mb-1">Datum ukončení turnusu</label>
+                                <input type="date" id="end_date" name="end_date" required class="form-control-modern"
+                                    value="{{ today_str }}" min="{{ active_turnus.start_date }}">
+                            </div>
+                            <div class="col-sm-5">
+                                <button type="submit" class="btn-modern btn-danger w-100">
+                                    Ukončit turnus
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                {% else %}
+                <div class="text-center py-4">
+                    <div style="font-size: 3rem; margin-bottom: 10px;">🏝️</div>
+                    <h4 class="text-muted">Aktuálně neprobíhá žádný turnus</h4>
+                    <p class="text-muted small mx-auto" style="max-width: 400px;">
+                        Systém je v klidovém režimu mezi výjezdy. Pro zahájení evidence pracovní doby a vytváření týdenních listů nejprve založte nový turnus.
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {# New Turnus Card #}
+        <div class="col-lg-6">
+            <div class="glass-card h-100 animate-fadeInUp" style="border-top: 5px solid var(--text-accent, #004ea3);">
+                <h3 class="mb-3">🚀 Založit nový turnus</h3>
+                <p class="small text-muted mb-4">
+                    Založením turnusu se otevře nové období pro zápis docházky, vytváření týdenních listů a evidenci záloh.
+                </p>
+
+                {% if active_turnus %}
+                <div class="alert alert-warning">
+                    ⚠️ <strong>Již běží turnus '{{ active_turnus.name }}'.</strong><br>
+                    Před založením nového výjezdu nejprve v levém panelu ukončete ten stávající.
+                </div>
+                {% endif %}
+
+                <form method="POST" action="{{ url_for('turnus.novy_turnus') }}">
+                    <div class="form-group-modern mb-3">
+                        <label for="name" class="form-label-modern">Název turnusu / zakázky *</label>
+                        <input type="text" id="name" name="name" required class="form-control-modern"
+                            placeholder="např. Blankendaal, Rotterdam, Montáž 14"
+                            {% if active_turnus %}disabled{% endif %}>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6">
+                            <div class="form-group-modern">
+                                <label for="firma" class="form-label-modern">Firma / zákazník</label>
+                                <input type="text" id="firma" name="firma" class="form-control-modern"
+                                    placeholder="např. Stow"
+                                    {% if active_turnus %}disabled{% endif %}>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group-modern">
+                                <label for="mesto" class="form-label-modern">Místo / lokalita</label>
+                                <input type="text" id="mesto" name="mesto" class="form-control-modern"
+                                    placeholder="např. Holandsko"
+                                    {% if active_turnus %}disabled{% endif %}>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-sm-6">
+                            <div class="form-group-modern">
+                                <label for="start_date" class="form-label-modern">Začátek turnusu *</label>
+                                <input type="date" id="start_date" name="start_date" required class="form-control-modern"
+                                    value="{{ today_str }}"
+                                    {% if active_turnus %}disabled{% endif %}>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group-modern">
+                                <label for="planned_end_date" class="form-label-modern">Předpokládaný konec (volitelné)</label>
+                                <input type="date" id="planned_end_date" name="end_date" class="form-control-modern"
+                                    {% if active_turnus %}disabled{% endif %}>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-modern btn-primary w-100"
+                        {% if active_turnus %}disabled{% endif %}>
+                        <span>➕</span> Zahájit nový turnus
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {# History Section #}
+    <div class="glass-card animate-fadeInUp mb-4">
+        <h3 class="mb-3">📚 Historie a přehled všech turnusů</h3>
+        <div class="table-responsive">
+            <table class="excel-table">
+                <thead>
+                    <tr>
+                        <th>Stav</th>
+                        <th>Název turnusu</th>
+                        <th>Zákazník</th>
+                        <th>Místo</th>
+                        <th>Období</th>
+                        <th class="text-end">Archivní soubor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for turnus in all_turnusy %}
+                    <tr>
+                        <td>
+                            {% if turnus.status == 'active' %}
+                            <span class="badge bg-success">Aktivní</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Uzavřen</span>
+                            {% endif %}
+                        </td>
+                        <td><strong>{{ turnus.name }}</strong></td>
+                        <td>{{ turnus.firma or '-' }}</td>
+                        <td>{{ turnus.mesto or '-' }}</td>
+                        <td>
+                            {{ turnus.start_date }}
+                            {% if turnus.end_date %}
+                            &rarr; {{ turnus.end_date }}
+                            {% else %}
+                            &rarr; <em>dosud</em>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            {% if turnus.archive_file %}
+                            <a href="{{ url_for('turnus.stahnout_archiv', filename=turnus.archive_file) }}"
+                                class="btn-modern btn-outline-primary btn-sm"
+                                title="Stáhnout zmrazenou archivní kopii">
+                                📥 Stáhnout Excel
+                            </a>
+                            {% elif turnus.status == 'active' %}
+                            <span class="text-muted small">Běžící (živý sešit)</span>
+                            {% else %}
+                            <span class="text-muted small">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            Zatím nebyly zaznamenány žádné turnusy.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

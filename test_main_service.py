@@ -20,6 +20,7 @@ def test_save_time_entry_raises_when_excel_write_fails():
             "0.5",
             ["Test Zamestnanec"],
             False,
+            validate_turnus=False,
         )
 
     hodiny2025_manager.zapis_pracovni_doby.assert_not_called()
@@ -39,6 +40,7 @@ def test_save_time_entry_does_not_double_write_hodiny2025_on_success():
         "0.5",
         ["Test Zamestnanec"],
         False,
+        validate_turnus=False,
     )
 
     assert "Pracovní doba" in message
@@ -67,6 +69,7 @@ def test_save_time_entry_raises_when_free_day_excel_write_fails():
             "0",
             ["Test Zamestnanec"],
             True,
+            validate_turnus=False,
         )
 
     hodiny2025_manager.zapis_pracovni_doby.assert_not_called()

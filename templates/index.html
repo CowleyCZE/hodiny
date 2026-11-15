@@ -155,17 +155,34 @@
     <div class="dashboard-grid stagger-animation">
         {# Project Info Card #}
         <div class="glass-card animate-fadeInUp">
-            <h3 class="mb-3">📋 Aktuální Projekt</h3>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="m-0">📋 Aktuální Turnus</h3>
+                <a href="{{ url_for('turnus.turnusy_view') }}" class="btn-modern btn-outline-primary btn-sm">Správa turnusů &rarr;</a>
+            </div>
             <div class="info-content">
-                <p class="mb-2"><strong>Název:</strong> {{ project_name or "Nepojmenovaný projekt" }}</p>
-                <p class="mb-2"><strong>Dnešní datum:</strong> {{ current_date_formatted }}</p>
+                {% if active_turnus %}
+                <p class="mb-2"><strong>Turnus:</strong> <span class="badge bg-success">Aktivní</span> {{ active_turnus.name }}</p>
+                {% if active_turnus.firma %}<p class="mb-2"><strong>Zákazník:</strong> {{ active_turnus.firma }}{% if active_turnus.mesto %} ({{ active_turnus.mesto }}){% endif %}</p>{% endif %}
+                <p class="mb-2"><strong>Období:</strong> od {{ active_turnus.start_date }}{% if active_turnus.end_date %} do {{ active_turnus.end_date }}{% endif %}</p>
                 <p class="mb-0"><strong>Status systému:</strong> Ready to record ⚡</p>
+                {% else %}
+                <div class="alert alert-warning py-2 mb-2">
+                    ⚠️ <strong>Není aktivní žádný turnus.</strong><br>
+                    <small>Zápis hodin a volných dnů je uzamčen. Pro pokračování nejprve založte nový turnus.</small>
+                </div>
+                <a href="{{ url_for('turnus.turnusy_view') }}" class="btn-modern btn-primary btn-sm mt-1">Založit nový turnus</a>
+                {% endif %}
             </div>
         </div>
 
         {# Quick Entry Card #}
         <div class="glass-card animate-fadeInUp" style="border-top: 4px solid var(--button-success);">
             <h3 class="mb-3">⚡ Rychlý záznam</h3>
+            {% if not active_turnus %}
+            <div class="alert alert-danger py-2 mb-3 small">
+                ⛔ <strong>Zápis uzamčen:</strong> Není aktivní žádný turnus. Záznamy nelze ukládat mimo platný turnus.
+            </div>
+            {% endif %}
             <form id="quick-entry-form" class="stagger-animation">
                 <div class="row g-3">
                     <div class="col-6">

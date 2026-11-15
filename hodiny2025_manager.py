@@ -408,8 +408,10 @@ class Hodiny2025Manager:
         return row_end
 
     def zapis_vydaje(self, category: str, amount: float, currency: str, payment_method: str,
-                     date_str: str, description: str = ""):
-        """Zapíše výdaj do odpovídajícího listu CAcashRR podle specifikace MMcash26."""
+                     date_str: str, description: str = "", old_record: dict = None):
+        """Zapíše výdaj do odpovídajícího listu CAcashRR podle specifikace MMcash26.
+        Pokud je zadán old_record, vyhledá odpovídající existující řádek a aktualizuje ho.
+        """
         date_obj = datetime.strptime(date_str, "%Y-%m-%d")
 
         project_start_date = self._get_project_start_date()
@@ -447,7 +449,42 @@ class Hodiny2025Manager:
         
         # Dle MMcash26_v2: A=Datum, B=Kategorie, C=Popis, D=Měna, E=Částka, F=Úhrada, G=Zaměstnanec, H=Typ pohybu, I=Poznámka
         # Sloupce J:N (10-14) jsou VÝPOČTOVÉ – aplikace je nesmí přepisovat
-        target_row = self._find_free_row(sheet, 1, 3, 302)
+        target_row = None
+        if old_record:
+            # Pokus se najít řádek odpovídající původnímu záznamu
+            old_date_raw = old_record.get("date", "")
+            try:
+                old_date_formatted = datetime.strptime(old_date_raw, "%Y-%m-%d").strftime("%d.%m.%Y")
+            except (ValueError, TypeError):
+                old_date_formatted = ""
+            old_amount = float(old_record.get("amount", 0)) if old_record.get("amount") is not None else None
+            old_curr = str(old_record.get("currency", "")).upper()
+            
+            for r in range(3, 303):
+                row_date = str(sheet.cell(row=r, column=1).value or "").strip()
+                if not row_date:
+                    continue
+                # Shoda data
+                date_match = (row_date == old_date_formatted) if old_date_formatted else True
+                if not date_match:
+                    continue
+                # Shoda měny
+                row_curr = str(sheet.cell(row=r, column=4).value or "").strip().upper()
+                if old_curr and row_curr != old_curr:
+                    continue
+                # Shoda částky
+                try:
+                    row_amount = float(sheet.cell(row=r, column=5).value or 0)
+                except (ValueError, TypeError):
+                    row_amount = 0.0
+                if old_amount is not None and abs(row_amount - old_amount) > 0.01:
+                    continue
+                target_row = r
+                logger.info(f"Nalezen původní řádek {target_row} pro aktualizaci výdaje/příjmu")
+                break
+
+        if target_row is None:
+            target_row = self._find_free_row(sheet, 1, 3, 302)
         
         self._set_cell_value(sheet, target_row, 1, date_formatted)              # A: Datum
         self._set_cell_value(sheet, target_row, 2, kategorie)                   # B: Kategorie

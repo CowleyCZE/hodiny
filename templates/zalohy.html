@@ -18,6 +18,7 @@
             <h3 class="mb-4">💰 Přidat novou zálohu</h3>
             <form method="POST" action="{{ url_for('reports.zalohy') }}" id="form-zaloha">
                 <input type="hidden" name="form_type" value="zaloha">
+                <input type="hidden" name="record_id" id="zaloha_record_id" value="">
 
                 {# Výběr uloženého záznamu #}
                 {% if zaloha_history %}
@@ -86,6 +87,7 @@
             <h3 class="mb-4">🧾 Zadání výdaje (Nafta, Mýto, Ubytování, Ostatní)</h3>
             <form method="POST" action="{{ url_for('reports.zalohy') }}" id="form-vydaj">
                 <input type="hidden" name="form_type" value="vydaj">
+                <input type="hidden" name="record_id" id="vydaj_record_id" value="">
 
                 {# Výběr uloženého záznamu #}
                 {% if vydaj_history %}
@@ -157,6 +159,7 @@
             <h3 class="mb-4">🏧 Příjem peněz</h3>
             <form method="POST" action="{{ url_for('reports.zalohy') }}" id="form-prijem">
                 <input type="hidden" name="form_type" value="prijem">
+                <input type="hidden" name="record_id" id="prijem_record_id" value="">
 
                 {# Výběr uloženého záznamu #}
                 {% if prijem_history %}
@@ -291,12 +294,14 @@ function loadRecord(section, selectEl) {
     try { data = JSON.parse(raw); } catch(e) { return; }
 
     if (section === 'zaloha') {
+        setVal('zaloha_record_id', data.record_id || '');
         setVal('zaloha_employee_name', data.employee_name);
         setVal('zaloha_amount', data.amount);
         setVal('zaloha_currency', data.currency);
         setVal('zaloha_option', data.option);
         setVal('zaloha_date', data.date);
     } else if (section === 'vydaj') {
+        setVal('vydaj_record_id', data.record_id || '');
         setVal('vydaj_expense_category', data.category);
         setVal('vydaj_expense_amount', data.amount);
         setVal('vydaj_expense_currency', data.currency);
@@ -304,6 +309,7 @@ function loadRecord(section, selectEl) {
         setVal('vydaj_expense_description', data.description || '');
         setVal('vydaj_expense_date', data.date);
     } else if (section === 'prijem') {
+        setVal('prijem_record_id', data.record_id || '');
         setVal('prijem_source', data.source);
         toggleColleague(data.source);
         if (data.colleague) setVal('prijem_colleague', data.colleague);

@@ -9,7 +9,7 @@ from flask import Blueprint, flash, g, redirect, render_template, request, send_
 from config import Config
 from services.export_service import build_csv, build_pdf
 from services.turnus_service import get_active_turnus, validate_date_for_entry
-from services.zalohy_history_service import label_for_record, load_records, save_record
+from services.zalohy_history_service import get_record_by_id, label_for_record, load_records, save_record
 from services.phase2_services import (
     build_statistics,
     create_backup,
@@ -47,6 +47,7 @@ def zalohy():
         try:
             form = request.form
             form_type = form.get("form_type", "zaloha")
+            record_id = form.get("record_id", "").strip() or None
 
             target_date = (
                 form.get("expense_date")
@@ -61,6 +62,7 @@ def zalohy():
                     raise ValueError(error_msg)
 
             if form_type == "vydaj":
+                old_record = get_record_by_id(Config.AUDIT_LOG_PATH, "vydaj", record_id) if record_id else None
                 category = form["expense_category"]
                 amount = float(form["expense_amount"].replace(",", "."))
                 currency = form["expense_currency"]
@@ -77,15 +79,18 @@ def zalohy():
                     payment_method=payment_method,
                     date_str=date_str,
                     description=description,
+                    old_record=old_record,
                 )
                 record_vydaj = {
                     "category": category, "amount": amount, "currency": currency,
                     "payment_method": payment_method, "description": description, "date": date_str,
                 }
-                save_record(Config.AUDIT_LOG_PATH, "vydaj", record_vydaj)
-                flash("Výdaj byl úspěšně uložen.", "success")
+                save_record(Config.AUDIT_LOG_PATH, "vydaj", record_vydaj, record_id=record_id)
+                msg = "Výdaj byl úspěšně upraven." if record_id else "Výdaj byl úspěšně uložen."
+                flash(msg, "success")
 
             elif form_type == "prijem":
+                old_record = get_record_by_id(Config.AUDIT_LOG_PATH, "prijem", record_id) if record_id else None
                 amount = float(form["prijem_amount"].replace(",", "."))
                 currency = form["prijem_currency"]
                 date_str = form["prijem_date"]
@@ -102,29 +107,33 @@ def zalohy():
                     payment_method="Hotově",
                     date_str=date_str,
                     description=description,
+                    old_record=old_record,
                 )
                 record_prijem = {
                     "amount": amount, "currency": currency, "date": date_str,
                     "source": source, "colleague": colleague, "description": description,
                 }
-                save_record(Config.AUDIT_LOG_PATH, "prijem", record_prijem)
-                flash(f"Příjem ({source}) byl úspěšně uložen.", "success")
+                save_record(Config.AUDIT_LOG_PATH, "prijem", record_prijem, record_id=record_id)
+                msg = f"Příjem ({source}) byl úspěšně upraven." if record_id else f"Příjem ({source}) byl úspěšně uložen."
+                flash(msg, "success")
 
             else:  # zaloha
+                old_record = get_record_by_id(Config.AUDIT_LOG_PATH, "zaloha", record_id) if record_id else None
                 amount = float(form["amount"].replace(",", "."))
                 employee_name = form["employee_name"]
                 currency = form["currency"]
                 option = form["option"]
                 date_str = form["date"]
                 g.zalohy_manager.add_or_update_employee_advance(
-                    employee_name, amount, currency, option, date_str
+                    employee_name, amount, currency, option, date_str, old_record=old_record
                 )
                 record_zaloha = {
                     "employee_name": employee_name, "amount": amount,
                     "currency": currency, "option": option, "date": date_str,
                 }
-                save_record(Config.AUDIT_LOG_PATH, "zaloha", record_zaloha)
-                flash("Záloha byla úspěšně uložena.", "success")
+                save_record(Config.AUDIT_LOG_PATH, "zaloha", record_zaloha, record_id=record_id)
+                msg = "Záloha byla úspěšně upravena." if record_id else "Záloha byla úspěšně uložena."
+                flash(msg, "success")
         except (ValueError, IOError, KeyError) as exc:
             flash(str(exc), "error")
 

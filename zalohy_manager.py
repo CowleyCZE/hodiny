@@ -93,7 +93,7 @@ class ZalohyManager:
                 return s
         return requested_name
 
-    def _write_advance_to_sheet(self, workbook, employee_name, amount, currency, option, date):
+    def _write_advance_to_sheet(self, workbook, employee_name, amount, currency, option, date, old_amount=None):
         real_sheet_name = self._get_real_sheet_name(workbook, self.zalohy_sheet_name)
         if real_sheet_name not in workbook.sheetnames:
             return False
@@ -114,7 +114,7 @@ class ZalohyManager:
             if target_coordinate:
                 amount_row, amount_col = target_coordinate
                 actual_row = row if amount_row <= self.employee_start_row else amount_row
-                self._update_advance_cell(sheet, actual_row, amount_col, amount)
+                self._update_advance_cell(sheet, actual_row, amount_col, amount, old_amount=old_amount)
                 logger.info(
                     "Částka %s %s zapsána do buňky %s%d (dynamická konfigurace)",
                     amount,
@@ -127,7 +127,7 @@ class ZalohyManager:
         else:
             # Fallback na původní logiku
             column_index = 2 + (option_index * 2) + (1 if currency == "CZK" else 0)
-            self._update_advance_cell(sheet, row, column_index, amount)
+            self._update_advance_cell(sheet, row, column_index, amount, old_amount=old_amount)
             logger.info(
                 "Částka %s %s zapsána na řádek %d, sloupec %d (původní logika)", amount, currency, row, column_index
             )
@@ -135,15 +135,16 @@ class ZalohyManager:
         self._update_date_cell(sheet, row, date)
         return True
 
-    def add_or_update_employee_advance(self, employee_name, amount, currency, option, date):
-        """Přičte zálohu zaměstnanci (vytvoří řádek pokud chybí)."""
+    def add_or_update_employee_advance(self, employee_name, amount, currency, option, date, old_record: dict = None):
+        """Přičte nebo aktualizuje zálohu zaměstnanci (vytvoří řádek pokud chybí)."""
         workbook = None
         try:
             self._validate_inputs(employee_name, amount, currency, date)
+            old_amount = float(old_record["amount"]) if old_record and "amount" in old_record else None
             
             # 1. Zápis do hlavního souboru (Hodiny_Cap.xlsx)
             workbook = self._get_active_workbook(read_only=False)
-            self._write_advance_to_sheet(workbook, employee_name, amount, currency, option, date)
+            self._write_advance_to_sheet(workbook, employee_name, amount, currency, option, date, old_amount=old_amount)
             self._save_workbook(workbook)
             workbook.close()
             workbook = None
@@ -162,7 +163,7 @@ class ZalohyManager:
                     if w_file.exists():
                         try:
                             wb_w = load_workbook(filename=w_file, read_only=False)
-                            if self._write_advance_to_sheet(wb_w, employee_name, amount, currency, option, date):
+                            if self._write_advance_to_sheet(wb_w, employee_name, amount, currency, option, date, old_amount=old_amount):
                                 wb_w.save(w_file)
                                 logger.info("Záloha zapsána i do týdenního souboru %s", w_file.name)
                             wb_w.close()
@@ -181,7 +182,8 @@ class ZalohyManager:
                     currency=currency,
                     payment_method="Hotově",
                     date_str=date,
-                    description=f"Záloha - {employee_name} ({option})"
+                    description=f"Záloha - {employee_name} ({option})",
+                    old_record=old_record
                 )
             except Exception as sync_err:
                 logger.error("Chyba při synchronizaci zálohy do Hodiny2026.xlsx: %s", sync_err)
@@ -226,7 +228,7 @@ class ZalohyManager:
 
         return max(self.employee_start_row, sheet.max_row + 1)
 
-    def _update_advance_cell(self, sheet, row, column, amount):
+    def _update_advance_cell(self, sheet, row, column, amount, old_amount=None):
         target_cell = sheet.cell(row=row, column=column)
         if isinstance(target_cell, MergedCell):
             return
@@ -238,7 +240,14 @@ class ZalohyManager:
         except (ValueError, TypeError):
             current_value = 0.0
 
-        target_cell.value = current_value + amount
+        if old_amount is not None:
+            # Režim úpravy existujícího záznamu: odečti starou hodnotu a přičti novou
+            new_value = max(0.0, current_value - float(old_amount) + amount)
+        else:
+            # Nový záznam: kumulativně přičti
+            new_value = current_value + amount
+
+        target_cell.value = new_value
         target_cell.number_format = "#,##0.00"
 
     def _update_date_cell(self, sheet, row, date_str):

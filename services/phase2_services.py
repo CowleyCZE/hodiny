@@ -25,8 +25,13 @@ def build_statistics(calendar_data, report_data, month, year):
     }
 
 
-def find_data_issues(calendar_data, employees, period_start, period_end):
-    """Najde chybějící pracovní dny a podezřele dlouhé souhrny."""
+def find_data_issues(calendar_data, employees, period_start, period_end, turnus_start=None):
+    """Najde chybějící pracovní dny a podezřele dlouhé souhrny.
+
+    Args:
+        turnus_start: Pokud je zadáno, varování MISSING_ENTRY se nezobrazí
+                      pro dny před tímto datem (před začátkem turnusu).
+    """
     issues = []
     employee_count = len(employees)
     current = period_start
@@ -34,7 +39,9 @@ def find_data_issues(calendar_data, employees, period_start, period_end):
         if current.weekday() < 5:
             key = current.isoformat()
             item = calendar_data.get(key, {})
-            if employee_count and not item.get("has_entry"):
+            # Přeskočit MISSING_ENTRY varování pro dny před začátkem turnusu
+            before_turnus = turnus_start is not None and current < turnus_start
+            if employee_count and not item.get("has_entry") and not before_turnus:
                 issues.append(
                     {
                         "severity": "warning",

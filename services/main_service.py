@@ -64,7 +64,16 @@ def build_dashboard_context(excel_manager, settings, employees=None):
                 2,
             )
             month_start = current_datetime.date().replace(day=1)
-            data_issues = find_data_issues(month_data, employees or [], month_start, current_datetime.date())
+            active_turnus_for_issues = get_active_turnus()
+            turnus_start_for_issues = (
+                dt.date.fromisoformat(active_turnus_for_issues["start_date"])
+                if active_turnus_for_issues
+                else None
+            )
+            data_issues = find_data_issues(
+                month_data, employees or [], month_start, current_datetime.date(),
+                turnus_start=turnus_start_for_issues
+            )
     except Exception:
         excel_exists = False
 

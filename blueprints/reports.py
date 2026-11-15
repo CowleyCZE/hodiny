@@ -8,7 +8,7 @@ from flask import Blueprint, flash, g, redirect, render_template, request, send_
 
 from config import Config
 from services.export_service import build_csv, build_pdf
-from services.turnus_service import validate_date_for_entry
+from services.turnus_service import get_active_turnus, validate_date_for_entry
 from services.phase2_services import (
     build_statistics,
     create_backup,
@@ -198,9 +198,11 @@ def issues():
     today = dt.date.today()
     employees = g.employee_manager.get_vybrani_zamestnanci()
     daily = g.excel_manager.generate_calendar_data(today.month, today.year, employees)
+    active_turnus = get_active_turnus()
+    turnus_start = dt.date.fromisoformat(active_turnus["start_date"]) if active_turnus else None
     return render_template(
         "issues.html",
-        issues=find_data_issues(daily, employees, today.replace(day=1), today),
+        issues=find_data_issues(daily, employees, today.replace(day=1), today, turnus_start=turnus_start),
         month=today.month,
         year=today.year,
     )

@@ -12,14 +12,29 @@
     </div>
 
     <div class="dashboard-grid stagger-animation">
-        {# Form Card: Zálohy #}
+
+        {# ── 1. Záloha ───────────────────────────────────────────────── #}
         <div class="glass-card animate-fadeInUp">
             <h3 class="mb-4">💰 Přidat novou zálohu</h3>
-            <form method="POST" action="{{ url_for('reports.zalohy') }}">
+            <form method="POST" action="{{ url_for('reports.zalohy') }}" id="form-zaloha">
                 <input type="hidden" name="form_type" value="zaloha">
+
+                {# Výběr uloženého záznamu #}
+                {% if zaloha_history %}
+                <div class="form-group-modern">
+                    <label class="form-label-modern">📋 Načíst uložený záznam</label>
+                    <select id="zaloha_load" class="form-control-modern" onchange="loadRecord('zaloha', this)">
+                        <option value="">— vyberte záznam pro úpravu —</option>
+                        {% for item in zaloha_history %}
+                        <option value="{{ item.data | tojson | e }}">{{ item.label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
                 <div class="form-group-modern">
                     <label for="employee_name" class="form-label-modern">Zaměstnanec</label>
-                    <select name="employee_name" id="employee_name" required class="form-control-modern">
+                    <select name="employee_name" id="zaloha_employee_name" required class="form-control-modern">
                         {% for employee in employees %}
                         <option value="{{ employee }}">{{ employee }}</option>
                         {% endfor %}
@@ -30,14 +45,14 @@
                     <div class="col-8">
                         <div class="form-group-modern">
                             <label for="amount" class="form-label-modern">Částka</label>
-                            <input type="number" name="amount" id="amount" step="0.01" required
+                            <input type="number" name="amount" id="zaloha_amount" step="0.01" required
                                 class="form-control-modern">
                         </div>
                     </div>
                     <div class="col-4">
                         <div class="form-group-modern">
                             <label for="currency" class="form-label-modern">Měna</label>
-                            <select name="currency" id="currency" required class="form-control-modern">
+                            <select name="currency" id="zaloha_currency" required class="form-control-modern">
                                 <option value="EUR">EUR (€)</option>
                                 <option value="CZK">CZK (Kč)</option>
                             </select>
@@ -47,7 +62,7 @@
 
                 <div class="form-group-modern">
                     <label for="option" class="form-label-modern">Možnost (Účel)</label>
-                    <select name="option" id="option" required class="form-control-modern">
+                    <select name="option" id="zaloha_option" required class="form-control-modern">
                         {% for option in options %}
                         <option value="{{ option }}">{{ option }}</option>
                         {% endfor %}
@@ -56,7 +71,7 @@
 
                 <div class="form-group-modern">
                     <label for="date" class="form-label-modern">Datum</label>
-                    <input type="date" name="date" id="date" value="{{ current_date }}" required
+                    <input type="date" name="date" id="zaloha_date" value="{{ current_date }}" required
                         class="form-control-modern">
                 </div>
 
@@ -66,15 +81,28 @@
             </form>
         </div>
 
-        {# Form Card: Výdaj #}
+        {# ── 2. Výdaj ────────────────────────────────────────────────── #}
         <div class="glass-card animate-fadeInUp">
             <h3 class="mb-4">🧾 Zadání výdaje (Nafta, Mýto, Ubytování, Ostatní)</h3>
-            <form method="POST" action="{{ url_for('reports.zalohy') }}">
+            <form method="POST" action="{{ url_for('reports.zalohy') }}" id="form-vydaj">
                 <input type="hidden" name="form_type" value="vydaj">
-                
+
+                {# Výběr uloženého záznamu #}
+                {% if vydaj_history %}
+                <div class="form-group-modern">
+                    <label class="form-label-modern">📋 Načíst uložený záznam</label>
+                    <select id="vydaj_load" class="form-control-modern" onchange="loadRecord('vydaj', this)">
+                        <option value="">— vyberte záznam pro úpravu —</option>
+                        {% for item in vydaj_history %}
+                        <option value="{{ item.data | tojson | e }}">{{ item.label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
                 <div class="form-group-modern">
                     <label for="expense_category" class="form-label-modern">Kategorie výdaje</label>
-                    <select name="expense_category" id="expense_category" required class="form-control-modern">
+                    <select name="expense_category" id="vydaj_expense_category" required class="form-control-modern">
                         <option value="Nafta">Nafta</option>
                         <option value="Peage">Peage (Mýto)</option>
                         <option value="Ubytování">Ubytování</option>
@@ -86,13 +114,13 @@
                     <div class="col-6">
                         <div class="form-group-modern">
                             <label for="expense_amount" class="form-label-modern">Částka</label>
-                            <input type="number" name="expense_amount" id="expense_amount" step="0.01" required class="form-control-modern">
+                            <input type="number" name="expense_amount" id="vydaj_expense_amount" step="0.01" required class="form-control-modern">
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="form-group-modern">
                             <label for="expense_currency" class="form-label-modern">Měna</label>
-                            <select name="expense_currency" id="expense_currency" required class="form-control-modern">
+                            <select name="expense_currency" id="vydaj_expense_currency" required class="form-control-modern">
                                 <option value="EUR">EUR (€)</option>
                                 <option value="CZK">CZK (Kč)</option>
                             </select>
@@ -102,7 +130,7 @@
 
                 <div class="form-group-modern">
                     <label for="expense_payment_method" class="form-label-modern">Způsob platby</label>
-                    <select name="expense_payment_method" id="expense_payment_method" required class="form-control-modern">
+                    <select name="expense_payment_method" id="vydaj_expense_payment_method" required class="form-control-modern">
                         <option value="Kartou">Kartou</option>
                         <option value="Hotově">Hotově</option>
                     </select>
@@ -110,12 +138,12 @@
 
                 <div class="form-group-modern">
                     <label for="expense_description" class="form-label-modern">Popis výdaje (nepovinné)</label>
-                    <input type="text" name="expense_description" id="expense_description" placeholder="Např. Tankování DE, Poplatek tunel..." class="form-control-modern">
+                    <input type="text" name="expense_description" id="vydaj_expense_description" placeholder="Např. Tankování DE, Poplatek tunel..." class="form-control-modern">
                 </div>
 
                 <div class="form-group-modern">
                     <label for="expense_date" class="form-label-modern">Datum</label>
-                    <input type="date" name="expense_date" id="expense_date" value="{{ current_date }}" required class="form-control-modern">
+                    <input type="date" name="expense_date" id="vydaj_expense_date" value="{{ current_date }}" required class="form-control-modern">
                 </div>
 
                 <button type="submit" class="btn-modern btn-primary w-100 mt-2">
@@ -124,42 +152,77 @@
             </form>
         </div>
 
-        {# Form Card: Výběr z bankomatu #}
+        {# ── 3. Příjem peněz ─────────────────────────────────────────── #}
         <div class="glass-card animate-fadeInUp">
-            <h3 class="mb-4">🏧 Příjem peněz (Výběr z bankomatu)</h3>
-            <form method="POST" action="{{ url_for('reports.zalohy') }}">
-                <input type="hidden" name="form_type" value="bankomat">
+            <h3 class="mb-4">🏧 Příjem peněz</h3>
+            <form method="POST" action="{{ url_for('reports.zalohy') }}" id="form-prijem">
+                <input type="hidden" name="form_type" value="prijem">
+
+                {# Výběr uloženého záznamu #}
+                {% if prijem_history %}
+                <div class="form-group-modern">
+                    <label class="form-label-modern">📋 Načíst uložený záznam</label>
+                    <select id="prijem_load" class="form-control-modern" onchange="loadRecord('prijem', this)">
+                        <option value="">— vyberte záznam pro úpravu —</option>
+                        {% for item in prijem_history %}
+                        <option value="{{ item.data | tojson | e }}">{{ item.label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+                {# Zdroj příjmu #}
+                <div class="form-group-modern">
+                    <label for="prijem_source" class="form-label-modern">Zdroj příjmu</label>
+                    <select name="prijem_source" id="prijem_source" required class="form-control-modern"
+                            onchange="toggleColleague(this.value)">
+                        <option value="Bankomat">🏧 Výběr z bankomatu</option>
+                        <option value="V kanceláři">🏢 V kanceláři</option>
+                        <option value="Od kolegy">🤝 Od kolegy</option>
+                    </select>
+                </div>
+
+                {# Výběr kolegy – zobrazí se pouze při "Od kolegy" #}
+                <div class="form-group-modern" id="colleague-field" style="display:none;">
+                    <label for="prijem_colleague" class="form-label-modern">Kolega (od koho)</label>
+                    <select name="prijem_colleague" id="prijem_colleague" class="form-control-modern">
+                        <option value="">— vyberte jméno —</option>
+                        {% for employee in employees %}
+                        <option value="{{ employee }}">{{ employee }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
                 <div class="row g-3">
                     <div class="col-6">
                         <div class="form-group-modern">
-                            <label for="atm_amount" class="form-label-modern">Vybraná částka</label>
-                            <input type="number" name="atm_amount" id="atm_amount" step="0.01" required class="form-control-modern">
+                            <label for="prijem_amount" class="form-label-modern">Přijatá částka</label>
+                            <input type="number" name="prijem_amount" id="prijem_amount" step="0.01" required class="form-control-modern">
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="form-group-modern">
-                            <label for="atm_currency" class="form-label-modern">Měna</label>
-                            <select name="atm_currency" id="atm_currency" required class="form-control-modern">
-                                <option value="EUR">EUR (€) -> do AG</option>
-                                <option value="CZK">CZK (Kč) -> do AE</option>
+                            <label for="prijem_currency" class="form-label-modern">Měna</label>
+                            <select name="prijem_currency" id="prijem_currency" required class="form-control-modern">
+                                <option value="EUR">EUR (€) → do AG</option>
+                                <option value="CZK">CZK (Kč) → do AE</option>
                             </select>
                         </div>
                     </div>
                 </div>
 
                 <div class="form-group-modern">
-                    <label for="atm_date" class="form-label-modern">Datum výběru</label>
-                    <input type="date" name="atm_date" id="atm_date" value="{{ current_date }}" required class="form-control-modern">
+                    <label for="prijem_date" class="form-label-modern">Datum příjmu</label>
+                    <input type="date" name="prijem_date" id="prijem_date" value="{{ current_date }}" required class="form-control-modern">
                 </div>
 
                 <button type="submit" class="btn-modern btn-primary w-100 mt-2">
-                    <span>🏧</span> Uložit výběr z bankomatu
+                    <span>💵</span> Uložit příjem
                 </button>
             </form>
         </div>
 
-        {# History Card #}
+        {# ── Historie ────────────────────────────────────────────────── #}
         <div class="glass-card animate-fadeInUp">
             <h3 class="mb-4">📜 Historie a Filtrování</h3>
 
@@ -204,6 +267,58 @@
         </div>
     </div>
 </div>
+
+<script>
+// Zobrazí / skryje pole "kolega" podle zvoleného zdroje
+function toggleColleague(value) {
+    const field = document.getElementById('colleague-field');
+    const sel = document.getElementById('prijem_colleague');
+    if (value === 'Od kolegy') {
+        field.style.display = '';
+        sel.required = true;
+    } else {
+        field.style.display = 'none';
+        sel.required = false;
+        sel.value = '';
+    }
+}
+
+// Naplní formulář daty z vybraného záznamu
+function loadRecord(section, selectEl) {
+    const raw = selectEl.value;
+    if (!raw) return;
+    let data;
+    try { data = JSON.parse(raw); } catch(e) { return; }
+
+    if (section === 'zaloha') {
+        setVal('zaloha_employee_name', data.employee_name);
+        setVal('zaloha_amount', data.amount);
+        setVal('zaloha_currency', data.currency);
+        setVal('zaloha_option', data.option);
+        setVal('zaloha_date', data.date);
+    } else if (section === 'vydaj') {
+        setVal('vydaj_expense_category', data.category);
+        setVal('vydaj_expense_amount', data.amount);
+        setVal('vydaj_expense_currency', data.currency);
+        setVal('vydaj_expense_payment_method', data.payment_method);
+        setVal('vydaj_expense_description', data.description || '');
+        setVal('vydaj_expense_date', data.date);
+    } else if (section === 'prijem') {
+        setVal('prijem_source', data.source);
+        toggleColleague(data.source);
+        if (data.colleague) setVal('prijem_colleague', data.colleague);
+        setVal('prijem_amount', data.amount);
+        setVal('prijem_currency', data.currency);
+        setVal('prijem_date', data.date);
+    }
+}
+
+function setVal(id, value) {
+    const el = document.getElementById(id);
+    if (!el || value === undefined || value === null) return;
+    el.value = value;
+}
+</script>
 {% endblock %}
 
 {% block footer_title %}Zálohy{% endblock %}

@@ -9,6 +9,7 @@ from flask import Blueprint, flash, g, redirect, render_template, request, send_
 from config import Config
 from services.export_service import build_csv, build_pdf
 from services.turnus_service import get_active_turnus, validate_date_for_entry
+from services.zalohy_history_service import label_for_record, load_records, save_record
 from services.phase2_services import (
     build_statistics,
     create_backup,
@@ -50,8 +51,8 @@ def zalohy():
             target_date = (
                 form.get("expense_date")
                 if form_type == "vydaj"
-                else form.get("atm_date")
-                if form_type == "bankomat"
+                else form.get("prijem_date")
+                if form_type == "prijem"
                 else form.get("date")
             )
             if target_date:
@@ -77,39 +78,69 @@ def zalohy():
                     date_str=date_str,
                     description=description,
                 )
+                record_vydaj = {
+                    "category": category, "amount": amount, "currency": currency,
+                    "payment_method": payment_method, "description": description, "date": date_str,
+                }
+                save_record(Config.AUDIT_LOG_PATH, "vydaj", record_vydaj)
                 flash("Výdaj byl úspěšně uložen.", "success")
 
-            elif form_type == "bankomat":
-                amount = float(form["atm_amount"].replace(",", "."))
-                currency = form["atm_currency"]
-                date_str = form["atm_date"]
+            elif form_type == "prijem":
+                amount = float(form["prijem_amount"].replace(",", "."))
+                currency = form["prijem_currency"]
+                date_str = form["prijem_date"]
+                source = form.get("prijem_source", "Bankomat")  # Bankomat / V kanceláři / Od kolegy
+                colleague = form.get("prijem_colleague", "") if source == "Od kolegy" else ""
+                description = f"Příjem – {source}" + (f" ({colleague})" if colleague else "")
 
                 from hodiny2025_manager import Hodiny2025Manager
                 hodiny_mgr = Hodiny2025Manager(g.zalohy_manager.base_path)
                 hodiny_mgr.zapis_vydaje(
-                    category="Bankomat",
+                    category="Bankomat" if source == "Bankomat" else "Příjem",
                     amount=amount,
                     currency=currency,
                     payment_method="Hotově",
                     date_str=date_str,
-                    description="Výběr z bankomatu",
+                    description=description,
                 )
-                flash("Výběr z bankomatu byl úspěšně uložen.", "success")
+                record_prijem = {
+                    "amount": amount, "currency": currency, "date": date_str,
+                    "source": source, "colleague": colleague, "description": description,
+                }
+                save_record(Config.AUDIT_LOG_PATH, "prijem", record_prijem)
+                flash(f"Příjem ({source}) byl úspěšně uložen.", "success")
 
-            else:
+            else:  # zaloha
                 amount = float(form["amount"].replace(",", "."))
+                employee_name = form["employee_name"]
+                currency = form["currency"]
+                option = form["option"]
+                date_str = form["date"]
                 g.zalohy_manager.add_or_update_employee_advance(
-                    form["employee_name"], amount, form["currency"], form["option"], form["date"]
+                    employee_name, amount, currency, option, date_str
                 )
+                record_zaloha = {
+                    "employee_name": employee_name, "amount": amount,
+                    "currency": currency, "option": option, "date": date_str,
+                }
+                save_record(Config.AUDIT_LOG_PATH, "zaloha", record_zaloha)
                 flash("Záloha byla úspěšně uložena.", "success")
         except (ValueError, IOError, KeyError) as exc:
             flash(str(exc), "error")
+
+    # Načti historii pro všechny tři sekce (pro dropdown "vybrat uložený záznam")
+    def _history(section):
+        records = load_records(Config.AUDIT_LOG_PATH, section)
+        return [{"label": label_for_record(section, r), "data": r} for r in records]
 
     return render_template(
         "zalohy.html",
         employees=g.employee_manager.get_employee_names(),
         options=g.zalohy_manager.get_option_names(),
         current_date=dt.datetime.now().strftime("%Y-%m-%d"),
+        zaloha_history=_history("zaloha"),
+        vydaj_history=_history("vydaj"),
+        prijem_history=_history("prijem"),
     )
 
 

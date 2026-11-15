@@ -1,0 +1,17 @@
+{
+    "active_turnus_id": "turnus_blankendaal_20261115",
+    "turnusy": [
+        {
+            "id": "turnus_blankendaal_20261115",
+            "name": "Blankendaal",
+            "firma": "Stow",
+            "mesto": "Holandsko",
+            "start_date": "2026-11-15",
+            "end_date": null,
+            "status": "active",
+            "created_at": "2026-11-15T21:38:28.865984",
+            "closed_at": null,
+            "archive_file": null
+        }
+    ]
+}

@@ -56,9 +56,7 @@ logs/
 backups/
 
 # Data soubory (pokud obsahují citlivé údaje)
-data/settings.json
-data/employee_config.json
-data/turnusy.json
+# (settings.json, employee_config.json a turnusy.json jsou sledovány v gitu)
 
 # Testovací soubory a cache
 .pytest_cache/

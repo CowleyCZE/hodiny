@@ -1,12 +1,14 @@
 {
-    "start_time": "07:00",
     "end_time": "18:00",
+    "last_archived_week": 40,
     "lunch_duration": 1.0,
-    "preferred_employee_name": "Jakub Čáp",
+    "preferred_employee_name": "Čáp Jakub",
     "project_info": {
-        "name": "Hesbay Frost",
-        "start_date": "2026-01-18",
-        "end_date": ""
+        "end_date": "",
+        "firma": "Stow",
+        "mesto": "Holandsko",
+        "name": "Blankendaal",
+        "start_date": "2026-11-15"
     },
-    "last_archived_week": 40
+    "start_time": "07:00"
 }

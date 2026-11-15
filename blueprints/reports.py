@@ -11,6 +11,8 @@ from services.export_service import build_csv, build_pdf
 from services.phase2_services import (
     build_statistics,
     create_backup,
+    delete_all_backups,
+    delete_backup,
     find_data_issues,
     list_backups,
     read_audit,
@@ -219,7 +221,7 @@ def calendar_view():
 
 @reports_bp.route("/backups", methods=["GET", "POST"])
 def backups():
-    """Správa vytvoření a bezpečné obnovy XLSX záloh."""
+    """Správa vytvoření, bezpečné obnovy a mazání XLSX záloh."""
     if request.method == "POST":
         action = request.form.get("action")
         try:
@@ -233,6 +235,15 @@ def backups():
                 restore_backup(Config.BACKUP_PATH, backup_name, g.excel_manager.get_active_file_path())
                 write_audit(Config.AUDIT_LOG_PATH, "BACKUP_RESTORED", {"name": backup_name})
                 flash("Záloha byla obnovena.", "success")
+            elif action == "delete":
+                backup_name = request.form.get("backup_name", "")
+                delete_backup(Config.BACKUP_PATH, backup_name)
+                write_audit(Config.AUDIT_LOG_PATH, "BACKUP_DELETED", {"name": backup_name})
+                flash(f"Záloha {backup_name} byla smazána.", "success")
+            elif action == "delete_all":
+                count = delete_all_backups(Config.BACKUP_PATH)
+                write_audit(Config.AUDIT_LOG_PATH, "ALL_BACKUPS_DELETED", {"count": count})
+                flash(f"Všechny zálohy ({count}) byly smazány.", "success")
         except (ValueError, FileNotFoundError, OSError) as error:
             flash(str(error), "error")
     return render_template("backups.html", backups=list_backups(Config.BACKUP_PATH))

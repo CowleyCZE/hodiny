@@ -5,6 +5,8 @@ from services.export_service import build_csv, build_pdf
 from services.phase2_services import (
     build_statistics,
     create_backup,
+    delete_all_backups,
+    delete_backup,
     find_data_issues,
     list_backups,
     read_audit,
@@ -37,6 +39,18 @@ def test_backup_restore_and_audit(tmp_path):
     restore_backup(backup_dir, backup.name, source)
     assert source.read_bytes() == b"original"
     assert len(list_backups(backup_dir)) == 1
+
+    # Test single delete
+    assert delete_backup(backup_dir, backup.name) is True
+    assert len(list_backups(backup_dir)) == 0
+
+    # Test delete all
+    create_backup(source, backup_dir, "test1")
+    create_backup(source, backup_dir, "test2")
+    assert len(list_backups(backup_dir)) == 2
+    assert delete_all_backups(backup_dir) == 2
+    assert len(list_backups(backup_dir)) == 0
+
     audit_path = tmp_path / "audit.jsonl"
     write_audit(audit_path, "TEST", {"ok": True})
     assert read_audit(audit_path)[0]["action"] == "TEST"

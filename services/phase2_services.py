@@ -136,3 +136,27 @@ def restore_backup(backup_dir, backup_name, target_path):
     shutil.copy2(source, temp)
     temp.replace(target)
     return target
+
+
+def delete_backup(backup_dir, backup_name):
+    """Bezpečně smaže jednu konkrétní XLSX zálohu."""
+    backup_root = Path(backup_dir).resolve()
+    source = (backup_root / backup_name).resolve()
+    if source.parent != backup_root or source.suffix.lower() != ".xlsx" or not source.exists():
+        raise ValueError("Neplatná záloha k odstranění.")
+    source.unlink()
+    return True
+
+
+def delete_all_backups(backup_dir):
+    """Bezpečně smaže všechny XLSX zálohy ve složce."""
+    backup_root = Path(backup_dir).resolve()
+    if not backup_root.exists():
+        return 0
+    deleted_count = 0
+    for file_path in backup_root.glob("*.xlsx"):
+        if file_path.is_file():
+            file_path.unlink()
+            deleted_count += 1
+    return deleted_count
+

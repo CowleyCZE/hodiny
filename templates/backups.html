@@ -1,3 +1,63 @@
 {% extends "base.html" %}
 {% block title %}Zálohy - Hodiny{% endblock %}
-{% block content %}<div class="animate-fadeIn"><div class="section-header"><h1 class="section-title">Zálohy</h1></div><div class="glass-card mb-4"><form method="post"><input type="hidden" name="action" value="create"><button class="btn-modern btn-primary">Vytvořit zálohu nyní</button></form></div><div class="glass-card"><h3>Dostupné zálohy</h3><div class="card-table-wrapper"><table class="excel-table"><thead><tr><th>Soubor</th><th>Vytvořeno</th><th>Velikost</th><th>Akce</th></tr></thead><tbody>{% for backup in backups %}<tr><td>{{ backup.name }}</td><td>{{ backup.created }}</td><td>{{ (backup.size / 1024)|round(1) }} KB</td><td><form method="post" onsubmit="return confirm('Obnovit tuto zálohu? Aktuální soubor bude před obnovou automaticky zazálohován.');"><input type="hidden" name="action" value="restore"><input type="hidden" name="backup_name" value="{{ backup.name }}"><button class="btn-modern btn-warning">Obnovit</button></form></td></tr>{% else %}<tr><td colspan="4">Zatím nejsou k dispozici žádné zálohy.</td></tr>{% endfor %}</tbody></table></div></div></div>{% endblock %}
+{% block content %}
+<div class="animate-fadeIn">
+    <div class="section-header">
+        <h1 class="section-title">Zálohy</h1>
+    </div>
+    <div class="glass-card mb-4" style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+        <form method="post">
+            <input type="hidden" name="action" value="create">
+            <button class="btn-modern btn-primary">Vytvořit zálohu nyní</button>
+        </form>
+        {% if backups %}
+        <form method="post" onsubmit="return confirm('Opravdu chcete smazat VŠECHNY zálohy? Tuto akci nelze vrátit.');">
+            <input type="hidden" name="action" value="delete_all">
+            <button class="btn-modern btn-danger" style="background-color: #ef4444; color: white;">Smazat všechny zálohy</button>
+        </form>
+        {% endif %}
+    </div>
+    <div class="glass-card">
+        <h3>Dostupné zálohy</h3>
+        <div class="card-table-wrapper">
+            <table class="excel-table">
+                <thead>
+                    <tr>
+                        <th>Soubor</th>
+                        <th>Vytvořeno</th>
+                        <th>Velikost</th>
+                        <th>Akce</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for backup in backups %}
+                    <tr>
+                        <td>{{ backup.name }}</td>
+                        <td>{{ backup.created }}</td>
+                        <td>{{ (backup.size / 1024)|round(1) }} KB</td>
+                        <td>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <form method="post" onsubmit="return confirm('Obnovit tuto zálohu? Aktuální soubor bude před obnovou automaticky zazálohován.');">
+                                    <input type="hidden" name="action" value="restore">
+                                    <input type="hidden" name="backup_name" value="{{ backup.name }}">
+                                    <button class="btn-modern btn-warning">Obnovit</button>
+                                </form>
+                                <form method="post" onsubmit="return confirm('Opravdu chcete smazat zálohu {{ backup.name }}?');">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="backup_name" value="{{ backup.name }}">
+                                    <button class="btn-modern btn-danger" style="background-color: #ef4444; color: white;">Smazat</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4">Zatím nejsou k dispozici žádné zálohy.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
